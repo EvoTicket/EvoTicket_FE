@@ -127,6 +127,7 @@ import {
   DropdownMenuTrigger,
 } from "@/src/components/ui/dropdown-menu";
 import { toast } from "react-toastify";
+import { decodeJWT } from "@/src/lib/jwt";
 
 // Định nghĩa kiểu dữ liệu User
 interface UserProfile {
@@ -178,6 +179,34 @@ export function Header() {
     setUser(null); // Clear user state
   };
 
+  const handleCreateEvent = () => {
+    const token = Cookies.get("token");
+
+    if (!token) {
+      toast.error("Vui lòng đăng nhập để tạo sự kiện");
+      router.push(`/${locale}/auth/login`);
+      return;
+    }
+
+    // Decode JWT để kiểm tra isOrganization
+    const payload = decodeJWT(token);
+
+    if (!payload) {
+      toast.error("Token không hợp lệ");
+      router.push(`/${locale}/auth/login`);
+      return;
+    }
+
+    // Kiểm tra isOrganization
+    if (payload.isOrganization) {
+      // Đã là organizer -> chuyển đến Organizer Center
+      router.push(`/${locale}/organizer/center`);
+    } else {
+      // Chưa là organizer -> chuyển đến trang đăng ký
+      router.push(`/${locale}/organizer/register`);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-none bg-main transition-colors duration-300">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-4">
@@ -219,7 +248,10 @@ export function Header() {
         <div className="flex items-center gap-3 lg:gap-4">
 
           {/* Nút Tạo sự kiện (Primary Button) */}
-          <button className="hidden lg:flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-lg font-medium transition-colors shadow-sm">
+          <button
+            onClick={handleCreateEvent}
+            className="hidden lg:flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-lg font-medium transition-colors shadow-sm"
+          >
             <div className="bg-white/20 p-0.5 rounded">
               <Plus size={14} strokeWidth={3} />
             </div>
