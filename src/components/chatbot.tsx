@@ -6,6 +6,9 @@ import Cookies from "js-cookie";
 import api from "@/src/lib/axios";
 import { toast } from "react-toastify";
 import Image from "next/image";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 interface ChatMessage {
     id: number;
@@ -211,7 +214,74 @@ export function ChatBot() {
                                             : "bg-secondary text-txt-primary"
                                             }`}
                                     >
-                                        <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
+                                        <div className={`text-sm prose prose-sm max-w-none ${msg.senderType === "USER"
+                                            ? "prose-invert"
+                                            : ""
+                                            }`}>
+                                            <ReactMarkdown
+                                                remarkPlugins={[remarkGfm]}
+                                                rehypePlugins={[rehypeRaw]}
+                                                components={{
+                                                    // Custom styling for markdown elements
+                                                    p: ({ children }) => <p className="mb-2 last:mb-0 whitespace-pre-wrap break-words">{children}</p>,
+                                                    h1: ({ children }) => <h1 className="text-lg font-bold mb-2">{children}</h1>,
+                                                    h2: ({ children }) => <h2 className="text-base font-bold mb-2">{children}</h2>,
+                                                    h3: ({ children }) => <h3 className="text-sm font-bold mb-1">{children}</h3>,
+                                                    ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
+                                                    ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
+                                                    li: ({ children }) => <li className="ml-2">{children}</li>,
+                                                    code: ({ inline, children, ...props }: any) =>
+                                                        inline ? (
+                                                            <code
+                                                                className={`px-1.5 py-0.5 rounded text-xs font-mono ${msg.senderType === "USER"
+                                                                    ? "bg-white/20"
+                                                                    : "bg-gray-200 text-gray-800"
+                                                                    }`}
+                                                                {...props}
+                                                            >
+                                                                {children}
+                                                            </code>
+                                                        ) : (
+                                                            <code
+                                                                className={`block px-3 py-2 rounded text-xs font-mono overflow-x-auto my-2 ${msg.senderType === "USER"
+                                                                    ? "bg-white/20"
+                                                                    : "bg-gray-200 text-gray-800"
+                                                                    }`}
+                                                                {...props}
+                                                            >
+                                                                {children}
+                                                            </code>
+                                                        ),
+                                                    pre: ({ children }) => <pre className="overflow-x-auto">{children}</pre>,
+                                                    a: ({ href, children }) => (
+                                                        <a
+                                                            href={href}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className={`underline hover:no-underline ${msg.senderType === "USER"
+                                                                ? "text-white font-semibold"
+                                                                : "text-primary font-semibold"
+                                                                }`}
+                                                        >
+                                                            {children}
+                                                        </a>
+                                                    ),
+                                                    strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+                                                    em: ({ children }) => <em className="italic">{children}</em>,
+                                                    blockquote: ({ children }) => (
+                                                        <blockquote className={`border-l-4 pl-3 my-2 ${msg.senderType === "USER"
+                                                            ? "border-white/50"
+                                                            : "border-gray-400"
+                                                            }`}>
+                                                            {children}
+                                                        </blockquote>
+                                                    ),
+                                                    hr: () => <hr className={`my-2 ${msg.senderType === "USER" ? "border-white/30" : "border-gray-300"}`} />,
+                                                }}
+                                            >
+                                                {msg.message}
+                                            </ReactMarkdown>
+                                        </div>
                                         {msg.images && msg.images.length > 0 && (
                                             <div className="mt-2 space-y-2">
                                                 {msg.images.map((img, idx) => {
