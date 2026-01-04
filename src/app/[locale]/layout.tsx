@@ -5,7 +5,7 @@ import { locales, defaultLocale, LocaleType } from '@/src/i18n/request';
 
 type Props = {
   children: ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 };
 
 // Load messages theo locale
@@ -18,7 +18,7 @@ async function getMessages(locale: LocaleType) {
 }
 
 export default async function LocaleLayout({ children, params }: Props) {
-  const requested = params.locale;
+  const { locale: requested } = await params;
 
   // locale không hợp lệ → redirect
   if (!locales.includes(requested as LocaleType)) {
