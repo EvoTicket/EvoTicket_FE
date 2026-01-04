@@ -4,6 +4,9 @@ import { notFound, redirect } from 'next/navigation';
 import { locales, defaultLocale, LocaleType } from '@/src/i18n/request';
 import { ThemeProvider } from '../../components/theme-provider';
 import '../globals.css';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { ChatBot } from '@/src/components/chatbot';
 
 type Props = {
   children: ReactNode;
@@ -40,6 +43,8 @@ export default async function LocaleLayout({ children, params }: Props) {
             enableSystem
           >
             {children}
+            <ToastContainer />
+            <ChatBot />
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

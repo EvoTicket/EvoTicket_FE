@@ -14,11 +14,23 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        protocol: "https",
+        hostname: "toplist.vn",
+      },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "img.freepik.com",
+      },
     ],
   },
 };
 
- 
- 
+
+
 const withNextIntl = createNextIntlPlugin();
 export default withNextIntl(nextConfig);

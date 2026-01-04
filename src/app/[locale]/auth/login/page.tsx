@@ -6,27 +6,58 @@ import Link from "next/link";
 // 💡 Import hook dịch thuật
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import { toast } from "react-toastify";
+import api from "@/src/lib/axios";
+import axios from "axios";
 
 export default function LoginPage() {
-  
+
   const router = useRouter();
   const { locale } = useParams();
   // Khởi tạo hook dịch thuật, sử dụng namespace 'Auth'
-  const t = useTranslations('Auth'); 
-  
-  const [showPassword, setShowPassword] = useState(false);
+  const t = useTranslations('Auth');
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // function submit login
-  const handleLogin =()=>{
-    console.log("abc")
-    router.push(`/${locale}/user/homepage`)
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await api.post("/iam-service/api/auth/login", {
+        email: email,
+        password: password
+      });
+
+      const data = response.data;
+
+      if (data.status === 200) {
+        // Success
+        Cookies.set("token", data.data.token, { expires: 7 }); // Expires in 7 days
+        toast.success(data.message || "Đăng nhập thành công!");
+        router.push(`/${locale}/user/homepage`);
+      }
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(error.response.data.message || "Đăng nhập thất bại");
+      } else {
+        console.error("Login error:", error);
+        toast.error("Có lỗi xảy ra, vui lòng thử lại sau.");
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-white p-4">
       <div className="flex flex-col md:flex-row items-center gap-10 max-w-5xl w-full justify-center">
-        
+
         {/* --- CỘT TRÁI: FORM ĐĂNG NHẬP --- */}
         <div className="w-full max-w-[400px] bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-gray-100">
           <div className="text-center mb-6">
@@ -36,7 +67,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-4" onSubmit={handleLogin}>
             {/* Input Email */}
             <div className="space-y-1">
               <label className="text-sm font-semibold text-gray-700">
@@ -46,6 +77,9 @@ export default function LoginPage() {
                 type="email"
                 placeholder="name@example.com"
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
 
@@ -66,6 +100,9 @@ export default function LoginPage() {
                 <input
                   type={showPassword ? "text" : "password"}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm pr-10"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
                 <button
                   type="button"
@@ -82,8 +119,12 @@ export default function LoginPage() {
             </div>
 
             {/* Nút Đăng nhập */}
-            <button onClick={handleLogin} className="w-full bg-[#1a1a1a] hover:bg-black text-white font-medium py-2.5 rounded-lg transition-colors text-sm mt-2">
-              {t('login_button')}
+            <button
+              type="submit"
+              className="w-full bg-[#1a1a1a] hover:bg-black text-white font-medium py-2.5 rounded-lg transition-colors text-sm mt-2 disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? "Đang xử lý..." : t('login_button')}
             </button>
           </form>
 
@@ -116,11 +157,11 @@ export default function LoginPage() {
 
         {/* --- CỘT PHẢI: HÌNH ẢNH PLACEHOLDER --- */}
         <div className="hidden md:flex w-[400px] h-[400px] bg-[#dfe1e5] items-center justify-center">
-            {/* Đây là mô phỏng icon hình ảnh placeholder như trong thiết kế */}
-            <div className="w-1/2 h-1/2 border-2 border-white relative opacity-50">
-                <div className="absolute inset-0 border-t-2 border-white rotate-45 scale-[1.4] origin-center translate-y-[45%]"></div>
-                <div className="absolute inset-0 border-t-2 border-white -rotate-45 scale-[1.4] origin-center translate-y-[45%]"></div>
-            </div>
+          {/* Đây là mô phỏng icon hình ảnh placeholder như trong thiết kế */}
+          <div className="w-1/2 h-1/2 border-2 border-white relative opacity-50">
+            <div className="absolute inset-0 border-t-2 border-white rotate-45 scale-[1.4] origin-center translate-y-[45%]"></div>
+            <div className="absolute inset-0 border-t-2 border-white -rotate-45 scale-[1.4] origin-center translate-y-[45%]"></div>
+          </div>
         </div>
 
       </div>
