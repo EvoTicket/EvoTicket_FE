@@ -2,6 +2,8 @@ import { ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound, redirect } from 'next/navigation';
 import { locales, defaultLocale, LocaleType } from '@/src/i18n/request';
+import { ThemeProvider } from '../../components/theme-provider';
+import '../globals.css';
 
 type Props = {
   children: ReactNode;
@@ -29,8 +31,18 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages(locale);
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      {children}
-    </NextIntlClientProvider>
+    <html lang={locale} suppressHydrationWarning>
+      <body>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+          >
+            {children}
+          </ThemeProvider>
+        </NextIntlClientProvider>
+      </body>
+    </html>
   );
 }
