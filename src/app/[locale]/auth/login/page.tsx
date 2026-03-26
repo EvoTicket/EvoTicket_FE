@@ -48,7 +48,7 @@ export default function LoginPage() {
 
       if (data.status === 200) {
         // Success - Dispatch to Redux instead of Cookie
-        dispatch(setCredentials({ token: data.data.token }));
+        dispatch(setCredentials({ token: data.data.token, refreshToken: data.data.refreshToken }));
         toast.success(data.message || t('login_success', { defaultMessage: "Đăng nhập thành công!" }));
         router.push(`/${locale}/user/homepage`);
       }
@@ -73,7 +73,7 @@ export default function LoginPage() {
         // Ta gửi nó xuống backend IAM-Service của bạn
         const response = await api.post("/iam-service/api/auth/google",
           {
-            access_token: tokenResponse.access_token
+            accessToken: tokenResponse.access_token
           },
           { skipAuth: true } as any
         );
@@ -81,7 +81,7 @@ export default function LoginPage() {
         const data = response.data;
         if (data.status === 200) {
           // Lưu token riêng của hệ thống bạn vào Redux
-          dispatch(setCredentials({ token: data.data.token }));
+          dispatch(setCredentials({ token: data.data.token, refreshToken: data.data.refreshToken }));
           toast.success(data.message || t('login_google_success', { defaultMessage: "Đăng nhập Google thành công!" }));
           router.push(`/${locale}/user/homepage`);
         }

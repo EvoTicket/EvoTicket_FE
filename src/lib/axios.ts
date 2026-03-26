@@ -77,7 +77,7 @@ api.interceptors.response.use(
 
             try {
                 // Call refresh token endpoint
-                const response = await axios.post(`${api.defaults.baseURL}/auth/refresh-token`, {
+                const response = await axios.post(`${api.defaults.baseURL}/iam-service/api/auth/refresh-token`, {
                     refreshToken: refreshToken
                 });
 

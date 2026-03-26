@@ -41,7 +41,7 @@ export function Header() {
   const t = useTranslations('Header');
 
   // Get auth state from Redux
-  const { user, token, isOrganization } = useAppSelector((state) => state.auth);
+  const { user, token, refreshToken, isOrganization } = useAppSelector((state) => state.auth);
 
   // Cần thiết để tránh lỗi Hydration mismatch khi icon Mặt trăng/Mặt trời khác nhau giữa server/client
   useEffect(() => {
@@ -64,7 +64,14 @@ export function Header() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (refreshToken) {
+      try {
+        await api.post("/iam-service/api/auth/logout", { refreshToken }, { skipAuth: true } as any);
+      } catch (error) {
+        console.error("Logout API failed", error);
+      }
+    }
     dispatch(logoutAction());
     toast.info(t("logged_out_success"));
     router.push(`/${locale}/auth/login`);
