@@ -29,7 +29,7 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   // locale không hợp lệ → redirect
   if (!locales.includes(requested as LocaleType)) {
-    redirect(`/${defaultLocale}/auth/login`);
+    redirect(`/${defaultLocale}/user/homepage`);
   }
 
   const locale = requested as LocaleType;

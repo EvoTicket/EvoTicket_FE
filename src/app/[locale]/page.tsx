@@ -10,6 +10,6 @@ export default function LocalePage({ params }: Props) {
     redirect('/'); // nếu locale invalid → quay về root
   }
 
-  // Redirect thẳng tới login
-  redirect(`/${locale}/auth/login`);
+  // Redirect thẳng tới homepage
+  redirect(`/${locale}/user/homepage`);
 }

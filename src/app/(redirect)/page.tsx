@@ -18,5 +18,5 @@ export default async function RootPage() {
         }
     }
 
-    redirect(`/${preferredLocale}/auth/login`);
+    redirect(`/${preferredLocale}/user/homepage`);
 }

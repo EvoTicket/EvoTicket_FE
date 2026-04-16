@@ -5,7 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 // 💡 Import hook dịch thuật
 import { useTranslations } from 'next-intl';
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import api from "@/src/lib/axios";
 import axios from "axios";
@@ -19,6 +19,10 @@ export default function LoginPage() {
 
   const router = useRouter();
   const { locale } = useParams();
+
+  const searchParams = useSearchParams();
+  const callBackURL = searchParams.get('callbackUrl') || `/${locale}/user/homepage`;
+
   const dispatch = useAppDispatch();
   // Khởi tạo hook dịch thuật, sử dụng namespace 'Auth'
   const t = useTranslations('Auth');
@@ -50,7 +54,7 @@ export default function LoginPage() {
         // Success - Dispatch to Redux instead of Cookie
         dispatch(setCredentials({ token: data.data.token, refreshToken: data.data.refreshToken }));
         toast.success(data.message || t('login_success', { defaultMessage: "Đăng nhập thành công!" }));
-        router.push(`/${locale}/user/homepage`);
+        router.push(callBackURL);
       }
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {
@@ -83,7 +87,7 @@ export default function LoginPage() {
           // Lưu token riêng của hệ thống bạn vào Redux
           dispatch(setCredentials({ token: data.data.token, refreshToken: data.data.refreshToken }));
           toast.success(data.message || t('login_google_success', { defaultMessage: "Đăng nhập Google thành công!" }));
-          router.push(`/${locale}/user/homepage`);
+          router.push(callBackURL);
         }
       } catch (error: any) {
         toast.error(error.response.data.message || t('login_google_failed', { defaultMessage: "Đăng nhập Google thất bại!" }));
@@ -166,7 +170,7 @@ export default function LoginPage() {
             {/* Nút Đăng nhập */}
             <button
               type="submit"
-              className="w-full bg-[#1a1a1a] hover:bg-black text-white font-medium py-2.5 rounded-lg transition-colors text-sm mt-2 disabled:opacity-50"
+              className="w-full bg-[#1a1a1a] hover:bg-blacktext-button-primary-text-default font-medium py-2.5 rounded-lg transition-colors text-sm mt-2 disabled:opacity-50"
               disabled={loading}
             >
               {loading ? t('processing') : t('login_button')}
