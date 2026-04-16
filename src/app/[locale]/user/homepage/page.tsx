@@ -11,31 +11,22 @@ import { Footer } from "@/src/components/footer";
 import api from "@/src/lib/axios";
 import Cookies from "js-cookie";
 import { CustomDatePicker } from "@/src/components/ui/CustomDatePicker";
+import { EventItem } from "@/src/types/event";
+import { useRouter } from "next/navigation";
 
 // Mock Data: Sự kiện thịnh hành (Table) - Giữ nguyên mock do chưa có API ranking/finance
 const trendingEvents = [
   { id: 1, rank: "01", title: "Nhà Gia Tiên", organizer: "Tên nhà tổ chức", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "+125%" },
-  { id: 2, rank: "02", title: "[BẾN THÀNH] Đêm Nhạc", organizer: "SpaceSpeakers", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "+125%" },
+  { id: 2, rank: "02", title: "[BẾN THÀNH] Đêm Nhạc", organizer: "Space Speakers", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "+125%" },
   { id: 3, rank: "03", title: "Concert Chillies", organizer: "SpaceSpeakers", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "-12%" },
   { id: 4, rank: "04", title: "Concert Chillies", organizer: "SpaceSpeakers", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "+1%" },
   { id: 5, rank: "05", title: "Concert Chillies", organizer: "SpaceSpeakers", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "+125%" },
 ];
 
-interface EventHomeItem {
-  id: number;
-  eventName: string;
-  description: string;
-  venue: string;
-  fullAddress: string;
-  startDatetime: string;
-  bannerImage: string | null;
-  categoryName: string;
-  ticketTypes?: any[]; // For price checking if needed
-}
-
 export default function HomePage() {
   const { locale } = useParams();
   const t = useTranslations("Homepage");
+  const router = useRouter();
 
   // const location = [
   //   { id: "all", name: t("location_all") },
@@ -54,30 +45,20 @@ export default function HomePage() {
     code: "all",
     name: t("location_all")
   });
-  const [openSelectLocation, setOpenSelectLocation] = useState(false)
-  const locationRef = useRef<HTMLDivElement>(null)
   const [genreSelected, setGenreSelected] = useState(genre[0])
-  const [openSelectGenre, setOpenSelectGenre] = useState(false)
-  const genreRef = useRef<HTMLDivElement>(null)
   const [dateSelected, setDateSelected] = useState<Date | null>(null)
   const [locationList, setLocationList] = useState<any[]>([]);
 
   // Events State
-  const [latestEvents, setLatestEvents] = useState<EventHomeItem[]>([]);
+  const [top1TrendingEvents, setTop1TrendingEvents] = useState<EventItem | null>(null);
+  const [trendingEvents, setTrendingEvents] = useState<EventItem[]>([]);
+  const [latestEvents, setLatestEvents] = useState<EventItem[]>([]);
+  const [liveStageEvents, setLiveStageEvents] = useState<EventItem[]>([]);
+  const [stageAndArtEvents, setStageAndArtEvents] = useState<EventItem[]>([]);
+  const [conferencesAndWorkshopsEvents, setConferencesAndWorkshopsEvents] = useState<EventItem[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (locationRef.current && !locationRef.current.contains(event.target as Node)) {
-        setOpenSelectLocation(false)
-      }
-      if (genreRef.current && !genreRef.current.contains(event.target as Node)) {
-        setOpenSelectGenre(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [locationRef, genreRef]);
+
 
   // Fetch Latest Events
   useEffect(() => {
@@ -91,16 +72,118 @@ export default function HomePage() {
             size: 4,
             sortBy: "createdAt",
             sortDirection: "DESC",
+            eventStatuses: "UPCOMING",
             includeExpired: false // Only show future events in "Upcoming" section
           },
-        });
+          skipAuth: true
+        } as any);
 
         if (response.data && response.data.data && response.data.data.content) {
           console.log(response.data);
           setLatestEvents(response.data.data.content);
         }
       } catch (error) {
-        console.error("Failed to fetch home events", error);
+        console.error("Failed to fetch latest events", error);
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+    const fetchTrendingEvents = async () => {
+      try {
+
+        // Fetch 4 latest events
+        const response = await api.get("/inventory-service/api/events/trending", {
+          params: {
+            limit: 5
+          },
+          skipAuth: true
+        } as any);
+
+        if (response.data && response.data.data && response.data.data.content) {
+          console.log(response.data);
+          setTrendingEvents(response.data.data.content);
+          setTop1TrendingEvents(response.data.data.content[0]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch trending events", error);
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+    const fetchLiveStageEvents = async () => {
+      try {
+
+        // Fetch 4 latest events
+        const response = await api.get("/inventory-service/api/events", {
+          params: {
+            page: 1,
+            size: 4,
+            sortBy: "createdAt",
+            categories: "LIVESTAGE",
+            sortDirection: "DESC",
+            includeExpired: false // Only show future events in "Upcoming" section
+          },
+          skipAuth: true
+        } as any);
+
+        if (response.data && response.data.data && response.data.data.content) {
+          console.log(response.data);
+          setLiveStageEvents(response.data.data.content);
+        }
+      } catch (error) {
+        console.error("Failed to fetch live stage events", error);
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+    const fetchStageAndArtEvents = async () => {
+      try {
+
+        // Fetch 4 latest events
+        const response = await api.get("/inventory-service/api/events", {
+          params: {
+            page: 1,
+            size: 4,
+            categories: "STAGE_ART",
+            sortBy: "createdAt",
+            sortDirection: "DESC",
+            includeExpired: false // Only show future events in "Upcoming" section
+          },
+          skipAuth: true
+        } as any);
+
+        if (response.data && response.data.data && response.data.data.content) {
+          console.log(response.data);
+          setStageAndArtEvents(response.data.data.content);
+        }
+      } catch (error) {
+        console.error("Failed to fetch stage and art events", error);
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+    const fetchConferencesAndWorkshopsEvents = async () => {
+      try {
+
+        // Fetch 4 latest events
+        const response = await api.get("/inventory-service/api/events", {
+          params: {
+            page: 1,
+            size: 4,
+            categories: "WORKSHOP",
+            sortBy: "createdAt",
+            sortDirection: "DESC",
+            includeExpired: false // Only show future events in "Upcoming" section
+          },
+          skipAuth: true
+        } as any);
+
+        if (response.data && response.data.data && response.data.data.content) {
+          console.log(response.data);
+          setConferencesAndWorkshopsEvents(response.data.data.content);
+        }
+      } catch (error) {
+        console.error("Failed to fetch conferences and workshops events", error);
       } finally {
         setLoadingEvents(false);
       }
@@ -108,7 +191,7 @@ export default function HomePage() {
     const fetchListProvince = async () => {
       try {
 
-        const response = await api.get("/iam-service/api/locations/provinces");
+        const response = await api.get("/iam-service/api/locations/provinces", { skipAuth: true } as any);
 
         if (response.data) {
           const allOption = {
@@ -124,7 +207,11 @@ export default function HomePage() {
       }
     };
 
+    fetchTrendingEvents();
     fetchLatestEvents();
+    fetchLiveStageEvents();
+    fetchStageAndArtEvents();
+    fetchConferencesAndWorkshopsEvents();
     fetchListProvince();
   }, []);
 
@@ -134,148 +221,169 @@ export default function HomePage() {
     });
   };
 
+  const handleOpenEvent = (eventId: any) => {
+    router.push(`/${locale}/events/${eventId}`);
+  };
+
   return (
     <>
-      <div className="min-h-screen pb-20 bg-main transition-colors duration-300">
+      <div className="min-h-screen pb-20 bg-bg-page transition-colors duration-300">
 
         {/* === HERO SECTION === */}
-        <section className="relative container mx-auto px-4 w-full lg:h-[580px] md:h-[600px] h-[680px] flex items-center justify-center">
+        <div className="relative mb-32">
+          <section className="relative w-full min-h-[600px] flex items-center pt-20 pb-28 bg-gradient-to-br from-bg-subtle to-bg-page overflow-hidden">
+            <div className="container mx-auto px-4 lg:px-12 relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
 
-          {/* Background Image */}
-          <div className="absolute inset-0 z-0 h-[500px]">
-            <Image
-              src="/imgHomePage.png"
-              alt="Banner"
-              fill
-              className="object-cover w-full h-auto mask-[linear-gradient(to_bottom,black_80%,#323212 90%,transparent_100%)]
-                [-webkit-mask-image:linear-gradient(to_bottom,black_80%,#323212_90%,transparent_100%)] mix-blend-overlay"
-            />
-          </div>
+              {/* Left Content */}
+              <div className="lg:w-1/2 w-full flex flex-col items-center lg:items-start text-center lg:text-left pt-10 lg:pt-0">
 
-          {/* Hero Content */}
-          <div className="relative z-10 text-center px-4 max-w-4xl mx-auto mt-[-50px]">
-            <h2 className="text-white text-lg md:text-xl font-medium tracking-wider mb-2 uppercase">
-              {t("hero_title")}
-            </h2>
-            <Link
-              href={`/${locale}/events`}
-              className="inline-block bg-gradient-to-r from-accent to-yellow-600 hover:from-yellow-400 hover:to-accent text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-all"
-            >
-              {t("explore_now")}
-            </Link>
-          </div>
+                {/* Badges */}
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-8">
+                  <div className="flex items-center gap-2 bg-bg-surface hover:bg-bg-subtle transition-colors border border-border-default rounded-full px-3 py-1.5 backdrop-blur-md shadow-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="stroke-primary" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><rect x="7" y="7" width="3" height="3" /><rect x="14" y="7" width="3" height="3" /><rect x="7" y="14" width="3" height="3" /><rect x="14" y="14" width="3" height="3" /></svg>
+                    <span className="text-xs font-medium text-text-primary">{t('Anti_copy_dynamic_QR_code')}</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-bg-surface hover:bg-bg-subtle transition-colors border border-border-default rounded-full px-3 py-1.5 backdrop-blur-md shadow-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="stroke-primary" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg>
+                    <span className="text-xs font-medium text-text-primary">{t('price_controller_release')}</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-bg-surface hover:bg-bg-subtle transition-colors border border-border-default rounded-full px-3 py-1.5 backdrop-blur-md shadow-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="stroke-primary" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M19 17v4" /><path d="M3 5h4" /><path d="M17 19h4" /></svg>
+                    <span className="text-xs font-medium text-text-primary">{t('AI_suggestion')}</span>
+                  </div>
+                </div>
 
-          {/* === FILTER BAR === */}
-          <div className="absolute lg:bottom-[40px] md:bottom-[50px] bottom-[40px] lg:w-[90%] md:w-[95%] w-[80%] max-w-5xl 
-            bg-surface/90 backdrop-blur-md border border-border rounded-2xl shadow-xl 
-            p-4 flex flex-col md:flex-row gap-4 items-center z-20 transition-colors lg:px-14 px-6 py-5 lg:py-12"
-          >
+                {/* Title & Description */}
+                <h1 className="text-4xl md:text-5xl lg:text-[56px] font-extrabold text-text-primary leading-[1.15] tracking-tight mb-6 drop-shadow-sm">{t('Own_a_transparent_ticket_to_worthwhile_experiences')}</h1>
+                <p className="text-base md:text-lg text-text-secondary mb-10 max-w-[90%] font-medium leading-relaxed">
+                  {t('EvoTicket_combines_modern_authentication_technology_and_intuitive_digital_experience_to_help_users_buy_tickets_with_peace_of_mind_manage_ownership_clearly_and_discover_more_suitable_events')}
+                </p>
 
-            {/* Dropdown: Địa điểm */}
-            <div ref={locationRef} className="flex-1 relative w-full">
-              <Listbox value={locationSelected} onChange={(val) => { setLocationSelected(val); setOpenSelectLocation(false) }}>
-                <ListboxButton
-                  onClick={() => setOpenSelectLocation(!openSelectLocation)}
-                  className="
-                            w-full p-3 pr-10 bg-secondary
-                            border border-border rounded-lg
-                            text-txt-primary outline-none
-                            focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer transition-colors text-left
-                        "
-                >
-                  {locationSelected?.name || t("location_all")}
-                </ListboxButton>
-
-                {openSelectLocation && (
-                  <ListboxOptions
-                    static
-                    className="
-                        absolute w-full z-50 mt-1 max-h-60 overflow-y-auto
-                        bg-surface border border-border
-                        rounded-lg shadow-lg text-txt-primary
-                        "
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                  <Link
+                    href={`/${locale}/events`}
+                    onMouseMove={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      e.currentTarget.style.setProperty('--x', `${e.clientX - rect.left}px`);
+                      e.currentTarget.style.setProperty('--y', `${e.clientY - rect.top}px`);
+                    }}
+                    className="group relative overflow-hidden w-full sm:w-auto bg-button-primary-bg-default text-button-primary-text-default font-bold py-4 px-10 rounded-lg shadow-lg shadow-primary/30 text-center"
                   >
+                    <span className="absolute w-[250%] aspect-square bg-button-accent-bg-hover rounded-full transition-transform duration-900 ease-out -translate-x-1/2 -translate-y-1/2 scale-0 group-hover:scale-100 z-0" style={{ top: 'var(--y, 50%)', left: 'var(--x, 50%)' }}></span>
+                    <span className="relative z-10">{t('explore_now')}</span>
+                  </Link>
+                  <Link
+                    href={`/${locale}/about`}
+                    onMouseMove={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      e.currentTarget.style.setProperty('--x', `${e.clientX - rect.left}px`);
+                      e.currentTarget.style.setProperty('--y', `${e.clientY - rect.top}px`);
+                    }}
+                    className="group relative overflow-hidden w-full sm:w-auto bg-transparent border border-border-default hover:border-border-strong text-text-primary font-bold py-4 px-8 rounded-lg text-center transition-colors"
+                  >
+                    <span className="absolute w-[250%] aspect-square bg-bg-subtle rounded-full transition-transform duration-500 ease-out -translate-x-1/2 -translate-y-1/2 scale-0 group-hover:scale-100 z-0" style={{ top: 'var(--y, 50%)', left: 'var(--x, 50%)' }}></span>
+                    <span className="relative z-10">{t('how_it_works')}</span>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right Content - Floating Tickets Graphic */}
+              <div className="lg:w-1/2 w-full flex justify-center relative min-h-[400px]">
+                {/* Decorative glow behind tickets */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#E4ADF2] rounded-full blur-[100px] opacity-20 pointer-events-none"></div>
+
+                {/* Decorative rings */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] border border-white/5 rounded-full rotate-45 pointer-events-none"></div>
+                <div className="absolute top-1/2 left-[55%] -translate-x-1/2 -translate-y-[45%] w-[420px] h-[420px] border border-white/5 rounded-full -rotate-12 pointer-events-none"></div>
+
+                {/* Tickets Placeholder */}
+                <div className="relative w-full max-w-[500px] aspect-[4/3] z-10 flex items-center justify-center">
+                  {/* Fake ticket 1 */}
+                  <div className="absolute right-[5%] top-[5%] w-[180px] md:w-[240px] h-[340px] md:h-[460px] bg-gradient-to-br from-[#FDE599] via-[#D5A02B] to-[#B38018] rounded-2xl rotate-12 shadow-[0_30px_60px_rgba(0,0,0,0.6)] flex items-center justify-center overflow-hidden border border-[#FFE484]/50">
+                    <div className="absolute m-3 inset-0 border-2 border-dashed border-[#FFE484]/40 rounded-xl relative">
+                      <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#3B1F4F] shadow-inner"></div>
+                      <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#20102E] shadow-inner"></div>
+                    </div>
+                  </div>
+                  {/* Fake ticket 2 */}
+                  <div className="absolute left-[8%] top-0 w-[160px] md:w-[220px] h-[300px] md:h-[420px] bg-gradient-to-br from-[#FAF0C0] via-[#C99119] to-[#996509] rounded-2xl -rotate-[15deg] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-center overflow-hidden border border-white/20">
+                    <div className="absolute m-3 inset-0 border border-[#FAF0C0]/30 rounded-xl relative">
+                      <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#3C1A52] shadow-inner"></div>
+                      <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#2E1541] shadow-inner"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* === FLOATING FILTER BAR === */}
+          <div className="absolute left-1/2 -translate-x-1/2 -bottom-16 w-full px-4 lg:px-12 z-30 flex justify-center">
+            <div className="w-full max-w-5xl bg-bg-surface/80 backdrop-blur-xl border border-border-default shadow-lg rounded-2xl p-4 md:p-6 md:px-14 md:py-10 flex flex-col md:flex-row items-center gap-4 lg:gap-6 justify-between">
+
+              {/* Lọc: Địa điểm */}
+              <div className="relative w-full md:w-[200px]">
+                <label className="hidden text-xs text-text-muted mb-1">Địa điểm</label>
+                <Listbox value={locationSelected} onChange={(val) => setLocationSelected(val)}>
+                  <ListboxButton className="w-full p-4 pl-4 pr-10 bg-bg-page/80 border border-border-default rounded-xl text-text-primary outline-none focus:border-primary transition-colors text-left text-sm font-medium">
+                    {locationSelected?.name || t("location_all")}
+                  </ListboxButton>
+                  <ListboxOptions anchor="bottom" modal={false} className="z-50 w-[var(--button-width)] [--anchor-gap:4px] !max-h-60 overflow-y-auto bg-bg-surface border border-border-strong rounded-xl shadow-xl text-text-primary mt-1">
                     {locationList.map(item => (
-                      <ListboxOption
-                        key={item.code}
-                        value={item}
-                        className="
-                            group flex items-center px-3 py-2 cursor-pointer
-                            hover:bg-secondary rounded-md
-                            "
-                      >
+                      <ListboxOption key={item.code} value={item} className="group flex items-center px-4 py-3 cursor-pointer hover:bg-bg-subtle rounded-md transition-colors text-sm">
                         <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-primary mr-2" />
                         <span>{item.name}</span>
                       </ListboxOption>
                     ))}
                   </ListboxOptions>
-                )}
-              </Listbox>
-              <MapPin size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" />
-            </div>
+                </Listbox>
+                <MapPin size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-icon-muted pointer-events-none" />
+              </div>
 
-            {/* Dropdown: Thể loại */}
-            <div ref={genreRef} className="flex-1 relative w-full">
-              <Listbox value={genreSelected} onChange={(val) => { setGenreSelected(val); setOpenSelectGenre(false) }}>
-                <ListboxButton
-                  onClick={() => setOpenSelectGenre(!openSelectGenre)}
-                  className="
-                            w-full p-3 pr-10 bg-secondary
-                            border border-border rounded-lg
-                            text-txt-primary outline-none
-                            focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer transition-colors text-left
-                        "
-                >
-                  {genreSelected.name}
-                </ListboxButton>
-
-                {openSelectGenre && (
-                  <ListboxOptions
-                    static
-                    className="
-                        absolute w-full z-50 mt-1 max-h-60 overflow-y-auto
-                        bg-surface border border-border
-                        rounded-lg shadow-lg text-txt-primary
-                        "
-                  >
+              {/* Lọc: Thể loại */}
+              <div className="relative w-full md:w-[200px]">
+                <label className="hidden text-xs text-text-muted mb-1">Thể loại</label>
+                <Listbox value={genreSelected} onChange={(val) => setGenreSelected(val)}>
+                  <ListboxButton className="w-full p-4 pl-4 pr-10 bg-bg-page/80 border border-border-default rounded-xl text-text-primary outline-none focus:border-primary transition-colors text-left text-sm font-medium">
+                    {genreSelected.name}
+                  </ListboxButton>
+                  <ListboxOptions anchor="bottom" modal={false} className="z-50 w-[var(--button-width)] [--anchor-gap:4px] !max-h-60 overflow-y-auto bg-bg-surface border border-border-strong rounded-xl shadow-xl text-text-primary mt-1">
                     {genre.map(item => (
-                      <ListboxOption
-                        key={item.id}
-                        value={item}
-                        className="
-                            group flex items-center px-3 py-2 cursor-pointer
-                            hover:bg-secondary rounded-md
-                            "
-                      >
+                      <ListboxOption key={item.id} value={item} className="group flex items-center px-4 py-3 cursor-pointer hover:bg-bg-subtle rounded-md transition-colors text-sm">
                         <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-primary mr-2" />
                         <span>{item.name}</span>
                       </ListboxOption>
                     ))}
                   </ListboxOptions>
-                )}
-              </Listbox>
-              <Filter size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" />
-            </div>
+                </Listbox>
+                <Filter size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-icon-muted pointer-events-none" />
+              </div>
 
-            {/* Date Picker */}
-            <div className="flex-1 w-full relative">
-              <CustomDatePicker
-                selectedDate={dateSelected}
-                onChange={setDateSelected}
-              />
-            </div>
+              {/* Lọc: Ngày diễn */}
+              <div className="relative w-full md:w-[200px] custom-date-wrapper">
+                <CustomDatePicker
+                  selectedDate={dateSelected}
+                  onChange={setDateSelected}
+                  width="100%"
+                  height="14"
+                />
+              </div>
 
-            {/* Button Search */}
-            <button className="w-full md:w-auto bg-primary hover:bg-primary-hover text-white px-8 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
-              <Search size={18} />
-              <span>{t("search_button")}</span>
-            </button>
+              {/* Nút Tìm kiếm */}
+              <div className="w-32 md:w-auto mt-2 md:mt-0 h-[50px] flex md:justify-end">
+                <Link href={`/${locale}/events`} className="w-full md:w-auto bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg">
+                  <Search size={18} />
+                  <span>{t('search_button')}</span>
+                </Link>
+              </div>
+            </div>
           </div>
-        </section>
+        </div>
 
         {/* === TRENDING EVENTS (Mocked) === */}
         <section className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold text-txt-primary mb-6 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-text-primary mb-6 flex items-center gap-2">
             {t("trending_events")} <TrendingUp className="text-accent" />
           </h2>
 
@@ -285,7 +393,7 @@ export default function HomePage() {
             <div className="lg:col-span-2 overflow-x-auto">
               <table className="w-full min-w-[600px]">
                 <thead>
-                  <tr className="text-txt-muted text-sm border-b border-border">
+                  <tr className="text-text-muted text-sm border-b border-border-default">
                     <th className="pb-3 text-left font-medium">{t("rank")}</th>
                     <th className="pb-3 text-left font-medium">{t("event_info")}</th>
                     <th className="pb-3 text-right font-medium">{t("floor_price")}</th>
@@ -294,24 +402,24 @@ export default function HomePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {trendingEvents.map((event) => (
-                    <tr key={event.id} className="group hover:bg-secondary transition-colors border-b border-border last:border-0">
-                      <td className="py-4 text-left font-bold text-xl text-txt-muted group-hover:text-primary transition-colors">
-                        <span className={event.rank === "01" ? "text-accent text-2xl" : ""}>{event.rank}</span>
+                  {trendingEvents.map((event, index) => (
+                    <tr key={event.id} onClick={() => handleOpenEvent(event.id)} className="group hover:bg-bg-subtle transition-colors border-b border-border-default last:border-0 cursor-pointer">
+                      <td className="py-4 text-center font-bold text-xl transition-colors">
+                        <span className={index < 3 ? "text-transparent bg-clip-text bg-gradient-to-r from-[#FDE599] via-[#D5A02B] to-[#996509] text-2xl" : "text-text-muted"}>{index + 1}</span>
                       </td>
                       <td className="py-4 text-left">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded bg-secondary"></div>
+                          <div className="w-10 h-10 rounded bg-gradient-to-br from-[#FDE599] to-[#D5A02B]"></div>
                           <div>
-                            <p className="font-bold text-txt-primary text-sm">{event.title}</p>
-                            <p className="text-xs text-txt-muted">{event.organizer}</p>
+                            <p className="font-bold text-text-primary text-sm line-clamp-1">{event.eventName}</p>
+                            <p className="text-xs text-text-muted italic">({event.organizerName})</p>
                           </div>
                         </div>
                       </td>
-                      <td className="py-4 text-right text-sm text-txt-secondary font-medium">{event.price}</td>
-                      <td className="py-4 text-right text-sm text-txt-muted">{event.volume}</td>
-                      <td className={`py-4 text-right text-sm font-bold ${event.growth.includes('-') ? 'text-error' : 'text-success'}`}>
-                        {event.growth}
+                      <td className="py-4 text-right text-sm text-text-secondary font-medium">{event.floorPrice}</td>
+                      <td className="py-4 text-right text-sm text-text-muted">{event.volume24H}</td>
+                      <td className={`py-4 text-right text-sm font-bold ${event.hotness?.toString().includes('-') ? 'text-error' : 'text-success'}`}>
+                        {event.hotness}
                       </td>
                     </tr>
                   ))}
@@ -320,23 +428,23 @@ export default function HomePage() {
             </div>
 
             {/* Cột phải: Poster Top 1 */}
-            <div className="lg:col-span-1 relative">
-              <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-10">
-                <span className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-accent to-yellow-600 drop-shadow-md" style={{ textShadow: '0px 4px 10px rgba(0,0,0,0.5)' }}>
-                  Top 1
+            <div className="lg:col-span-1 relative flex flex-col items-center justify-center pt-8">
+              <div className="absolute top-0 w-full text-center z-10 flex flex-col items-center">
+                <span className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-text-primary to-text-secondary tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" style={{ textShadow: '0px 0px 20px rgba(255,255,255,0.3)' }}>
+                  T<span className="relative inline-block w-8 h-8 mx-1 -translate-y-1 rounded-full border-2 border-[#D5A02B]"><svg className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="#D5A02B" strokeWidth="1"><path d="M12 2v20M2 12h20M12 5l7 7-7 7-7-7 7-7z" /></svg></span>P 1
                 </span>
               </div>
-              <div className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden border-2 border-accent/50 shadow-2xl shadow-accent/20 group cursor-pointer">
+              <div onClick={() => handleOpenEvent(top1TrendingEvents?.id)} className="relative w-full aspect-square md:aspect-[4/5] rounded-[2rem] overflow-hidden border-2 border-border-strong shadow-xl group cursor-pointer mt-4">
                 <Image
-                  src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?q=80&w=1000"
+                  src={top1TrendingEvents?.bannerImage || ""}
                   alt="Top 1 Event"
                   fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <div className="absolute bottom-4 left-4 text-white">
-                  <h3 className="font-bold text-xl mb-1">NHÀ GIA TIÊN</h3>
-                  <p className="text-sm opacity-80">{t("upcoming")} • {t("location_hcm")}</p>
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bg-surface/50 to-bg-surface"></div>
+                <div className="absolute bottom-6 w-full text-center text-text-primary px-4">
+                  <h3 className="font-extrabold text-2xl mb-2 text-primary tracking-wide">{top1TrendingEvents?.eventName}</h3>
+                  <p className="text-sm opacity-80 uppercase tracking-widest font-semibold">{top1TrendingEvents?.organizerName}</p>
                 </div>
               </div>
             </div>
@@ -347,7 +455,7 @@ export default function HomePage() {
         {/* === LATEST / UPCOMING EVENTS (From API) === */}
         <section className="container mx-auto px-4 mt-16">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-txt-primary">{t("latest_events")}</h2>
+            <h2 className="text-2xl font-bold text-text-primary">{t("upcoming_events")}</h2>
             <Link href={`/${locale}/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
               {t("view_all")} <ChevronRight size={16} />
             </Link>
@@ -361,7 +469,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {latestEvents.length > 0 ? latestEvents.map((event) => (
                 <Link key={event.id} href={`/${locale}/events/${event.id}`} className="block">
-                  <div className="bg-surface rounded-xl overflow-hidden border border-border hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
+                  <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
                     {/* Card Image */}
                     <div className="relative h-48 overflow-hidden bg-gray-100">
                       {event.bannerImage ? (
@@ -376,18 +484,18 @@ export default function HomePage() {
                           <Calendar size={32} />
                         </div>
                       )}
-                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded">
+                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-smtext-button-primary-text-default text-xs px-2 py-1 rounded">
                         {event.categoryName || "Event"}
                       </div>
                     </div>
 
                     {/* Card Content */}
                     <div className="p-4 flex-1 flex flex-col">
-                      <h3 className="font-bold text-txt-primary text-md mb-3 line-clamp-2 min-h-[48px] group-hover:text-primary transition-colors">
+                      <h3 className="font-bold text-text-primary text-md mb-3 line-clamp-2 min-h-[48px] group-hover:text-primary transition-colors">
                         {event.eventName}
                       </h3>
 
-                      <div className="space-y-2 text-sm text-txt-muted mt-auto">
+                      <div className="space-y-2 text-sm text-text-muted mt-auto">
                         <div className="flex items-center gap-2">
                           <Calendar size={14} className="text-primary shrink-0" />
                           <span>{formatDate(event.startDatetime)}</span>
@@ -398,7 +506,7 @@ export default function HomePage() {
                         </div>
                       </div>
 
-                      <div className="mt-4 pt-3 border-t border-border">
+                      <div className="mt-4 pt-3 border-t border-border-default">
                         <span className="text-primary font-bold block">
                           {/* Placeholder for price, as list API might not explicitly return it in sample */}
                           {t("contact")}
@@ -408,8 +516,224 @@ export default function HomePage() {
                   </div>
                 </Link>
               )) : (
-                <div className="col-span-4 text-center py-10 text-txt-muted">
+                <div className="col-span-4 text-center py-10 text-text-muted">
                   {t("no_upcoming_events")}
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* === Livestage EVENTS (From API) === */}
+        <section className="container mx-auto px-4 mt-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-text-primary">{t("live_stage_events")}</h2>
+            <Link href={`/${locale}/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
+              {t("view_all")} <ChevronRight size={16} />
+            </Link>
+          </div>
+
+          {loadingEvents ? (
+            <div className="flex justify-center py-10">
+              <Loader2 className="animate-spin text-primary" size={40} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {liveStageEvents.length > 0 ? liveStageEvents.map((event) => (
+                <Link key={event.id} href={`/${locale}/events/${event.id}`} className="block">
+                  <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
+                    {/* Card Image */}
+                    <div className="relative h-48 overflow-hidden bg-gray-100">
+                      {event.bannerImage ? (
+                        <Image
+                          src={event.bannerImage}
+                          alt={event.eventName}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center text-gray-300">
+                          <Calendar size={32} />
+                        </div>
+                      )}
+                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-smtext-button-primary-text-default text-xs px-2 py-1 rounded">
+                        {event.categoryName || "Event"}
+                      </div>
+                    </div>
+
+                    {/* Card Content */}
+                    <div className="p-4 flex-1 flex flex-col">
+                      <h3 className="font-bold text-text-primary text-md mb-3 line-clamp-2 min-h-[48px] group-hover:text-primary transition-colors">
+                        {event.eventName}
+                      </h3>
+
+                      <div className="space-y-2 text-sm text-text-muted mt-auto">
+                        <div className="flex items-center gap-2">
+                          <Calendar size={14} className="text-primary shrink-0" />
+                          <span>{formatDate(event.startDatetime)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin size={14} className="text-primary shrink-0" />
+                          <span className="line-clamp-1">{event.venue || "Online"}</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-border-default">
+                        <span className="text-primary font-bold block">
+                          {/* Placeholder for price, as list API might not explicitly return it in sample */}
+                          {t("contact")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              )) : (
+                <div className="col-span-4 text-center py-10 text-text-muted">
+                  {t("no_livestage_events")}
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* === Stage Art EVENTS (From API) === */}
+        <section className="container mx-auto px-4 mt-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-text-primary">{t("stage_art_events")}</h2>
+            <Link href={`/${locale}/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
+              {t("view_all")} <ChevronRight size={16} />
+            </Link>
+          </div>
+
+          {loadingEvents ? (
+            <div className="flex justify-center py-10">
+              <Loader2 className="animate-spin text-primary" size={40} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {stageAndArtEvents.length > 0 ? stageAndArtEvents.map((event) => (
+                <Link key={event.id} href={`/${locale}/events/${event.id}`} className="block">
+                  <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
+                    {/* Card Image */}
+                    <div className="relative h-48 overflow-hidden bg-gray-100">
+                      {event.bannerImage ? (
+                        <Image
+                          src={event.bannerImage}
+                          alt={event.eventName}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center text-gray-300">
+                          <Calendar size={32} />
+                        </div>
+                      )}
+                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-smtext-button-primary-text-default text-xs px-2 py-1 rounded">
+                        {event.categoryName || "Event"}
+                      </div>
+                    </div>
+
+                    {/* Card Content */}
+                    <div className="p-4 flex-1 flex flex-col">
+                      <h3 className="font-bold text-text-primary text-md mb-3 line-clamp-2 min-h-[48px] group-hover:text-primary transition-colors">
+                        {event.eventName}
+                      </h3>
+
+                      <div className="space-y-2 text-sm text-text-muted mt-auto">
+                        <div className="flex items-center gap-2">
+                          <Calendar size={14} className="text-primary shrink-0" />
+                          <span>{formatDate(event.startDatetime)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin size={14} className="text-primary shrink-0" />
+                          <span className="line-clamp-1">{event.venue || "Online"}</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-border-default">
+                        <span className="text-primary font-bold block">
+                          {/* Placeholder for price, as list API might not explicitly return it in sample */}
+                          {t("contact")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              )) : (
+                <div className="col-span-4 text-center py-10 text-text-muted">
+                  {t("no_stage_art_events")}
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* === Workshop EVENTS (From API) === */}
+        <section className="container mx-auto px-4 mt-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-text-primary">{t("workshop_events")}</h2>
+            <Link href={`/${locale}/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
+              {t("view_all")} <ChevronRight size={16} />
+            </Link>
+          </div>
+
+          {loadingEvents ? (
+            <div className="flex justify-center py-10">
+              <Loader2 className="animate-spin text-primary" size={40} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {conferencesAndWorkshopsEvents.length > 0 ? conferencesAndWorkshopsEvents.map((event) => (
+                <Link key={event.id} href={`/${locale}/events/${event.id}`} className="block">
+                  <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
+                    {/* Card Image */}
+                    <div className="relative h-48 overflow-hidden bg-gray-100">
+                      {event.bannerImage ? (
+                        <Image
+                          src={event.bannerImage}
+                          alt={event.eventName}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center text-gray-300">
+                          <Calendar size={32} />
+                        </div>
+                      )}
+                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-smtext-button-primary-text-default text-xs px-2 py-1 rounded">
+                        {event.categoryName || "Event"}
+                      </div>
+                    </div>
+
+                    {/* Card Content */}
+                    <div className="p-4 flex-1 flex flex-col">
+                      <h3 className="font-bold text-text-primary text-md mb-3 line-clamp-2 min-h-[48px] group-hover:text-primary transition-colors">
+                        {event.eventName}
+                      </h3>
+
+                      <div className="space-y-2 text-sm text-text-muted mt-auto">
+                        <div className="flex items-center gap-2">
+                          <Calendar size={14} className="text-primary shrink-0" />
+                          <span>{formatDate(event.startDatetime)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin size={14} className="text-primary shrink-0" />
+                          <span className="line-clamp-1">{event.venue || "Online"}</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-border-default">
+                        <span className="text-primary font-bold block">
+                          {/* Placeholder for price, as list API might not explicitly return it in sample */}
+                          {t("contact")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              )) : (
+                <div className="col-span-4 text-center py-10 text-text-muted">
+                  {t("no_workshop_events")}
                 </div>
               )}
             </div>

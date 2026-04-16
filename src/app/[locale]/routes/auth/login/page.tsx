@@ -10,14 +10,14 @@ import { useTranslations } from 'next-intl';
 
 export default function LoginPage() {
   // Khởi tạo hook dịch thuật, sử dụng namespace 'Auth'
-  const t = useTranslations('Auth'); 
-  
+  const t = useTranslations('Auth');
+
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-white p-4">
       <div className="flex flex-col md:flex-row items-center gap-10 max-w-5xl w-full justify-center">
-        
+
         {/* --- CỘT TRÁI: FORM ĐĂNG NHẬP --- */}
         <div className="w-full max-w-[400px] bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-gray-100">
           <div className="text-center mb-6">
@@ -73,7 +73,7 @@ export default function LoginPage() {
             </div>
 
             {/* Nút Đăng nhập */}
-            <button className="w-full bg-[#1a1a1a] hover:bg-black text-white font-medium py-2.5 rounded-lg transition-colors text-sm mt-2">
+            <button className="w-full bg-[#1a1a1a] hover:bg-blacktext-button-primary-text-default font-medium py-2.5 rounded-lg transition-colors text-sm mt-2">
               {t('login_button')}
             </button>
           </form>
@@ -107,11 +107,11 @@ export default function LoginPage() {
 
         {/* --- CỘT PHẢI: HÌNH ẢNH PLACEHOLDER --- */}
         <div className="hidden md:flex w-[400px] h-[400px] bg-[#dfe1e5] items-center justify-center">
-            {/* Đây là mô phỏng icon hình ảnh placeholder như trong thiết kế */}
-            <div className="w-1/2 h-1/2 border-2 border-white relative opacity-50">
-                <div className="absolute inset-0 border-t-2 border-white rotate-45 scale-[1.4] origin-center translate-y-[45%]"></div>
-                <div className="absolute inset-0 border-t-2 border-white -rotate-45 scale-[1.4] origin-center translate-y-[45%]"></div>
-            </div>
+          {/* Đây là mô phỏng icon hình ảnh placeholder như trong thiết kế */}
+          <div className="w-1/2 h-1/2 border-2 border-white relative opacity-50">
+            <div className="absolute inset-0 border-t-2 border-white rotate-45 scale-[1.4] origin-center translate-y-[45%]"></div>
+            <div className="absolute inset-0 border-t-2 border-white -rotate-45 scale-[1.4] origin-center translate-y-[45%]"></div>
+          </div>
         </div>
 
       </div>

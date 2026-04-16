@@ -273,7 +273,7 @@ export default function RegisterPage() {
             <button
               onClick={handleRegister}
               disabled={loading}
-              className="w-full bg-[#1a1a1a] hover:bg-black text-white font-medium py-2.5 rounded-lg transition-colors text-sm mt-4">
+              className="w-full bg-[#1a1a1a] hover:bg-blacktext-button-primary-text-default font-medium py-2.5 rounded-lg transition-colors text-sm mt-4">
               {loading ? "Đang xử lý..." : "Tạo tài khoản"}
             </button>
           </form>

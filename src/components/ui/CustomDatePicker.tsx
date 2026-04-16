@@ -8,9 +8,11 @@ import { useTranslations } from "next-intl";
 interface CustomDatePickerProps {
   selectedDate: Date | null;
   onChange: (date: Date | null) => void;
+  width?: string;
+  height?: string;
 }
 
-export function CustomDatePicker({ selectedDate, onChange }: CustomDatePickerProps) {
+export function CustomDatePicker({ selectedDate, onChange, width, height }: CustomDatePickerProps) {
 
   const t = useTranslations("Homepage");
 
@@ -63,9 +65,9 @@ export function CustomDatePicker({ selectedDate, onChange }: CustomDatePickerPro
       {({ close }) => (
         <>
           <PopoverButton
-            className="w-full p-3 bg-secondary border border-border rounded-lg text-txt-primary flex items-center justify-between cursor-pointer hover:border-primary transition-colors focus:outline-none focus:ring-1 focus:ring-primary text-left"
+            className={`w-full h-${height} p-3 	bg-bg-surface border border-border-default rounded-lg text-text-primary flex items-center justify-between cursor-pointer hover:border-primary transition-colors focus:outline-none focus:ring-1 focus:ring-primary text-left`}
           >
-            <span>
+            <span className={selectedDate ? "text-text-primary" : "text-text-muted"}>
               {selectedDate
                 ? selectedDate.toLocaleDateString("vi-VN", {
                   day: "2-digit",
@@ -74,34 +76,34 @@ export function CustomDatePicker({ selectedDate, onChange }: CustomDatePickerPro
                 })
                 : t('select_date')}
             </span>
-            <CalendarIcon size={16} className={selectedDate ? "text-primary" : "text-txt-muted"} />
+            <CalendarIcon size={16} className={selectedDate ? "text-primary" : "text-text-muted"} />
           </PopoverButton>
 
           <PopoverPanel
             transition
-            className="absolute z-50 mt-2 w-76 bg-surface/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl p-5 transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0 lg:bottom-auto bottom-full lg:mb-0 mb-2 origin-top-left"
+            className={`absolute z-50 mt-2 w-${width} 	bg-bg-surface/95 backdrop-blur-xl border border-border-default rounded-xl shadow-2xl p-5 transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0 lg:bottom-auto bottom-full lg:mb-0 mb-2 origin-top-left`}
           >
             <div className="flex justify-between items-center mb-5">
               <button
                 type="button"
                 onClick={prevMonth}
-                className="p-1.5 hover:bg-secondary rounded-lg text-txt-muted hover:text-txt-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="p-1.5 hover:bg-secondary rounded-lg text-text-muted hover:text-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
                 <ChevronLeft size={18} />
               </button>
-              <span className="font-semibold text-txt-primary">
+              <span className="font-semibold text-text-primary">
                 {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
               </span>
               <button
                 type="button"
                 onClick={nextMonth}
-                className="p-1.5 hover:bg-secondary rounded-lg text-txt-muted hover:text-txt-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="p-1.5 hover:bg-secondary rounded-lg text-text-muted hover:text-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
                 <ChevronRight size={18} />
               </button>
             </div>
 
-            <div className="grid grid-cols-7 gap-1.5 mb-2 text-center text-xs font-semibold text-txt-muted">
+            <div className="grid grid-cols-7 gap-1.5 mb-2 text-center text-xs font-semibold text-text-muted">
               {dayNames.map((day) => (
                 <div key={day} className="w-8 h-8 flex items-center justify-center">
                   {day}
@@ -123,10 +125,10 @@ export function CustomDatePicker({ selectedDate, onChange }: CustomDatePickerPro
                   }}
                   className={`w-8 h-8 flex items-center justify-center rounded-full text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50
                     ${isSelected(day)
-                      ? "bg-primary text-white font-bold shadow-md shadow-primary/30 scale-105"
+                      ? "bg-button-primary-bg-defaultext-button-primary-text-default font-bold shadow-md shadow-primary/30 scale-105"
                       : isToday(day)
-                        ? "text-primary font-bold border border-primary/30 bg-primary/10"
-                        : "text-txt-primary hover:bg-secondary hover:text-primary"
+                        ? "text-primary font-bold border border-primary/30 bg-button-primary-bg-defaul/10"
+                        : "text-text-primary hover:bg-secondary hover:text-primary"
                     }
                   `}
                 >
@@ -135,14 +137,14 @@ export function CustomDatePicker({ selectedDate, onChange }: CustomDatePickerPro
               ))}
             </div>
 
-            <div className="mt-4 pt-3 border-t border-border flex justify-end">
+            <div className="mt-4 pt-3 border-t border-border-default flex justify-end">
               <button
                 type="button"
                 onClick={() => {
                   onChange(null);
                   close();
                 }}
-                className="text-xs text-txt-muted hover:text-primary transition-colors font-medium px-2 py-1"
+                className="text-xs text-text-muted hover:text-primary transition-colors font-medium px-2 py-1"
               >
                 {t('clear_selection')}
               </button>

@@ -313,7 +313,7 @@ export default function CreateEventPage() {
 
     return (
         <div className="container mx-auto px-4 py-8 pb-20">
-            <h1 className="text-3xl font-bold text-txt-primary mb-8">Tạo sự kiện mới</h1>
+            <h1 className="text-3xl font-bold text-text-primary mb-8">Tạo sự kiện mới</h1>
 
             <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-8">
 
@@ -321,26 +321,26 @@ export default function CreateEventPage() {
                 <div className="w-full lg:w-2/3 space-y-8">
 
                     {/* General Info */}
-                    <div className="bg-surface border border-border rounded-xl p-6 shadow-sm space-y-6">
+                    <div className="	bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm space-y-6">
                         <h2 className="text-xl font-semibold flex items-center gap-2 text-primary">
                             <Info size={24} /> Thông tin chung
                         </h2>
 
                         <div className="grid grid-cols-1 gap-4">
                             <div>
-                                <label className="block text-sm font-medium mb-1">Tên sự kiện <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium mb-1">Tên sự kiện <span className="text-feedback-error-text">*</span></label>
                                 <input
                                     type="text" name="eventName" required
                                     value={formData.eventName} onChange={handleInputChange}
-                                    className="w-full p-2 border border-border rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:outline-none"
+                                    className="w-full p-2 border border-border-default rounded-lg 	bg-bg-surface focus:ring-2 focus:ring-primary focus:outline-none"
                                     placeholder="Nhập tên sự kiện..."
                                 />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Ảnh Banner <span className="text-red-500">*</span></label>
-                                    <div className="relative border-2 border-dashed border-border rounded-lg p-4 hover:bg-main/50 transition-colors cursor-pointer text-center">
+                                    <label className="block text-sm font-medium mb-1">Ảnh Banner <span className="text-feedback-error-text">*</span></label>
+                                    <div className="relative border-2 border-dashed border-border-default rounded-lg p-4 hover:bg-bg-page/50 transition-colors cursor-pointer text-center">
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -352,7 +352,7 @@ export default function CreateEventPage() {
                                                 <img src={previewBanner} alt="Banner Preview" className="w-full h-full object-cover rounded" />
                                             </div>
                                         ) : (
-                                            <div className="flex flex-col items-center justify-center h-32 text-txt-muted">
+                                            <div className="flex flex-col items-center justify-center h-32 text-text-muted">
                                                 <ImageIcon size={32} />
                                                 <span className="text-xs mt-2">Upload Banner</span>
                                             </div>
@@ -360,8 +360,8 @@ export default function CreateEventPage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Ảnh Thumbnail <span className="text-red-500">*</span></label>
-                                    <div className="relative border-2 border-dashed border-border rounded-lg p-4 hover:bg-main/50 transition-colors cursor-pointer text-center">
+                                    <label className="block text-sm font-medium mb-1">Ảnh Thumbnail <span className="text-feedback-error-text">*</span></label>
+                                    <div className="relative border-2 border-dashed border-border-default rounded-lg p-4 hover:bg-bg-page/50 transition-colors cursor-pointer text-center">
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -373,7 +373,7 @@ export default function CreateEventPage() {
                                                 <img src={previewThumbnail} alt="Thumbnail Preview" className="w-full h-full object-cover rounded" />
                                             </div>
                                         ) : (
-                                            <div className="flex flex-col items-center justify-center h-32 text-txt-muted">
+                                            <div className="flex flex-col items-center justify-center h-32 text-text-muted">
                                                 <ImageIcon size={32} />
                                                 <span className="text-xs mt-2">Upload Thumbnail</span>
                                             </div>
@@ -384,11 +384,11 @@ export default function CreateEventPage() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Danh mục <span className="text-red-500">*</span></label>
+                                    <label className="block text-sm font-medium mb-1">Danh mục <span className="text-feedback-error-text">*</span></label>
                                     <select
                                         name="categoryId" required
                                         value={formData.categoryId} onChange={handleInputChange}
-                                        className="w-full p-2 border border-border rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:outline-none"
+                                        className="w-full p-2 border border-border-default rounded-lg 	bg-bg-surface focus:ring-2 focus:ring-primary focus:outline-none"
                                     >
                                         <option value={0}>Chọn danh mục</option>
                                         {categories.map((c: any) => (
@@ -401,7 +401,7 @@ export default function CreateEventPage() {
                                     <select
                                         name="eventType"
                                         value={formData.eventType} onChange={handleInputChange}
-                                        className="w-full p-2 border border-border rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:outline-none"
+                                        className="w-full p-2 border border-border-default rounded-lg 	bg-bg-surface focus:ring-2 focus:ring-primary focus:outline-none"
                                     >
                                         <option value="ONLINE">Online</option>
                                         <option value="OFFLINE">Offline</option>
@@ -414,7 +414,7 @@ export default function CreateEventPage() {
                                 <textarea
                                     name="description" rows={5}
                                     value={formData.description} onChange={handleInputChange}
-                                    className="w-full p-2 border border-border rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:outline-none"
+                                    className="w-full p-2 border border-border-default rounded-lg 	bg-bg-surface focus:ring-2 focus:ring-primary focus:outline-none"
                                     placeholder="Mô tả nội dung sự kiện..."
                                 />
                             </div>
@@ -422,38 +422,38 @@ export default function CreateEventPage() {
                     </div>
 
                     {/* Time & Location */}
-                    <div className="bg-surface border border-border rounded-xl p-6 shadow-sm space-y-6">
+                    <div className="	bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm space-y-6">
                         <h2 className="text-xl font-semibold flex items-center gap-2 text-primary">
                             <Calendar size={24} /> Thời gian & Địa điểm
                         </h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium mb-1">Thời gian bắt đầu <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium mb-1">Thời gian bắt đầu <span className="text-feedback-error-text">*</span></label>
                                 <input
                                     type="datetime-local" name="startDatetime" required
                                     value={formData.startDatetime} onChange={handleInputChange}
-                                    className="w-full p-2 border border-border rounded-lg bg-surface"
+                                    className="w-full p-2 border border-border-default rounded-lg 	bg-bg-surface"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1">Thời gian kết thúc <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium mb-1">Thời gian kết thúc <span className="text-feedback-error-text">*</span></label>
                                 <input
                                     type="datetime-local" name="endDatetime" required
                                     value={formData.endDatetime} onChange={handleInputChange}
-                                    className="w-full p-2 border border-border rounded-lg bg-surface"
+                                    className="w-full p-2 border border-border-default rounded-lg 	bg-bg-surface"
                                 />
                             </div>
                         </div>
 
-                        <div className="pt-4 border-t border-dashed border-border">
+                        <div className="pt-4 border-t border-dashed border-border-default">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Tỉnh / Thành phố <span className="text-red-500">*</span></label>
+                                    <label className="block text-sm font-medium mb-1">Tỉnh / Thành phố <span className="text-feedback-error-text">*</span></label>
                                     <select
                                         name="provinceCode" required
                                         value={formData.provinceCode} onChange={handleInputChange}
-                                        className="w-full p-2 border border-border rounded-lg bg-surface"
+                                        className="w-full p-2 border border-border-default rounded-lg 	bg-bg-surface"
                                     >
                                         <option value={0}>Chọn tỉnh/thành</option>
                                         {provinces.map((p: any) => (
@@ -462,11 +462,11 @@ export default function CreateEventPage() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Phường / Xã <span className="text-red-500">*</span></label>
+                                    <label className="block text-sm font-medium mb-1">Phường / Xã <span className="text-feedback-error-text">*</span></label>
                                     <select
                                         name="wardCode" required
                                         value={formData.wardCode} onChange={handleInputChange}
-                                        className="w-full p-2 border border-border rounded-lg bg-surface"
+                                        className="w-full p-2 border border-border-default rounded-lg 	bg-bg-surface"
                                         disabled={!formData.provinceCode}
                                     >
                                         <option value={0}>Chọn phường/xã</option>
@@ -482,7 +482,7 @@ export default function CreateEventPage() {
                                 <input
                                     type="text" name="venue"
                                     value={formData.venue} onChange={handleInputChange}
-                                    className="w-full p-2 border border-border rounded-lg bg-surface"
+                                    className="w-full p-2 border border-border-default rounded-lg 	bg-bg-surface"
                                     placeholder="VD: Nhà hát lớn, Sân vận động Mỹ Đình..."
                                 />
                             </div>
@@ -492,13 +492,13 @@ export default function CreateEventPage() {
                                 <input
                                     type="text" name="address"
                                     value={formData.address} onChange={handleInputChange}
-                                    className="w-full p-2 border border-border rounded-lg bg-surface"
+                                    className="w-full p-2 border border-border-default rounded-lg 	bg-bg-surface"
                                     placeholder="Số nhà, tên đường..."
                                 />
                             </div>
 
 
-                            <div className="h-[300px] w-full rounded-xl overflow-hidden border border-border relative">
+                            <div className="h-[300px] w-full rounded-xl overflow-hidden border border-border-default relative">
                                 <div className="absolute top-2 right-2 z-10 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs shadow-md">
                                     Click bản đồ để chọn vị trí
                                 </div>
@@ -507,7 +507,7 @@ export default function CreateEventPage() {
                                     initialPos={formData.latitude && formData.longitude ? [formData.latitude, formData.longitude] : undefined}
                                 />
                             </div>
-                            <div className="flex gap-4 mt-2 text-xs text-txt-muted">
+                            <div className="flex gap-4 mt-2 text-xs text-text-muted">
                                 <span>Lat: {formData.latitude.toFixed(6)}</span>
                                 <span>Lng: {formData.longitude.toFixed(6)}</span>
                             </div>
@@ -520,7 +520,7 @@ export default function CreateEventPage() {
                 <div className="w-full lg:w-1/3 space-y-8">
 
                     {/* Ticket Management */}
-                    <div className="bg-surface border border-border rounded-xl p-6 shadow-sm space-y-4">
+                    <div className="	bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm space-y-4">
                         <div className="flex justify-between items-center">
                             <h2 className="text-xl font-semibold flex items-center gap-2 text-primary">
                                 <Tag size={24} /> Các loại vé
@@ -532,7 +532,7 @@ export default function CreateEventPage() {
 
                         <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1">
                             {ticketTypes.map((ticket, idx) => (
-                                <div key={idx} className="p-4 border border-border rounded-lg bg-main relative group">
+                                <div key={idx} className="p-4 border border-border-default rounded-lg bg-bg-page relative group">
                                     <button
                                         type="button"
                                         onClick={() => removeTicketType(idx)}
@@ -545,33 +545,33 @@ export default function CreateEventPage() {
                                         <input
                                             type="text"
                                             placeholder="Tên loại vé (VD: VIP)"
-                                            className="w-full font-bold text-sm bg-transparent border-b border-border focus:border-primary focus:outline-none pb-1"
+                                            className="w-full font-bold text-sm bg-transparent border-b border-border-default focus:border-primary focus:outline-none pb-1"
                                             value={ticket.typeName}
                                             onChange={(e) => handleTicketChange(idx, "typeName", e.target.value)}
                                         />
                                         <input
                                             type="text"
                                             placeholder="Mô tả vé"
-                                            className="w-full text-xs text-txt-secondary bg-transparent border-b border-border focus:border-primary focus:outline-none pb-1"
+                                            className="w-full text-xs text-text-secondary bg-transparent border-b border-border-default focus:border-primary focus:outline-none pb-1"
                                             value={ticket.description}
                                             onChange={(e) => handleTicketChange(idx, "description", e.target.value)}
                                         />
 
                                         <div className="flex gap-2">
                                             <div className="w-1/2">
-                                                <label className="text-[10px] uppercase text-txt-muted font-bold">Giá vé</label>
+                                                <label className="text-[10px] uppercase text-text-muted font-bold">Giá vé</label>
                                                 <input
                                                     type="number" min={0}
-                                                    className="w-full text-sm bg-surface border border-border rounded p-1"
+                                                    className="w-full text-sm 	bg-bg-surface border border-border-default rounded p-1"
                                                     value={ticket.price}
                                                     onChange={(e) => handleTicketChange(idx, "price", e.target.value)}
                                                 />
                                             </div>
                                             <div className="w-1/2">
-                                                <label className="text-[10px] uppercase text-txt-muted font-bold">Số lượng</label>
+                                                <label className="text-[10px] uppercase text-text-muted font-bold">Số lượng</label>
                                                 <input
                                                     type="number" min={1}
-                                                    className="w-full text-sm bg-surface border border-border rounded p-1"
+                                                    className="w-full text-sm 	bg-bg-surface border border-border-default rounded p-1"
                                                     value={ticket.quantityAvailable}
                                                     onChange={(e) => handleTicketChange(idx, "quantityAvailable", e.target.value)}
                                                 />
@@ -580,19 +580,19 @@ export default function CreateEventPage() {
 
                                         <div className="flex gap-2">
                                             <div className="w-1/2">
-                                                <label className="text-[10px] uppercase text-txt-muted font-bold">Mở bán</label>
+                                                <label className="text-[10px] uppercase text-text-muted font-bold">Mở bán</label>
                                                 <input
                                                     type="datetime-local"
-                                                    className="w-full text-[10px] bg-surface border border-border rounded p-1"
+                                                    className="w-full text-[10px] 	bg-bg-surface border border-border-default rounded p-1"
                                                     value={ticket.saleStartDate}
                                                     onChange={(e) => handleTicketChange(idx, "saleStartDate", e.target.value)}
                                                 />
                                             </div>
                                             <div className="w-1/2">
-                                                <label className="text-[10px] uppercase text-txt-muted font-bold">Đóng bán</label>
+                                                <label className="text-[10px] uppercase text-text-muted font-bold">Đóng bán</label>
                                                 <input
                                                     type="datetime-local"
-                                                    className="w-full text-[10px] bg-surface border border-border rounded p-1"
+                                                    className="w-full text-[10px] 	bg-bg-surface border border-border-default rounded p-1"
                                                     value={ticket.saleEndDate}
                                                     onChange={(e) => handleTicketChange(idx, "saleEndDate", e.target.value)}
                                                 />
@@ -605,7 +605,7 @@ export default function CreateEventPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="bg-surface border border-border rounded-xl p-6 shadow-sm sticky top-24">
+                    <div className="	bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm sticky top-24">
                         <div className="flex items-center gap-2 mb-4">
                             {/* <input
                                 type="checkbox"
@@ -622,13 +622,13 @@ export default function CreateEventPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full py-3 bg-primary text-white rounded-lg font-bold hover:bg-primary-hover shadow-lg shadow-primary/30 transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
+                                className="w-full py-3 bg-button-primary-bg-defaultext-button-primary-text-default rounded-lg font-bold hover:bg-button-primary-bg-defaul-hover shadow-lg shadow-primary/30 transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
                             >
                                 {loading && <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>}
                                 <Save size={20} />
                                 {loading ? "Đang xử lý..." : "Công bố sự kiện"}
                             </button>
-                            <button type="button" onClick={() => router.back()} className="w-full py-2 bg-transparent border border-border rounded-lg text-txt-secondary hover:bg-secondary transition-colors">
+                            <button type="button" onClick={() => router.back()} className="w-full py-2 bg-transparent border border-border-default rounded-lg text-text-secondary hover:bg-secondary transition-colors">
                                 Hủy bỏ
                             </button>
                         </div>

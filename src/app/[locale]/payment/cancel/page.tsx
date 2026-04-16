@@ -10,9 +10,9 @@ import api from "@/src/lib/axios";
 function CancelPaymentContent() {
   const searchParams = useSearchParams();
   const { locale } = useParams();
-  
+
   const orderCode = searchParams.get("orderCode");
-  
+
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [errorMessage, setErrorMessage] = useState("");
   const calledRef = useRef(false);
@@ -32,7 +32,7 @@ function CancelPaymentContent() {
 
       try {
         const response = await api.post(`/order-service/api/v1/orders/${orderCode}/cancel`);
-        
+
         // Backend có thể trả về Http Status 200, hoặc status bên trong body data
         if (response.status === 200 || response.data?.status === 200) {
           setStatus("success");
@@ -46,12 +46,12 @@ function CancelPaymentContent() {
       } catch (error: any) {
         console.error("Lỗi khi hủy đơn hàng:", error);
         setStatus("error");
-        
+
         let msg = "Có lỗi xảy ra khi hủy đơn hàng";
         if (error.response?.data?.message) {
-           msg = error.response.data.message;
+          msg = error.response.data.message;
         }
-        
+
         setErrorMessage(msg);
         toast.error(msg);
       }
@@ -80,9 +80,9 @@ function CancelPaymentContent() {
             <p className="text-gray-500 mb-8">
               Đơn hàng <span className="font-semibold text-gray-900">#{orderCode}</span> của bạn đã được hủy thành công trên hệ thống.
             </p>
-            <Link 
+            <Link
               href={`/${locale}/user/homepage`}
-              className="w-full bg-[#1a1a1a] hover:bg-black text-white font-medium py-3 rounded-xl transition-colors text-sm flex items-center justify-center"
+              className="w-full bg-[#1a1a1a] hover:bg-blacktext-button-primary-text-default font-medium py-3 rounded-xl transition-colors text-sm flex items-center justify-center"
             >
               Về trang chủ
             </Link>
@@ -91,7 +91,7 @@ function CancelPaymentContent() {
 
         {status === "error" && (
           <>
-            <XCircle className="w-16 h-16 text-red-500 mb-6" />
+            <XCircle className="w-16 h-16 text-feedback-error-text mb-6" />
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Hủy thất bại</h1>
             <p className="text-gray-500 mb-8">
               {errorMessage}
@@ -103,9 +103,9 @@ function CancelPaymentContent() {
               >
                 Thử lại
               </button>
-              <Link 
+              <Link
                 href={`/${locale}/user/homepage`}
-                className="flex-1 bg-[#1a1a1a] hover:bg-black text-white font-medium py-3 rounded-xl transition-colors text-sm flex items-center justify-center"
+                className="flex-1 bg-[#1a1a1a] hover:bg-blacktext-button-primary-text-default font-medium py-3 rounded-xl transition-colors text-sm flex items-center justify-center"
               >
                 Về trang chủ
               </Link>

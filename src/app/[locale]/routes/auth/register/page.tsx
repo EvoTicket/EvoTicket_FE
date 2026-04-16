@@ -7,7 +7,7 @@ import Link from "next/link";
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   // State mô phỏng thanh độ mạnh mật khẩu (Strength bar)
   const [passwordStrength, setPasswordStrength] = useState(0); // 0 (yếu) đến 4 (mạnh)
 
@@ -25,19 +25,19 @@ export default function RegisterPage() {
 
   const strengthBarColor = ['bg-gray-200', 'bg-red-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
   const strengthText = [
-    'Tối thiểu 8 ký tự.', 
-    'Chứa chữ hoa và chữ thường.', 
+    'Tối thiểu 8 ký tự.',
+    'Chứa chữ hoa và chữ thường.',
     'Chứa số và ký tự đặc biệt.'
   ];
 
   const renderStrengthIndicator = (index: number) => {
     const isCompleted = passwordStrength > index;
     const isMinLength = index === 0 && passwordStrength >= 1; // Ký tự tối thiểu (luôn là bước 1)
-    
+
     return (
       <li key={index} className={`flex items-start text-xs ${isCompleted || isMinLength ? 'text-gray-900' : 'text-gray-400'}`}>
         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`mt-0.5 mr-1 ${isCompleted ? 'text-green-500' : 'text-gray-300'}`}>
-            <polyline points="20 6 9 17 4 12"></polyline>
+          <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
         {strengthText[index]}
       </li>
@@ -48,17 +48,17 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-white p-4">
       <div className="flex flex-col md:flex-row items-center gap-10 max-w-5xl w-full justify-center">
-        
+
         {/* --- CỘT TRÁI: HÌNH ẢNH PLACEHOLDER --- */}
         <div className="hidden md:flex w-[400px] h-[600px] bg-[#f8f8f8] items-center justify-center">
-            {/* Đây là mô phỏng icon hình ảnh placeholder như trong thiết kế */}
-            <div className="w-1/3 h-1/3 border-2 border-gray-300 rounded-full flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 opacity-50">
-                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <polyline points="21 15 16 10 5 21" />
-                </svg>
-            </div>
+          {/* Đây là mô phỏng icon hình ảnh placeholder như trong thiết kế */}
+          <div className="w-1/3 h-1/3 border-2 border-gray-300 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 opacity-50">
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+          </div>
         </div>
 
         {/* --- CỘT PHẢI: FORM ĐĂNG KÝ --- */}
@@ -71,7 +71,7 @@ export default function RegisterPage() {
           </div>
 
           <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-            
+
             {/* Input Họ và Tên */}
             <div className="space-y-1">
               <label className="text-sm font-semibold text-gray-700">
@@ -98,7 +98,7 @@ export default function RegisterPage() {
                 EvoTicket sử dụng email để tạo ví lưu ký, và sẽ không tiết lộ cho bên thứ ba.
               </p>
             </div>
-            
+
             {/* Input Số điện thoại */}
             <div className="space-y-1">
               <label className="text-sm font-semibold text-gray-700">
@@ -134,7 +134,7 @@ export default function RegisterPage() {
                   )}
                 </button>
               </div>
-              
+
               {/* Thanh độ mạnh mật khẩu */}
               <div className="flex justify-between mt-1 space-x-1">
                 <div className={`h-1 flex-1 rounded-full ${strengthBarColor[Math.min(strengthBarColor.length - 1, passwordStrength)]}`} style={{ width: `${(passwordStrength / (strengthBarColor.length - 1)) * 100}%` }}></div>
@@ -142,13 +142,13 @@ export default function RegisterPage() {
                 <div className={`h-1 flex-1 rounded-full ${passwordStrength >= 2 ? strengthBarColor[Math.min(strengthBarColor.length - 1, passwordStrength)] : 'bg-gray-200'}`}></div>
                 <div className={`h-1 flex-1 rounded-full ${passwordStrength >= 3 ? strengthBarColor[Math.min(strengthBarColor.length - 1, passwordStrength)] : 'bg-gray-200'}`}></div>
               </div>
-              
+
               {/* Yêu cầu mật khẩu */}
               <ul className="list-none pt-2 pl-0 space-y-1">
                 {strengthText.map((_, index) => renderStrengthIndicator(index))}
               </ul>
             </div>
-            
+
             {/* Input Xác nhận Mật khẩu */}
             <div className="space-y-1">
               <label className="text-sm font-semibold text-gray-700">
@@ -174,7 +174,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Nút Tạo tài khoản */}
-            <button className="w-full bg-[#1a1a1a] hover:bg-black text-white font-medium py-2.5 rounded-lg transition-colors text-sm mt-4">
+            <button className="w-full bg-[#1a1a1a] hover:bg-blacktext-button-primary-text-default font-medium py-2.5 rounded-lg transition-colors text-sm mt-4">
               Tạo tài khoản
             </button>
           </form>

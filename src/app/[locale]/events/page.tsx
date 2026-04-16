@@ -1,51 +1,54 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import Cookies from "js-cookie";
 import api from "@/src/lib/axios";
 import {
-    Search, MapPin, Calendar, Filter, Heart, ChevronLeft, ChevronRight,
-    LayoutGrid, List as ListIcon, Loader2
+    Search, MapPin, Calendar, LayoutGrid, List as ListIcon, Loader2, ChevronRight, X,
+    CheckIcon, CircleHelp,
+    ArrowLeft,
+    ReceiptRussianRubleIcon,
+    SkipBackIcon,
+    BackpackIcon
 } from "lucide-react";
-import { Footer } from "@/src/components/footer";
 import { Header } from "@/src/components/header";
-
-// --- Interfaces ---
-interface EventItem {
-    id: number;
-    eventName: string;
-    description: string;
-    venue: string;
-    fullAddress: string;
-    startDatetime: string;
-    endDatetime: string;
-    eventStatus: string;
-    eventType: string;
-    bannerImage: string | null;
-    thumbnailImage: string | null;
-    totalSeats: number;
-    organizerId: number;
-    isFeatured: boolean;
-    categoryId: number;
-    categoryName: string;
-    favorite: boolean;
-    favoriteCount: number;
-    minPrice?: number; // Optional, might not be in list API directly based on your sample
-}
-
-interface Province {
-    code: number;
-    name: string;
-}
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
+import { useTranslations } from "next-intl";
+import { CustomDatePicker } from "@/src/components/ui/CustomDatePicker";
+import { EventItem, Province } from "@/src/types/event";
 
 export default function EventsPage() {
     const { locale } = useParams();
-    const router = useRouter();
     const searchParams = useSearchParams();
+    const t = useTranslations("Events");
 
+
+
+    // Fake data cho danh mục sự kiện
+    const categoriesList = [
+        { id: "LIVESTAGE", name: t("category_livestage") },
+        { id: "STAGE_ART", name: t("category_stage_art") },
+        { id: "WORKSHOP", name: t("category_workshop") },
+        { id: "SPORTS", name: t("category_sport") },
+        { id: "EXHIBITION", name: t("category_exhibition") }
+    ];
+
+    const sortByList = [
+        { id: "popular", name: t("sort_by_popular") },
+        { id: "nearestDay", name: t("sort_by_nearest_day") },
+        { id: "priceLowToHigh", name: t("sort_by_price_low_to_high") },
+        { id: "priceHighToLow", name: t("sort_by_price_high_to_low") },
+        { id: "newlyPosted", name: t("sort_by_newly_posted") },
+    ];
+
+    const dateFiltersList = [
+        { id: "TODAY", name: "Hôm nay" },
+        { id: "THIS_WEEKEND", name: "Cuối tuần này" },
+        { id: "NEXT_7_DAYS", name: "7 ngày tới" },
+        { id: "CUSTOM", name: "Chọn ngày" }
+    ];
     // --- State ---
     const [events, setEvents] = useState<EventItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -53,75 +56,119 @@ export default function EventsPage() {
     const [totalElements, setTotalElements] = useState(0);
 
     // Filters State
-    const [keyword, setKeyword] = useState("");
-    const [selectedProvince, setSelectedProvince] = useState<number | "">("");
-    const [eventType, setEventType] = useState<string>("");
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
+    const [keyword, setKeyword] = useState(searchParams?.get("keyword") || "");
+    const [selectedProvince, setSelectedProvince] = useState<any>(null);
+    const [startDate, setStartDate] = useState<Date | null>(null);
+    const [endDate, setEndDate] = useState<Date | null>(null);
     const [provinces, setProvinces] = useState<Province[]>([]);
+    const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+    // const [openSelectLocation, setOpenSelectLocation] = useState(false);
 
     // Pagination & Sort
     const [page, setPage] = useState(1);
-    const [size, setSize] = useState(12);
-    const [sortBy, setSortBy] = useState("createdAt");
-    const [sortDirection, setSortDirection] = useState("DESC");
+    const [size, setSize] = useState(9);
+    const [sortBy, setSortBy] = useState(sortByList[0]);
+
+    const [suggestedEvents, setSuggestedEvents] = useState<EventItem[]>([]);
+    const [loadingSuggested, setLoadingSuggested] = useState(false);
+
+    // Thêm các state UI cho wireframe (Chỉ là UI tĩnh ở level này để đúng thiết kế)
+    // const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [priceFrom, setPriceFrom] = useState("");
+    const [priceTo, setPriceTo] = useState("");
+    const [ticketStatuses, setTicketStatuses] = useState<string[]>([]);
+    const [selectedDateFilters, setSelectedDateFilters] = useState<string[]>([]);
+    const [selectedCategories, setSelectedCategories] = useState<{ id: string, name: string }[]>([]);
+
 
     // --- Effects ---
+
+    // Headless UI Listbox handles its own state and click-outside natively.
+
     useEffect(() => {
         fetchProvinces();
     }, []);
 
     useEffect(() => {
-        fetchEvents();
-    }, [page, size, sortBy, sortDirection]);
-    // Trigger fetch on pagination/sort change directly. 
-    // For filters, we usually wait for user to click "Apply" or debounce, 
-    // but for simplicity, let's trigger on "Apply" button or Enter key for keyword.
+        fetchEvents(page === 1);
+    }, [page, sortBy]); // Trigger fetch khi page hoặc sort thay đổi
+
+    useEffect(() => {
+        if (suggestedEvents.length === 0) {
+            fetchSuggestedEvents();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const isFilterApplied = Boolean(
+        keyword ||
+        selectedProvince ||
+        startDate ||
+        endDate ||
+        selectedCategories.length > 0 ||
+        selectedDateFilters.length > 0 ||
+        priceFrom ||
+        priceTo ||
+        ticketStatuses.length > 0
+    );
+
+    const fetchSuggestedEvents = async () => {
+        setLoadingSuggested(true);
+        try {
+            const params: any = {
+                page: 1,
+                size: 4,
+                sortBy: "popular",
+                sortDirection: "DESC",
+                includeExpired: false,
+            };
+            const response = await api.get("/api/events/recommended?limit=3", { params, skipAuth: true } as any);
+            if (response.data && response.data.data) {
+                setSuggestedEvents(response.data.data.content);
+            }
+        } catch (error) {
+            console.error("Failed to fetch suggested events", error);
+        } finally {
+            setLoadingSuggested(false);
+        }
+    };
 
     const fetchProvinces = async () => {
         try {
-            const res = await api.get("/iam-service/api/locations/provinces");
+            const res = await api.get("/iam-service/api/locations/provinces", { skipAuth: true } as any);
             if (res.data) setProvinces(res.data);
         } catch (err) {
             console.error("Failed to fetch provinces", err);
         }
     };
 
-    const fetchEvents = async () => {
+    const fetchEvents = async (isReset = false) => {
         setLoading(true);
         try {
-            const token = Cookies.get("token");
-            const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
             const params: any = {
                 page,
                 size,
                 sortBy,
-                sortDirection,
+                sortDirection: "DESC", // Cố định theo thiết kế wireframe
                 includeExpired: true,
             };
 
             if (keyword) params.keyword = keyword;
-            if (selectedProvince) params.provinceCodes = selectedProvince;
-            if (eventType) params.eventTypes = eventType;
-            if (startDate) params.startDate = startDate;
-            if (endDate) params.endDate = endDate;
+            if (selectedCategories.length > 0) {
+                params.categories = selectedCategories.map(cat => cat.id).join(",");
+            }
+            if (selectedProvince) params.provinceCodes = selectedProvince.code;
+            if (startDate) params.startDate = startDate.toISOString();
+            if (endDate) params.endDate = endDate.toISOString();
+            if (selectedDateFilters.length > 0) params.dateFilters = selectedDateFilters.join(",");
 
-            // Note: params that accept lists (provinceCodes, eventTypes) 
-            // might need special formatting if multiple selected, but here we stick to single select for simplicity first.
-
-            const response = await api.get("/inventory-service/api/events", {
-                params,
-                headers
-            });
+            const response = await api.get("/inventory-service/api/events", { params, skipAuth: true } as any);
 
             if (response.data && response.data.data) {
-                setEvents(response.data.data.content);
+                const newEvents = response.data.data.content;
+                setEvents(isReset ? newEvents : [...events, ...newEvents]);
                 setTotalPages(response.data.data.totalPages || 0);
                 setTotalElements(response.data.data.totalElements || 0);
-
-                // Handle pagination response structure if different
-                // Based on sample, it likely returns standard Spring Page structure
             }
         } catch (error) {
             console.error("Failed to fetch events", error);
@@ -130,318 +177,551 @@ export default function EventsPage() {
         }
     };
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        setPage(1); // Reset to page 1
-        fetchEvents();
+    const handleApplyFilters = () => {
+        setPage(1);
+        fetchEvents(true);
     };
 
     const clearFilters = () => {
         setKeyword("");
         setSelectedProvince("");
-        setEventType("");
-        setStartDate("");
-        setEndDate("");
+        setStartDate(null);
+        setEndDate(null);
+        setSelectedCategories([]);
+        setPriceFrom("");
+        setPriceTo("");
+        setTicketStatuses([]);
+        setSelectedDateFilters([]);
         setPage(1);
-        // After clearing, we should probably fetch again or wait for user to click apply.
-        // Let's create a reset trigger or just call fetch manually inside a timeout or effect
-        // Simpler: just call fetchEvents() via timeout
-        setTimeout(() => {
-            // Trigger fetch logic manually or by dependecy 
-            // We need a clearer way. Let's make fetchEvents use the current state values, 
-            // but state updates are async. 
-            // Best approach: Just reload page or implement useEffect on filter dependencies with debounce.
-            // For this implementation, I will just require clicking "Tìm kiếm"/Apply.
-        }, 0);
+        setTimeout(() => fetchEvents(true), 0);
     };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString("vi-VN", {
-            day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+    const loadMore = useCallback(() => {
+        if (page < totalPages) {
+            setPage(p => p + 1);
+        }
+    }, [page, totalPages]);
+
+    const observer = useRef<IntersectionObserver | null>(null);
+    const loadMoreRef = useCallback((node: HTMLDivElement) => {
+        if (loading) return;
+        if (observer.current) observer.current.disconnect();
+
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && page < totalPages) {
+                loadMore();
+            }
         });
-    };
 
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case 'PUBLISHED': return <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">Đang mở bán</span>;
-            case 'ON_GOING': return <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">Đang diễn ra</span>;
-            case 'COMPLETED': return <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">Đã kết thúc</span>;
-            case 'CANCELLED': return <span className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs">Đã hủy</span>;
-            default: return null;
+        if (node) observer.current.observe(node);
+    }, [loading, page, totalPages, loadMore]);
+
+    const toggleArrayItem = (array: string[], setArray: any, item: string) => {
+        if (array.includes(item)) {
+            setArray(array.filter(i => i !== item));
+        } else {
+            setArray([...array, item]);
         }
     };
 
     return (
-        <div className="min-h-screen bg-surface pb-20">
+        <div className="min-h-screen bg-bg-page flex flex-col">
             <Header />
-            {/* Header Banner */}
-            <div className="bg-primary text-white py-12">
-                <div className="container mx-auto px-4">
-                    <h1 className="text-3xl font-bold mb-4">Khám phá sự kiện</h1>
-                    <p className="text-white/80 max-w-2xl">
-                        Tìm kiếm những sự kiện hấp dẫn nhất đang diễn ra xung quanh bạn.
-                        Âm nhạc, nghệ thuật, hội thảo và nhiều hơn nữa.
-                    </p>
-                </div>
-            </div>
 
-            <div className="container mx-auto px-4 py-8">
+            <div className="container mx-auto px-4 py-6 flex-1 max-w-7xl">
+
+                {/* --- BREADCRUMB & HEADER --- */}
+                <div className="mb-8">
+                    {/* Breadcrumb */}
+                    <div className="flex items-center gap-2 text-sm text-text-muted mb-6">
+                        <Link href={`/${locale}/user/homepage`} className="hover:text-primary transition-colors">Home</Link>
+                        <ChevronRight size={14} />
+                        <span className="text-text-primary font-medium">Tìm kiếm</span>
+                    </div>
+
+                    {/* Title */}
+                    <div className="flex items-center justify-between">
+                        <h1 className="text-4xl font-bold text-text-primary mb-2">Kết quả tìm kiếm</h1>
+                        <Link href={`/${locale}/user/homepage`} className="flex items-center text-text-primary hover:text-primary transition-colors bg-bg-surface px-3 py-2 border border-border-default rounded-lg">
+                            <ArrowLeft size={14} />
+                            <span className="ml-2">
+                                {t("back_homepage")}
+                            </span>
+                        </Link>
+                    </div>
+                    <p className="text-text-secondary">
+                        {totalElements} kết quả cho {keyword ? `"${keyword}"` : `"Tất cả sự kiện"`}
+                    </p>
+
+                    {/* Active Filters Tags (Mockup theo wireframe) */}
+                    <div className="flex flex-wrap gap-3 mt-4 mb-6">
+                        {keyword && (
+                            <div className="flex items-center gap-2 px-3 py-1.5 text-text-primary border border-border-default rounded-full text-sm">
+                                <span>{keyword}</span>
+                                <button onClick={() => { setKeyword(""); handleApplyFilters(); }} className="hover:text-primary"><X size={14} /></button>
+                            </div>
+                        )}
+                        {selectedProvince && (
+                            <div className="flex items-center gap-2 px-3 py-1.5 text-text-primary border border-border-default rounded-full text-sm">
+                                <span>{provinces.find(p => p.code === selectedProvince.code)?.name}</span>
+                                <button onClick={() => { setSelectedProvince(""); handleApplyFilters(); }} className="hover:text-primary"><X size={14} /></button>
+                            </div>
+                        )}
+                        {(startDate || endDate) && (
+                            <div className="flex items-center gap-2 px-3 py-1.5 text-text-primary border border-border-default rounded-full text-sm">
+                                <span>
+                                    {startDate ? `${new Date(startDate).getDate().toString().padStart(2, '0')} tháng ${(new Date(startDate).getMonth() + 1).toString().padStart(2, '0')}, ${new Date(startDate).getFullYear()}` : "..."}
+                                    {" - "}
+                                    {endDate ? `${new Date(endDate).getDate().toString().padStart(2, '0')} tháng ${(new Date(endDate).getMonth() + 1).toString().padStart(2, '0')}, ${new Date(endDate).getFullYear()}` : "..."}
+                                </span>
+                                <button onClick={() => { setStartDate(null); setEndDate(null); handleApplyFilters(); }} className="hover:text-primary"><X size={14} /></button>
+                            </div>
+                        )}
+                        {selectedCategories.length > 0 && selectedCategories.map(cat => (
+                            <div key={cat.id} className="flex items-center gap-2 px-3 py-1.5 text-text-primary border border-border-default rounded-full text-sm">
+                                <span>{cat.name}</span>
+                                <button onClick={() => {
+                                    setSelectedCategories(selectedCategories.filter(c => c.id !== cat.id));
+                                    handleApplyFilters();
+                                }} className="hover:text-primary"><X size={14} /></button>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="h-px w-full bg-border"></div>
+                </div>
+
+                {/* --- MAIN LAYOUT: SIDEBAR + CONTENT --- */}
                 <div className="flex flex-col lg:flex-row gap-8">
 
-                    {/* SIDEBAR FILTERS */}
-                    <aside className="w-full lg:w-1/4 space-y-6">
-                        <div className="bg-main border border-border rounded-xl p-6 sticky top-24">
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="font-bold text-lg flex items-center gap-2">
-                                    <Filter size={20} /> Bộ lọc
-                                </h2>
-                                <button
-                                    onClick={clearFilters}
-                                    className="text-sm text-primary hover:underline"
-                                >
-                                    Xóa lọc
-                                </button>
+                    {/* SIDEBAR: BỘ LỌC */}
+                    <aside className="w-full lg:w-[300px] shrink-0 space-y-8">
+                        {/* Container bộ lọc */}
+                        <div className="bg-bg-surface border border-border-default rounded-xl p-6">
+                            <h2 className="font-bold text-2xl text-text-primary mb-6">Bộ lọc</h2>
+
+                            {/* Danh mục sự kiện */}
+                            <div className="mb-6">
+                                <h3 className="font-semibold text-sm text-text-primary mb-3">Danh mục sự kiện</h3>
+                                <div className="space-y-3">
+                                    {categoriesList.map(cat => (
+                                        <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
+                                            <div className="relative flex items-center justify-center w-5 h-5">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedCategories.some(c => c.id === cat.id)}
+                                                    onChange={() => {
+                                                        if (selectedCategories.some(c => c.id === cat.id)) {
+                                                            setSelectedCategories(selectedCategories.filter(c => c.id !== cat.id));
+                                                        } else {
+                                                            setSelectedCategories([...selectedCategories, cat]);
+                                                        }
+                                                    }}
+                                                    className="peer appearance-none w-5 h-5 border border-border-default rounded bg-bg-surface checked:bg-button-primary-bg-default checked:border-primary transition-colors cursor-pointer"
+                                                />
+                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 peer-checked:opacity-100 pointer-events-none text-button-primary-text-default">
+                                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <span className="text-sm text-text-primary group-hover:text-primary transition-colors">{cat.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
 
-                            <form onSubmit={handleSearch} className="space-y-4">
-                                {/* Keyword */}
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Từ khóa</label>
+                            {/* Địa điểm */}
+                            <div className="mb-6">
+                                <h3 className="font-semibold text-sm text-text-primary mb-3">Địa điểm</h3>
+                                <div className="h-10 relative">
+
+                                    <Listbox value={selectedProvince} onChange={(val) => { setSelectedProvince(val); }}>
+                                        <ListboxButton
+                                            className="
+                                                w-full h-full p-1.5 pl-3 bg-bg-surface
+                                                border border-border-default rounded-lg
+                                                text-text-primary outline-none
+                                                focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer transition-colors text-left">
+                                            {selectedProvince?.name || "Địa điểm"}
+                                        </ListboxButton>
+
+                                        <ListboxOptions
+                                            anchor="bottom"
+                                            modal={false}
+                                            className="
+                                                        w-[var(--button-width)] z-50 origin-top
+                                                        [--anchor-gap:4px] !max-h-60 overflow-y-auto
+                                                        bg-bg-surface border border-border-default
+                                                        rounded-lg shadow-lg text-text-primary transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0">
+                                            {provinces.map(item => (
+                                                <ListboxOption
+                                                    key={item.code}
+                                                    value={item}
+                                                    className="
+                                                            group flex items-center justify-between px-3 py-2 cursor-pointer
+                                                            hover:bg-secondary rounded-md">
+                                                    <span>{item.name}</span>
+                                                    <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-primary ml-2" />
+                                                </ListboxOption>
+                                            ))}
+                                        </ListboxOptions>
+                                    </Listbox>
+                                </div>
+                            </div>
+
+                            {/* Ngày diễn */}
+                            <div className="mb-6">
+                                <h3 className="font-semibold text-sm text-text-primary mb-3">Ngày diễn</h3>
+                                <div className="grid grid-cols-2 gap-2 mb-4">
+                                    {dateFiltersList.map(filter => {
+                                        const isSelected = selectedDateFilters.includes(filter.id);
+                                        return (
+                                            <button
+                                                key={filter.id}
+                                                onClick={() => toggleArrayItem(selectedDateFilters, setSelectedDateFilters, filter.id)}
+                                                className={`flex items-center gap-1 py-2 px-3 text-xs border transition-colors cursor-pointer ${isSelected
+                                                    ? 'justify-between bg-chip-filter-bg-selected text-text-primary border-chip-filter-border-selected rounded-(--button-radius)'
+                                                    : 'justify-center border-border-default text-text-secondary hover:bg-secondary hover:text-text-primary rounded-sm'
+                                                    }`}
+                                            >
+                                                <span>{filter.name}</span>
+                                                {isSelected && <X size={12} strokeWidth={3} />}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                <div className="space-y-3">
                                     <div className="relative">
-                                        <input
-                                            type="text"
-                                            value={keyword}
-                                            onChange={(e) => setKeyword(e.target.value)}
-                                            placeholder="Tên sự kiện..."
-                                            className="w-full pl-9 pr-4 py-2 border border-border rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:outline-none"
-                                        />
-                                        <Search className="absolute left-3 top-2.5 text-txt-muted" size={16} />
+                                        <label className="text-xs text-text-muted block mb-1">Từ ngày</label>
+                                        {/* <div className="relative">
+                                            <input
+                                                type="date"
+                                                value={startDate}
+                                                onChange={(e) => setStartDate(e.target.value)}
+                                                className="w-full px-4 py-2 bg-bg-surface text-sm border border-border-default rounded-lg focus:outline-none focus:border-primary text-text-secondary appearance-none"
+                                            />
+                                        </div> */}
+                                        <div className="flex-1 w-full relative">
+                                            <CustomDatePicker
+                                                selectedDate={startDate}
+                                                onChange={(e) => setStartDate(e)}
+                                                width="62.5"
+                                                height="10"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="relative">
+                                        <label className="text-xs text-text-muted block mb-1">Đến ngày</label>
+                                        <div className="flex-1 w-full relative">
+                                            <CustomDatePicker
+                                                selectedDate={endDate}
+                                                onChange={(e) => setEndDate(e)}
+                                                width="62.5"
+                                                height="10"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                {/* Province */}
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Địa điểm</label>
-                                    <select
-                                        value={selectedProvince}
-                                        onChange={(e) => setSelectedProvince(e.target.value ? Number(e.target.value) : "")}
-                                        className="w-full px-4 py-2 border border-border rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:outline-none"
-                                    >
-                                        <option value="">Tất cả địa điểm</option>
-                                        {provinces.map(p => (
-                                            <option key={p.code} value={p.code}>{p.name}</option>
-                                        ))}
-                                    </select>
+                            {/* Khoảng giá */}
+                            <div className="mb-6">
+                                <h3 className="font-semibold text-sm text-text-primary mb-3">Khoảng giá</h3>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex-1">
+                                        <label className="text-xs text-text-muted block mb-1">Từ</label>
+                                        <input
+                                            type="number"
+                                            value={priceFrom}
+                                            min={0}
+                                            onChange={(e) => setPriceFrom(e.target.value)}
+                                            className="w-full px-3 py-2 bg-bg-surface text-sm border border-border-default rounded-lg focus:outline-none focus:border-primary text-text-secondary"
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="text-xs text-text-muted block mb-1">Đến</label>
+                                        <input
+                                            type="number"
+                                            value={priceTo}
+                                            onChange={(e) => setPriceTo(e.target.value)}
+                                            className="w-full px-3 py-2 bg-bg-surface text-sm border border-border-default rounded-lg focus:outline-none focus:border-primary text-text-secondary"
+                                        />
+                                    </div>
                                 </div>
+                            </div>
 
-                                {/* Event Type */}
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Loại hình</label>
-                                    <select
-                                        value={eventType}
-                                        onChange={(e) => setEventType(e.target.value)}
-                                        className="w-full px-4 py-2 border border-border rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:outline-none"
-                                    >
-                                        <option value="">Tất cả</option>
-                                        <option value="ONLINE">Online</option>
-                                        <option value="OFFLINE">Offline</option>
-                                    </select>
+                            {/* Trạng thái vé */}
+                            <div className="mb-8">
+                                <h3 className="font-semibold text-sm text-text-primary mb-3">Trạng thái vé</h3>
+                                <div className="space-y-3">
+                                    {["Còn vé", "Sắp hết vé", "Sold out"].map(status => (
+                                        <label key={status} className="flex items-center gap-3 cursor-pointer group">
+                                            <div className="relative flex items-center justify-center w-5 h-5">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={ticketStatuses.includes(status)}
+                                                    onChange={() => toggleArrayItem(ticketStatuses, setTicketStatuses, status)}
+                                                    className="peer appearance-none w-5 h-5 border border-border-default rounded bg-bg-surface checked:bg-button-primary-bg-default checked:border-primary transition-colors cursor-pointer"
+                                                />
+                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 peer-checked:opacity-100 pointer-events-none text-button-primary-text-default">
+                                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <span className="text-sm text-text-secondary group-hover:text-primary transition-colors">{status}</span>
+                                        </label>
+                                    ))}
                                 </div>
+                            </div>
 
-                                {/* Dates */}
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Từ ngày</label>
-                                    <input
-                                        type="date"
-                                        value={startDate}
-                                        onChange={(e) => setStartDate(e.target.value)}
-                                        className="w-full px-4 py-2 border border-border rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:outline-none"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Đến ngày</label>
-                                    <input
-                                        type="date"
-                                        value={endDate}
-                                        onChange={(e) => setEndDate(e.target.value)}
-                                        className="w-full px-4 py-2 border border-border rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:outline-none"
-                                    />
-                                </div>
-
+                            {/* Nút hành động */}
+                            <div className="space-y-3">
                                 <button
-                                    type="submit"
-                                    className="w-full bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary-hover transition-colors"
+                                    onClick={handleApplyFilters}
+                                    className="w-full bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default py-3 rounded-lg font-medium transition-colors cursor-pointer"
                                 >
-                                    Áp dụng bộ lọc
+                                    Áp dụng
                                 </button>
-                            </form>
+                                <button
+                                    onClick={clearFilters}
+                                    className="w-full bg-transparent text-primary hover:text-primary-hover py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer"
+                                >
+                                    Xóa bộ lọc
+                                </button>
+                            </div>
                         </div>
                     </aside>
 
-                    {/* MAIN CONTENT */}
-                    <main className="flex-1">
-                        {/* Sort & Count */}
-                        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                            <p className="text-txt-secondary">
-                                Tìm thấy <span className="font-bold text-txt-primary">{totalElements}</span> sự kiện
+                    {/* MAIN CONTENT (LIST GRID) */}
+                    <div className="flex-1">
+
+                        {/* Top controls: Hiển thị 9 sự kiện / Sort / ViewMode */}
+                        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 z-10 relative">
+                            <p className="text-text-secondary text-sm">
+                                <span className="font-medium text-text-primary mr-1">{totalElements}</span>
+                                sự kiện
                             </p>
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm text-txt-muted">Sắp xếp:</span>
-                                <select
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                    className="px-3 py-1.5 border border-border rounded-lg bg-surface text-sm focus:outline-none"
-                                >
-                                    <option value="createdAt">Mới nhất</option>
-                                    <option value="startDatetime">Ngày diễn ra</option>
-                                    <option value="totalSeats">Số ghế</option>
-                                </select>
-                                <select
-                                    value={sortDirection}
-                                    onChange={(e) => setSortDirection(e.target.value)}
-                                    className="px-3 py-1.5 border border-border rounded-lg bg-surface text-sm focus:outline-none"
-                                >
-                                    <option value="DESC">Giảm dần</option>
-                                    <option value="ASC">Tăng dần</option>
-                                </select>
+
+                            <div className="flex items-center gap-4 mt-4 sm:mt-0">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-text-muted whitespace-nowrap w-20">Sắp xếp theo</span>
+                                    <div className="relative h-9">
+
+                                        <Listbox value={sortBy} onChange={(val) => { setSortBy(val); setPage(1); }}>
+                                            <ListboxButton
+                                                className="
+                                                w-50 h-full pl-3 bg-bg-surface
+                                                border border-border-default rounded-lg
+                                                text-text-primary outline-none
+                                                focus:ring-1 focus:ring-primary 
+                                                focus:border-primary cursor-pointer 
+                                                transition-colors text-left">
+                                                {sortBy?.name || t("location_all")}
+                                            </ListboxButton>
+
+                                            <ListboxOptions
+                                                anchor="bottom"
+                                                modal={false}
+                                                className="
+                                            w-[var(--button-width)] z-50 origin-top
+                                            [--anchor-gap:4px] !max-h-60 overflow-y-auto
+                                            bg-bg-surface border border-border-default
+                                            rounded-lg shadow-lg text-text-primary transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0">
+                                                {sortByList.map(item => (
+                                                    <ListboxOption
+                                                        key={item.id}
+                                                        value={item}
+                                                        className="
+                                                    group flex justify-between items-center px-3 py-2 cursor-pointer
+                                                            hover:bg-secondary rounded-md">
+                                                        <span>{item.name}</span>
+                                                        <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-primary mr-2" />
+                                                    </ListboxOption>
+                                                ))}
+                                            </ListboxOptions>
+                                        </Listbox>
+                                    </div>
+                                </div>
+
+                                {/* Icon chuyển đổi Grid / List */}
+                                <div className="flex border border-border-default rounded-lg overflow-hidden bg-bg-page">
+                                    <button
+                                        className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-[#1e293b] text-button-primary-text-default' : 'text-text-muted hover:bg-secondary'}`}
+                                        onClick={() => setViewMode("grid")}
+                                    >
+                                        <LayoutGrid size={18} />
+                                    </button>
+                                    <div className="w-px bg-border"></div>
+                                    <button
+                                        className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-[#1e293b] text-button-primary-text-default' : 'text-text-muted hover:bg-secondary'}`}
+                                        onClick={() => setViewMode("list")}
+                                    >
+                                        <ListIcon size={18} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Event Grid */}
-                        {loading ? (
+                        {/* Event Grid body */}
+                        {loading && page === 1 ? (
                             <div className="flex justify-center py-20">
                                 <Loader2 className="animate-spin text-primary" size={40} />
                             </div>
                         ) : events.length === 0 ? (
-                            <div className="text-center py-20 bg-main border border-border rounded-xl">
-                                <p className="text-txt-muted text-lg">Không tìm thấy sự kiện nào phù hợp.</p>
-                                <button
-                                    onClick={clearFilters}
-                                    className="mt-4 text-primary hover:underline font-medium"
-                                >
-                                    Xóa bộ lọc để xem tất cả
-                                </button>
+                            <div className="flex flex-col w-full pb-10">
+                                <div className="flex flex-col items-center justify-center py-24 px-4 text-center bg-transparent rounded-xl">
+                                    {/* Icon */}
+                                    <div className="w-16 h-16 mb-6 flex items-center justify-center border border-border-default rounded shadow-sm bg-bg-surface">
+                                        <CircleHelp className="text-text-muted w-8 h-8" strokeWidth={1.5} />
+                                    </div>
+                                    {/* Text */}
+                                    <h3 className="text-2xl font-bold text-text-primary mb-3">
+                                        Không tìm thấy sự kiện phù hợp
+                                    </h3>
+                                    <p className="text-text-secondary text-[15px] mb-8 max-w-md">
+                                        Hãy thử đổi từ khóa hoặc nới rộng bộ lọc để xem thêm sự kiện khác.
+                                    </p>
+                                    {/* Buttons */}
+                                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                                        <button
+                                            onClick={clearFilters}
+                                            className="w-full sm:w-auto px-6 py-2.5 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default font-medium rounded-md transition-colors"
+                                        >
+                                            Xóa bộ lọc
+                                        </button>
+                                        <button
+                                            onClick={clearFilters}
+                                            className="w-full sm:w-auto px-6 py-2.5 bg-transparent border border-border-default text-text-primary hover:bg-secondary font-medium rounded-md transition-colors"
+                                        >
+                                            Khám phá tất cả sự kiện
+                                        </button>
+                                    </div>
+                                </div>
+
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {events.map((event) => (
-                                    <div key={event.id} className="group bg-main border border-border rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col relative h-[420px]">
-                                        {/* Card Image */}
-                                        <Link href={`/${locale}/events/${event.id}`} className="relative h-48 w-full block overflow-hidden bg-gray-100">
-                                            {event.bannerImage ? (
-                                                <Image
-                                                    src={event.bannerImage}
-                                                    alt={event.eventName}
-                                                    fill
-                                                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                                />
-                                            ) : (
-                                                <div className="h-full w-full flex items-center justify-center text-gray-300">
-                                                    <Calendar size={48} />
-                                                </div>
-                                            )}
-                                            <div className="absolute top-3 left-3">
-                                                {getStatusBadge(event.eventStatus)}
-                                            </div>
-                                            <div className="absolute top-3 right-3">
-                                                {/* Favorite Button (Visual Only for now) */}
-                                                <button
-                                                    className={`p-2 rounded-full transition-colors ${event.favorite ? 'bg-red-50 text-red-500' : 'bg-black/30 text-white hover:bg-red-50 hover:text-red-500'}`}
-                                                    title={event.favorite ? "Đã yêu thích" : "Yêu thích"}
-                                                >
-                                                    <Heart size={18} className={event.favorite ? "fill-current" : ""} />
-                                                </button>
-                                            </div>
-                                        </Link>
-
-                                        {/* Card Content */}
-                                        <div className="p-4 flex-1 flex flex-col">
-                                            <div className="flex items-center justify-between text-xs text-txt-muted mb-2">
-                                                <div className="flex items-center gap-1">
-                                                    <Calendar size={12} />
-                                                    <span>{new Date(event.startDatetime).toLocaleDateString("vi-VN")}</span>
-                                                </div>
-                                                <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
-                                                    {event.categoryName}
-                                                </span>
+                            <>
+                                {/* Lưới 3 cột */}
+                                <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+                                    {events.map((event) => (
+                                        <Link href={`/${locale}/events/${event.id}`} key={`${event.id}-${Math.random()}`} className="group bg-bg-page border border-border-default rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer">
+                                            {/* Phần hình ảnh */}
+                                            <div className="relative h-44 w-full bg-[#83858a] shrink-0">
+                                                {event.bannerImage && (
+                                                    <Image
+                                                        src={event.bannerImage}
+                                                        alt={event.eventName}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                )}
+                                                {event.eventStatus === 'COMPLETED' && (
+                                                    <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm text-button-primary-text-default text-xs font-semibold px-2.5 py-1 rounded">
+                                                        Sold out
+                                                    </div>
+                                                )}
                                             </div>
 
-                                            <Link href={`/${locale}/events/${event.id}`} className="block">
-                                                <h3 className="font-bold text-lg text-txt-primary mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                                            {/* Phần nội dung */}
+                                            <div className="p-4 flex-1 flex flex-col bg-bg-page">
+                                                <h3 className="font-bold text-lg text-text-primary mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
                                                     {event.eventName}
                                                 </h3>
-                                            </Link>
 
-                                            <div className="flex items-start gap-2 text-sm text-txt-secondary mb-3">
-                                                <MapPin size={16} className="shrink-0 mt-0.5" />
-                                                <span className="line-clamp-2">{event.venue || event.fullAddress || "Online"}</span>
-                                            </div>
-
-                                            <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
-                                                <div className="text-sm font-semibold text-primary">
-                                                    <span className="text-xs text-txt-muted font-normal mr-1">Từ</span>
-                                                    {/* Since API listing sample doesn't clearly show minPrice, I use a placeholder or handle if present. 
-                                            Assuming price might need to be fetched or is implicit. 
-                                            I'll just show 'Liên hệ' or similar if not available.
-                                        */}
-                                                    Liên hệ
+                                                <div className="flex items-start gap-2 text-sm text-text-secondary mb-2">
+                                                    <Calendar size={16} className="mt-0.5 shrink-0" />
+                                                    <span>{new Date(event.startDatetime).toLocaleString("vi-VN", { hour: '2-digit', minute: '2-digit', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }).replace('lúc', '-')}</span>
                                                 </div>
-                                                <Link
-                                                    href={`/${locale}/events/${event.id}`}
-                                                    className="text-xs font-bold uppercase tracking-wide bg-secondary hover:bg-border px-3 py-2 rounded-lg transition-colors"
-                                                >
-                                                    Mua vé
-                                                </Link>
+
+                                                <div className="flex items-start gap-2 text-sm text-text-secondary mb-4">
+                                                    <MapPin size={16} className="mt-0.5 shrink-0" />
+                                                    <span className="line-clamp-1">{event.venue || event.fullAddress || "Online"}</span>
+                                                </div>
+
+                                                <div className="mt-auto pt-4 flex items-center">
+                                                    <span className="text-accent font-bold text-base">{event.floorPrice ? t('price_from', { price: event.floorPrice.toLocaleString(locale as string === 'en' ? 'en-US' : 'vi-VN') }) : t('contact')}</span>
+                                                </div>
                                             </div>
+                                        </Link>
+                                    ))}
+                                </div>
+
+                                {/* Nút hiển thị thêm / Observer */}
+                                {page < totalPages && (
+                                    <div ref={loadMoreRef} className="flex justify-center mt-12 mb-8 h-10 w-full items-center">
+                                        {loading && <Loader2 className="animate-spin text-primary" size={32} />}
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+
+                </div>
+
+                {/* --- SUGGESTED EVENTS (FULL WIDTH) --- */}
+                {(!isFilterApplied || events.length === 0) && suggestedEvents.length > 0 && (
+                    <div className="mt-16 pt-10">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-text-primary">Có thể bạn cũng thích</h2>
+                            {isFilterApplied ? (
+                                <button onClick={clearFilters} className="text-text-secondary hover:text-primary transition-colors flex items-center gap-1 text-sm">
+                                    Xem thêm <ChevronRight size={16} />
+                                </button>
+                            ) : (
+                                <Link href={`/${locale}/events`} className="text-text-secondary hover:text-primary transition-colors flex items-center gap-1 text-sm">
+                                    Xem thêm <ChevronRight size={16} />
+                                </Link>
+                            )}
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {suggestedEvents.map((event) => (
+                                <Link href={`/${locale}/events/${event.id}`} key={`suggested-full-${event.id}`} className="group bg-bg-page border border-border-default rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer">
+                                    {/* Phần hình ảnh */}
+                                    <div className="relative h-44 w-full bg-[#83858a] shrink-0">
+                                        {event.bannerImage && (
+                                            <Image
+                                                src={event.bannerImage}
+                                                alt={event.eventName}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        )}
+                                        {event.eventStatus === 'COMPLETED' && (
+                                            <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm text-button-primary-text-default text-xs font-semibold px-2.5 py-1 rounded">
+                                                Sold out
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Phần nội dung */}
+                                    <div className="p-4 flex-1 flex flex-col bg-bg-page">
+                                        <h3 className="font-bold text-lg text-text-primary mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+                                            {event.eventName}
+                                        </h3>
+
+                                        <div className="flex items-start gap-2 text-sm text-text-secondary mb-2">
+                                            <Calendar size={16} className="mt-0.5 shrink-0" />
+                                            <span>{new Date(event.startDatetime).toLocaleString("vi-VN", { hour: '2-digit', minute: '2-digit', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }).replace('lúc', '-')}</span>
+                                        </div>
+
+                                        <div className="flex items-start gap-2 text-sm text-text-secondary mb-4">
+                                            <MapPin size={16} className="mt-0.5 shrink-0" />
+                                            <span className="line-clamp-1">{event.venue || event.fullAddress || "Online"}</span>
+                                        </div>
+
+                                        <div className="mt-auto pt-4 flex items-center">
+                                            <span className="text-accent font-bold text-base">{event.floorPrice ? t('price_from', { price: event.floorPrice.toLocaleString(locale as string === 'en' ? 'en-US' : 'vi-VN') }) : t('contact')}</span>
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        )}
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
-                        {/* Pagination */}
-                        {totalPages > 1 && (
-                            <div className="flex justify-center mt-12 gap-2">
-                                <button
-                                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                                    disabled={page === 1}
-                                    className="p-2 border border-border rounded-lg hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <ChevronLeft size={20} />
-                                </button>
-
-                                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                                    .filter(p => p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1))
-                                    .map((p, index, array) => {
-                                        // Add dots logic if needed, simplify for now
-                                        return (
-                                            <button
-                                                key={p}
-                                                onClick={() => setPage(p)}
-                                                className={`w-10 h-10 rounded-lg font-medium transition-colors ${page === p
-                                                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                                                    : 'border border-border hover:bg-secondary'
-                                                    }`}
-                                            >
-                                                {p}
-                                            </button>
-                                        );
-                                    })}
-
-                                <button
-                                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                    disabled={page === totalPages}
-                                    className="p-2 border border-border rounded-lg hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <ChevronRight size={20} />
-                                </button>
-                            </div>
-                        )}
-
-                    </main>
-                </div>
             </div>
-            <Footer />
         </div>
     );
 }
