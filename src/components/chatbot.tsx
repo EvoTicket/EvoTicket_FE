@@ -162,14 +162,14 @@ export function ChatBot() {
             <div className="fixed bottom-6 right-6 z-50 group">
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="bg-primary hover:bg-primary-hover text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110"
+                    className="bg-button-primary-bg-defaul hover:bg-button-primary-bg-defaul-hovertext-button-primary-text-default rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110"
                     aria-label="Chat Bot"
                 >
                     {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
                 </button>
 
                 <div className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                    <div className="bg-gray-800 text-white text-sm px-3 py-1 rounded whitespace-nowrap">
+                    <div className="bg-gray-800text-button-primary-text-default text-sm px-3 py-1 rounded whitespace-nowrap">
                         Sử dụng chat bot
                     </div>
                 </div>
@@ -177,9 +177,9 @@ export function ChatBot() {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="fixed bottom-24 right-6 z-50 w-[450px] h-[600px] bg-main border border-border rounded-lg shadow-2xl flex flex-col">
+                <div className="fixed bottom-24 right-6 z-50 w-[450px] h-[600px] bg-bg-page border border-border-default rounded-lg shadow-2xl flex flex-col">
                     {/* Header */}
-                    <div className="bg-primary text-white p-4 rounded-t-lg flex items-center justify-between">
+                    <div className="bg-button-primary-bg-defaultext-button-primary-text-default p-4 rounded-t-lg flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <MessageCircle size={20} />
                             <h3 className="font-semibold">Chat Bot Hỗ Trợ</h3>
@@ -193,13 +193,13 @@ export function ChatBot() {
                     </div>
 
                     {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-surface">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4 	bg-bg-surface">
                         {isLoadingHistory ? (
                             <div className="flex items-center justify-center h-full">
                                 <Loader2 className="animate-spin text-primary" size={32} />
                             </div>
                         ) : messages.length === 0 ? (
-                            <div className="flex items-center justify-center h-full text-txt-muted">
+                            <div className="flex items-center justify-center h-full text-text-muted">
                                 <p>Chưa có tin nhắn nào. Hãy bắt đầu trò chuyện!</p>
                             </div>
                         ) : (
@@ -210,8 +210,8 @@ export function ChatBot() {
                                 >
                                     <div
                                         className={`max-w-[75%] rounded-lg p-3 ${msg.senderType === "USER"
-                                            ? "bg-primary text-white"
-                                            : "bg-secondary text-txt-primary"
+                                            ? "bg-button-primary-bg-defaultext-button-primary-text-default"
+                                            : "bg-secondary text-text-primary"
                                             }`}
                                     >
                                         <div className={`text-sm prose prose-sm max-w-none ${msg.senderType === "USER"
@@ -325,7 +325,7 @@ export function ChatBot() {
 
                         {isLoading && (
                             <div className="flex justify-start">
-                                <div className="max-w-[75%] rounded-lg p-3 bg-secondary text-txt-primary">
+                                <div className="max-w-[75%] rounded-lg p-3 bg-secondary text-text-primary">
                                     <div className="flex items-center gap-2">
                                         <Loader2 className="animate-spin" size={16} />
                                         <span className="text-sm">Đang trả lời...</span>
@@ -338,13 +338,13 @@ export function ChatBot() {
                     </div>
 
                     {/* Input */}
-                    <div className="p-4 border-t border-border bg-main">
+                    <div className="p-4 border-t border-border-default bg-bg-page">
                         {selectedFiles.length > 0 && (
                             <div className="mb-2 flex flex-wrap gap-2">
                                 {selectedFiles.map((file, idx) => (
                                     <div
                                         key={idx}
-                                        className="bg-secondary text-txt-primary text-xs px-2 py-1 rounded flex items-center gap-1"
+                                        className="bg-secondary text-text-primary text-xs px-2 py-1 rounded flex items-center gap-1"
                                     >
                                         <Paperclip size={12} />
                                         <span className="max-w-[100px] truncate">{file.name}</span>
@@ -370,7 +370,7 @@ export function ChatBot() {
                             />
                             <button
                                 onClick={() => fileInputRef.current?.click()}
-                                className="p-2 hover:bg-secondary rounded-lg transition-colors text-txt-secondary"
+                                className="p-2 hover:bg-secondary rounded-lg transition-colors text-text-secondary"
                                 disabled={isLoading}
                             >
                                 <Paperclip size={20} />
@@ -381,13 +381,13 @@ export function ChatBot() {
                                 onChange={(e) => setInputMessage(e.target.value)}
                                 onKeyPress={handleKeyPress}
                                 placeholder="Nhập tin nhắn..."
-                                className="flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-surface text-txt-primary"
+                                className="flex-1 px-3 py-2 border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-primary 	bg-bg-surface text-text-primary"
                                 disabled={isLoading}
                             />
                             <button
                                 onClick={handleSendMessage}
                                 disabled={!inputMessage.trim() && selectedFiles.length === 0}
-                                className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="bg-button-primary-bg-defaul hover:bg-button-primary-bg-defaul-hovertext-button-primary-text-default px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
                                 <Send size={20} />
                             </button>

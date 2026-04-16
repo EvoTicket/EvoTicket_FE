@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Bell, Ticket, Plus, ChevronDown, Moon, Sun, User, LogOut } from "lucide-react";
+import { Search, Bell, Ticket, Plus, ChevronDown, Moon, Sun, User, LogOut, LogInIcon, Subscript, UserPlus } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { useParams, useRouter, usePathname } from "next/navigation";
@@ -81,7 +81,7 @@ export function Header() {
     console.log(token);
     if (!token) {
       toast.error(t("login_required_to_create_event"));
-      router.push(`/${locale}/auth/login`);
+      router.push(`/${locale}/auth/login?callbackUrl=/${locale}/organizer/center`);
       return;
     }
 
@@ -104,8 +104,8 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-none bg-main transition-colors duration-300">
-      <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-50 w-full border-none bg-navbar-topbar-bg transition-colors duration-300">
+      <div className="mx-auto px-4 h-20 flex items-center justify-between gap-4">
 
         {/* === LEFT: LOGO === */}
         <Link href={`/${locale}/user/homepage`} className="flex items-center gap-2 shrink-0 group">
@@ -115,26 +115,26 @@ export function Header() {
           </div>
           {/* Logo Text */}
           <div className="flex flex-col">
-            <span className="text-2xl font-bold text-txt-primary leading-none">
+            <span className="text-2xl font-bold text-text-primary leading-none">
               Evo<span className="text-primary">Ticket</span>
             </span>
-            <span className="text-[10px] text-txt-muted uppercase tracking-wider">Event-booking</span>
+            <span className="text-[10px] text-text-muted uppercase tracking-wider">Event-booking</span>
           </div>
         </Link>
 
         {/* === CENTER: SEARCH BAR === */}
         <div className="hidden md:flex flex-1 max-w-xl mx-4">
-          <div className="w-full flex items-center bg-surface border border-border rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-primary focus-within:border-primary transition-all h-11">
-            <div className="pl-4 text-txt-muted">
+          <div className="w-full flex items-center 	bg-bg-surface border border-border-default rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-primary focus-within:border-primary transition-all h-11">
+            <div className="pl-4 text-text-muted">
               <Search size={20} />
             </div>
             <input
               type="text"
               placeholder={t('search_placeholder')}
-              className="flex-1 px-3 py-2 bg-transparent text-txt-primary outline-none placeholder:text-txt-muted"
+              className="flex-1 px-3 py-2 bg-transparent text-text-primary outline-none placeholder:text-text-muted"
             />
             <div className="h-6 w-px bg-border mx-2"></div>
-            <button className="px-6 py-2 text-sm font-medium text-txt-secondary hover:text-primary transition-colors">
+            <button className="px-6 py-2 text-sm font-medium text-text-secondary hover:text-primary transition-colors">
               {t("search_button")}
             </button>
           </div>
@@ -146,33 +146,40 @@ export function Header() {
           {/* Nút Tạo sự kiện (Primary Button) */}
           <button
             onClick={handleCreateEvent}
-            className="hidden lg:flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-lg font-medium transition-colors shadow-sm"
+            className="group relative overflow-hidden hidden lg:flex items-center gap-2 bg-button-primary-bg-default text-button-primary-text-default px-4 py-2.5 rounded-lg font-medium transition-colors shadow-sm cursor-pointer "
           >
-            <div className="bg-white/20 p-0.5 rounded">
+            <span className="absolute inset-0 w-full h-full bg-button-accent-bg-hover origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 z-0"></span>
+            <div className="relative z-10 bg-white/20 p-0.5 rounded border border-white/30">
               <Plus size={14} strokeWidth={3} />
             </div>
-            <span>{t("create_event")}</span>
+            <span className="relative z-10">{t("create_event")}</span>
           </button>
 
           {/* Nút Vé của tôi (Secondary Button) */}
-          <button className="hidden lg:flex items-center gap-2 border border-border text-txt-primary px-4 py-2.5 rounded-lg font-medium hover:bg-secondary transition-colors">
-            <Ticket size={18} className="text-txt-secondary" />
-            <span>{t("my_tickets")}</span>
-          </button>
+          {user &&
+            <Link href={`/${locale}/user/tickets`} className="group relative overflow-hidden hidden lg:flex items-center gap-2 border border-border-default text-text-primary px-4 py-2.5 rounded-lg font-medium hover:border-primary transition-colors cursor-pointer bg-transparent">
+              <span className="absolute inset-0 w-full h-full bg-bg-subtle origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 z-0"></span>
+              <Ticket size={18} className="relative z-10 text-text-secondary" />
+              <span className="relative z-10">{t("my_tickets")}</span>
+            </Link>
+          }
 
           {/* Icon Notification */}
-          <button className="relative p-2.5 border border-border rounded-lg text-txt-secondary hover:bg-secondary transition-colors">
-            <Bell size={20} />
-            <span className="absolute -top-1.5 -right-1.5 bg-error text-white text-[10px] font-bold h-5 min-w-5 px-1 flex items-center justify-center rounded-full border-2 border-main">
-              99
-            </span>
-          </button>
+
+          {user &&
+            <button className="relative p-2.5 border border-border-default rounded-lg text-text-secondary hover:border-primary transition-colors cursor-pointer">
+              <Bell size={20} />
+              <span className="absolute -top-1.5 -right-1.5 bg-feedback-error-bgtext-button-primary-text-default text-[10px] font-bold h-5 min-w-5 px-1 flex items-center justify-center rounded-full border-2 border-main">
+                99
+              </span>
+            </button>
+          }
 
           {/* User Profile Dropdown */}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="flex items-center gap-2 border border-border rounded-lg p-1 pr-2 hover:bg-secondary cursor-pointer transition-colors outline-none">
+                <div className="flex items-center gap-2 border border-border-default rounded-lg p-1 pr-2 hover:border-primary cursor-pointer transition-colors outline-none">
                   <div className="w-8 h-8 rounded bg-linear-to-tr from-primary to-accent overflow-hidden relative">
                     <Image
                       src={user.avatarUrl || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
@@ -181,7 +188,7 @@ export function Header() {
                       className="object-cover"
                     />
                   </div>
-                  <ChevronDown size={16} className="text-txt-muted" />
+                  <ChevronDown size={16} className="text-text-muted" />
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
@@ -199,24 +206,35 @@ export function Header() {
                   <span>{t("profile")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-red-500 hover:text-red-600 cursor-pointer">
+                <DropdownMenuItem onClick={handleLogout} className="text-feedback-error-text hover:text-red-600 cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>{t("logout")}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            // Fallback hoặc nút Login nếu chưa đăng nhập (tùy nhu cầu, ở đây giữ nguyên placeholder nếu chưa có user data để tránh layout shift quá nhiều, hoặc có thể hiện nút login)
-            <div className="flex items-center gap-2 border border-border rounded-lg p-1 pr-2 hover:bg-secondary cursor-pointer transition-colors">
-              <div className="w-8 h-8 rounded bg-gray-200 animate-pulse" />
-              <ChevronDown size={16} className="text-txt-muted" />
-            </div>
+            <>
+              <button
+                onClick={() => router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(pathname)}`)}
+                className="flex items-center gap-2 border border-border-default rounded-lg px-4 py-2 hover:border-primary cursor-pointer transition-colors text-sm font-medium"
+              >
+                <LogInIcon size={16} className="text-text-secondary" />
+                <span>{t('login', { defaultMessage: 'Đăng nhập' })}</span>
+              </button>
+              {/* <button
+                onClick={() => router.push(`/${locale}/auth/register?callbackUrl=${encodeURIComponent(pathname)}`)}
+                className="flex items-center gap-2 border border-border-default rounded-lg px-4 py-2 hover:border-primary cursor-pointer transition-colors text-sm font-medium"
+              >
+                <UserPlus size={16} className="text-text-secondary" />
+                <span>{t('register', { defaultMessage: 'Đăng ký' })}</span>
+              </button> */}
+            </>
           )}
 
           {/* === LANGUAGE TOGGLE === */}
           <button
             onClick={switchLanguage}
-            className="ml-2 w-10 h-10 flex items-center justify-center rounded-full bg-secondary text-txt-secondary hover:bg-border transition-colors font-bold text-xs"
+            className="ml-2 w-10 h-10 flex items-center justify-center rounded-full bg-secondary text-text-secondary hover:bg-border transition-colors font-bold text-xs cursor-pointer"
             title="Chuyển đổi ngôn ngữ / Switch Language"
           >
             {locale === "vi" ? "VI" : "EN"}
@@ -226,7 +244,7 @@ export function Header() {
           {/* Chỉ render icon khi client đã mounted để tránh lỗi hydration */}
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="ml-2 p-2 rounded-full bg-secondary text-txt-secondary hover:bg-border transition-colors"
+            className="ml-2 p-2 rounded-full bg-secondary text-text-secondary hover:bg-border transition-colors cursor-pointer"
             title="Chuyển đổi giao diện"
           >
             {mounted ? (

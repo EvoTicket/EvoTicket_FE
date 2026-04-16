@@ -21,11 +21,10 @@ export function ThemeToggle() {
       {/* Nút Light Mode */}
       <button
         onClick={() => setTheme("light")}
-        className={`px-4 py-2 rounded-md border transition-colors ${
-          theme === "light"
-            ? "bg-blue-500 text-white border-blue-500"
+        className={`px-4 py-2 rounded-md border transition-colors ${theme === "light"
+            ? "bg-blue-500text-button-primary-text-default border-blue-500"
             : "bg-gray-200 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-        }`}
+          }`}
       >
         Light
       </button>
@@ -33,11 +32,10 @@ export function ThemeToggle() {
       {/* Nút Dark Mode */}
       <button
         onClick={() => setTheme("dark")}
-        className={`px-4 py-2 rounded-md border transition-colors ${
-          theme === "dark"
-            ? "bg-blue-500 text-white border-blue-500"
+        className={`px-4 py-2 rounded-md border transition-colors ${theme === "dark"
+            ? "bg-blue-500text-button-primary-text-default border-blue-500"
             : "bg-gray-200 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-        }`}
+          }`}
       >
         Dark
       </button>
@@ -45,11 +43,10 @@ export function ThemeToggle() {
       {/* Nút System (Theo cài đặt máy) */}
       <button
         onClick={() => setTheme("system")}
-        className={`px-4 py-2 rounded-md border transition-colors ${
-          theme === "system"
-            ? "bg-blue-500 text-white border-blue-500"
+        className={`px-4 py-2 rounded-md border transition-colors ${theme === "system"
+            ? "bg-blue-500text-button-primary-text-default border-blue-500"
             : "bg-gray-200 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-        }`}
+          }`}
       >
         System
       </button>
