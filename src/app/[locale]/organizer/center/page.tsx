@@ -9,6 +9,8 @@ import api from "@/src/lib/axios";
 import Image from "next/image";
 import { useSelector } from "react-redux";
 import { selectIsOrganization } from "@/src/store/slices/authSlice";
+import { OrganizerSidebar } from "@/src/components/organizer/OrganizerSidebar";
+import { OrganizerHeader } from "@/src/components/organizer/OrganizerHeader";
 
 // Interfaces based on API response
 interface AddressInfo {
@@ -63,20 +65,17 @@ export default function OrganizerCenterPage() {
     const [organizationName, setOrganizationName] = useState<string>("");
     const [events, setEvents] = useState<Event[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const isOrganization = useSelector(selectIsOrganization);
 
     useEffect(() => {
-
-
-        if (!useSelector(selectIsOrganization)) {
+        if (!isOrganization) {
             router.push(`/${locale}/organizer/register`);
             return;
         }
 
-
-
         setOrganizationName("Organizer Center");
         fetchMyEvents();
-    }, [router, locale]);
+    }, [router, locale, isOrganization]);
 
     const fetchMyEvents = async () => {
         const token = Cookies.get("token");
@@ -127,82 +126,21 @@ export default function OrganizerCenterPage() {
     };
 
     return (
-        <div className="min-h-screen 	bg-bg-surface flex">
-            {/* Sidebar - Dark Green Theme */}
-            <aside className="w-64 bg-gradient-to-b from-[#1a4d3e] to-[#0f3329]text-button-primary-text-default min-h-screen flex flex-col fixed h-full z-10">
-                {/* Logo/Brand */}
-                <div className="p-6 border-b border-white/10">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                            <LayoutDashboard size={24} className="text-white" />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold">Organizer Center</h1>
-                            <p className="text-xstext-button-primary-text-default/70">Quản lý sự kiện</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Navigation */}
-                <nav className="flex-1 p-4 space-y-2">
-                    <Link
-                        href={`/${locale}/organizer/center`}
-                        className="flex items-center gap-3 px-4 py-3text-button-primary-text-default bg-white/10 rounded-lg font-medium hover:bg-white/20 transition-colors"
-                    >
-                        <LayoutDashboard size={20} />
-                        <span>Sự kiện của tôi</span>
-                    </Link>
-                    <Link
-                        href={`/${locale}/organizer/reports`}
-                        className="flex items-center gap-3 px-4 py-3text-button-primary-text-default/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                    >
-                        <FolderOpen size={20} />
-                        <span>Quản lý báo cáo</span>
-                    </Link>
-                    <Link
-                        href={`/${locale}/organizer/analytics`}
-                        className="flex items-center gap-3 px-4 py-3text-button-primary-text-default/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                    >
-                        <FileText size={20} />
-                        <span>Phân tích dữ liệu</span>
-                    </Link>
-                </nav>
-
-                {/* Settings at bottom */}
-                <div className="p-4 border-t border-white/10 space-y-2">
-                    <Link
-                        href={`/${locale}/organizer/settings`}
-                        className="flex items-center gap-3 px-4 py-3text-button-primary-text-default/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                    >
-                        <Settings size={20} />
-                        <span>Cài đặt</span>
-                    </Link>
-                    <Link
-                        href={`/${locale}/user/homepage`}
-                        className="flex items-center gap-3 px-4 py-3text-button-primary-text-default/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors group"
-                    >
-                        <LogOut size={20} className="group-hover:text-red-400 transition-colors" />
-                        <span className="group-hover:text-red-400 transition-colors">Thoát về trang chủ</span>
-                    </Link>
-                </div>
-            </aside>
+        <div className="min-h-screen bg-bg-surface flex">
+            <OrganizerSidebar />
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col ml-64">
-                {/* Header */}
-                <header className="bg-bg-page border-b border-border-default px-8 py-4 flex items-center justify-between sticky top-0 z-10">
-                    <div>
-                        <h2 className="text-2xl font-bold text-text-primary">Sự kiện của tôi</h2>
-                        <p className="text-sm text-text-muted">Quản lý và theo dõi các sự kiện của bạn</p>
-                    </div>
-                    <Link href={`/${locale}/organizer/events/create`} className="flex items-center gap-2 bg-button-primary-bg-defaul hover:bg-button-primary-bg-defaul-hovertext-button-primary-text-default px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm">
-                        <Plus size={20} />
-                        Tạo sự kiện
-                    </Link>
-                </header>
+            <div className="flex-1 flex flex-col ml-[280px]">
+                <OrganizerHeader />
+
+                {/* Page Title & Description */}
+                <div className="px-8 pt-8 pb-2">
+                    <h2 className="text-2xl font-bold text-text-primary mb-1">Sự kiện của tôi</h2>
+                    <p className="text-sm text-text-muted">Quản lý toàn bộ sự kiện của tổ chức, từ nháp đến đã kết thúc</p>
+                </div>
 
                 {/* Content Area */}
-                <main className="flex-1 p-8 	bg-bg-surface">
+                <main className="flex-1 px-8 pb-8 bg-bg-surface">
                     <div className="max-w-7xl mx-auto">
 
                         {isLoading ? (
@@ -231,7 +169,7 @@ export default function OrganizerCenterPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {events.map((event) => (
                                     <Link
-                                        href={`/${locale}/events/${event.eventId}`}
+                                        href={`/${locale}/user/events/${event.eventId}`}
                                         key={event.eventId}
                                         className="group bg-bg-page border border-border-default rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-primary/50 flex flex-col"
                                     >
@@ -321,3 +259,4 @@ export default function OrganizerCenterPage() {
         </div>
     );
 }
+
