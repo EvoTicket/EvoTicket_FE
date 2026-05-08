@@ -126,14 +126,21 @@ cssOutput += `  }\n}\n\n/* ---- AUTO MAP SANG TAILWIND CLASSES ---- */\n@theme {
 
 // Gán biến CSS vào Cây Theme Tailwind V4
 for (const key of Object.keys(lightVars)) {
-    // Nếu biến tên là --color-primary-500, map với Tailwind bằng key "--color"
-    if (key.startsWith('--color-')) cssOutput += `  ${key}: var(${key});\n`;
-
-    // Nếu biến có tên --space-md, Tailwind V4 dùng --spacing
-    else if (key.startsWith('--space-')) cssOutput += `  --spacing-${key.replace('--space-', '')}: var(${key});\n`;
-
-    // Nếu biến có tên --radius-md, Tailwind V4 dùng --radius
-    else if (key.startsWith('--radius-')) cssOutput += `  ${key}: var(${key});\n`;
+    // Map biến màu sắc
+    if (key.startsWith('--color-')) {
+        cssOutput += `  ${key}: var(${key});\n`;
+    }
+    // Map biến không gian (spacing) cho các class p-, m-, gap-, w-, h-
+    else if (key.includes('-padding') || key.includes('-gap') || key.includes('-size') || key.includes('-width') || key.includes('-height') || key.startsWith('--space-')) {
+        let spacingName = key.replace('--', '');
+        if (spacingName.startsWith('space-')) spacingName = spacingName.replace('space-', '');
+        cssOutput += `  --spacing-${spacingName}: var(${key});\n`;
+    }
+    // Map biến bo góc (radius) cho các class rounded-
+    else if (key.includes('-radius')) {
+        let radiusName = key.replace('--', '');
+        cssOutput += `  --radius-${radiusName}: var(${key});\n`;
+    }
 }
 cssOutput += `}\n`;
 

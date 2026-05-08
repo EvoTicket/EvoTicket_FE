@@ -3,6 +3,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const nextConfig: NextConfig = {
   /* config options here */
+  reactStrictMode: false,
   images: {
     dangerouslyAllowSVG: true,
     remotePatterns: [
@@ -33,6 +34,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "th.bing.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
       },
     ],
   },

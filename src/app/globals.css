@@ -121,4 +121,25 @@
       transform: scale(0.3) scaleX(0.5) translateY(-60px) rotate(-15deg);
     }
   }
+
+  .animate-scanner-laser {
+    animation: scanner-laser 2.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes scanner-laser {
+    0%, 5% {
+      top: 0%;
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    95%, 100% {
+      top: calc(100% - 2px);
+      opacity: 0;
+    }
+  }
 }
