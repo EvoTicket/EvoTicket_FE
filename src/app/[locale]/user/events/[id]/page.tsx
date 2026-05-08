@@ -8,6 +8,7 @@ import Cookies from "js-cookie";
 import api from "@/src/lib/axios";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import {
     MapPin, Calendar, Clock, User, Star, Image as ImageIcon,
     Check, MapIcon, CircleHelp, AlertCircle, ChevronDown, ChevronUp
@@ -19,7 +20,10 @@ import { EventDetail } from "@/src/types/event";
 // Dynamic import for Map to avoid SSR issues
 const Map = dynamic(() => import("@/src/components/Map"), {
     ssr: false,
-    loading: () => <div className="h-40 w-full bg-gray-100 animate-pulse rounded-xl flex items-center justify-center text-gray-400">Đang tải bản đồ...</div>
+    loading: () => {
+        const t = useTranslations("EventDetail");
+        return <div className="h-40 w-full bg-gray-100 animate-pulse rounded-xl flex items-center justify-center text-gray-400">{t('loading_map')}</div>
+    }
 });
 
 
@@ -27,6 +31,8 @@ const Map = dynamic(() => import("@/src/components/Map"), {
 export default function EventDetailPage() {
     const { locale, id } = useParams();
     const router = useRouter();
+    const tb = useTranslations("Booking");
+    const te = useTranslations("EventDetail");
 
     const [event, setEvent] = useState<EventDetail | null>(null);
     const [suggestedEvents, setSuggestedEvents] = useState<any[]>([]);
@@ -42,7 +48,7 @@ export default function EventDetailPage() {
     const [expandedShowtimeId, setExpandedShowtimeId] = useState<number | null>(null);
 
     // Xử lý cờ sold out
-    const isSoldOut = event?.eventStatus === "SOLD_OUT" || (event && event.showtimes.map(showtime => showtime.ticketTypes).flat().every(t => t.quantityAvailable <= 0));
+    const isSoldOut = !!(event?.eventStatus === "SOLD_OUT" || (event && event.showtimes.map(showtime => showtime.ticketTypes).flat().every(t => t.quantityAvailable <= 0)));
 
     // Tính giá vé nhỏ nhất
     const minPrice = event?.showtimes.map(showtime => showtime.ticketTypes).flat().length
@@ -115,7 +121,7 @@ export default function EventDetailPage() {
 
     const formatDate = (dateString: string) => {
         if (!dateString) return "";
-        return new Date(dateString).toLocaleDateString("vi-VN", {
+        return new Date(dateString).toLocaleDateString(locale === 'vi' ? "vi-VN" : "en-US", {
             weekday: 'long',
             year: 'numeric',
             month: '2-digit',
@@ -129,21 +135,26 @@ export default function EventDetailPage() {
         const day = d.getDate();
         const month = d.getMonth() + 1;
         const year = d.getFullYear();
-        const days = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
-        const weekday = days[d.getDay()];
-        return `${day} tháng ${month}, ${year} (${weekday})`;
+
+        const weekdayKey = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat'][d.getDay()];
+        const weekday = tb(weekdayKey);
+
+        if (locale === 'vi') {
+            return `${day} tháng ${month}, ${year} (${weekday})`;
+        }
+        return `${weekday}, ${month}/${day}/${year}`;
     }
 
     const formatTime = (dateString: string) => {
         if (!dateString) return "";
-        return new Date(dateString).toLocaleTimeString("vi-VN", {
+        return new Date(dateString).toLocaleTimeString(locale === 'vi' ? "vi-VN" : "en-US", {
             hour: '2-digit',
             minute: '2-digit'
         });
     };
 
     const getDuration = (start: string, end: string) => {
-        if (!start || !end) return "Chưa cập nhật";
+        if (!start || !end) return tb('not_updated');
         const startDate = new Date(start);
         const endDate = new Date(end);
         const diffMs = endDate.getTime() - startDate.getTime();
@@ -151,9 +162,9 @@ export default function EventDetailPage() {
         const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
         const parts = [];
-        if (diffHrs > 0) parts.push(`${diffHrs} giờ`);
-        if (diffMins > 0) parts.push(`${diffMins} phút`);
-        return parts.length > 0 ? parts.join(" ") : "Chưa cập nhật";
+        if (diffHrs > 0) parts.push(`${diffHrs} ${tb('hours')}`);
+        if (diffMins > 0) parts.push(`${diffMins} ${tb('minutes')}`);
+        return parts.length > 0 ? parts.join(" ") : tb('not_updated');
     };
 
     if (loading) {
@@ -167,34 +178,34 @@ export default function EventDetailPage() {
     if (!event) {
         return (
             <div className="min-h-screen bg-bg-page flex flex-col">
-                <Header />
+                {/* <Header /> */}
                 <div className="flex-1 flex flex-col items-center py-20 px-4">
                     <div className="bg-bg-inverse text-text-inverse rounded-[2rem] rounded-bl-sm p-6 mb-6">
                         <CircleHelp size={64} strokeWidth={2.5} />
                     </div>
-                    <h2 className="text-3xl font-bold text-text-primary mb-2">Không tìm thấy sự kiện</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-2">{te('event_not_found')}</h2>
                     <p className="text-text-secondary text-center mb-6 max-w-md">
-                        Liên kết bạn truy cập không còn tồn tại, đã bị thay đổi hoặc sự kiện không khả dụng trên hệ thống.
+                        {te('event_not_found_desc')}
                     </p>
                     <Link
                         href={`/${locale}/user/homepage`}
                         className="px-8 py-3 bg-button-primary-bg-default text-button-primary-text-default rounded-button-radius hover:bg-button-primary-bg-hover transition-colors font-medium mb-20"
                     >
-                        Quay về trang chủ
+                        {te('back_to_home')}
                     </Link>
 
                     {/* Suggested Events */}
                     {suggestedEvents.length > 0 && (
-                        <div className="w-full max-w-7xl mx-auto border-t border-border-default pt-10">
+                        <div className="w-full max-w-[90%] mx-auto border-t border-border-default pt-10">
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="font-semibold text-lg text-text-primary text-opacity-50 uppercase tracking-widest">Có thể bạn cũng thích</h3>
-                                <Link href={`/${locale}/events`} className="text-sm text-text-secondary hover:text-primary">
-                                    Xem thêm {'>'}
+                                <h3 className="font-semibold text-lg text-text-primary text-opacity-50 uppercase tracking-widest">{te('you_might_also_like')}</h3>
+                                <Link href={`/${locale}/user/events`} className="text-sm text-text-secondary hover:text-primary">
+                                    {te('see_more')} {'>'}
                                 </Link>
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 2xl:grid-cols-5 gap-6">
                                 {suggestedEvents.map(evt => (
-                                    <Link key={evt.eventId} href={`/${locale}/events/${evt.eventId}`} className="group cursor-pointer">
+                                    <Link key={evt.eventId} href={`/${locale}/user/events/${evt.id}`} className="group cursor-pointer">
                                         <div className="aspect-[4/3] rounded-xl bg-secondary mb-3 overflow-hidden relative">
                                             {evt.bannerImage ? (
                                                 <Image src={evt.bannerImage} alt={evt.eventName} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -210,7 +221,7 @@ export default function EventDetailPage() {
                                             <MapPin size={14} className="shrink-0" /> {evt.venue || evt.address}
                                         </div>
                                         <div className="font-bold text-primary mt-2">
-                                            Từ {(evt.ticketTypes?.[0]?.price || 500000).toLocaleString("vi-VN")} VND
+                                            {te('from_price', { price: (evt.ticketTypes?.[0]?.price || 500000).toLocaleString(locale === 'vi' ? "vi-VN" : "en-US") })}
                                         </div>
                                     </Link>
                                 ))}
@@ -225,24 +236,24 @@ export default function EventDetailPage() {
 
     return (
         <div className="min-h-screen bg-bg-page flex flex-col font-sans">
-            <Header />
+            {/* <Header /> */}
 
             {/* TOP HERO SECTION - Thích ứng theo theme Dark/Light */}
             <div className="bg-gradient-to-br from-bg-surface to-bg-bg-decor border-b border-border-default text-text-primary w-full">
-                <div className="max-w-7xl mx-auto px-4 py-6 md:py-10">
+                <div className="max-w-[90%] mx-auto px-4 py-6 md:py-10">
                     <div className="text-xs text-text-secondary flex items-center gap-2 mb-6 uppercase tracking-wider">
-                        <Link href={`/${locale}/user/homepage`} className="hover:text-primary transition-colors">Home</Link>
+                        <Link href={`/${locale}/user/homepage`} className="hover:text-primary transition-colors">{tb('home')}</Link>
                         <span>{'>'}</span>
-                        <Link href={`/${locale}/events`} className="hover:text-primary transition-colors">Sự kiện</Link>
+                        <Link href={`/${locale}/user/events`} className="hover:text-primary transition-colors">{te('see_more')}</Link>
                         <span>{'>'}</span>
-                        <span className="text-primary font-semibold">Chi tiết sự kiện</span>
+                        <span className="text-primary font-semibold">{te('event_breadcrumb')}</span>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                         {/* Poster Cột Trái */}
-                        <div className="lg:col-span-5 w-full flex flex-col">
+                        <div className="lg:col-span-6 w-full flex flex-col">
                             <div className="flex items-center justify-end gap-3 mb-4 w-full">
-                                <span className="text-sm text-text-secondary font-medium">Loại sự kiện:</span>
+                                <span className="text-sm text-text-secondary font-medium">{te('event_category_label')}</span>
                                 <div className="inline-block bg-badge-neutral-bg text-badge-neutral-text rounded-full border-2 border-badge-neutral-border px-4 py-1.5 text-sm font-semibold shadow-sm">
                                     {event.category}
                                 </div>
@@ -266,7 +277,7 @@ export default function EventDetailPage() {
                         </div>
 
                         {/* Info Cột Phải */}
-                        <div className="lg:col-span-7 flex flex-col justify-start h-full align-top">
+                        <div className="lg:col-span-6 flex flex-col justify-start h-full align-top">
 
                             <h1 className="text-3xl md:text-5xl font-extrabold mb-4 leading-tight text-text-primary drop-shadow-sm align-top">
                                 {event.eventName}
@@ -276,38 +287,43 @@ export default function EventDetailPage() {
                                 {event.description}
                             </p>
 
-                            <div className="bg-card-bg-elevated border border-border-default shadow-sm rounded-xl p-4 mb-6 max-w-xl space-y-3">
-                                <div className="flex items-start gap-3">
-                                    <Clock size={18} className="text-icon-muted mt-0.5 shrink-0" />
-                                    <div>
-                                        <div className="text-sm font-medium text-text-primary">Thời gian: {formatTime(activeShowtime.startDatetime)} - {formatDate(activeShowtime.startDatetime)}</div>
-                                        {/* <div className="text-xs text-text-muted">Mở cổng: {formatTime(new Date(new Date(activeShowtime.startDatetime).getTime() - 3600000).toISOString())}</div> */}
+                            <div className="bg-card-bg-elevated border border-border-default shadow-sm rounded-xl p-6 mb-8 max-w-full grid grid-cols-1 gap-6">
+                                <div className="flex  items-center gap-4">
+                                    <div className="bg-bg-page p-2 rounded-lg border border-border-subtle shrink-0">
+                                        <Clock size={22} className="text-primary" />
+                                    </div>
+                                    <div className="flex flex-row gap-4 items-center">
+                                        <div className="text-xs text-text-secondary uppercase tracking-wider font-bold">{te('time_label')}</div>
+                                        <div className="text-sm font-semibold text-text-primary">{formatTime(activeShowtime.startDatetime)} - {formatDate(activeShowtime.startDatetime)}</div>
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-3">
-                                    <MapPin size={18} className="text-icon-muted mt-0.5 shrink-0" />
+                                <div className="flex items-start gap-4">
+                                    <div className="bg-bg-page p-2 rounded-lg border border-border-subtle shrink-0">
+                                        <MapPin size={22} className="text-primary" />
+                                    </div>
                                     <div>
-                                        <div className="text-sm font-medium text-text-primary">Địa điểm: {activeShowtime.venue || event.venue || activeShowtime.address || event.address}</div>
-                                        <div className="text-xs text-text-secondary">Tổ chức bởi: {event.orgInternalResponse?.organizationName}</div>
+                                        <div className="flex flex-row gap-4 items-center">
+                                            <div className="text-xs text-text-secondary uppercase tracking-wider font-bold">{te('location_label')}</div>
+                                            <div className="text-sm font-semibold text-text-primary">{activeShowtime.venue || event.venue || activeShowtime.address || event.address}</div>
+                                        </div>
+                                        <div className="text-[11px] text-text-muted mt-1">{te('organized_by', { name: event.orgInternalResponse?.organizationName })}</div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="flex flex-col md:flex-row md:items-center gap-4 max-w-xl mb-4">
-                                <div className="shrink-0">
-                                    <span className="text-sm text-text-secondary mr-2 font-medium">Giá từ:</span>
-                                    <span className="text-2xl font-bold text-feedback-warning-text">
-                                        {minPrice > 0 ? `${minPrice.toLocaleString('vi-VN')} VND` : 'Miễn phí'}
+                            <div className="max-w-full flex flex-col items-start gap-6">
+                                <div className="flex flex-row w-full items-center justify-start gap-2">
+                                    <span className="text-sm text-text-secondary font-medium">{te('price_only_from')}</span>
+                                    <span className="text-3xl font-black text-feedback-warning-text">
+                                        {minPrice > 0 ? `${minPrice.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US')} VND` : te('free')}
                                     </span>
                                 </div>
-                            </div>
-                            <div className="max-w-xl">
-                                <button 
-                                    className={`w-full py-4 rounded-button-radius font-bold text-lg transition-colors shadow-lg ${isSoldOut ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
+                                <button
+                                    className={`w-full py-4 px-10 rounded-button-radius font-bold text-lg transition-all shadow-lg ${isSoldOut ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default hover:shadow-xl hover:-translate-y-0.5'}`}
                                     disabled={isSoldOut}
-                                    onClick={() => !isSoldOut && router.push(`/${locale}/events/${id}/booking`)}
+                                    onClick={() => !isSoldOut && router.push(`/${locale}/user/events/${id}/booking`)}
                                 >
-                                    {isSoldOut ? "Tạm hết vé" : "Mua vé ngay"}
+                                    {isSoldOut ? te('sold_out_temp') : te('buy_now')}
                                 </button>
                             </div>
                         </div>
@@ -317,7 +333,7 @@ export default function EventDetailPage() {
 
             {/* BOTTOM DETAILS SECTION - Background xám nhạt (hoặc dark tùy theme) */}
             <div className="bg-bg-page w-full flex-1">
-                <div className="max-w-7xl mx-auto px-4 py-10">
+                <div className="max-w-[90%] mx-auto px-4 py-10">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
                         {/* LEFT COLUMN: Chi tiết */}
@@ -325,27 +341,27 @@ export default function EventDetailPage() {
 
                             {/* Khối Giới thiệu */}
                             <div className="bg-card-bg-default border border-border-default rounded-xl p-6 shadow-sm">
-                                <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 ">Giới thiệu sự kiện</h3>
+                                <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 ">{te('event_intro')}</h3>
                                 <div
                                     ref={descriptionRef}
                                     className={`prose prose-sm max-w-none text-text-secondary whitespace-pre-line leading-relaxed ${isDescriptionExpanded ? '' : 'line-clamp-4'}`}
                                 >
-                                    {event.introduction || "Chưa có thông tin giới thiệu chi tiết."}
+                                    {event.introduction || te('no_intro')}
                                 </div>
                                 {showExpandButton && (
                                     <button
                                         onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
                                         className="mt-4 text-sm font-semibold text-primary hover:text-primary-dark transition-colors w-full text-center py-2 bg-bg-page hover:bg-bg-subtle rounded-lg border border-border-default"
                                     >
-                                        {isDescriptionExpanded ? "Thu gọn" : "Xem thêm"}
+                                        {isDescriptionExpanded ? te('collapse') : te('see_more')}
                                     </button>
                                 )}
                             </div>
 
                             {/* Khối Thời gian & Địa điểm (Chia 2 cột) */}
                             <div className="bg-card-bg-default border border-border-default rounded-xl p-6 shadow-sm">
-                                <h3 className="text-lg font-bold text-text-primary mb-1">Lịch diễn & địa điểm</h3>
-                                <p className="text-sm text-text-secondary mb-4">Vui lòng chọn một lịch diễn trước khi tiếp tục đặt vé.</p>
+                                <h3 className="text-lg font-bold text-text-primary mb-1">{te('schedule_venue')}</h3>
+                                <p className="text-sm text-text-secondary mb-4">{te('schedule_note')}</p>
 
                                 <div className="space-y-4">
                                     {event.showtimes && event.showtimes.map((showtime) => {
@@ -365,7 +381,7 @@ export default function EventDetailPage() {
                                                 >
                                                     <div className="flex-1">
                                                         {isSoldOut && (
-                                                            <div className="bg-feedback-error-bg text-feedback-error-text text-xs px-2 py-0.5 rounded w-fit mb-2">Sold out</div>
+                                                            <div className="bg-feedback-error-bg text-feedback-error-text text-xs px-2 py-0.5 rounded w-fit mb-2">{tb('sold_out')}</div>
                                                         )}
                                                         <div className="font-bold text-text-primary text-base">
                                                             {formatShowtimeDate(showtime.startDatetime)}
@@ -383,17 +399,17 @@ export default function EventDetailPage() {
                                                 {isExpanded && (
                                                     <div className="p-4 pt-0 mt-2 flex flex-col">
                                                         <div className="pt-2 border-t border-border-subtle mt-1 grid grid-cols-[140px_1fr] gap-y-2 text-sm">
-                                                            <div className="text-text-secondary">Thời lượng dự kiến:</div>
+                                                            <div className="text-text-secondary">{tb('estimated_duration')}</div>
                                                             <div className="text-text-primary">{getDuration(showtime.startDatetime, showtime.endDatetime)}</div>
 
-                                                            <div className="text-text-secondary">Địa điểm:</div>
+                                                            <div className="text-text-secondary">{tb('venue')}</div>
                                                             <div className="text-text-primary">{showtime.venue || event.venue}</div>
 
-                                                            <div className="text-text-secondary">Địa chỉ:</div>
+                                                            <div className="text-text-secondary">{tb('address')}</div>
                                                             <div className="text-text-primary line-clamp-2">{showtime.address || showtime.fullAddress || event.address}</div>
 
-                                                            <div className="text-text-secondary">Khu vực check-in:</div>
-                                                            <div className="text-text-primary">Sảnh chính tầng 1</div>
+                                                            <div className="text-text-secondary">{tb('checkin_area')}</div>
+                                                            <div className="text-text-primary">{tb('main_hall')}</div>
                                                         </div>
                                                         <button
                                                             className={`mt-4 px-6 py-2 rounded-button-radius text-sm font-semibold max-w-fit transition-colors shadow-sm ${isSelected ? 'bg-bg-subtle border border-border-default text-text-secondary cursor-not-allowed' : 'bg-button-neutral-bg-default hover:bg-button-neutral-bg-hover text-button-neutral-text-default border border-border-default'}`}
@@ -403,7 +419,7 @@ export default function EventDetailPage() {
                                                             }}
                                                             disabled={isSoldOut || isSelected}
                                                         >
-                                                            {isSelected ? 'Đã chọn lịch diễn này' : 'Chọn lịch diễn này'}
+                                                            {isSelected ? te('selected_this_schedule') : te('select_this_schedule')}
                                                         </button>
                                                     </div>
                                                 )}
@@ -416,10 +432,10 @@ export default function EventDetailPage() {
                             {/* Khối Sơ đồ chỗ ngồi (Dựa theo Wireframe Seat Selection) */}
                             {event.hasSeatMap && (
                                 <div className="bg-card-bg-default border border-border-default rounded-xl p-6 shadow-sm">
-                                    <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 ">Sơ đồ chỗ ngồi</h3>
+                                    <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 ">{te('seat_map')}</h3>
                                     <div className="bg-bg-page border border-border-default rounded-xl p-6 flex flex-col items-center">
                                         <div className="w-full max-w-sm h-12 bg-[#A59EDA] text-white flex items-center justify-center font-bold text-sm mb-8 rounded shadow-sm">
-                                            SÂN KHẤU
+                                            {te('stage')}
                                         </div>
                                         <div className="flex flex-col gap-3 items-center w-full">
                                             <div className="w-24 h-12 border-2 border-yellow-400 bg-yellow-100/50 flex items-center justify-center font-bold text-sm text-text-primary">VIP</div>
@@ -438,29 +454,29 @@ export default function EventDetailPage() {
                                         </div>
 
                                         <div className="flex gap-6 mt-8">
-                                            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#4c3575]"></div><span className="text-xs text-text-secondary">Còn vé</span></div>
-                                            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#8b82a3]"></div><span className="text-xs text-text-secondary">Sắp hết</span></div>
-                                            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-gray-300"></div><span className="text-xs text-text-secondary">Hết vé</span></div>
+                                            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#4c3575]"></div><span className="text-xs text-text-secondary">{te('available')}</span></div>
+                                            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#8b82a3]"></div><span className="text-xs text-text-secondary">{te('fast_selling')}</span></div>
+                                            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-gray-300"></div><span className="text-xs text-text-secondary">{te('sold_out_status')}</span></div>
                                         </div>
                                     </div>
-                                    <p className="text-sm text-text-secondary mt-4">Bạn sẽ chọn vị trí ghế chính xác ở bước tiếp theo.</p>
+                                    <p className="text-sm text-text-secondary mt-4">{te('seat_selection_next_step')}</p>
                                 </div>
                             )}
 
                             {/* Khối Thông tin tham dự */}
                             <div className="bg-card-bg-default border border-border-default rounded-xl p-6 shadow-sm">
-                                <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 ">Thông tin tham dự</h3>
+                                <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 ">{te('attendance_info')}</h3>
                                 <ul className="list-disc list-outside pl-5 space-y-2 text-sm text-text-secondary marker:text-text-muted">
-                                    <li>Khán giả nên đến trước giờ diễn ít nhất 30 phút</li>
-                                    <li>Ghế ngồi được xác nhận theo mã vé sau khi thanh toán thành công</li>
-                                    <li>Vui lòng kiểm tra đúng khu vực và số ghế trước khi vào chỗ</li>
-                                    <li>Mỗi vé chỉ có hiệu lực cho đúng một chỗ ngồi</li>
+                                    <li>{te('attendance_note_1')}</li>
+                                    <li>{te('attendance_note_2')}</li>
+                                    <li>{te('attendance_note_3')}</li>
+                                    <li>{te('attendance_note_4')}</li>
                                 </ul>
                             </div>
 
                             {/* Khối Đơn vị tổ chức */}
                             <div className="bg-card-bg-default border border-border-default rounded-xl p-6 shadow-sm">
-                                <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 ">Đơn vị tổ chức</h3>
+                                <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 ">{te('organizer')}</h3>
                                 <div className="flex items-start gap-4">
                                     <div className="relative w-16 h-16 rounded-md overflow-hidden bg-bg-page border border-border-default shrink-0">
                                         <Image src={event.orgInternalResponse?.logoUrl || "/placeholder-avatar.png"} alt="logo" fill className="object-cover" />
@@ -468,11 +484,11 @@ export default function EventDetailPage() {
                                     <div>
                                         <h4 className="font-bold text-text-primary">{event.orgInternalResponse?.organizationName}</h4>
                                         <p className="text-sm text-text-secondary mt-1 max-w-lg">
-                                            Đơn vị tổ chức các chương trình biểu diễn sân khấu, ballet và nhạc kịch tại Việt Nam.
+                                            {event.orgInternalResponse?.description}
                                         </p>
-                                        <button className="mt-3 text-sm font-semibold text-primary underline underline-offset-2">
-                                            Xem thêm sự kiện từ đơn vị này
-                                        </button>
+                                        {/* <button className="mt-3 text-sm font-semibold text-primary underline underline-offset-2">
+                                            {te('see_more_from_org')}
+                                        </button> */}
                                     </div>
                                 </div>
                             </div>
@@ -482,54 +498,46 @@ export default function EventDetailPage() {
                         {/* RIGHT COLUMN: Sticky Sidebar Card */}
                         <div className="lg:col-span-4 relative">
                             <div className="bg-payment-summary-bg-default border border-border-default rounded-xl overflow-hidden shadow-xl sticky top-24">
-                                {/* Header / Status */}
-                                {/* <div className="px-6 py-4 border-b border-border-default flex items-center justify-between">
-                                    <div className={`text-xs font-bold px-2 py-1 rounded shadow-sm ${isSoldOut ? 'bg-bg-page border border-border-default text-text-secondary' : 'bg-bg-page border border-border-strong text-text-primary'
-                                        }`}>
-                                        {isSoldOut ? "Sold out" : "Đang mở bán"}
-                                    </div>
-                                </div> */}
-
                                 <div className="p-6">
                                     <div className="text-2xl font-extrabold text-feedback-warning-text mb-6">
-                                        Từ {minPrice?.toLocaleString('vi-VN')}đ
+                                        {te('from_price', { price: minPrice?.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US') })}
                                     </div>
 
                                     <div className="space-y-4 mb-6">
                                         <div className="flex justify-between items-start border-b border-border-subtle pb-3">
-                                            <span className="text-sm text-text-muted shrink-0 w-24">Loại sự kiện:</span>
+                                            <span className="text-sm text-text-muted shrink-0 w-24">{te('event_category_label')}</span>
                                             <span className="text-sm font-medium text-text-primary text-right">{event.category}</span>
                                         </div>
                                         <div className="flex justify-between items-start border-b border-border-subtle pb-3">
-                                            <span className="text-sm text-text-muted shrink-0 w-24">Hình thức vé:</span>
-                                            <span className="text-sm font-medium text-text-primary text-right">{event.hasSeatMap ? "Chọn ghế theo sơ đồ" : "Vé tự do (No Seat Map)"}</span>
+                                            <span className="text-sm text-text-muted shrink-0 w-24">{te('ticket_type_label')}</span>
+                                            <span className="text-sm font-medium text-text-primary text-right">{event.hasSeatMap ? te('has_seat_map_label') : te('no_seat_map_label')}</span>
                                         </div>
                                         <div className="flex justify-between items-start border-b border-border-subtle pb-3">
-                                            <span className="text-sm text-text-muted shrink-0 w-24">Thời gian:</span>
+                                            <span className="text-sm text-text-muted shrink-0 w-24">{te('time_label')}</span>
                                             <span className="text-sm font-medium text-text-primary text-right">{formatTime(activeShowtime.startDatetime)} - {formatDate(activeShowtime.startDatetime)}</span>
                                         </div>
                                         <div className="flex justify-between items-start pb-1">
-                                            <span className="text-sm text-text-muted shrink-0 w-24">Địa điểm:</span>
+                                            <span className="text-sm text-text-muted shrink-0 w-24">{te('venue_label')}</span>
                                             <span className="text-sm font-medium text-text-primary text-right">{event.venue || "Nhà Hát Hòa Bình"}</span>
                                         </div>
                                     </div>
 
-                                    <button 
+                                    <button
                                         className={`w-full py-3.5 rounded-button-radius font-semibold mb-6 transition-colors shadow-sm ${isSoldOut ? 'bg-[#5b4f8a] text-white/80 cursor-not-allowed' : 'bg-[#6D48D7] hover:bg-[#5b3bb8] text-white'}`}
                                         disabled={isSoldOut}
-                                        onClick={() => !isSoldOut && router.push(`/${locale}/events/${id}/booking`)}
+                                        onClick={() => !isSoldOut && router.push(`/${locale}/user/events/${id}/booking`)}
                                     >
-                                        {isSoldOut ? "Tạm hết vé" : "Mua vé ngay"}
+                                        {isSoldOut ? te('sold_out_temp') : te('buy_now')}
                                     </button>
 
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
                                             <Check size={14} className="text-text-muted shrink-0" />
-                                            <span className="text-xs text-text-secondary">Check-in bằng mã QR</span>
+                                            <span className="text-xs text-text-secondary">{te('qr_checkin')}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Check size={14} className="text-text-muted shrink-0" />
-                                            <span className="text-xs text-text-secondary">Hỗ trợ chuyển nhượng an toàn trong hệ thống</span>
+                                            <span className="text-xs text-text-secondary">{te('secure_transfer_support')}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -544,3 +552,4 @@ export default function EventDetailPage() {
         </div>
     );
 }
+

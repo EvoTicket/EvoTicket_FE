@@ -43,6 +43,12 @@ export default function EventsPage() {
         { id: "newlyPosted", name: t("sort_by_newly_posted") },
     ];
 
+    const ticketAvailabilityList = [
+        { id: "AVAILABLE", name: "Còn vé" },
+        { id: "ALMOST_SOLD_OUT", name: "Sắp hết vé" },
+        { id: "SOLD_OUT", name: "Hết vé" }
+    ];
+
     const dateFiltersList = [
         { id: "TODAY", name: "Hôm nay" },
         { id: "THIS_WEEKEND", name: "Cuối tuần này" },
@@ -77,7 +83,7 @@ export default function EventsPage() {
     const [priceFrom, setPriceFrom] = useState("");
     const [priceTo, setPriceTo] = useState("");
     const [ticketStatuses, setTicketStatuses] = useState<string[]>([]);
-    const [selectedDateFilters, setSelectedDateFilters] = useState<string[]>([]);
+    const [selectedDateFilter, setSelectedDateFilter] = useState<string | null>(null);
     const [selectedCategories, setSelectedCategories] = useState<{ id: string, name: string }[]>([]);
 
 
@@ -106,7 +112,7 @@ export default function EventsPage() {
         startDate ||
         endDate ||
         selectedCategories.length > 0 ||
-        selectedDateFilters.length > 0 ||
+        selectedDateFilter ||
         priceFrom ||
         priceTo ||
         ticketStatuses.length > 0
@@ -160,7 +166,10 @@ export default function EventsPage() {
             if (selectedProvince) params.provinceCodes = selectedProvince.code;
             if (startDate) params.startDate = startDate.toISOString();
             if (endDate) params.endDate = endDate.toISOString();
-            if (selectedDateFilters.length > 0) params.dateFilters = selectedDateFilters.join(",");
+            if (selectedDateFilter) params.dateFilters = selectedDateFilter;
+            if (priceFrom) params.minPrice = priceFrom;
+            if (priceTo) params.maxPrice = priceTo;
+            if (ticketStatuses.length > 0) params.ticketAvailabilityStatuses = ticketStatuses.join(",");
 
             const response = await api.get("/inventory-service/api/events", { params, skipAuth: true } as any);
 
@@ -191,7 +200,7 @@ export default function EventsPage() {
         setPriceFrom("");
         setPriceTo("");
         setTicketStatuses([]);
-        setSelectedDateFilters([]);
+        setSelectedDateFilter(null);
         setPage(1);
         setTimeout(() => fetchEvents(true), 0);
     };
@@ -216,7 +225,7 @@ export default function EventsPage() {
         if (node) observer.current.observe(node);
     }, [loading, page, totalPages, loadMore]);
 
-    const toggleArrayItem = (array: string[], setArray: any, item: string) => {
+    const toggleArrayItem = (array: any[], setArray: any, item: any) => {
         if (array.includes(item)) {
             setArray(array.filter(i => i !== item));
         } else {
@@ -224,11 +233,63 @@ export default function EventsPage() {
         }
     };
 
+    const handleDateFilterClick = (filterId: string) => {
+        if (selectedDateFilter === filterId) {
+            setSelectedDateFilter(null);
+            setStartDate(null);
+            setEndDate(null);
+            return;
+        }
+
+        setSelectedDateFilter(filterId);
+        const now = new Date();
+        let start: Date | null = null;
+        let end: Date | null = null;
+
+        switch (filterId) {
+            case "TODAY":
+                start = new Date(now.setHours(0, 0, 0, 0));
+                end = new Date(now.setHours(23, 59, 59, 999));
+                break;
+            case "THIS_WEEKEND":
+                const day = now.getDay();
+                // Diff to Saturday (6)
+                const diffToSat = (6 - day + 7) % 7;
+                start = new Date(now);
+                start.setDate(now.getDate() + (day === 0 ? -1 : diffToSat)); // If Sunday, Sat was yesterday
+                start.setHours(0, 0, 0, 0);
+
+                end = new Date(start);
+                end.setDate(start.getDate() + (day === 0 ? 0 : 1)); // Sunday
+                if (day === 0) {
+                    end = new Date(now);
+                }
+                end.setHours(23, 59, 59, 999);
+                break;
+            case "NEXT_7_DAYS":
+                start = new Date(now.setHours(0, 0, 0, 0));
+                end = new Date(now);
+                end.setDate(now.getDate() + 7);
+                end.setHours(23, 59, 59, 999);
+                break;
+            case "CUSTOM":
+                // Don't auto-calculate, just let user pick
+                break;
+            default:
+                break;
+        }
+
+        if (filterId !== "CUSTOM") {
+            setStartDate(start);
+            setEndDate(end);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-bg-page flex flex-col">
-            <Header />
+            {/* <Header /> */}
 
-            <div className="container mx-auto px-4 py-6 flex-1 max-w-7xl">
+            <div className="container mx-auto px-4 py-6 flex-1 max-w-[90%]">
 
                 {/* --- BREADCRUMB & HEADER --- */}
                 <div className="mb-8">
@@ -342,7 +403,8 @@ export default function EventsPage() {
                                                 w-full h-full p-1.5 pl-3 bg-bg-surface
                                                 border border-border-default rounded-lg
                                                 text-text-primary outline-none
-                                                focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer transition-colors text-left">
+                                                focus:ring-1 focus:ring-primary focus:border-primary 
+                                                cursor-pointer transition-colors text-left">
                                             {selectedProvince?.name || "Địa điểm"}
                                         </ListboxButton>
 
@@ -375,11 +437,11 @@ export default function EventsPage() {
                                 <h3 className="font-semibold text-sm text-text-primary mb-3">Ngày diễn</h3>
                                 <div className="grid grid-cols-2 gap-2 mb-4">
                                     {dateFiltersList.map(filter => {
-                                        const isSelected = selectedDateFilters.includes(filter.id);
+                                        const isSelected = selectedDateFilter === filter.id;
                                         return (
                                             <button
                                                 key={filter.id}
-                                                onClick={() => toggleArrayItem(selectedDateFilters, setSelectedDateFilters, filter.id)}
+                                                onClick={() => handleDateFilterClick(filter.id)}
                                                 className={`flex items-center gap-1 py-2 px-3 text-xs border transition-colors cursor-pointer ${isSelected
                                                     ? 'justify-between bg-chip-filter-bg-selected text-text-primary border-chip-filter-border-selected rounded-(--button-radius)'
                                                     : 'justify-center border-border-default text-text-secondary hover:bg-secondary hover:text-text-primary rounded-sm'
@@ -405,7 +467,10 @@ export default function EventsPage() {
                                         <div className="flex-1 w-full relative">
                                             <CustomDatePicker
                                                 selectedDate={startDate}
-                                                onChange={(e) => setStartDate(e)}
+                                                onChange={(e) => {
+                                                    setStartDate(e);
+                                                    if (selectedDateFilter !== "CUSTOM") setSelectedDateFilter("CUSTOM");
+                                                }}
                                                 width="62.5"
                                                 height="10"
                                             />
@@ -416,7 +481,10 @@ export default function EventsPage() {
                                         <div className="flex-1 w-full relative">
                                             <CustomDatePicker
                                                 selectedDate={endDate}
-                                                onChange={(e) => setEndDate(e)}
+                                                onChange={(e) => {
+                                                    setEndDate(e);
+                                                    if (selectedDateFilter !== "CUSTOM") setSelectedDateFilter("CUSTOM");
+                                                }}
                                                 width="62.5"
                                                 height="10"
                                             />
@@ -455,13 +523,13 @@ export default function EventsPage() {
                             <div className="mb-8">
                                 <h3 className="font-semibold text-sm text-text-primary mb-3">Trạng thái vé</h3>
                                 <div className="space-y-3">
-                                    {["Còn vé", "Sắp hết vé", "Sold out"].map(status => (
-                                        <label key={status} className="flex items-center gap-3 cursor-pointer group">
+                                    {ticketAvailabilityList.map(status => (
+                                        <label key={status.id} className="flex items-center gap-3 cursor-pointer group">
                                             <div className="relative flex items-center justify-center w-5 h-5">
                                                 <input
                                                     type="checkbox"
-                                                    checked={ticketStatuses.includes(status)}
-                                                    onChange={() => toggleArrayItem(ticketStatuses, setTicketStatuses, status)}
+                                                    checked={ticketStatuses.includes(status.id)}
+                                                    onChange={() => toggleArrayItem(ticketStatuses, setTicketStatuses, status.id)}
                                                     className="peer appearance-none w-5 h-5 border border-border-default rounded bg-bg-surface checked:bg-button-primary-bg-default checked:border-primary transition-colors cursor-pointer"
                                                 />
                                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 peer-checked:opacity-100 pointer-events-none text-button-primary-text-default">
@@ -470,7 +538,7 @@ export default function EventsPage() {
                                                     </svg>
                                                 </div>
                                             </div>
-                                            <span className="text-sm text-text-secondary group-hover:text-primary transition-colors">{status}</span>
+                                            <span className="text-sm text-text-secondary group-hover:text-primary transition-colors">{status.name}</span>
                                         </label>
                                     ))}
                                 </div>
@@ -604,9 +672,9 @@ export default function EventsPage() {
                         ) : (
                             <>
                                 {/* Lưới 3 cột */}
-                                <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+                                <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
                                     {events.map((event) => (
-                                        <Link href={`/${locale}/events/${event.id}`} key={`${event.id}-${Math.random()}`} className="group bg-bg-page border border-border-default rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer">
+                                        <Link href={`/${locale}/user/events/${event.id}`} key={`${event.id}-${Math.random()}`} className="group bg-bg-page border border-border-default rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer">
                                             {/* Phần hình ảnh */}
                                             <div className="relative h-44 w-full bg-[#83858a] shrink-0">
                                                 {event.bannerImage && (
@@ -670,14 +738,14 @@ export default function EventsPage() {
                                     Xem thêm <ChevronRight size={16} />
                                 </button>
                             ) : (
-                                <Link href={`/${locale}/events`} className="text-text-secondary hover:text-primary transition-colors flex items-center gap-1 text-sm">
+                                <Link href={`/${locale}/user/events`} className="text-text-secondary hover:text-primary transition-colors flex items-center gap-1 text-sm">
                                     Xem thêm <ChevronRight size={16} />
                                 </Link>
                             )}
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                             {suggestedEvents.map((event) => (
-                                <Link href={`/${locale}/events/${event.id}`} key={`suggested-full-${event.id}`} className="group bg-bg-page border border-border-default rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer">
+                                <Link href={`/${locale}/user/events/${event.id}`} key={`suggested-full-${event.id}`} className="group bg-bg-page border border-border-default rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer">
                                     {/* Phần hình ảnh */}
                                     <div className="relative h-44 w-full bg-[#83858a] shrink-0">
                                         {event.bannerImage && (
@@ -725,3 +793,4 @@ export default function EventsPage() {
         </div>
     );
 }
+

@@ -186,7 +186,7 @@ function PaymentResultContent() {
                             <button className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors">Thử lại thanh toán</button>
                             <button 
                                 className="w-full py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-button-radius font-semibold transition-colors"
-                                onClick={() => router.push(`/${locale}/events/${event.eventId}/booking`)}
+                                onClick={() => router.push(`/${locale}/user/events/${event.eventId}/booking`)}
                             >
                                 Quay lại chọn vé
                             </button>
@@ -228,19 +228,19 @@ function PaymentResultContent() {
                         <div className="w-full space-y-3">
                             <button 
                                 className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors"
-                                onClick={() => router.push(`/${locale}/events/${event.eventId}/booking`)}
+                                onClick={() => router.push(`/${locale}/user/events/${event.eventId}/booking`)}
                             >
                                 Chọn vé lại
                             </button>
                             <button 
                                 className="w-full py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-button-radius font-semibold transition-colors"
-                                onClick={() => router.push(`/${locale}/events`)}
+                                onClick={() => router.push(`/${locale}/user/events`)}
                             >
                                 Xem sự kiện khác
                             </button>
                             <button 
                                 className="w-full py-3 bg-transparent border border-border-strong hover:bg-bg-subtle text-text-secondary rounded-button-radius font-semibold transition-colors"
-                                onClick={() => router.push(`/${locale}/events/${event.eventId}`)}
+                                onClick={() => router.push(`/${locale}/user/events/${event.eventId}`)}
                             >
                                 Về trang sự kiện
                             </button>
@@ -277,13 +277,13 @@ function PaymentResultContent() {
                         <div className="w-full space-y-3">
                             <button 
                                 className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors"
-                                onClick={() => router.push(`/${locale}/events/${event.eventId}/payment`)}
+                                onClick={() => router.push(`/${locale}/user/events/${event.eventId}/payment`)}
                             >
                                 Tiếp tục thanh toán
                             </button>
                             <button 
                                 className="w-full py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-button-radius font-semibold transition-colors"
-                                onClick={() => router.push(`/${locale}/events/${event.eventId}/booking`)}
+                                onClick={() => router.push(`/${locale}/user/events/${event.eventId}/booking`)}
                             >
                                 Quay lại chọn vé
                             </button>
@@ -309,9 +309,9 @@ function PaymentResultContent() {
                     <div className="text-xs text-text-secondary flex items-center gap-2 mb-6 uppercase tracking-wider">
                         <Link href={`/${locale}/user/homepage`} className="hover:text-primary transition-colors">Home</Link>
                         <span>{'>'}</span>
-                        <Link href={`/${locale}/events`} className="hover:text-primary transition-colors">Tìm kiếm</Link>
+                        <Link href={`/${locale}/user/events`} className="hover:text-primary transition-colors">Tìm kiếm</Link>
                         <span>{'>'}</span>
-                        <Link href={`/${locale}/events/${event.eventId}`} className="hover:text-primary transition-colors">Chi tiết sự kiện</Link>
+                        <Link href={`/${locale}/user/events/${event.eventId}`} className="hover:text-primary transition-colors">Chi tiết sự kiện</Link>
                         <span>{'>'}</span>
                         <span className="text-primary font-semibold">Đặt vé và thanh toán</span>
                     </div>
@@ -322,7 +322,7 @@ function PaymentResultContent() {
                             <p className="text-sm text-text-secondary mb-1">Thực hiện trọn vẹn quy trình 03 bước để sở hữu vé</p>
                             <p className="text-[11px] text-text-muted">Vui lòng hoàn tất các bước trong thời gian giữ vé để tránh mất các vé đã chọn.</p>
                         </div>
-                        <Link href={`/${locale}/events/${event.eventId}`} className="flex items-center gap-2 px-4 py-2 bg-bg-surface border border-border-default rounded-button-radius hover:bg-bg-subtle transition-colors text-sm font-semibold text-text-primary h-fit">
+                        <Link href={`/${locale}/user/events/${event.eventId}`} className="flex items-center gap-2 px-4 py-2 bg-bg-surface border border-border-default rounded-button-radius hover:bg-bg-subtle transition-colors text-sm font-semibold text-text-primary h-fit">
                             <ArrowLeft size={16} /> Quay lại chi tiết vé
                         </Link>
                     </div>
@@ -393,3 +393,4 @@ export default function ResultPage() {
         </Suspense>
     );
 }
+

@@ -44,6 +44,7 @@ export interface OrganizationInfo {
     addressInfo: AddressInfo;
     businessPhone: string;
     businessEmail: string;
+    description?: string;
 }
 
 export interface TicketTypeDetail {
@@ -91,6 +92,7 @@ export interface EventDetail {
     description: string;
     venue: string;
     address: string;
+    startDatetime?: string;
     eventStatus: string;
     eventType: string;
     bannerImage: string | null;
@@ -107,5 +109,5 @@ export interface EventDetail {
     reviews: Review[];
 
     // Khai báo thêm thuộc tính fallback phía giao diện
-    hasSeatMap?: boolean;
+    hasSeatMap?: boolean | null;
 }

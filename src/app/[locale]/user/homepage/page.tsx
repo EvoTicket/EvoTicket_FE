@@ -222,7 +222,7 @@ export default function HomePage() {
   };
 
   const handleOpenEvent = (eventId: any) => {
-    router.push(`/${locale}/events/${eventId}`);
+    router.push(`/${locale}/user/events/${eventId}`);
   };
 
   return (
@@ -262,7 +262,7 @@ export default function HomePage() {
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
                   <Link
-                    href={`/${locale}/events`}
+                    href={`/${locale}/user/events`}
                     onMouseMove={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
                       e.currentTarget.style.setProperty('--x', `${e.clientX - rect.left}px`);
@@ -372,7 +372,7 @@ export default function HomePage() {
 
               {/* Nút Tìm kiếm */}
               <div className="w-32 md:w-auto mt-2 md:mt-0 h-[50px] flex md:justify-end">
-                <Link href={`/${locale}/events`} className="w-full md:w-auto bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg">
+                <Link href={`/${locale}/user/events`} className="w-full md:w-auto bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg">
                   <Search size={18} />
                   <span>{t('search_button')}</span>
                 </Link>
@@ -435,12 +435,18 @@ export default function HomePage() {
                 </span>
               </div>
               <div onClick={() => handleOpenEvent(top1TrendingEvents?.id)} className="relative w-full aspect-square md:aspect-[4/5] rounded-[2rem] overflow-hidden border-2 border-border-strong shadow-xl group cursor-pointer mt-4">
-                <Image
-                  src={top1TrendingEvents?.bannerImage || ""}
-                  alt="Top 1 Event"
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
+                {top1TrendingEvents?.bannerImage ? (
+                  <Image
+                    src={top1TrendingEvents.bannerImage}
+                    alt={top1TrendingEvents?.eventName || "Top 1 Event"}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center bg-bg-subtle text-text-muted">
+                    <Calendar size={64} />
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bg-surface/50 to-bg-surface"></div>
                 <div className="absolute bottom-6 w-full text-center text-text-primary px-4">
                   <h3 className="font-extrabold text-2xl mb-2 text-primary tracking-wide">{top1TrendingEvents?.eventName}</h3>
@@ -456,7 +462,7 @@ export default function HomePage() {
         <section className="container mx-auto px-4 mt-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-text-primary">{t("upcoming_events")}</h2>
-            <Link href={`/${locale}/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
+            <Link href={`/${locale}/user/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
               {t("view_all")} <ChevronRight size={16} />
             </Link>
           </div>
@@ -468,7 +474,7 @@ export default function HomePage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {latestEvents.length > 0 ? latestEvents.map((event) => (
-                <Link key={event.id} href={`/${locale}/events/${event.id}`} className="block">
+                <Link key={event.id} href={`/${locale}/user/events/${event.id}`} className="block">
                   <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
                     {/* Card Image */}
                     <div className="relative h-48 overflow-hidden bg-gray-100">
@@ -528,7 +534,7 @@ export default function HomePage() {
         <section className="container mx-auto px-4 mt-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-text-primary">{t("live_stage_events")}</h2>
-            <Link href={`/${locale}/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
+            <Link href={`/${locale}/user/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
               {t("view_all")} <ChevronRight size={16} />
             </Link>
           </div>
@@ -540,7 +546,7 @@ export default function HomePage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {liveStageEvents.length > 0 ? liveStageEvents.map((event) => (
-                <Link key={event.id} href={`/${locale}/events/${event.id}`} className="block">
+                <Link key={event.id} href={`/${locale}/user/events/${event.id}`} className="block">
                   <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
                     {/* Card Image */}
                     <div className="relative h-48 overflow-hidden bg-gray-100">
@@ -600,7 +606,7 @@ export default function HomePage() {
         <section className="container mx-auto px-4 mt-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-text-primary">{t("stage_art_events")}</h2>
-            <Link href={`/${locale}/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
+            <Link href={`/${locale}/user/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
               {t("view_all")} <ChevronRight size={16} />
             </Link>
           </div>
@@ -612,7 +618,7 @@ export default function HomePage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {stageAndArtEvents.length > 0 ? stageAndArtEvents.map((event) => (
-                <Link key={event.id} href={`/${locale}/events/${event.id}`} className="block">
+                <Link key={event.id} href={`/${locale}/user/events/${event.id}`} className="block">
                   <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
                     {/* Card Image */}
                     <div className="relative h-48 overflow-hidden bg-gray-100">
@@ -672,7 +678,7 @@ export default function HomePage() {
         <section className="container mx-auto px-4 mt-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-text-primary">{t("workshop_events")}</h2>
-            <Link href={`/${locale}/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
+            <Link href={`/${locale}/user/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
               {t("view_all")} <ChevronRight size={16} />
             </Link>
           </div>
@@ -684,7 +690,7 @@ export default function HomePage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {conferencesAndWorkshopsEvents.length > 0 ? conferencesAndWorkshopsEvents.map((event) => (
-                <Link key={event.id} href={`/${locale}/events/${event.id}`} className="block">
+                <Link key={event.id} href={`/${locale}/user/events/${event.id}`} className="block">
                   <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
                     {/* Card Image */}
                     <div className="relative h-48 overflow-hidden bg-gray-100">
@@ -744,4 +750,4 @@ export default function HomePage() {
       <Footer />
     </>
   );
-}
+}

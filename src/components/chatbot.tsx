@@ -9,6 +9,7 @@ import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import { useTranslations } from "next-intl";
 
 interface ChatMessage {
     id: number;
@@ -21,6 +22,7 @@ interface ChatMessage {
 const PDF_PLACEHOLDER = "https://img.freepik.com/premium-vector/modern-flat-design-of-pdf-file-icon-for-web_599062-7115.jpg?w=2000";
 
 export function ChatBot() {
+    const t = useTranslations("Chatbot");
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputMessage, setInputMessage] = useState("");
@@ -49,7 +51,7 @@ export function ChatBot() {
     const fetchChatHistory = async () => {
         const token = Cookies.get("token");
         if (!token) {
-            toast.error("Vui lòng đăng nhập để sử dụng chatbot");
+            toast.error(t("error_login_required"));
             return;
         }
 
@@ -78,7 +80,7 @@ export function ChatBot() {
 
         const token = Cookies.get("token");
         if (!token) {
-            toast.error("Vui lòng đăng nhập để sử dụng chatbot");
+            toast.error(t("error_login_required"));
             return;
         }
 
@@ -129,9 +131,9 @@ export function ChatBot() {
             }
         } catch (error: any) {
             if (error.response?.status === 500) {
-                toast.error("Đã có lỗi xảy ra");
+                toast.error(t("error_generic"));
             } else {
-                toast.error("Không thể gửi tin nhắn");
+                toast.error(t("error_send_failed"));
             }
             console.error("Failed to send message", error);
         } finally {
@@ -163,14 +165,14 @@ export function ChatBot() {
                 <button
                     onClick={() => setIsOpen(!isOpen)}
                     className="bg-button-primary-bg-defaul hover:bg-button-primary-bg-defaul-hovertext-button-primary-text-default rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110"
-                    aria-label="Chat Bot"
+                    aria-label={t("btn_aria")}
                 >
                     {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
                 </button>
 
                 <div className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                     <div className="bg-gray-800text-button-primary-text-default text-sm px-3 py-1 rounded whitespace-nowrap">
-                        Sử dụng chat bot
+                        {t("btn_tooltip")}
                     </div>
                 </div>
             </div>
@@ -182,7 +184,7 @@ export function ChatBot() {
                     <div className="bg-button-primary-bg-defaultext-button-primary-text-default p-4 rounded-t-lg flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <MessageCircle size={20} />
-                            <h3 className="font-semibold">Chat Bot Hỗ Trợ</h3>
+                            <h3 className="font-semibold">{t("header_title")}</h3>
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
@@ -200,7 +202,7 @@ export function ChatBot() {
                             </div>
                         ) : messages.length === 0 ? (
                             <div className="flex items-center justify-center h-full text-text-muted">
-                                <p>Chưa có tin nhắn nào. Hãy bắt đầu trò chuyện!</p>
+                                <p>{t("empty_state")}</p>
                             </div>
                         ) : (
                             messages.map((msg) => (
@@ -303,7 +305,7 @@ export function ChatBot() {
                                                                 />
                                                                 {isPdf && (
                                                                     <div className="absolute inset-0 flex items-center justify-center bg-black/10 rounded">
-                                                                        <span className="text-xs bg-white/90 px-2 py-1 rounded">Click để xem PDF</span>
+                                                                        <span className="text-xs bg-white/90 px-2 py-1 rounded">{t("click_view_pdf")}</span>
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -328,7 +330,7 @@ export function ChatBot() {
                                 <div className="max-w-[75%] rounded-lg p-3 bg-secondary text-text-primary">
                                     <div className="flex items-center gap-2">
                                         <Loader2 className="animate-spin" size={16} />
-                                        <span className="text-sm">Đang trả lời...</span>
+                                        <span className="text-sm">{t("status_responding")}</span>
                                     </div>
                                 </div>
                             </div>
@@ -380,7 +382,7 @@ export function ChatBot() {
                                 value={inputMessage}
                                 onChange={(e) => setInputMessage(e.target.value)}
                                 onKeyPress={handleKeyPress}
-                                placeholder="Nhập tin nhắn..."
+                                placeholder={t("input_placeholder")}
                                 className="flex-1 px-3 py-2 border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-primary 	bg-bg-surface text-text-primary"
                                 disabled={isLoading}
                             />

@@ -1,0 +1,644 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import Cookies from "js-cookie";
+import api from "@/src/lib/axios";
+import { Header } from "@/src/components/header";
+import { Footer } from "@/src/components/footer";
+import { ArrowLeft, Check } from "lucide-react";
+import { EventDetail } from "@/src/types/event";
+import { OdometerDigit } from "@/src/components/ui/odoMeterDigit";
+import { isValidEmail, isValidPhone, isValidFullName } from "@/src/lib/validations";
+
+export default function PaymentPage() {
+    const { locale, id } = useParams();
+    const router = useRouter();
+    const tb = useTranslations("Booking");
+    const tp = useTranslations("Payment");
+
+    const [event, setEvent] = useState<EventDetail | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [selectedTickets, setSelectedTickets] = useState<any[]>([]);
+    const [activeShowtime, setActiveShowtime] = useState<any>(null);
+    const [bookingSessionId, setBookingSessionId] = useState<any>(null);
+    const [isSticky, setIsSticky] = useState(false);
+
+    const [timeLeft, setTimeLeft] = useState(9 * 60 + 9); // 09:09
+
+    // Mock user context if needed
+    const [fullName, setFullName] = useState("");
+    const [phone, setPhone] = useState("");
+    const [email, setEmail] = useState("");
+
+    const [discountCode, setDiscountCode] = useState("");
+    const [appliedDiscount, setAppliedDiscount] = useState(50000);
+    const [paymentMethod, setPaymentMethod] = useState("payos");
+
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
+    const [checkedInfo, setCheckedInfo] = useState(false);
+    const [understoodTime, setUnderstoodTime] = useState(false);
+
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+    const validateForm = () => {
+        const newErrors: { [key: string]: string } = {};
+
+        // Fullname validation
+        if (!fullName.trim()) {
+            newErrors.fullName = tp('error_fullname_required');
+        } else if (!isValidFullName(fullName)) {
+            newErrors.fullName = tp('error_fullname_invalid');
+        }
+
+        // Phone validation
+        if (!phone.trim()) {
+            newErrors.phone = tp('error_phone_required');
+        } else if (!isValidPhone(phone)) {
+            newErrors.phone = tp('error_phone_invalid');
+        }
+
+        // Email validation
+        if (!email.trim()) {
+            newErrors.email = tp('error_email_required');
+        } else if (!isValidEmail(email)) {
+            newErrors.email = tp('error_email_invalid');
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    useEffect(() => {
+        // Chỉ lấy bookingSessionId từ sessionStorage
+        const bookingSessionIdData = sessionStorage.getItem('booking_session_ID');
+
+        if (bookingSessionIdData) {
+            const currentSessionId = JSON.parse(bookingSessionIdData);
+            setBookingSessionId(currentSessionId);
+
+            // Luôn gọi lấy thông tin sự kiện và sau đó lấy thông tin reservation
+            if (id) {
+                fetchData(id as string, currentSessionId);
+            }
+        } else {
+            // Nếu không có sessionId, có thể quay lại trang booking
+            // router.push(`/${locale}/user/events/${id}/booking`);
+        }
+
+        const timer = setInterval(() => {
+            setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+        }, 1000);
+
+        const handleScroll = () => {
+            if (window.scrollY > 250) {
+                setIsSticky(true);
+            } else {
+                setIsSticky(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => {
+            clearInterval(timer);
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, [id]);
+
+    const fetchData = async (eventId: string, sessionId: string) => {
+        setLoading(true);
+        try {
+            // Chỉ gọi API reservation để lấy toàn bộ thông tin cần thiết
+            const resResponse = await api.get(`/inventory-service/api/reservations/${sessionId}`);
+
+            if (resResponse.data && resResponse.data.data) {
+                const { remainingSeconds, sessionData } = resResponse.data.data;
+
+                // Cập nhật thông tin "sự kiện" từ sessionData
+                if (sessionData) {
+                    setEvent({
+                        id: eventId,
+                        eventId: eventId,
+                        eventName: sessionData.eventName || "Sự kiện",
+                        venue: sessionData.venue || "Chưa xác định",
+                        // Map thêm các trường cần thiết cho UI
+                        startDatetime: sessionData.time,
+                    } as any);
+
+                    // Map tickets
+                    if (sessionData.items) {
+                        const mappedTickets = sessionData.items.map((item: any) => {
+                            return {
+                                id: item.ticketTypeId,
+                                name: item.ticketTypeName || "Vé", // Giả định backend trả thêm name/price hoặc UI sẽ dùng dữ liệu cũ
+                                price: item.price || 0,
+                                quantity: item.qty
+                            };
+                        });
+                        setSelectedTickets(mappedTickets);
+                    }
+                }
+
+                // Cập nhật timer
+                if (remainingSeconds > 0) {
+                    setTimeLeft(remainingSeconds);
+                }
+            }
+        } catch (error) {
+            console.error("Failed to fetch reservation data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const formatTimeMS = (seconds: number) => {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return {
+            m1: Math.floor(m / 10), m2: m % 10,
+            s1: Math.floor(s / 10), s2: s % 10
+        };
+    };
+
+    const t = formatTimeMS(timeLeft);
+
+    const formatShowtimeDate = (dateString?: string) => {
+        if (!dateString) return "";
+        const d = new Date(dateString);
+        const day = d.getDate();
+        const month = d.getMonth() + 1;
+        const year = d.getFullYear();
+
+        const weekdayKey = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat'][d.getDay()];
+        const weekday = tb(weekdayKey);
+
+        if (locale === 'vi') {
+            return `${day} tháng ${month}, ${year} (${weekday})`;
+        }
+        return `${weekday}, ${month}/${day}/${year}`;
+    }
+
+    const formatTime = (dateString?: string) => {
+        if (!dateString) return "";
+        return new Date(dateString).toLocaleTimeString(locale === 'vi' ? "vi-VN" : "en-US", {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    const createOrder = async () => {
+        if (!validateForm()) return;
+        try {
+
+            const response = await api.post(`/order-service/api/v1/orders`, {
+                bookingSessionId,
+                paymentMethod: paymentMethod.toUpperCase(),
+                fullName,
+                phoneNumber: phone,
+                email,
+                voucherIds: []
+            });
+
+            if (response.data && response.data.data) {
+                const data = response.data.data;
+                if (data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                }
+            }
+        } catch (error) {
+            console.error("Failed to create order", error);
+        }
+    }
+
+
+    const serviceFee = 2000;
+    const ticketTotal = selectedTickets.reduce((sum, t) => sum + t.price * t.quantity, 0);
+    const subTotal = ticketTotal + serviceFee;
+    const finalTotal = subTotal - appliedDiscount;
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-bg-surface">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    if (!event) return null;
+
+    return (
+        <div className="min-h-screen bg-bg-page flex flex-col font-sans">
+            {/* <Header /> */}
+
+            {/* STICKY COUNTDOWN FLOATING BAR */}
+            <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-[90] transition-all duration-500 transform ${isSticky ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0 pointer-events-none'}`}>
+                <div className="bg-bg-surface/80 backdrop-blur-xl border border-primary/30 px-6 py-2.5 rounded-full shadow-[0_8px_32px_rgba(109,72,215,0.25)] flex items-center gap-4">
+                    <span className="text-xs font-bold text-text-secondary uppercase tracking-widest">{tb('time_remaining')}</span>
+                    <div className="flex items-center gap-1 font-mono text-xl font-black text-primary">
+                        <OdometerDigit value={t.m1} />
+                        <OdometerDigit value={t.m2} />
+                        <span className="mb-1">:</span>
+                        <OdometerDigit value={t.s1} />
+                        <OdometerDigit value={t.s2} />
+                    </div>
+                </div>
+            </div>
+
+            {/* TOP HEADER */}
+            <div className="bg-bg-page border-b border-border-default pt-6 pb-4">
+                <div className="max-w-[90%] mx-auto px-4">
+                    {/* BREADCRUMB */}
+                    <div className="text-xs text-text-secondary flex items-center gap-2 mb-6 uppercase tracking-wider">
+                        <Link href={`/${locale}/user/homepage`} className="hover:text-primary transition-colors">{tb('home')}</Link>
+                        <span>{'>'}</span>
+                        <Link href={`/${locale}/user/events`} className="hover:text-primary transition-colors">{tb('search')}</Link>
+                        <span>{'>'}</span>
+                        <Link href={`/${locale}/user/events/${event.eventId}`} className="hover:text-primary transition-colors">{tb('event_detail')}</Link>
+                        <span>{'>'}</span>
+                        <span className="text-primary font-semibold">{tb('booking_and_payment')}</span>
+                    </div>
+
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h1 className="text-3xl font-bold text-text-primary mb-2">{tb('booking_title')}</h1>
+                            <p className="text-sm text-text-secondary mb-1">{tb('booking_subtitle')}</p>
+                            <p className="text-[11px] text-text-muted">{tb('booking_warning')}</p>
+                        </div>
+                        <Link href={`/${locale}/user/events/${event.eventId}/booking`} className="flex items-center gap-2 px-4 py-2 bg-bg-surface border border-border-default rounded-button-radius hover:bg-bg-subtle transition-colors text-sm font-semibold text-text-primary h-fit">
+                            <ArrowLeft size={16} /> {tb('back_to_event')}
+                        </Link>
+                    </div>
+
+                    {/* STEPPER & COUNTDOWN */}
+                    <div className="mt-8 flex flex-col lg:flex-row items-center justify-between bg-stepper-bg-default border border-border-default rounded-full p-4 gap-6">
+                        <div className="flex items-center flex-1 w-full">
+                            {/* Step 1 - Done */}
+                            <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-[#1e463a] border border-[#2bad7f] text-[#2bad7f] flex items-center justify-center font-bold text-sm">
+                                    <Check size={16} />
+                                </div>
+                                <span className="text-sm font-bold text-stepper-text-completed">{tb('step_1')}</span>
+                            </div>
+                            <div className="h-[1px] flex-1 bg-stepper-border-completed mx-4"></div>
+                            {/* Step 2 - Active */}
+                            <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-bg-surface border border-stepper-border-active text-stepper-text-active flex items-center justify-center font-bold text-sm">2</div>
+                                <span className="text-sm font-bold text-stepper-text-active">{tb('step_2')}</span>
+                            </div>
+                            <div className="h-[1px] flex-1 bg-border-strong mx-4"></div>
+                            {/* Step 3 - Pending */}
+                            <div className="flex items-center gap-2 opacity-50">
+                                <div className="w-8 h-8 rounded-full bg-bg-surface border border-border-default text-text-secondary flex items-center justify-center font-bold text-sm">3</div>
+                                <span className="text-sm font-medium text-text-secondary">{tb('step_3')}</span>
+                            </div>
+                        </div>
+
+                        <div className="h-8 w-[1px] bg-border-default hidden lg:block"></div>
+
+                        <div className="flex items-center gap-4 shrink-0">
+                            <span className="text-sm text-text-secondary">{tb('time_remaining')}</span>
+                            <div className="flex items-center gap-1 font-mono text-lg font-bold text-feedback-error-text">
+                                <OdometerDigit value={t.m1} />
+                                <OdometerDigit value={t.m2} />
+                                <span className="mb-1">:</span>
+                                <OdometerDigit value={t.s1} />
+                                <OdometerDigit value={t.s2} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="max-w-[90%] mx-auto px-4 py-8 w-full flex-1">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+                    {/* LEFT COLUMN: FORM NHẬP THÔNG TIN */}
+                    <div className="lg:col-span-8 flex flex-col gap-6">
+
+                        {/* Block: Thông tin liên hệ */}
+                        <div className="bg-card-bg-default border border-border-default rounded-xl p-6">
+                            <h3 className="font-bold text-text-primary mb-4">{tp('contact_info_title')}</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm text-text-secondary mb-1">{tp('fullname_label')}</label>
+                                    <input
+                                        type="text"
+                                        value={fullName}
+                                        placeholder={tp('fullname_placeholder')}
+                                        onChange={(e) => {
+                                            setFullName(e.target.value);
+                                            if (errors.fullName) setErrors({ ...errors, fullName: "" });
+                                        }}
+                                        className={`w-full bg-bg-surface border ${errors.fullName ? 'border-feedback-error-text' : 'border-border-default'} rounded-lg px-4 py-2.5 text-text-primary outline-none focus:border-primary transition-colors`}
+                                    />
+                                    {errors.fullName && <p className="text-xs text-feedback-error-text mt-1">{errors.fullName}</p>}
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-text-secondary mb-1">{tp('phone_label')}</label>
+                                    <input
+                                        type="text"
+                                        value={phone}
+                                        placeholder={tp('phone_placeholder')}
+                                        onChange={(e) => {
+                                            setPhone(e.target.value);
+                                            if (errors.phone) setErrors({ ...errors, phone: "" });
+                                        }}
+                                        className={`w-full bg-bg-surface border ${errors.phone ? 'border-feedback-error-text' : 'border-border-default'} rounded-lg px-4 py-2.5 text-text-primary outline-none focus:border-primary transition-colors`}
+                                    />
+                                    {errors.phone && <p className="text-xs text-feedback-error-text mt-1">{errors.phone}</p>}
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-text-secondary mb-1">{tp('email_label')}</label>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        placeholder={tp('email_placeholder')}
+                                        onChange={(e) => {
+                                            setEmail(e.target.value);
+                                            if (errors.email) setErrors({ ...errors, email: "" });
+                                        }}
+                                        className={`w-full bg-bg-surface border ${errors.email ? 'border-feedback-error-text' : 'border-border-default'} rounded-lg px-4 py-2.5 text-text-primary outline-none focus:border-primary transition-colors`}
+                                    />
+                                    {errors.email && <p className="text-xs text-feedback-error-text mt-1">{errors.email}</p>}
+                                    <p className="text-xs text-text-muted mt-2">{tp('email_note')}</p>
+                                </div>
+
+                                <div className="bg-[#19274e] border border-[#253f7f] rounded-lg p-3 text-sm text-[#87a5f8]">
+                                    {tp('wallet_note')}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Block: Mã giảm giá */}
+                        <div className="bg-card-bg-default border border-border-default rounded-xl p-6">
+                            <h3 className="font-bold text-text-primary mb-4">{tp('discount_title')}</h3>
+                            <div className="flex gap-3 mb-2">
+                                <input
+                                    type="text"
+                                    placeholder={tp('discount_placeholder')}
+                                    value={discountCode}
+                                    onChange={(e) => setDiscountCode(e.target.value)}
+                                    className="flex-1 bg-bg-surface border border-border-default rounded-lg px-4 py-2.5 text-text-primary outline-none focus:border-primary transition-colors placeholder:text-text-muted"
+                                />
+                                <button className="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-lg font-medium transition-colors">
+                                    {tp('apply_button')}
+                                </button>
+                            </div>
+                            {appliedDiscount > 0 && (
+                                <p className="text-sm text-text-secondary mb-4">{tp('applied_discount', { amount: appliedDiscount.toLocaleString(locale === 'vi' ? "vi-VN" : "en-US") })}</p>
+                            )}
+                            <div className="bg-[#19274e] border border-[#253f7f] rounded-lg p-3 text-sm text-[#87a5f8]">
+                                {tp('discount_note')}
+                            </div>
+                        </div>
+
+                        {/* Block: Phương thức thanh toán */}
+                        <div className="bg-card-bg-default border border-border-default rounded-xl p-6">
+                            <h3 className="font-bold text-text-primary mb-4">{tb('payment_method')}</h3>
+                            <p className="text-sm text-text-secondary mb-4">{tb('payment_method_note')}</p>
+
+                            <div className="space-y-3 mb-6">
+                                <label className="flex items-center gap-3 p-3 border border-primary bg-primary/5 rounded-lg cursor-pointer transition-colors shadow-sm">
+                                    <input
+                                        type="radio"
+                                        name="payment"
+                                        value="payos"
+                                        checked={paymentMethod === "payos"}
+                                        onChange={() => setPaymentMethod("payos")}
+                                        className="w-4 h-4 accent-primary"
+                                    />
+                                    <div className="w-8 h-8 rounded bg-white flex items-center justify-center p-1 shrink-0">
+                                        <div className="text-blue-600 font-black text-xs">PayOS</div>
+                                    </div>
+                                    <div className="flex-1">
+                                        <span className="text-sm font-bold text-text-primary">{tp('payos_label')}</span>
+                                        <p className="text-[10px] text-text-secondary">{tp('payos_sub')}</p>
+                                    </div>
+                                </label>
+
+                                <label className="flex items-center gap-3 p-3 border border-border-default hover:border-primary rounded-lg cursor-pointer bg-bg-surface transition-colors">
+                                    <input
+                                        type="radio"
+                                        name="payment"
+                                        value="sepay"
+                                        checked={paymentMethod === "sepay"}
+                                        onChange={() => setPaymentMethod("sepay")}
+                                        className="w-4 h-4 accent-primary"
+                                    />
+                                    <div className="w-8 h-8 rounded bg-bg-surface border border-border-strong flex items-center justify-center shrink-0">
+                                        <div className="text-primary font-bold text-[8px]">sepay</div>
+                                    </div>
+                                    <div className="flex-1">
+                                        <span className="text-sm font-bold text-text-primary">{tp('balance_label')}</span>
+                                        <p className="text-[10px] text-text-secondary">{tp('balance_sub')}</p>
+                                    </div>
+                                </label>
+
+                                <div className="pt-2 pb-1 text-[10px] font-bold text-text-muted uppercase tracking-widest">{tp('other_methods')}</div>
+
+                                <label className="flex items-center gap-3 p-3 border border-border-default rounded-lg bg-bg-subtle/50 opacity-40 cursor-not-allowed grayscale pointer-events-none">
+                                    <input
+                                        type="radio"
+                                        name="payment"
+                                        value="vnpay"
+                                        disabled
+                                        className="w-4 h-4 accent-primary"
+                                    />
+                                    <div className="w-8 h-8 rounded bg-white flex items-center justify-center p-1 shrink-0">
+                                        <div className="flex gap-0.5 font-bold text-[10px]"><span className="text-blue-600">VN</span><span className="text-red-500">PAY</span></div>
+                                    </div>
+                                    <span className="text-sm font-medium text-text-muted">{tp('vnpay_label')}</span>
+                                </label>
+
+                                <label className="flex items-center gap-3 p-3 border border-border-default rounded-lg bg-bg-subtle/50 opacity-40 cursor-not-allowed grayscale pointer-events-none">
+                                    <input
+                                        type="radio"
+                                        name="payment"
+                                        value="momo"
+                                        disabled
+                                        className="w-4 h-4 accent-primary"
+                                    />
+                                    <div className="w-8 h-8 rounded bg-[#a50064] flex items-center justify-center p-1 shrink-0">
+                                        <span className="text-white font-bold text-[8px]">MoMo</span>
+                                    </div>
+                                    <span className="text-sm font-medium text-text-muted">{tp('momo_label')}</span>
+                                </label>
+
+                                <label className="flex items-center gap-3 p-3 border border-border-default rounded-lg bg-bg-subtle/50 opacity-40 cursor-not-allowed grayscale pointer-events-none">
+                                    <input
+                                        type="radio"
+                                        name="payment"
+                                        value="zalopay"
+                                        disabled
+                                        className="w-4 h-4 accent-primary"
+                                    />
+                                    <div className="w-8 h-8 rounded bg-white flex items-center justify-center p-1 shrink-0">
+                                        <span className="text-blue-500 font-extrabold text-[8px]">Zalo</span><span className="text-green-500 font-extrabold text-[8px]">Pay</span>
+                                    </div>
+                                    <span className="text-sm font-medium text-text-muted">{tp('zalopay_label')}</span>
+                                </label>
+                            </div>
+
+                            <div className="bg-[#19274e] border border-[#253f7f] rounded-lg p-3 text-sm text-[#87a5f8]">
+                                {tp('payment_note')}
+                            </div>
+                        </div>
+
+                        {/* Block: Lưu ý trước khi thanh toán */}
+                        <div className="bg-bg-surface border border-border-default rounded-xl p-6">
+                            <h3 className="font-bold text-text-primary mb-3">{tp('before_payment_title')}</h3>
+                            <ul className="list-disc pl-5 space-y-2 text-sm text-text-secondary marker:text-text-muted">
+                                <li>{tp('before_note_1')}</li>
+                                <li>{tp('before_note_2')}</li>
+                                <li>{tp('before_note_3')}</li>
+                                <li>{tp('before_note_4')}</li>
+                            </ul>
+                        </div>
+
+                        {/* Block: Lưu ý sau khi thanh toán */}
+                        <div className="bg-bg-surface border border-border-default rounded-xl p-6">
+                            <h3 className="font-bold text-text-primary mb-3">{tp('after_payment_title')}</h3>
+                            <ul className="list-disc pl-5 space-y-2 text-sm text-text-secondary marker:text-text-muted">
+                                <li>{tp('after_note_1')}</li>
+                                <li>{tp('after_note_2')}</li>
+                                <li>{tp('after_note_3')}</li>
+                                <li>{tp('after_note_4')}</li>
+                            </ul>
+                        </div>
+
+                        {/* Block: Xác nhận giao dịch */}
+                        <div className="bg-card-bg-default border border-border-default rounded-xl p-6">
+                            <h3 className="font-bold text-text-primary mb-4">{tp('confirmation_title')}</h3>
+                            <div className="space-y-3">
+                                <label className="flex items-start gap-3 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        checked={checkedInfo}
+                                        onChange={(e) => setCheckedInfo(e.target.checked)}
+                                        className="mt-0.5 w-4 h-4 accent-primary shrink-0 cursor-pointer"
+                                    />
+                                    <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors">{tp('confirm_check')}</span>
+                                </label>
+                                <label className="flex items-start gap-3 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        checked={understoodTime}
+                                        onChange={(e) => setUnderstoodTime(e.target.checked)}
+                                        className="mt-0.5 w-4 h-4 accent-primary shrink-0 cursor-pointer"
+                                    />
+                                    <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors">{tp('confirm_time')}</span>
+                                </label>
+                                <label className="flex items-start gap-3 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        checked={agreedToTerms}
+                                        onChange={(e) => setAgreedToTerms(e.target.checked)}
+                                        className="mt-0.5 w-4 h-4 accent-primary shrink-0 cursor-pointer"
+                                    />
+                                    <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors">{tp('confirm_terms')}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {/* RIGHT COLUMN: ĐƠN HÀNG */}
+                    <div className="lg:col-span-4 relative">
+                        <div className="bg-payment-summary-bg-default border border-border-default rounded-xl overflow-hidden shadow-xl sticky top-24">
+                            <div className="p-6">
+                                <h2 className="text-xl font-bold text-text-primary mb-6">{tb('your_order')}</h2>
+
+                                <div className="mb-6">
+                                    <h3 className="font-bold text-text-primary text-base mb-2">{event.eventName}</h3>
+                                    <p className="text-sm text-text-secondary mb-1">
+                                        {event.startDatetime}
+                                    </p>
+                                    <p className="text-sm text-text-secondary">
+                                        {event.venue}
+                                    </p>
+                                </div>
+
+                                {/* Order Items */}
+                                <div className="border-t border-border-strong pt-4 mb-4">
+                                    <h4 className="font-bold text-sm text-text-primary mb-4">{tb('selected_tickets')}</h4>
+
+                                    <div className="space-y-3">
+                                        {selectedTickets.map((t, idx) => (
+                                            <div key={idx} className="flex flex-col gap-1 text-sm border-b border-border-subtle pb-3 last:border-0 last:pb-0">
+                                                <div className="flex justify-between">
+                                                    <span className="text-text-secondary">{tb('ticket_type_label')}</span>
+                                                    <span className="font-medium text-text-primary">{t.name}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-text-secondary">{tb('quantity_label')}</span>
+                                                    <span className="font-medium text-text-primary">{String(t.quantity).padStart(2, '0')}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-text-secondary">{tb('price_label')}</span>
+                                                    <span className="font-medium text-text-primary">{(t.price * t.quantity).toLocaleString(locale === 'vi' ? "vi-VN" : "en-US")}đ</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Summary */}
+                                <div className="border-t border-border-strong pt-4 mb-6 space-y-3">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-text-secondary">{tb('service_fee')}</span>
+                                        <span className="font-medium text-text-primary text-right">{serviceFee.toLocaleString(locale === 'vi' ? "vi-VN" : "en-US")} đ</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-text-secondary">{tb('subtotal')}</span>
+                                        <span className="font-medium text-text-primary text-right">{subTotal.toLocaleString(locale === 'vi' ? "vi-VN" : "en-US")} đ</span>
+                                    </div>
+                                    {appliedDiscount > 0 && (
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-text-secondary">{tp('discount_title')}</span>
+                                            <span className="font-medium text-text-primary text-right">- {appliedDiscount.toLocaleString(locale === 'vi' ? "vi-VN" : "en-US")} đ</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between items-end mt-2 pt-2 border-t border-border-strong">
+                                        <span className="text-sm font-medium text-text-secondary">{tp('total_payment')}</span>
+                                        <span className="text-2xl font-bold text-text-primary text-right">
+                                            {finalTotal.toLocaleString(locale === 'vi' ? "vi-VN" : "en-US")}đ
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <p className="text-[11px] text-text-muted mb-4">
+                                    {tp.rich('terms_agree_note', {
+                                        link: (chunks) => <Link href="#" className="text-primary hover:underline">{tp('terms_link_text')}</Link>
+                                    })}
+                                </p>
+
+                                <button
+                                    className={`w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm mb-3 ${!(agreedToTerms && checkedInfo && understoodTime) ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-[#6D48D7] hover:bg-[#5b3bb8] text-white'}`}
+                                    disabled={!(agreedToTerms && checkedInfo && understoodTime)}
+                                    onClick={() => createOrder()}
+                                >
+                                    {tp('pay_now')}
+                                </button>
+
+                                <button
+                                    className="w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm bg-transparent hover:bg-bg-subtle text-text-secondary border border-border-strong"
+                                    onClick={() => router.push(`/${locale}/user/events/${event.eventId}/booking`)}
+                                >
+                                    {tp('reselect_ticket')}
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            {/* <Footer /> */}
+
+        </div>
+    );
+}
+
