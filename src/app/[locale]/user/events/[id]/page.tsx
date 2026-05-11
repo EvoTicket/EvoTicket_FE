@@ -16,6 +16,11 @@ import {
 import { Footer } from "@/src/components/footer";
 import { Header } from "@/src/components/header";
 import { EventDetail } from "@/src/types/event";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 // Dynamic import for Map to avoid SSR issues
 const Map = dynamic(() => import("@/src/components/Map"), {
@@ -100,8 +105,8 @@ export default function EventDetailPage() {
 
     const fetchSuggestedEvents = async () => {
         try {
-            const response = await api.get("/inventory-service/api/events", {
-                params: { page: 1, size: 4 },
+            const response = await api.get("/inventory-service/api/events/recommend", {
+                params: { limit: "10" },
                 skipAuth: true
             } as any);
             if (response.data?.data?.content) {
@@ -548,6 +553,72 @@ export default function EventDetailPage() {
                 </div>
             </div>
 
+
+            {suggestedEvents.length > 0 && (
+                <div className="w-full max-w-[90%] mx-auto border-t border-border-default pt-10 pb-20">
+                    <div className="flex justify-between items-center mb-8">
+                        <h3 className="font-semibold text-lg text-text-primary text-opacity-50 uppercase tracking-widest">{te('you_might_also_like')}</h3>
+                        <Link href={`/${locale}/user/events`} className="text-sm text-text-secondary hover:text-primary transition-colors flex items-center gap-1">
+                            {te('see_more')} <span className="text-xs">▶</span>
+                        </Link>
+                    </div>
+
+                    <Swiper
+                        modules={[Navigation, Pagination, Autoplay]}
+                        spaceBetween={24}
+                        slidesPerView={1}
+                        navigation
+                        pagination={{ clickable: true }}
+                        autoplay={{ delay: 5000, disableOnInteraction: false }}
+                        breakpoints={{
+                            640: { slidesPerView: 2 },
+                            1024: { slidesPerView: 4 },
+                            1536: { slidesPerView: 5 },
+                        }}
+                        className="suggested-events-swiper !pb-12"
+                    >
+                        {suggestedEvents.map(evt => (
+                            <SwiperSlide key={evt.eventId || evt.id}>
+                                <Link href={`/${locale}/user/events/${evt.id}`} className="group cursor-pointer block h-full">
+                                    <div className="aspect-[4/3] rounded-xl bg-secondary mb-3 overflow-hidden relative shadow-sm group-hover:shadow-md transition-all duration-300">
+                                        {evt.bannerImage ? (
+                                            <Image
+                                                src={evt.bannerImage}
+                                                alt={evt.eventName}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-text-muted">
+                                                <ImageIcon size={32} />
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <h4 className="font-bold text-text-primary line-clamp-2 group-hover:text-primary transition-colors leading-snug h-12">
+                                            {evt.eventName}
+                                        </h4>
+                                        <div className="text-[13px] text-text-secondary flex items-center gap-1.5">
+                                            <Calendar size={14} className="shrink-0" />
+                                            <span>{formatTime(evt.startDatetime)} - {formatDate(evt.startDatetime)}</span>
+                                        </div>
+                                        <div className="text-[13px] text-text-secondary flex items-center gap-1.5 line-clamp-1">
+                                            <MapPin size={14} className="shrink-0" />
+                                            <span>{evt.venue || evt.address}</span>
+                                        </div>
+                                        <div className="font-bold text-primary mt-2 text-base">
+                                            {te('from_price', {
+                                                price: (evt.floorPrice || evt.ticketTypes?.[0]?.price || 500000).toLocaleString(locale === 'vi' ? "vi-VN" : "en-US")
+                                            })}
+                                        </div>
+                                    </div>
+                                </Link>
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
+                </div>
+            )}
             <Footer />
         </div>
     );

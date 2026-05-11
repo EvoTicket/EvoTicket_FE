@@ -423,10 +423,10 @@ export default function MyTicketsPage() {
 
                                                                             <div className="text-text-muted">{t('ticket_status')}</div>
                                                                             <div className="font-medium text-text-primary pl-2 text-right">{ticket.status.toUpperCase().replace(/_/g, ' ')}</div>
-                                                                            {ticket.status !== 'onsale' &&
+                                                                            {ticket.status === 'on_sale' &&
                                                                                 <div className="text-text-muted">{t('listing_price')}</div>
                                                                             }
-                                                                            {ticket.status !== 'onsale' &&
+                                                                            {ticket.status === 'on_sale' &&
                                                                                 <div className="font-medium text-text-primary pl-2 text-right">{ticket.listingPrice}</div>
                                                                             }
                                                                             <div className="text-text-muted">{t('qr_status')}</div>

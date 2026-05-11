@@ -10,6 +10,7 @@ import Image from "next/image";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { CustomDatePicker } from "@/src/components/ui/CustomDatePicker";
 import api from "@/src/lib/axios";
+import { useEventFilters } from "@/src/hooks/useEventFilters";
 
 
 export default function ResaleMarketplacePage() {
@@ -43,31 +44,9 @@ export default function ResaleMarketplacePage() {
 
     const [viewMode, setViewMode] = useState<"grid" | "list">("list");
     const [provinces, setProvinces] = useState<any[]>([]);
+    const { categoriesList, sortByList, dateFiltersList } = useEventFilters();
 
-    // Sort setup
-    const sortByList = [
-        { id: "PRICE_ASC", name: t("sort_price_asc") },
-        { id: "PRICE_DESC", name: t("sort_price_desc") },
-        { id: "DATE_ASC", name: t("sort_date_asc") },
-        { id: "NEWEST", name: t("sort_newest") },
-        { id: "POPULAR", name: t("sort_popular") },
-    ];
     const [sortBy, setSortBy] = useState(sortByList[0]);
-
-    // Predefined items
-    const categoriesList = [
-        { id: "LIVESTAGE", name: "Livestage" },
-        { id: "STAGE_ART", name: "Sân khấu & Nghệ thuật" },
-        { id: "WORKSHOP", name: "Hội thảo & Workshop" },
-        { id: "SPORTS", name: "Thể thao" },
-        { id: "EXHIBITION", name: "Triển lãm / Trải nghiệm" }
-    ];
-    const dateFiltersList = [
-        { id: "TODAY", name: "Hôm nay" },
-        { id: "THIS_WEEKEND", name: "Cuối tuần này" },
-        { id: "NEXT_7_DAYS", name: "7 ngày tới" },
-        { id: "CUSTOM", name: "Chọn ngày" }
-    ];
 
     useEffect(() => {
         fetchProvinces();

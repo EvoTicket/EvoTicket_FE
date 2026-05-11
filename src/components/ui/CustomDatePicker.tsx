@@ -81,7 +81,7 @@ export function CustomDatePicker({ selectedDate, onChange, width, height }: Cust
 
           <PopoverPanel
             transition
-            className={`absolute z-50 mt-2 w-${width} 	bg-bg-surface/95 backdrop-blur-xl border border-border-default rounded-xl shadow-2xl p-5 transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0 lg:bottom-auto bottom-full lg:mb-0 mb-2 origin-top-left`}
+            className={`absolute z-50 mt-2 inset-x-0 bg-bg-surface/95 backdrop-blur-xl border border-border-default rounded-xl shadow-2xl p-5 transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0 lg:bottom-auto bottom-full lg:mb-0 mb-2 origin-top`}
           >
             <div className="flex justify-between items-center mb-5">
               <button

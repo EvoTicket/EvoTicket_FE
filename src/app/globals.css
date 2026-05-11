@@ -143,3 +143,27 @@
     }
   }
 }
+
+/* 5. Swiper Custom Styles */
+.suggested-events-swiper .swiper-button-next,
+.suggested-events-swiper .swiper-button-prev {
+  @apply bg-bg-surface border border-border-default w-10 h-10 rounded-full shadow-md text-text-primary transition-all duration-300;
+}
+
+.suggested-events-swiper .swiper-button-next:hover,
+.suggested-events-swiper .swiper-button-prev:hover {
+  @apply bg-primary text-button-primary-text-default border-primary scale-110;
+}
+
+.suggested-events-swiper .swiper-button-next::after,
+.suggested-events-swiper .swiper-button-prev::after {
+  @apply text-sm font-bold;
+}
+
+.suggested-events-swiper .swiper-pagination-bullet {
+  @apply bg-border-default opacity-50 transition-all duration-300;
+}
+
+.suggested-events-swiper .swiper-pagination-bullet-active {
+  @apply bg-primary opacity-100 w-6 rounded-full;
+}

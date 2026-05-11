@@ -18,6 +18,7 @@ import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headless
 import { useTranslations } from "next-intl";
 import { CustomDatePicker } from "@/src/components/ui/CustomDatePicker";
 import { EventItem, Province } from "@/src/types/event";
+import { useEventFilters } from "@/src/hooks/useEventFilters";
 
 export default function EventsPage() {
     const { locale } = useParams();
@@ -26,35 +27,13 @@ export default function EventsPage() {
 
 
 
-    // Fake data cho danh mục sự kiện
-    const categoriesList = [
-        { id: "LIVESTAGE", name: t("category_livestage") },
-        { id: "STAGE_ART", name: t("category_stage_art") },
-        { id: "WORKSHOP", name: t("category_workshop") },
-        { id: "SPORTS", name: t("category_sport") },
-        { id: "EXHIBITION", name: t("category_exhibition") }
-    ];
+    const {
+        categoriesList,
+        sortByList,
+        ticketAvailabilityList,
+        dateFiltersList
+    } = useEventFilters();
 
-    const sortByList = [
-        { id: "popular", name: t("sort_by_popular") },
-        { id: "nearestDay", name: t("sort_by_nearest_day") },
-        { id: "priceLowToHigh", name: t("sort_by_price_low_to_high") },
-        { id: "priceHighToLow", name: t("sort_by_price_high_to_low") },
-        { id: "newlyPosted", name: t("sort_by_newly_posted") },
-    ];
-
-    const ticketAvailabilityList = [
-        { id: "AVAILABLE", name: "Còn vé" },
-        { id: "ALMOST_SOLD_OUT", name: "Sắp hết vé" },
-        { id: "SOLD_OUT", name: "Hết vé" }
-    ];
-
-    const dateFiltersList = [
-        { id: "TODAY", name: "Hôm nay" },
-        { id: "THIS_WEEKEND", name: "Cuối tuần này" },
-        { id: "NEXT_7_DAYS", name: "7 ngày tới" },
-        { id: "CUSTOM", name: "Chọn ngày" }
-    ];
     // --- State ---
     const [events, setEvents] = useState<EventItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -63,9 +42,19 @@ export default function EventsPage() {
 
     // Filters State
     const [keyword, setKeyword] = useState(searchParams?.get("keyword") || "");
-    const [selectedProvince, setSelectedProvince] = useState<any>(null);
-    const [startDate, setStartDate] = useState<Date | null>(null);
-    const [endDate, setEndDate] = useState<Date | null>(null);
+    const [selectedProvince, setSelectedProvince] = useState<any>(() => {
+        const location = searchParams?.get("location");
+        if (location && location !== 'all') {
+            return { code: location, name: "" }; // Name will be filled by fetchProvinces
+        }
+        return { code: "all", name: t("location_all") || "Tất cả địa điểm" };
+    });
+    const [startDate, setStartDate] = useState<Date | null>(
+        searchParams?.get("fromDate") ? new Date(searchParams.get("fromDate")!) : null
+    );
+    const [endDate, setEndDate] = useState<Date | null>(
+        searchParams?.get("toDate") ? new Date(searchParams.get("toDate")!) : null
+    );
     const [provinces, setProvinces] = useState<Province[]>([]);
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     // const [openSelectLocation, setOpenSelectLocation] = useState(false);
@@ -84,7 +73,14 @@ export default function EventsPage() {
     const [priceTo, setPriceTo] = useState("");
     const [ticketStatuses, setTicketStatuses] = useState<string[]>([]);
     const [selectedDateFilter, setSelectedDateFilter] = useState<string | null>(null);
-    const [selectedCategories, setSelectedCategories] = useState<{ id: string, name: string }[]>([]);
+    const [selectedCategories, setSelectedCategories] = useState<{ id: string, name: string }[]>(() => {
+        const genresParam = searchParams?.get("genres");
+        if (genresParam && categoriesList) {
+            const genresArray = genresParam.split(",");
+            return categoriesList.filter(cat => genresArray.includes(cat.id));
+        }
+        return [];
+    });
 
 
     // --- Effects ---
@@ -97,7 +93,7 @@ export default function EventsPage() {
 
     useEffect(() => {
         fetchEvents(page === 1);
-    }, [page, sortBy]); // Trigger fetch khi page hoặc sort thay đổi
+    }, [page, sortBy, selectedProvince, startDate, endDate, selectedCategories, keyword]); // Trigger fetch khi bất kỳ bộ lọc nào thay đổi
 
     useEffect(() => {
         if (suggestedEvents.length === 0) {
@@ -142,7 +138,23 @@ export default function EventsPage() {
     const fetchProvinces = async () => {
         try {
             const res = await api.get("/iam-service/api/locations/provinces", { skipAuth: true } as any);
-            if (res.data) setProvinces(res.data);
+            if (res.data) {
+                const allOption = {
+                    code: "all",
+                    name: t("location_all") || "Tất cả địa điểm"
+                };
+                const fullList = [allOption, ...res.data];
+                setProvinces(fullList);
+
+                // Cập nhật selectedProvince để có đầy đủ thông tin (như trường name)
+                const locCode = searchParams?.get("location") || "all";
+                const found = fullList.find((p: any) => String(p.code) === String(locCode));
+                if (found) {
+                    setSelectedProvince(found);
+                } else {
+                    setSelectedProvince(allOption);
+                }
+            }
         } catch (err) {
             console.error("Failed to fetch provinces", err);
         }
@@ -154,18 +166,17 @@ export default function EventsPage() {
             const params: any = {
                 page,
                 size,
-                sortBy,
-                sortDirection: "DESC", // Cố định theo thiết kế wireframe
-                includeExpired: true,
+                sort: sortBy.id,
             };
 
             if (keyword) params.keyword = keyword;
             if (selectedCategories.length > 0) {
                 params.categories = selectedCategories.map(cat => cat.id).join(",");
             }
-            if (selectedProvince) params.provinceCodes = selectedProvince.code;
-            if (startDate) params.startDate = startDate.toISOString();
-            if (endDate) params.endDate = endDate.toISOString();
+            const provinceCode = selectedProvince?.code || searchParams?.get("location");
+            if (provinceCode && provinceCode !== 'all') params.provinceCodes = provinceCode;
+            if (startDate) params.startDate = startDate.toISOString().split('T')[0];
+            if (endDate) params.endDate = endDate.toISOString().split('T')[0];
             if (selectedDateFilter) params.dateFilters = selectedDateFilter;
             if (priceFrom) params.minPrice = priceFrom;
             if (priceTo) params.maxPrice = priceTo;
@@ -297,12 +308,12 @@ export default function EventsPage() {
                     <div className="flex items-center gap-2 text-sm text-text-muted mb-6">
                         <Link href={`/${locale}/user/homepage`} className="hover:text-primary transition-colors">Home</Link>
                         <ChevronRight size={14} />
-                        <span className="text-text-primary font-medium">Tìm kiếm</span>
+                        <span className="text-text-primary font-medium">{t("search_for")}</span>
                     </div>
 
                     {/* Title */}
                     <div className="flex items-center justify-between">
-                        <h1 className="text-4xl font-bold text-text-primary mb-2">Kết quả tìm kiếm</h1>
+                        <h1 className="text-4xl font-bold text-text-primary mb-2">{t("search_results")}</h1>
                         <Link href={`/${locale}/user/homepage`} className="flex items-center text-text-primary hover:text-primary transition-colors bg-bg-surface px-3 py-2 border border-border-default rounded-lg">
                             <ArrowLeft size={14} />
                             <span className="ml-2">
@@ -311,7 +322,10 @@ export default function EventsPage() {
                         </Link>
                     </div>
                     <p className="text-text-secondary">
-                        {totalElements} kết quả cho {keyword ? `"${keyword}"` : `"Tất cả sự kiện"`}
+                        {t("results_count", {
+                            count: totalElements,
+                            keyword: keyword ? `"${keyword}"` : t("all_events")
+                        })}
                     </p>
 
                     {/* Active Filters Tags (Mockup theo wireframe) */}
@@ -359,11 +373,11 @@ export default function EventsPage() {
                     <aside className="w-full lg:w-[300px] shrink-0 space-y-8">
                         {/* Container bộ lọc */}
                         <div className="bg-bg-surface border border-border-default rounded-xl p-6">
-                            <h2 className="font-bold text-2xl text-text-primary mb-6">Bộ lọc</h2>
+                            <h2 className="font-bold text-2xl text-text-primary mb-6">{t("filter_title")}</h2>
 
                             {/* Danh mục sự kiện */}
                             <div className="mb-6">
-                                <h3 className="font-semibold text-sm text-text-primary mb-3">Danh mục sự kiện</h3>
+                                <h3 className="font-semibold text-sm text-text-primary mb-3">{t("filter_by_category")}</h3>
                                 <div className="space-y-3">
                                     {categoriesList.map(cat => (
                                         <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
@@ -394,10 +408,10 @@ export default function EventsPage() {
 
                             {/* Địa điểm */}
                             <div className="mb-6">
-                                <h3 className="font-semibold text-sm text-text-primary mb-3">Địa điểm</h3>
+                                <h3 className="font-semibold text-sm text-text-primary mb-3">{t("location")}</h3>
                                 <div className="h-10 relative">
 
-                                    <Listbox value={selectedProvince} onChange={(val) => { setSelectedProvince(val); }}>
+                                    <Listbox value={selectedProvince} by={(a, b) => String(a?.code) === String(b?.code)} onChange={(val) => { setSelectedProvince(val); }}>
                                         <ListboxButton
                                             className="
                                                 w-full h-full p-1.5 pl-3 bg-bg-surface
@@ -434,7 +448,7 @@ export default function EventsPage() {
 
                             {/* Ngày diễn */}
                             <div className="mb-6">
-                                <h3 className="font-semibold text-sm text-text-primary mb-3">Ngày diễn</h3>
+                                <h3 className="font-semibold text-sm text-text-primary mb-3">{t("event_date")}</h3>
                                 <div className="grid grid-cols-2 gap-2 mb-4">
                                     {dateFiltersList.map(filter => {
                                         const isSelected = selectedDateFilter === filter.id;
@@ -455,7 +469,7 @@ export default function EventsPage() {
                                 </div>
                                 <div className="space-y-3">
                                     <div className="relative">
-                                        <label className="text-xs text-text-muted block mb-1">Từ ngày</label>
+                                        <label className="text-xs text-text-muted block mb-1">{t("from_date")}</label>
                                         {/* <div className="relative">
                                             <input
                                                 type="date"
@@ -477,7 +491,7 @@ export default function EventsPage() {
                                         </div>
                                     </div>
                                     <div className="relative">
-                                        <label className="text-xs text-text-muted block mb-1">Đến ngày</label>
+                                        <label className="text-xs text-text-muted block mb-1">{t("to_date")}</label>
                                         <div className="flex-1 w-full relative">
                                             <CustomDatePicker
                                                 selectedDate={endDate}
@@ -495,10 +509,10 @@ export default function EventsPage() {
 
                             {/* Khoảng giá */}
                             <div className="mb-6">
-                                <h3 className="font-semibold text-sm text-text-primary mb-3">Khoảng giá</h3>
+                                <h3 className="font-semibold text-sm text-text-primary mb-3">{t("price_range")}</h3>
                                 <div className="flex items-center gap-3">
                                     <div className="flex-1">
-                                        <label className="text-xs text-text-muted block mb-1">Từ</label>
+                                        <label className="text-xs text-text-muted block mb-1">{t("from")}</label>
                                         <input
                                             type="number"
                                             value={priceFrom}
@@ -508,7 +522,7 @@ export default function EventsPage() {
                                         />
                                     </div>
                                     <div className="flex-1">
-                                        <label className="text-xs text-text-muted block mb-1">Đến</label>
+                                        <label className="text-xs text-text-muted block mb-1">{t("to")}</label>
                                         <input
                                             type="number"
                                             value={priceTo}
@@ -521,7 +535,7 @@ export default function EventsPage() {
 
                             {/* Trạng thái vé */}
                             <div className="mb-8">
-                                <h3 className="font-semibold text-sm text-text-primary mb-3">Trạng thái vé</h3>
+                                <h3 className="font-semibold text-sm text-text-primary mb-3">{t("ticket_status")}</h3>
                                 <div className="space-y-3">
                                     {ticketAvailabilityList.map(status => (
                                         <label key={status.id} className="flex items-center gap-3 cursor-pointer group">
@@ -550,13 +564,13 @@ export default function EventsPage() {
                                     onClick={handleApplyFilters}
                                     className="w-full bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default py-3 rounded-lg font-medium transition-colors cursor-pointer"
                                 >
-                                    Áp dụng
+                                    {t("apply_filter")}
                                 </button>
                                 <button
                                     onClick={clearFilters}
                                     className="w-full bg-transparent text-primary hover:text-primary-hover py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer"
                                 >
-                                    Xóa bộ lọc
+                                    {t("clear_filter")}
                                 </button>
                             </div>
                         </div>
@@ -569,12 +583,12 @@ export default function EventsPage() {
                         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 z-10 relative">
                             <p className="text-text-secondary text-sm">
                                 <span className="font-medium text-text-primary mr-1">{totalElements}</span>
-                                sự kiện
+                                {t("events_count", { count: totalElements }).replace(totalElements.toString(), "").trim()}
                             </p>
 
                             <div className="flex items-center gap-4 mt-4 sm:mt-0">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-sm text-text-muted whitespace-nowrap w-20">Sắp xếp theo</span>
+                                    <span className="text-sm text-text-muted whitespace-nowrap w-20">{t("sort_by")}</span>
                                     <div className="relative h-9">
 
                                         <Listbox value={sortBy} onChange={(val) => { setSortBy(val); setPage(1); }}>
@@ -646,10 +660,10 @@ export default function EventsPage() {
                                     </div>
                                     {/* Text */}
                                     <h3 className="text-2xl font-bold text-text-primary mb-3">
-                                        Không tìm thấy sự kiện phù hợp
+                                        {t("no_events_found")}
                                     </h3>
                                     <p className="text-text-secondary text-[15px] mb-8 max-w-md">
-                                        Hãy thử đổi từ khóa hoặc nới rộng bộ lọc để xem thêm sự kiện khác.
+                                        {t("no_events_desc")}
                                     </p>
                                     {/* Buttons */}
                                     <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -657,13 +671,13 @@ export default function EventsPage() {
                                             onClick={clearFilters}
                                             className="w-full sm:w-auto px-6 py-2.5 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default font-medium rounded-md transition-colors"
                                         >
-                                            Xóa bộ lọc
+                                            {t("clear_filter")}
                                         </button>
                                         <button
                                             onClick={clearFilters}
                                             className="w-full sm:w-auto px-6 py-2.5 bg-transparent border border-border-default text-text-primary hover:bg-secondary font-medium rounded-md transition-colors"
                                         >
-                                            Khám phá tất cả sự kiện
+                                            {t("explore_all")}
                                         </button>
                                     </div>
                                 </div>
@@ -700,7 +714,7 @@ export default function EventsPage() {
 
                                                 <div className="flex items-start gap-2 text-sm text-text-secondary mb-2">
                                                     <Calendar size={16} className="mt-0.5 shrink-0" />
-                                                    <span>{new Date(event.startDatetime).toLocaleString("vi-VN", { hour: '2-digit', minute: '2-digit', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }).replace('lúc', '-')}</span>
+                                                    <span>{new Date(event.startDatetime).toLocaleString(locale as string === 'vi' ? "vi-VN" : "en-US", { hour: '2-digit', minute: '2-digit', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }).replace('lúc', '-')}</span>
                                                 </div>
 
                                                 <div className="flex items-start gap-2 text-sm text-text-secondary mb-4">
@@ -732,14 +746,14 @@ export default function EventsPage() {
                 {(!isFilterApplied || events.length === 0) && suggestedEvents.length > 0 && (
                     <div className="mt-16 pt-10">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-text-primary">Có thể bạn cũng thích</h2>
+                            <h2 className="text-2xl font-bold text-text-primary">{t("suggested_for_you")}</h2>
                             {isFilterApplied ? (
                                 <button onClick={clearFilters} className="text-text-secondary hover:text-primary transition-colors flex items-center gap-1 text-sm">
-                                    Xem thêm <ChevronRight size={16} />
+                                    {t("view_more")} <ChevronRight size={16} />
                                 </button>
                             ) : (
                                 <Link href={`/${locale}/user/events`} className="text-text-secondary hover:text-primary transition-colors flex items-center gap-1 text-sm">
-                                    Xem thêm <ChevronRight size={16} />
+                                    {t("view_more")} <ChevronRight size={16} />
                                 </Link>
                             )}
                         </div>
@@ -771,7 +785,7 @@ export default function EventsPage() {
 
                                         <div className="flex items-start gap-2 text-sm text-text-secondary mb-2">
                                             <Calendar size={16} className="mt-0.5 shrink-0" />
-                                            <span>{new Date(event.startDatetime).toLocaleString("vi-VN", { hour: '2-digit', minute: '2-digit', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }).replace('lúc', '-')}</span>
+                                            <span>{new Date(event.startDatetime).toLocaleString(locale as string === 'vi' ? "vi-VN" : "en-US", { hour: '2-digit', minute: '2-digit', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }).replace('lúc', '-')}</span>
                                         </div>
 
                                         <div className="flex items-start gap-2 text-sm text-text-secondary mb-4">

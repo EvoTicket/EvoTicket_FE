@@ -13,6 +13,7 @@ import Cookies from "js-cookie";
 import { CustomDatePicker } from "@/src/components/ui/CustomDatePicker";
 import { EventItem } from "@/src/types/event";
 import { useRouter } from "next/navigation";
+import { useEventFilters } from "@/src/hooks/useEventFilters";
 
 // Mock Data: Sự kiện thịnh hành (Table) - Giữ nguyên mock do chưa có API ranking/finance
 const trendingEvents = [
@@ -34,11 +35,11 @@ export default function HomePage() {
   //   { id: "hn", name: t("location_hn") },
   //   { id: "dn", name: t("location_dn") },
   // ]
+  const { categoriesList } = useEventFilters();
   const genre = [
     { id: "all", name: t("genre_all") },
-    { id: "music", name: t("genre_music") },
-    { id: "workshop", name: t("genre_workshop") },
-  ]
+    ...categoriesList
+  ];
 
   // Filters State
   const [locationSelected, setLocationSelected] = useState<any>({
@@ -231,8 +232,8 @@ export default function HomePage() {
 
         {/* === HERO SECTION === */}
         <div className="relative mb-32">
-          <section className="relative w-full min-h-[600px] flex items-center pt-20 pb-28 bg-gradient-to-br from-bg-subtle to-bg-page overflow-hidden">
-            <div className="container mx-auto px-4 lg:px-12 relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
+          <section className="relative w-full min-h-[600px] flex items-center justify-between pt-20 pb-28 bg-gradient-to-br from-bg-subtle to-bg-page overflow-hidden">
+            <div className="w-full px-[5%] mx-auto relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
 
               {/* Left Content */}
               <div className="lg:w-1/2 w-full flex flex-col items-center lg:items-start text-center lg:text-left pt-10 lg:pt-0">
@@ -372,7 +373,20 @@ export default function HomePage() {
 
               {/* Nút Tìm kiếm */}
               <div className="w-32 md:w-auto mt-2 md:mt-0 h-[50px] flex md:justify-end">
-                <Link href={`/${locale}/user/events`} className="w-full md:w-auto bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg">
+                <Link
+                  href={{
+                    pathname: `/${locale}/user/events`,
+                    query: {
+                      ...(locationSelected?.code !== 'all' && { location: locationSelected.code }),
+                      ...(genreSelected?.id !== 'all' && { genres: genreSelected.id }),
+                      ...(dateSelected && {
+                        fromDate: dateSelected.toISOString().split('T')[0],
+                        toDate: dateSelected.toISOString().split('T')[0]
+                      }),
+                    }
+                  }}
+                  className="w-full md:w-auto bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+                >
                   <Search size={18} />
                   <span>{t('search_button')}</span>
                 </Link>
@@ -382,7 +396,7 @@ export default function HomePage() {
         </div>
 
         {/* === TRENDING EVENTS (Mocked) === */}
-        <section className="container mx-auto px-4">
+        <section className="max-w-[90%] mx-auto px-4">
           <h2 className="text-2xl font-bold text-text-primary mb-6 flex items-center gap-2">
             {t("trending_events")} <TrendingUp className="text-accent" />
           </h2>
@@ -459,7 +473,7 @@ export default function HomePage() {
         </section>
 
         {/* === LATEST / UPCOMING EVENTS (From API) === */}
-        <section className="container mx-auto px-4 mt-16">
+        <section className="max-w-[90%] mx-auto px-4 mt-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-text-primary">{t("upcoming_events")}</h2>
             <Link href={`/${locale}/user/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
@@ -531,7 +545,7 @@ export default function HomePage() {
         </section>
 
         {/* === Livestage EVENTS (From API) === */}
-        <section className="container mx-auto px-4 mt-16">
+        <section className="max-w-[90%] mx-auto px-4 mt-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-text-primary">{t("live_stage_events")}</h2>
             <Link href={`/${locale}/user/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
@@ -603,7 +617,7 @@ export default function HomePage() {
         </section>
 
         {/* === Stage Art EVENTS (From API) === */}
-        <section className="container mx-auto px-4 mt-16">
+        <section className="max-w-[90%] mx-auto px-4 mt-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-text-primary">{t("stage_art_events")}</h2>
             <Link href={`/${locale}/user/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
@@ -675,7 +689,7 @@ export default function HomePage() {
         </section>
 
         {/* === Workshop EVENTS (From API) === */}
-        <section className="container mx-auto px-4 mt-16">
+        <section className="max-w-[90%] mx-auto px-4 mt-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-text-primary">{t("workshop_events")}</h2>
             <Link href={`/${locale}/user/events`} className="text-primary hover:text-primary-hover text-sm font-medium flex items-center gap-1 transition-colors">
@@ -750,4 +764,4 @@ export default function HomePage() {
       <Footer />
     </>
   );
-}
+}

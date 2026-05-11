@@ -82,16 +82,16 @@ export function ChangeShowtimeModal({ isOpen, onClose, event, selectedShowtimeId
 
     return (
         <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-200 ${isClosing ? 'opacity-0' : 'animate-in fade-in'}`}>
-            <div className={`bg-[#2A2359] border border-border-strong rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col relative shadow-2xl ${isClosing ? 'animate-thu-chai' : 'animate-quang-chai'}`}>
+            <div className={`bg-surface border border-border rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col relative shadow-2xl ${isClosing ? 'animate-thu-chai' : 'animate-quang-chai'}`}>
                 <button
-                    className="absolute top-4 right-4 text-text-muted hover:text-text-primary transition-colors hover:bg-white/10 rounded-full p-1"
+                    className="absolute top-4 right-4 text-txt-muted hover:text-txt-primary transition-colors hover:bg-secondary rounded-full p-1"
                     onClick={handleClose}
                 >
                     <X size={24} />
                 </button>
                 <div className="p-6 pb-2 text-center mt-2">
-                    <h3 className="text-2xl font-bold text-text-primary mb-2">{t("change_showtime_title")}</h3>
-                    <p className="text-sm text-text-secondary">{t("change_showtime_subtitle")}</p>
+                    <h3 className="text-2xl font-bold text-txt-primary mb-2">{t("change_showtime_title")}</h3>
+                    <p className="text-sm text-txt-secondary">{t("change_showtime_subtitle")}</p>
                 </div>
 
                 <div className="p-6 overflow-y-auto flex-1 space-y-4 custom-scrollbar">
@@ -99,41 +99,41 @@ export function ChangeShowtimeModal({ isOpen, onClose, event, selectedShowtimeId
                         const isExpanded = expandedShowtimeId === st.showtimeId;
                         const isTempSelected = tempShowtimeId === st.showtimeId;
                         return (
-                            <div key={st.showtimeId} className={`border rounded-xl transition-colors overflow-hidden ${isTempSelected ? 'border-primary' : 'border-border-strong bg-[#201A4A]'}`}>
+                            <div key={st.showtimeId} className={`border rounded-xl transition-colors overflow-hidden ${isTempSelected ? 'border-primary' : 'border-border bg-secondary/30'}`}>
                                 <div
-                                    className="p-5 flex gap-4 justify-between items-center cursor-pointer hover:bg-white/5"
+                                    className="p-5 flex gap-4 justify-between items-center cursor-pointer hover:bg-secondary/50"
                                     onClick={() => setExpandedShowtimeId(isExpanded ? null : st.showtimeId)}
                                 >
                                     <div>
-                                        <div className="font-bold text-text-primary text-base">
+                                        <div className="font-bold text-txt-primary text-base">
                                             {formatShowtimeDate(st.startDatetime)}
                                         </div>
-                                        <div className="text-sm text-text-secondary mt-1">
+                                        <div className="text-sm text-txt-secondary mt-1">
                                             {formatTime(st.startDatetime)} - {formatTime(st.endDatetime)}
                                         </div>
                                     </div>
-                                    <div className="text-text-muted">
+                                    <div className="text-txt-muted">
                                         {isExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
                                     </div>
                                 </div>
 
                                 {isExpanded && (
-                                    <div className="p-5 pt-0 mt-2 flex flex-col border-t border-border-strong/50">
+                                    <div className="p-5 pt-0 mt-2 flex flex-col border-t border-border/50">
                                         <div className="pt-4 grid grid-cols-[140px_1fr] gap-y-3 text-sm">
-                                            <div className="text-text-secondary">{t("estimated_duration")}</div>
-                                            <div className="text-text-primary">{getDuration(st.startDatetime, st.endDatetime)}</div>
+                                            <div className="text-txt-secondary">{t("estimated_duration")}</div>
+                                            <div className="text-txt-primary">{getDuration(st.startDatetime, st.endDatetime)}</div>
 
-                                            <div className="text-text-secondary">{t("venue")}</div>
-                                            <div className="text-text-primary">{st.venue || event.venue}</div>
+                                            <div className="text-txt-secondary">{t("venue")}</div>
+                                            <div className="text-txt-primary">{st.venue || event.venue}</div>
 
-                                            <div className="text-text-secondary">{t("address")}</div>
-                                            <div className="text-text-primary">{st.address || event.address}</div>
+                                            <div className="text-txt-secondary">{t("address")}</div>
+                                            <div className="text-txt-primary">{st.address || event.address}</div>
 
-                                            <div className="text-text-secondary">{t("checkin_area")}</div>
-                                            <div className="text-text-primary">{t("main_hall")}</div>
+                                            <div className="text-txt-secondary">{t("checkin_area")}</div>
+                                            <div className="text-txt-primary">{t("main_hall")}</div>
                                         </div>
                                         <button
-                                            className={`mt-6 px-6 py-2.5 rounded-button-radius text-sm font-semibold max-w-fit transition-colors shadow-sm ${isTempSelected ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-transparent hover:bg-white/10 text-text-primary border border-border-strong'}`}
+                                            className={`mt-6 px-6 py-2.5 rounded-button-radius text-sm font-semibold max-w-fit transition-colors shadow-sm ${isTempSelected ? 'bg-secondary text-txt-muted cursor-not-allowed border border-border' : 'bg-transparent hover:bg-secondary text-txt-primary border border-border'}`}
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 setTempShowtimeId(st.showtimeId);
@@ -149,17 +149,17 @@ export function ChangeShowtimeModal({ isOpen, onClose, event, selectedShowtimeId
                     })}
                 </div>
 
-                <div className="bg-[#1D1743] p-6 border-t border-[#3B3474] flex gap-4 items-center flex-col">
-                    <p className="text-[#CBA853] text-sm font-medium">{t("change_showtime_warning")}</p>
+                <div className="bg-secondary/20 p-6 border-t border-border flex gap-4 items-center flex-col">
+                    <p className="text-warning text-sm font-medium">{t("change_showtime_warning")}</p>
                     <div className="flex gap-4 w-full justify-end mt-2">
                         <button
-                            className="flex-1 py-3 bg-transparent border border-[#3B3474] text-text-secondary rounded-button-radius font-semibold hover:bg-white/5 transition-colors"
+                            className="flex-1 py-3 bg-transparent border border-border text-txt-secondary rounded-button-radius font-semibold hover:bg-secondary transition-colors"
                             onClick={handleClose}
                         >
                             {t("keep_current_showtime")}
                         </button>
                         <button
-                            className="flex-1 py-3 bg-[#6D48D7] text-white rounded-button-radius font-semibold hover:bg-[#5b3bb8] transition-colors"
+                            className="flex-1 py-3 bg-primary text-button-primary-text-default rounded-button-radius font-semibold hover:bg-primary-hover transition-colors"
                             onClick={handleConfirm}
                         >
                             {t("confirm_change_showtime")}

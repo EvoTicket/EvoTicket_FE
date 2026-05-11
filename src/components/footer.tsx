@@ -11,7 +11,7 @@ export function Footer() {
 
   return (
     <footer className="bg-secondary text-text-secondary transition-colors duration-300 text-sm pt-12">
-      <div className="container mx-auto px-4">
+      <div className="max-w-[90%] mx-auto px-4">
 
         {/* === TOP SECTION: 5 CỘT === */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
