@@ -1,12 +1,1 @@
-import { EventEditForm } from "@/src/components/organizer/EventEditForm";
-import { EventSectionPanel } from "@/src/components/organizer/EventSectionPanel";
-
-export default function EventEditPage() {
-  return (
-    <div className="flex flex-col gap-6">
-      <EventSectionPanel title="Event Edit" subtitle="Cập nhật thông tin sự kiện và gửi lại để admin review nếu cần">
-        <EventEditForm />
-      </EventSectionPanel>
-    </div>
-  );
-}
+export { default } from "@/src/features/organizer/pages/EventEditPage";
