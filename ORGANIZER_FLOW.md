@@ -134,6 +134,7 @@ Visual truth:
 - `design-references/screens/hub`: Organizer Hub screenshots.
 - `design-references/screens/event-detail`: Event Detail Workspace screenshots.
 - `design-references/screens/create-event`: Create Event Wizard screenshots.
+- In the current checkout, Create Event screenshots are located under `design-references/organizer/screens/event-detail/Create-Event-*.png`.
 
 Reference-only code:
 
@@ -162,7 +163,7 @@ Existing routes:
 - `src/app/[locale]/organizer/reports/page.tsx`: Organizer-level reports.
 - `src/app/[locale]/organizer/terms/page.tsx`: Organizer terms and policies.
 - `src/app/[locale]/organizer/account/page.tsx`: Organizer account/profile.
-- `src/app/[locale]/organizer/events/create/page.tsx`: Current create event page, to become a five-step wizard.
+- `src/app/[locale]/organizer/(create-flow)/events/create/page.tsx`: Focused Create Event Wizard without workspace sidebar.
 - `src/app/[locale]/organizer/register/page.tsx`: Organizer registration.
 
 Planned Event Detail Workspace routes:
@@ -370,6 +371,124 @@ Submit result:
 - Show "Pending admin review" state.
 - Link back to Organizer Hub and the Event Detail Workspace overview.
 
+## Create Event Wizard Fix Plan
+
+Current route path:
+
+- The create event page currently lives at `src/app/[locale]/organizer/(workspace)/events/create/page.tsx`.
+- Because it is inside `(workspace)`, it inherits `src/app/[locale]/organizer/(workspace)/layout.tsx`, which renders `OrganizerSidebar`, `OrganizerHeader`, and the workspace scroll container.
+
+Why the sidebar must be removed:
+
+- The create-event flow is a focused wizard, not a workspace management page.
+- The Figma Create Event screens show a full-width creation surface with a top wizard header, stepper, right-side draft checklist, and footer actions.
+- The Organizer workspace sidebar and event-detail sidebar are not part of this flow and create a misleading navigation context.
+
+New route group plan:
+
+- Move the create route to `src/app/[locale]/organizer/(create-flow)/events/create/page.tsx`.
+- Keep the public URL unchanged: `/${locale}/organizer/events/create`.
+- The `(create-flow)` route group must not render `OrganizerSidebar`, event-detail sidebar navigation, or the workspace left navigation.
+- A `(create-flow)/layout.tsx` is optional and should remain minimal if added; the existing create wizard shell already owns the focused top bar and stepper.
+- Remove the old workspace create route after the move to avoid duplicate route conflicts.
+
+Step 1 event type rule:
+
+- `Offline` is enabled and selected by default.
+- `Online` is visible but disabled.
+- `Hybrid` is visible but disabled.
+- Disabled options must not change wizard state and should expose disabled/ARIA-disabled semantics.
+- Wizard state must always store `eventType: "OFFLINE"` and submit logic must not allow `ONLINE` or `HYBRID`.
+
+Step 1 category chips to add:
+
+- Required field label: `Thể loại sự kiện *`.
+- Supported backend enum-compatible values:
+  - `LIVESTAGE` -> `Nhạc sống / Concert`
+  - `STAGE_ART` -> `Sân khấu / Nghệ thuật`
+  - `WORKSHOP` -> `Workshop / Hội thảo`
+  - `SPORTS` -> `Thể thao`
+  - `EXHIBITION` -> `Triển lãm`
+- Only one category can be selected.
+- Store the selected category in wizard state as `category: "LIVESTAGE" | "STAGE_ART" | "WORKSHOP" | "SPORTS" | "EXHIBITION"`.
+
+Category validation:
+
+- Category is required before Step 1 can advance to Step 2.
+- If missing and the user clicks Next, show an inline error near the category chip group and do not advance.
+- The selected category must be preserved through Back/Next navigation and shown in the Step 5 review screen.
+
+Files to move or modify:
+
+- Move `src/app/[locale]/organizer/(workspace)/events/create/**` to `src/app/[locale]/organizer/(create-flow)/events/create/**`.
+- Modify `useCreateEventWizard.ts` for OFFLINE-only state, category enum state, validation readiness, and API mapping readiness.
+- Modify `components/CreateEventStep1BasicInfo.tsx` for disabled Online/Hybrid options and required category chips.
+- Modify `page.tsx` for Step 1 validation and inline category errors.
+- Modify `components/CreateEventStep5Review.tsx` to show event type and selected category.
+- Keep Organizer CTAs linked to `/${locale}/organizer/events/create`; route groups do not affect the public URL.
+
+## Create Event Wizard Fix Audit
+
+Current Step 1 mismatch:
+
+- The route is correctly under `src/app/[locale]/organizer/(create-flow)/events/create/page.tsx`, so it does not inherit the workspace sidebar.
+- Step 1 currently has image, basic info, location, description, and organizer cards, but validation is partial and only blocks a few fields.
+- Missing or invalid fields are not consistently marked with red field borders or inline messages.
+- The screenshot includes a public-content warning near the event description area; current Step 1 only has an image warning.
+- Offline is selected and Online/Hybrid are visible-disabled, which must be preserved.
+
+Current Step 2 mismatch:
+
+- Step 2 has showtime and ticket creation, but ticket types cannot be edited after creation.
+- Sale-window validation is missing, including required start/end dates and checks against showtime start time.
+- The screenshot shows a warning card for an invalid ticket sale window; current UI only warns when there are no tickets.
+- Inline field errors and focus/scroll-to-first-invalid behavior are missing.
+
+Current Step 3 mismatch:
+
+- The URL slug input is present but has no strict slug validation.
+- The screenshot shows gate rows with edit/delete actions and an add-gate affordance; current UI only has total gate and checker counts.
+- Gate configuration is currently frontend-only and must stay preserved locally until backend endpoints exist.
+
+Current Step 5 mismatch:
+
+- Step 5 has a banner preview, but the screenshot shows both poster and cover previews in the event identity section.
+- Step 5 should include selected category, Offline event type, location, showtime/ticket summaries, slug, gates, and payment readiness.
+- Step 5 should be gated by global wizard validity before submit.
+
+Current progress sidebar mismatch:
+
+- The right-side progress panel currently uses a draft-progress calculation across mixed required fields and does not represent the active step.
+- Expected behavior is current-step progress only: Step 1 public info, Step 2 showtimes/tickets, Step 3 slug/settings/gates, Step 4 settlement, Step 5 global readiness.
+- The user should only be able to advance when the current step validates to 100%.
+
+Files/components to modify:
+
+- `src/app/[locale]/organizer/(create-flow)/events/create/page.tsx`
+- `src/app/[locale]/organizer/(create-flow)/events/create/useCreateEventWizard.ts`
+- `src/app/[locale]/organizer/(create-flow)/events/create/components/CreateEventStep1BasicInfo.tsx`
+- `src/app/[locale]/organizer/(create-flow)/events/create/components/CreateEventStep2Showtimes.tsx`
+- `src/app/[locale]/organizer/(create-flow)/events/create/components/CreateEventStep3Settings.tsx`
+- `src/app/[locale]/organizer/(create-flow)/events/create/components/CreateEventStep5Review.tsx`
+- `src/app/[locale]/organizer/(create-flow)/events/create/components/CreateEventWizardShell.tsx`
+- `src/app/[locale]/organizer/(create-flow)/events/create/components/CreateEventFooterActions.tsx`
+- Add a create-flow validation helper for step validation, progress, first invalid field, and warning detection.
+
+Validation and scrolling behavior to add:
+
+- Centralize validation with `validateStep1`, `validateStep2`, `validateStep3`, `validateStep4`, `validateStep5`, `getStepProgress`, and `getFirstInvalidField`.
+- Add `data-field` attributes for important fields/groups so the page can scroll and focus to the first invalid field.
+- Focus native inputs when possible; focus chip/group containers with `tabIndex={-1}` when the invalid target is a group.
+- Show inline errors and token-based red/error borders after the user tries to continue.
+
+Unsupported backend fields that remain frontend-only for now:
+
+- Gate names/codes/notes and checker planning.
+- Resale policy details, royalty fee, external wallet toggle, and buyer-facing operational notes.
+- Settlement profile selection and reconciliation notes.
+- Seat map usage and seat map image state.
+- Draft progress/checklist metadata and final review readiness indicators.
+
 ## Known Risks
 
 - The requested Figma reference files were not present at the specified paths during this audit; verify the actual design-reference location before screen implementation.
@@ -393,3 +512,81 @@ Submit result:
 - Before full screen implementation, run:
   - `npm run lint`
   - `npm run build` or at minimum `npx tsc --noEmit` if build is too slow.
+
+## Create Event Visual Audit
+
+### Step 1: Thông tin sự kiện
+1. **Overall layout structure**: Full width container with max width, main content on left/center, stepper on top. Stepper: 1 (active) to 5.
+2. **Header/title area**: "Tạo sự kiện - Bước 1 / 5", sub-text about entering info.
+3. **Stepper**: Horizontal stepper at top.
+4. **Main card/section structure**: 
+   - Left column (main form): Three main cards. 1) "Hình ảnh sự kiện" (Poster and Cover), 2) "Thông tin cơ bản" (Name, Tagline, Type, Category), 3) "Địa điểm / nền tảng tổ chức" (Venue name, Province, Ward, Address, Map), 4) "Mô tả sự kiện" (Short summary, Detailed description rich text), 5) "Thông tin ban tổ chức" (Logo, Org name, Intro, Email, Phone).
+   - Right column: "Trạng thái bản nháp" (progress 67% with checklist of poster, cover, etc.), "Yêu cầu hình ảnh" (requirements box).
+   - Sticky footer with "Lưu nháp" and "Tiếp tục".
+5. **Form field groups**: Poster upload, Cover upload. Name, short description, offline/online/hybrid toggle, categories pills. Location dropdowns and map. Description rich text editor. Org contact info.
+6. **Primary/secondary actions**: Header has "Lưu nháp" (top right). Footer has "Lưu nháp" (ghost/secondary) and "Tiếp tục" (primary).
+7. **Empty/upload states**: Poster shows upload zone with "Kéo thả hoặc nhấn để tải lên". Cover is similar.
+8. **Spacing/card hierarchy**: Gap between cards looks like 24px/32px. Cards have surface background (`bg-bg-surface` or similar) with subtle border.
+9. **Components to reuse**: `src/components/MapPicker.tsx` for map, `src/components/ui/dropdown-menu` or select for location. Upload zones.
+
+### Step 2: Suất diễn & Loại vé
+1. **Overall layout structure**: Stepper 2 is active. Top has 4 summary stat cards. Warning banner. Below is split view: Left sidebar for "Danh sách suất diễn", Right panel for "Loại vé của suất diễn".
+2. **Main card/section structure**: 
+   - Stat cards on top.
+   - Left side: "Danh sách suất diễn". "Thêm suất diễn" button. Cards for each showtime.
+   - Right side: Shows tickets for the selected showtime. Button "Tạo loại vé". Table/list of tickets.
+   - Modal/Panel: "Tạo loại vé mới" inline form. Fields: Name, Description, Price, Free ticket toggle, Total quantity, Min/Max per order, Sale start/end date.
+   - Bottom area: "Mô hình chỗ ngồi" card (Toggle use/don't use seat map).
+3. **Components to reuse**: `CustomDatePicker`, `CustomTimePicker` for showtimes and sale dates. Switch component for free tickets and seat map. 
+
+### Step 3: Cài đặt
+1. **Overall layout structure**: Stepper 3 is active.
+2. **Main card/section structure**: 
+   - Left: Form cards. 1) "Công bố sự kiện" 2) "Quy tắc bán vé" 3) "Chính sách resale & blockchain" 4) "Cấu hình vận hành tại cổng" 5) "Hướng dẫn cho người mua".
+   - Right: "Kiểm tra cài đặt" checklist, warnings.
+3. **Form field groups**: Toggles, Textareas, Selects.
+4. **Primary/secondary actions**: Quay lại, Lưu nháp, Tiếp tục.
+
+### Step 4: Hồ sơ thanh toán áp dụng
+1. **Overall layout structure**: Stepper 4 is active.
+2. **Main card/section structure**:
+   - Left: 1) "Hồ sơ hiện tại của tổ chức" 2) "Áp dụng cho sự kiện này" 3) "Ghi chú đối soát" 4) "Trạng thái sẵn sàng" 5) "Quản lý hồ sơ thanh toán".
+   - Right: "Tóm tắt hồ sơ".
+3. **Primary/secondary actions**: Quay lại, Lưu nháp, Tiếp tục.
+
+### Step 5: Review & Submit
+1. **Overall layout structure**: Stepper 5 is active. Final review before submission.
+2. **Main card/section structure**:
+   - Left: Read-only summaries. "Nhận diện sự kiện", "Suất diễn & vé", "Công bố & Resale", "Thanh toán & Pháp lý", "Kiểm tra trước khi gửi".
+   - Bottom footer: "Quay lại chỉnh sửa", "Lưu nháp", "Gửi duyệt sự kiện".
+   - Right: "Kết quả sau khi gửi", "Checklist cuối cùng".
+3. **Primary/secondary actions**: Gửi duyệt sự kiện.
+
+### Submit Success Screen: Pending admin review
+1. **Overall layout structure**: Centered success message in top card, summary cards below.
+2. **Main card/section structure**: 
+   - Top card: Green check icon, "Sự kiện đã được gửi duyệt".
+   - Left column: "Thông tin sự kiện" summary. "Quy trình duyệt sự kiện". "Tiếp theo".
+   - Right column: "Ý nghĩa các trạng thái", "Lưu ý".
+3. **Primary actions**: Vào quản trị sự kiện, Quay về danh sách sự kiện.
+
+### Wizard State Shape (to map to API later)
+- `eventName`, `description`, `venue`, `wardCode`, `provinceCode`, `address`, `eventType`, `category`.
+- `showtimes`: `startDatetime`, `endDatetime`, `ticketTypes`.
+- `ticketTypes`: `typeName`, `description`, `price`, `quantityTotal`, `minPurchase`, `maxPurchase`, `saleStartDate`, `saleEndDate`.
+- Images: `bannerImage`, `thumbnailImage`, `seatMapImage`.
+
+### Unsupported UI Fields (Pending backend support)
+- Resale price cap, resale policy, refund policy, checker assignment rule, settlement/bank info, team permissions, advanced approval workflow. Keep in local state for UI completeness.
+
+## Create Event Wizard Implemented Fixes
+
+- Step 1 now includes the public-content warning card near the event description area. Required fields use inline error messages, token-based error borders, and first-invalid scroll/focus behavior when the user tries to continue.
+- Event type remains OFFLINE-only. Offline is enabled and selected; Online and Hybrid remain visible but disabled and cannot change wizard state.
+- Step 2 validates showtime start/end, ticket names, quantities, purchase limits, sale windows, and sale-end timing against showtime start. Invalid sale windows block progress, while suspicious timing can surface a warning card.
+- Ticket types can be created, edited, saved, cancelled, and deleted per showtime. Editing preserves the local ticket id and updates the existing ticket instead of duplicating it.
+- Step 3 validates the public slug with `^[a-z0-9]+(?:-[a-z0-9]+)*$`, blocks uppercase, accents, spaces, underscores, URL strings, special characters, leading/trailing hyphens, and consecutive hyphens.
+- Step 3 now supports frontend-only gate add/edit/delete behavior. Gate name is required, and gate code accepts uppercase letters, numbers, and hyphens with no spaces.
+- Step 5 now shows poster and cover previews from local file state, falls back to placeholders when images are missing, and includes configured gates in the review summary.
+- The right-side progress panel now reports progress for the current step only through `getStepProgress(step, wizardState)`. Navigation validates the active step and blocks Next/Submit until that step is complete.
+- Unsupported backend fields remain frontend-only for now: gate configuration, resale settings, refund policy details, checker assignment preferences, buyer guidance, settlement profile selection, and review warnings.
