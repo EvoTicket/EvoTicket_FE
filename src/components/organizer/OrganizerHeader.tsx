@@ -23,14 +23,14 @@ export function OrganizerHeader() {
                     <input 
                         type="text" 
                         placeholder="Tìm nhanh sự kiện, đơn hàng..." 
-                        className="block w-full pl-10 pr-4 py-2 bg-bg-surface border border-border-default rounded-full text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
+                        className="block w-full pl-10 pr-4 py-2 bg-bg-surface border border-border-default rounded-full text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-1 focus:ring-focus-ring focus:border-field-border-focus transition-colors"
                     />
                 </div>
             </div>
 
             {/* Right side: Actions */}
             <div className="flex items-center gap-4">
-                <Link href={`/${locale}/organizer/events/create`} className="flex items-center gap-2 bg-button-primary-bg-defaul hover:bg-button-primary-bg-defaul-hover text-button-primary-text-default px-4 py-2 rounded-lg font-medium transition-colors shadow-sm text-sm">
+                <Link href={`/${locale}/organizer/events/create`} className="flex items-center gap-2 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2 rounded-lg font-medium transition-colors shadow-sm text-sm">
                     <Plus size={16} />
                     Tạo sự kiện
                 </Link>
@@ -41,7 +41,7 @@ export function OrganizerHeader() {
                 </button>
 
                 <div className="flex items-center gap-3 pl-4 border-l border-border-default cursor-pointer hover:opacity-80 transition-opacity">
-                    <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary font-bold">
+                    <div className="w-10 h-10 rounded-lg bg-action-brand-bg-default/10 flex items-center justify-center text-action-brand-bg-default font-bold">
                         HN
                     </div>
                     <div className="hidden md:block">

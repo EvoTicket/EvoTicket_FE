@@ -42,7 +42,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ThemeProvider
               attribute="class"
-              defaultTheme="light"
+              defaultTheme="dark"
               enableSystem
             >
               <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>

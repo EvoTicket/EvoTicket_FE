@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
 import Cookies from "js-cookie";
 import {
-    Calendar, MapPin, DollarSign, Image as ImageIcon,
+    Calendar, Image as ImageIcon,
     Plus, Trash2, Save, Info, Tag
 } from "lucide-react";
 
@@ -33,6 +33,15 @@ interface TicketTypeInput {
     saleStartDate: string;
     saleEndDate: string;
     ticketTypeStatus: string;
+}
+
+function getApiErrorMessage(error: unknown) {
+    if (typeof error === "object" && error !== null && "response" in error) {
+        const response = (error as { response?: { data?: { message?: string } } }).response;
+        return response?.data?.message;
+    }
+
+    return undefined;
 }
 
 export default function CreateEventPage() {
@@ -82,23 +91,6 @@ export default function CreateEventPage() {
         ticketTypeStatus: "AVAILABLE"
     }]);
 
-    // Initial Data Fetch
-    useEffect(() => {
-        fetchCategories();
-        fetchProvinces();
-    }, []);
-
-    // Update tickets dates when event dates change (helper)
-    useEffect(() => {
-        if (formData.startDatetime && formData.endDatetime) {
-            setTicketTypes(prev => prev.map(t => ({
-                ...t,
-                saleStartDate: t.saleStartDate || new Date().toISOString().slice(0, 16),
-                saleEndDate: t.saleEndDate || formData.startDatetime
-            })));
-        }
-    }, [formData.startDatetime, formData.endDatetime]);
-
     const fetchCategories = async () => {
         try {
             const token = Cookies.get("token");
@@ -143,6 +135,15 @@ export default function CreateEventPage() {
             console.error("Wards API error", error);
         }
     };
+
+    // Initial Data Fetch
+    useEffect(() => {
+        const loadInitialData = async () => {
+            await Promise.all([fetchCategories(), fetchProvinces()]);
+        };
+
+        void loadInitialData();
+    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -202,7 +203,7 @@ export default function CreateEventPage() {
         }
     };
 
-    const handleTicketChange = (index: number, field: keyof TicketTypeInput, value: any) => {
+    const handleTicketChange = (index: number, field: keyof TicketTypeInput, value: string | number) => {
         const newTickets = [...ticketTypes];
         newTickets[index] = { ...newTickets[index], [field]: value };
         setTicketTypes(newTickets);
@@ -303,9 +304,9 @@ export default function CreateEventPage() {
                 toast.error(response.data.message || "Có lỗi xảy ra");
             }
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Create event error", error);
-            toast.error(error.response?.data?.message || "Không thể tạo sự kiện");
+            toast.error(getApiErrorMessage(error) || "Không thể tạo sự kiện");
         } finally {
             setLoading(false);
         }
@@ -391,7 +392,7 @@ export default function CreateEventPage() {
                                         className="w-full p-2 border border-border-default rounded-lg 	bg-bg-surface focus:ring-2 focus:ring-primary focus:outline-none"
                                     >
                                         <option value={0}>Chọn danh mục</option>
-                                        {categories.map((c: any) => (
+                                        {categories.map((c) => (
                                             <option key={c.id} value={c.id}>{c.categoryName}</option>
                                         ))}
                                     </select>
@@ -456,7 +457,7 @@ export default function CreateEventPage() {
                                         className="w-full p-2 border border-border-default rounded-lg 	bg-bg-surface"
                                     >
                                         <option value={0}>Chọn tỉnh/thành</option>
-                                        {provinces.map((p: any) => (
+                                        {provinces.map((p) => (
                                             <option key={p.code} value={p.code}>{p.name}</option>
                                         ))}
                                     </select>
@@ -470,7 +471,7 @@ export default function CreateEventPage() {
                                         disabled={!formData.provinceCode}
                                     >
                                         <option value={0}>Chọn phường/xã</option>
-                                        {wards.map((w: any) => (
+                                        {wards.map((w) => (
                                             <option key={w.code} value={w.code}>{w.name}</option>
                                         ))}
                                     </select>

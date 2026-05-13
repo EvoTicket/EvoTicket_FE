@@ -53,3 +53,6 @@ package-lock.json
 .agent/rules
 .agent/rules/*
 .agent/rules/**
+
+# design references
+/design-references
