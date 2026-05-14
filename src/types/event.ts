@@ -22,6 +22,7 @@ export interface EventItem {
     volume24H?: number;
     hotness?: number;
     organizerName?: string;
+    ticketAvailabilityStatus?: string;
 }
 
 export interface Province {
@@ -110,4 +111,5 @@ export interface EventDetail {
 
     // Khai báo thêm thuộc tính fallback phía giao diện
     hasSeatMap?: boolean | null;
+    ticketAvailabilityStatus?: string;
 }

@@ -13,19 +13,14 @@ import { CustomDatePicker } from "@/src/components/ui/CustomDatePicker";
 import { EventItem } from "@/src/types/event";
 import { useRouter } from "next/navigation";
 import { useEventFilters } from "@/src/hooks/useEventFilters";
+import { TICKET_AVAILABILITY_OPTIONS } from "@/src/constants/eventFilters";
 
-// Mock Data: Sự kiện thịnh hành (Table) - Giữ nguyên mock do chưa có API ranking/finance
-const trendingEvents = [
-  { id: 1, rank: "01", title: "Nhà Gia Tiên", organizer: "Tên nhà tổ chức", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "+125%" },
-  { id: 2, rank: "02", title: "[BẾN THÀNH] Đêm Nhạc", organizer: "Space Speakers", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "+125%" },
-  { id: 3, rank: "03", title: "Concert Chillies", organizer: "SpaceSpeakers", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "-12%" },
-  { id: 4, rank: "04", title: "Concert Chillies", organizer: "SpaceSpeakers", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "+1%" },
-  { id: 5, rank: "05", title: "Concert Chillies", organizer: "SpaceSpeakers", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "+125%" },
-];
+
 
 export default function HomePage() {
   const { locale } = useParams();
   const t = useTranslations("Homepage");
+  const te = useTranslations("Events");
   const router = useRouter();
 
   // const location = [
@@ -59,6 +54,13 @@ export default function HomePage() {
   const [loadingEvents, setLoadingEvents] = useState(true);
 
 
+
+  // Helper to map ticket status
+  const getTicketStatusLabel = (status?: string) => {
+    if (!status) return t("event_default");
+    const option = TICKET_AVAILABILITY_OPTIONS.find(opt => opt.id === status);
+    return option ? te(option.translationKey as any) : status;
+  };
 
   // Fetch Latest Events
   useEffect(() => {
@@ -525,7 +527,7 @@ export default function HomePage() {
                         </div>
                       )}
                       <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-button-primary-text-default text-xs px-2 py-1 rounded">
-                        {event.categoryName || t("event_default")}
+                        {getTicketStatusLabel(event.ticketAvailabilityStatus)}
                       </div>
                     </div>
 
@@ -601,7 +603,7 @@ export default function HomePage() {
                         </div>
                       )}
                       <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-button-primary-text-default text-xs px-2 py-1 rounded">
-                        {event.categoryName || t("event_default")}
+                        {getTicketStatusLabel(event.ticketAvailabilityStatus)}
                       </div>
                     </div>
 
@@ -677,7 +679,7 @@ export default function HomePage() {
                         </div>
                       )}
                       <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-button-primary-text-default text-xs px-2 py-1 rounded">
-                        {event.categoryName || t("event_default")}
+                        {getTicketStatusLabel(event.ticketAvailabilityStatus)}
                       </div>
                     </div>
 
@@ -753,7 +755,7 @@ export default function HomePage() {
                         </div>
                       )}
                       <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-button-primary-text-default text-xs px-2 py-1 rounded">
-                        {event.categoryName || t("event_default")}
+                        {getTicketStatusLabel(event.ticketAvailabilityStatus)}
                       </div>
                     </div>
 

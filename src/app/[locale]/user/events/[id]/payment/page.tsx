@@ -234,36 +234,36 @@ export default function PaymentPage() {
     };
 
     const createOrder = async () => {
-        // if (!validateForm()) return;
-        // try {
+        if (!validateForm()) return;
+        try {
 
-        //     const response = await api.post(`/order-service/api/v1/orders`, {
-        //         bookingSessionId,
-        //         paymentMethod: paymentMethod.toUpperCase(),
-        //         fullName,
-        //         phoneNumber: phone,
-        //         email,
-        //         voucherCodes: appliedVoucherCode ? [appliedVoucherCode] : []
-        //     });
+            const response = await api.post(`/order-service/api/v1/orders`, {
+                bookingSessionId,
+                paymentMethod: paymentMethod.toUpperCase(),
+                fullName,
+                phoneNumber: phone,
+                email,
+                voucherCodes: appliedVoucherCode
+            });
 
-        //     if (response.data && response.data.data) {
-        //         const data = response.data.data;
-        //         if (data.redirectUrl) {
-        //             window.location.href = data.redirectUrl;
-        //         }
-        //     }
-        // } catch (error) {
-        //     console.error("Failed to create order", error);
-        // }
-        console.log({
-            bookingSessionId,
-            paymentMethod: paymentMethod.toUpperCase(),
-            fullName,
-            phoneNumber: phone,
-            email,
-            voucherCodes: appliedVoucherCode
-        });
-        router.push(`/${locale}/user/events/${id}/payment/result?status=PAID&orderCode=120526626521`);
+            if (response.data && response.data.data) {
+                const data = response.data.data;
+                if (data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                }
+            }
+        } catch (error) {
+            console.error("Failed to create order", error);
+        }
+        // console.log({
+        //     bookingSessionId,
+        //     paymentMethod: paymentMethod.toUpperCase(),
+        //     fullName,
+        //     phoneNumber: phone,
+        //     email,
+        //     voucherCodes: appliedVoucherCode
+        // });
+        // router.push(`/${locale}/user/events/${id}/payment/result?status=PAID&orderCode=120526626521`);
     }
 
 
