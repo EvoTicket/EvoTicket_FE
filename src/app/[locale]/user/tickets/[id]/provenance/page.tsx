@@ -350,7 +350,7 @@ export default function ProvenancePage() {
                                             <div className="border border-border-default rounded p-3 bg-bg-page">
                                                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 text-[11px]">
                                                     <div className="sm:col-span-3 text-text-muted">{t("status")}:</div>
-                                                    <div className="sm:col-span-9 font-medium">{t(item.details.status)}</div>
+                                                    <div className="sm:col-span-9 font-medium">{item.details.status ? t(item.details.status) : ""}</div>
                                                 </div>
                                             </div>
                                         )}
