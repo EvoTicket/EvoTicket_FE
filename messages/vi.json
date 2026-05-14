@@ -257,6 +257,7 @@
     "view_conditions": "Xem điều kiện"
   },
   "Payment": {
+    "processing": "Đang xử lý...",
     "contact_info_title": "Thông tin liên hệ",
     "fullname_label": "Họ và tên",
     "fullname_placeholder": "Nguyen Van A",
@@ -321,7 +322,7 @@
     "receipt_email_label": "Email nhận vé",
     "nft_issuing_note": "NFT ticket đang được phát hành ở nền. Bạn vẫn có thể theo dõi trạng thái trong Ví của tôi.",
     "view_ticket_detail": "Xem chi tiết vé",
-    "view_ticket_list": "Xem danh sách vé",
+    "view_ticket_list": "Xem vé của tôi",
     "back_to_homepage": "Về trang chủ",
     "pending_title": "Đang xác nhận thanh toán",
     "pending_desc": "Chúng tôi đang kiểm tra kết quả từ cổng thanh toán. Vui lòng không đóng trang trong lúc hệ thống xác nhận giao dịch.",

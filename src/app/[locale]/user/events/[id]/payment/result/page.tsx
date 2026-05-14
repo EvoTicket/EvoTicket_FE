@@ -159,8 +159,12 @@ function PaymentResultContent() {
                         </div>
 
                         <div className="w-full space-y-3">
-                            <button className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors">{tr('view_ticket_detail')}</button>
-                            <button className="w-full py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-button-radius font-semibold transition-colors">{tr('view_ticket_list')}</button>
+                            <button
+                                className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors"
+                                onClick={() => router.push(`/${locale}/user/tickets`)}
+                            >
+                                {tr('view_ticket_list')}
+                            </button>
                             <button
                                 className="w-full py-3 bg-transparent border border-border-strong hover:bg-bg-subtle text-text-secondary rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/homepage`)}
@@ -428,28 +432,34 @@ function PaymentResultContent() {
                     </div>
 
                     {/* STEPPER */}
-                    <div className="mt-8 flex flex-col md:flex-row items-center justify-between bg-card-bg-elevated border border-border-default rounded-xl p-4">
-                        <div className="flex items-center w-full md:w-auto mb-4 md:mb-0">
+                    <div className="mt-8 flex flex-col md:flex-row items-center justify-between bg-card-bg-elevated border border-border-default rounded-xl p-4 px-6">
+                        <div className="flex items-center w-full mb-4 md:mb-0">
                             {/* Step 1 - Done */}
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-shrink-0">
                                 <div className="w-8 h-8 rounded-full bg-[#1e463a] border border-[#2bad7f] text-[#2bad7f] flex items-center justify-center font-bold text-sm">
                                     <Check size={16} />
                                 </div>
-                                <span className="text-sm font-bold text-text-primary">{tb('step_1')}</span>
+                                <span className="text-sm font-bold text-text-primary whitespace-nowrap">{tb('step_1')}</span>
                             </div>
-                            <div className="h-[1px] w-12 md:w-24 bg-[#2bad7f] mx-4 opacity-50"></div>
+                            <div className="h-[1px] flex-1 bg-[#2bad7f] mx-4 opacity-50"></div>
                             {/* Step 2 - Done */}
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-shrink-0">
                                 <div className="w-8 h-8 rounded-full bg-[#1e463a] border border-[#2bad7f] text-[#2bad7f] flex items-center justify-center font-bold text-sm">
                                     <Check size={16} />
                                 </div>
-                                <span className="text-sm font-bold text-text-primary">{tb('step_2')}</span>
+                                <span className="text-sm font-bold text-text-primary whitespace-nowrap">{tb('step_2')}</span>
                             </div>
-                            <div className="h-[1px] w-12 md:w-24 bg-[#2bad7f] mx-4 opacity-50"></div>
-                            {/* Step 3 - Active */}
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-bg-surface border border-primary text-primary flex items-center justify-center font-bold text-sm">3</div>
-                                <span className="text-sm font-bold text-text-primary">{tb('step_3')}</span>
+                            <div className={`h-[1px] flex-1 mx-4 opacity-50 ${(status === 'SUCCESS' || status === 'CANCELLED') ? 'bg-[#2bad7f]' : 'bg-[#ad2b2b]'}`}></div>
+                            {/* Step 3 - Status based */}
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                                    (status === 'SUCCESS' || status === 'CANCELLED')
+                                        ? 'bg-[#1e463a] border border-[#2bad7f] text-[#2bad7f]'
+                                        : 'bg-[#461e1e] border border-[#ad2b2b] text-[#ad2b2b]'
+                                }`}>
+                                    {(status === 'SUCCESS' || status === 'CANCELLED') ? <Check size={16} /> : <X size={16} />}
+                                </div>
+                                <span className="text-sm font-bold text-text-primary whitespace-nowrap">{tb('step_3')}</span>
                             </div>
                         </div>
 

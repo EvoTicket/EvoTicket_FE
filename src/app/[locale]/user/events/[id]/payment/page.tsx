@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import api from "@/src/lib/axios";
 import { Header } from "@/src/components/header";
 import { Footer } from "@/src/components/footer";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, Loader2 } from "lucide-react";
 import { EventDetail } from "@/src/types/event";
 import { OdometerDigit } from "@/src/components/ui/odoMeterDigit";
 import { isValidEmail, isValidPhone, isValidFullName } from "@/src/lib/validations";
@@ -43,6 +43,7 @@ export default function PaymentPage() {
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [checkedInfo, setCheckedInfo] = useState(false);
     const [understoodTime, setUnderstoodTime] = useState(false);
+    const [isCreatingOrder, setIsCreatingOrder] = useState(false);
 
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -235,8 +236,8 @@ export default function PaymentPage() {
 
     const createOrder = async () => {
         if (!validateForm()) return;
+        setIsCreatingOrder(true);
         try {
-
             const response = await api.post(`/order-service/api/v1/orders`, {
                 bookingSessionId,
                 paymentMethod: paymentMethod.toUpperCase(),
@@ -254,14 +255,16 @@ export default function PaymentPage() {
             }
         } catch (error) {
             console.error("Failed to create order", error);
+            setIsCreatingOrder(false);
         }
+
         // console.log({
         //     bookingSessionId,
         //     paymentMethod: paymentMethod.toUpperCase(),
         //     fullName,
         //     phoneNumber: phone,
         //     email,
-        //     voucherCodes: appliedVoucherCode
+        //     voucherCode: appliedVoucherCode
         // });
         // router.push(`/${locale}/user/events/${id}/payment/result?status=PAID&orderCode=120526626521`);
     }
@@ -680,11 +683,18 @@ export default function PaymentPage() {
                                 </p>
 
                                 <button
-                                    className={`w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm mb-3 ${!(agreedToTerms && checkedInfo && understoodTime) ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-[#6D48D7] hover:bg-[#5b3bb8] text-white'}`}
-                                    disabled={!(agreedToTerms && checkedInfo && understoodTime)}
+                                    className={`w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm mb-3 ${!(agreedToTerms && checkedInfo && understoodTime) || isCreatingOrder ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-[#6D48D7] hover:bg-[#5b3bb8] text-white'}`}
+                                    disabled={!(agreedToTerms && checkedInfo && understoodTime) || isCreatingOrder}
                                     onClick={() => createOrder()}
                                 >
-                                    {tp('pay_now')}
+                                    {isCreatingOrder ? (
+                                        <div className="flex items-center justify-center gap-2">
+                                            <Loader2 size={20} className="animate-spin" />
+                                            {tp('processing')}
+                                        </div>
+                                    ) : (
+                                        tp('pay_now')
+                                    )}
                                 </button>
 
                                 <button

@@ -257,6 +257,7 @@
     "payment_method_note": "Select a method to continue payment through the secure payment gateway."
   },
   "Payment": {
+    "processing": "Processing...",
     "contact_info_title": "Contact Information",
     "fullname_label": "Full Name",
     "fullname_placeholder": "John Doe",
@@ -321,7 +322,7 @@
     "receipt_email_label": "Receipt Email",
     "nft_issuing_note": "NFT ticket is being issued in the background. You can still track the status in My Wallet.",
     "view_ticket_detail": "View Ticket Details",
-    "view_ticket_list": "View Ticket List",
+    "view_ticket_list": "View my tickets",
     "back_to_homepage": "Back to Homepage",
     "pending_title": "Confirming Payment",
     "pending_desc": "We are checking results from the payment gateway. Please do not close the page while the system confirms the transaction.",
