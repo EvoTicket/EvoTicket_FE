@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import Cookies from "js-cookie";
 import api from "@/src/lib/axios";
 import { Header } from "@/src/components/header";
 import { Footer } from "@/src/components/footer";
@@ -12,12 +11,14 @@ import { ArrowLeft, Check } from "lucide-react";
 import { EventDetail } from "@/src/types/event";
 import { OdometerDigit } from "@/src/components/ui/odoMeterDigit";
 import { isValidEmail, isValidPhone, isValidFullName } from "@/src/lib/validations";
+import { toast } from "react-toastify";
 
 export default function PaymentPage() {
     const { locale, id } = useParams();
     const router = useRouter();
     const tb = useTranslations("Booking");
     const tp = useTranslations("Payment");
+    const tr = useTranslations("Result");
 
     const [event, setEvent] = useState<EventDetail | null>(null);
     const [loading, setLoading] = useState(true);
@@ -34,7 +35,9 @@ export default function PaymentPage() {
     const [email, setEmail] = useState("");
 
     const [discountCode, setDiscountCode] = useState("");
-    const [appliedDiscount, setAppliedDiscount] = useState(50000);
+    const [appliedDiscount, setAppliedDiscount] = useState(0);
+    const [isApplyingVoucher, setIsApplyingVoucher] = useState(false);
+    const [appliedVoucherCode, setAppliedVoucherCode] = useState<string | null>(null);
     const [paymentMethod, setPaymentMethod] = useState("payos");
 
     const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -107,13 +110,21 @@ export default function PaymentPage() {
         };
     }, [id]);
 
+    useEffect(() => {
+        if (timeLeft === 0 && !loading) {
+            toast.warning(tb('timeout_message'));
+            sessionStorage.removeItem('booking_session_ID');
+            router.push(`/${locale}/user/events/${id}`);
+        }
+    }, [timeLeft, loading, id, locale, router, tb]);
+
     const fetchData = async (eventId: string, sessionId: string) => {
         setLoading(true);
         try {
             // Chỉ gọi API reservation để lấy toàn bộ thông tin cần thiết
             const resResponse = await api.get(`/inventory-service/api/reservations/${sessionId}`);
 
-            if (resResponse.data && resResponse.data.data) {
+            if (resResponse.data && resResponse.data.status === 200) {
                 const { remainingSeconds, sessionData } = resResponse.data.data;
 
                 // Cập nhật thông tin "sự kiện" từ sessionData
@@ -121,8 +132,8 @@ export default function PaymentPage() {
                     setEvent({
                         id: eventId,
                         eventId: eventId,
-                        eventName: sessionData.eventName || "Sự kiện",
-                        venue: sessionData.venue || "Chưa xác định",
+                        eventName: sessionData.eventName || tb('event_default'),
+                        venue: sessionData.venue || tb('not_updated'),
                         // Map thêm các trường cần thiết cho UI
                         startDatetime: sessionData.time,
                     } as any);
@@ -132,7 +143,7 @@ export default function PaymentPage() {
                         const mappedTickets = sessionData.items.map((item: any) => {
                             return {
                                 id: item.ticketTypeId,
-                                name: item.ticketTypeName || "Vé", // Giả định backend trả thêm name/price hoặc UI sẽ dùng dữ liệu cũ
+                                name: item.ticketTypeName || tb('ticket_default'), // Giả định backend trả thêm name/price hoặc UI sẽ dùng dữ liệu cũ
                                 price: item.price || 0,
                                 quantity: item.qty
                             };
@@ -146,8 +157,13 @@ export default function PaymentPage() {
                     setTimeLeft(remainingSeconds);
                 }
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to fetch reservation data", error);
+            const errorData = error.response?.data;
+            if (error.response?.status === 404 || errorData?.code === "BOOKING_SESSION_NOT_FOUND") {
+                toast.error(tp('error_booking_session_not_found') || "Phiên đặt vé đã hết hạn hoặc không tồn tại");
+                router.push(`/${locale}/user/events/${eventId}`);
+            }
         } finally {
             setLoading(false);
         }
@@ -188,40 +204,79 @@ export default function PaymentPage() {
         });
     };
 
-    const createOrder = async () => {
-        if (!validateForm()) return;
-        try {
+    const handleApplyVoucher = async () => {
+        if (!discountCode.trim()) {
+            toast.error(tp('error_voucher_required') || "Vui lòng nhập mã giảm giá");
+            return;
+        }
 
-            const response = await api.post(`/order-service/api/v1/orders`, {
-                bookingSessionId,
-                paymentMethod: paymentMethod.toUpperCase(),
-                fullName,
-                phoneNumber: phone,
-                email,
-                voucherIds: []
+        setIsApplyingVoucher(true);
+        try {
+            const response = await api.post(`/order-service/api/v1/vouchers/apply-voucher`, {
+                voucherCode: discountCode.toUpperCase(),
+                sessionId: bookingSessionId
             });
 
             if (response.data && response.data.data) {
-                const data = response.data.data;
-                if (data.redirectUrl) {
-                    window.location.href = data.redirectUrl;
-                }
+                const { discountAmount, voucherCode } = response.data.data;
+                setAppliedDiscount(discountAmount);
+                setAppliedVoucherCode(voucherCode);
+                toast.success(tp('voucher_applied_success') || "Áp dụng mã giảm giá thành công");
+            } else {
+                toast.error(response.data?.message || "Mã giảm giá không hợp lệ");
             }
-        } catch (error) {
-            console.error("Failed to create order", error);
+        } catch (error: any) {
+            console.error("Failed to apply voucher", error);
+            toast.error(error.response?.data?.message || "Lỗi khi áp dụng mã giảm giá");
+        } finally {
+            setIsApplyingVoucher(false);
         }
+    };
+
+    const createOrder = async () => {
+        // if (!validateForm()) return;
+        // try {
+
+        //     const response = await api.post(`/order-service/api/v1/orders`, {
+        //         bookingSessionId,
+        //         paymentMethod: paymentMethod.toUpperCase(),
+        //         fullName,
+        //         phoneNumber: phone,
+        //         email,
+        //         voucherCodes: appliedVoucherCode ? [appliedVoucherCode] : []
+        //     });
+
+        //     if (response.data && response.data.data) {
+        //         const data = response.data.data;
+        //         if (data.redirectUrl) {
+        //             window.location.href = data.redirectUrl;
+        //         }
+        //     }
+        // } catch (error) {
+        //     console.error("Failed to create order", error);
+        // }
+        console.log({
+            bookingSessionId,
+            paymentMethod: paymentMethod.toUpperCase(),
+            fullName,
+            phoneNumber: phone,
+            email,
+            voucherCodes: appliedVoucherCode
+        });
+        router.push(`/${locale}/user/events/${id}/payment/result?status=PAID&orderCode=120526626521`);
     }
 
 
-    const serviceFee = 2000;
+    // const serviceFee = 2000;
     const ticketTotal = selectedTickets.reduce((sum, t) => sum + t.price * t.quantity, 0);
-    const subTotal = ticketTotal + serviceFee;
+    const subTotal = ticketTotal;
     const finalTotal = subTotal - appliedDiscount;
 
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-bg-surface">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                <p className="ml-4 text-text-secondary">{tr('loading_result')}</p>
             </div>
         );
     }
@@ -312,7 +367,7 @@ export default function PaymentPage() {
             </div>
 
             <div className="max-w-[90%] mx-auto px-4 py-8 w-full flex-1">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
                     {/* LEFT COLUMN: FORM NHẬP THÔNG TIN */}
                     <div className="lg:col-span-8 flex flex-col gap-6">
@@ -382,12 +437,22 @@ export default function PaymentPage() {
                                     onChange={(e) => setDiscountCode(e.target.value)}
                                     className="flex-1 bg-bg-surface border border-border-default rounded-lg px-4 py-2.5 text-text-primary outline-none focus:border-primary transition-colors placeholder:text-text-muted"
                                 />
-                                <button className="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-lg font-medium transition-colors">
-                                    {tp('apply_button')}
+                                <button
+                                    onClick={handleApplyVoucher}
+                                    disabled={isApplyingVoucher}
+                                    className={`bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center min-w-[100px] ${isApplyingVoucher ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                >
+                                    {isApplyingVoucher ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : tp('apply_button')}
                                 </button>
                             </div>
-                            {appliedDiscount > 0 && (
-                                <p className="text-sm text-text-secondary mb-4">{tp('applied_discount', { amount: appliedDiscount.toLocaleString(locale === 'vi' ? "vi-VN" : "en-US") })}</p>
+                            {appliedDiscount > 0 && appliedVoucherCode && (
+                                <p className="text-sm text-feedback-success-text mt-2 flex items-center gap-2">
+                                    <Check size={16} />
+                                    {tp('applied_discount', {
+                                        code: appliedVoucherCode,
+                                        amount: appliedDiscount.toLocaleString(locale === 'vi' ? "vi-VN" : "en-US")
+                                    })}
+                                </p>
                             )}
                             <div className="bg-[#19274e] border border-[#253f7f] rounded-lg p-3 text-sm text-[#87a5f8]">
                                 {tp('discount_note')}
@@ -545,8 +610,8 @@ export default function PaymentPage() {
                     </div>
 
                     {/* RIGHT COLUMN: ĐƠN HÀNG */}
-                    <div className="lg:col-span-4 relative">
-                        <div className="bg-payment-summary-bg-default border border-border-default rounded-xl overflow-hidden shadow-xl sticky top-24">
+                    <div className="lg:col-span-4 lg:sticky lg:top-24 h-fit z-10">
+                        <div className="bg-payment-summary-bg-default border border-border-default rounded-xl overflow-hidden shadow-xl">
                             <div className="p-6">
                                 <h2 className="text-xl font-bold text-text-primary mb-6">{tb('your_order')}</h2>
 
@@ -586,10 +651,10 @@ export default function PaymentPage() {
 
                                 {/* Summary */}
                                 <div className="border-t border-border-strong pt-4 mb-6 space-y-3">
-                                    <div className="flex justify-between text-sm">
+                                    {/* <div className="flex justify-between text-sm">
                                         <span className="text-text-secondary">{tb('service_fee')}</span>
                                         <span className="font-medium text-text-primary text-right">{serviceFee.toLocaleString(locale === 'vi' ? "vi-VN" : "en-US")} đ</span>
-                                    </div>
+                                    </div> */}
                                     <div className="flex justify-between text-sm">
                                         <span className="text-text-secondary">{tb('subtotal')}</span>
                                         <span className="font-medium text-text-primary text-right">{subTotal.toLocaleString(locale === 'vi' ? "vi-VN" : "en-US")} đ</span>

@@ -5,7 +5,6 @@ import { useRouter, useParams } from "next/navigation";
 import api from "@/src/lib/axios";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
-import Cookies from "js-cookie";
 import {
     Calendar, MapPin, DollarSign, Image as ImageIcon,
     Plus, Trash2, Save, Info, Tag
@@ -101,10 +100,7 @@ export default function CreateEventPage() {
 
     const fetchCategories = async () => {
         try {
-            const token = Cookies.get("token");
-            const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-            const res = await api.get("/inventory-service/api/categories", { headers });
+            const res = await api.get("/inventory-service/api/categories");
             if (res.data && res.data.data) {
                 setCategories(res.data.data);
             }
@@ -125,12 +121,8 @@ export default function CreateEventPage() {
 
     const fetchWards = async (provinceCode: number) => {
         try {
-            const token = Cookies.get("token");
-            const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
             const res = await api.get("/iam-service/api/locations/wards", {
-                params: { provinceCode },
-                headers
+                params: { provinceCode }
             });
 
             if (res.data) {
@@ -223,10 +215,8 @@ export default function CreateEventPage() {
         formDataUpload.append('eventId', String(eventId));
         formDataUpload.append('type', type);
 
-        const token = Cookies.get("token");
         await api.post("/inventory-service/api/upload/avatar", formDataUpload, {
             headers: {
-                Authorization: `Bearer ${token}`,
                 'Content-Type': 'multipart/form-data'
             }
         });
@@ -237,7 +227,6 @@ export default function CreateEventPage() {
         setLoading(true);
 
         try {
-            const token = Cookies.get("token");
 
             // Validate basic
             if (!formData.eventName || !formData.categoryId || !formData.startDatetime || !formData.endDatetime) {
@@ -276,9 +265,7 @@ export default function CreateEventPage() {
                 }))
             };
 
-            const response = await api.post("/inventory-service/api/events", payload, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.post("/inventory-service/api/events", payload);
 
             if (response.data && (response.data.status === 200 || response.data.status === 0)) {
                 const newEventId = response.data.data.eventId;

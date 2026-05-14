@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Cookies from "js-cookie";
 import { Plus, LayoutDashboard, FolderOpen, FileText, Settings, LogOut, Calendar, MapPin, Loader2 } from "lucide-react";
 import Link from "next/link";
 import api from "@/src/lib/axios";
@@ -78,8 +77,6 @@ export default function OrganizerCenterPage() {
     }, [router, locale, isOrganization]);
 
     const fetchMyEvents = async () => {
-        const token = Cookies.get("token");
-        if (!token) return;
 
         setIsLoading(true);
         try {
@@ -89,9 +86,6 @@ export default function OrganizerCenterPage() {
                     size: 10,
                     sortBy: "createdAt",
                     sortDirection: "DESC",
-                },
-                headers: {
-                    Authorization: `Bearer ${token}`
                 }
             });
 

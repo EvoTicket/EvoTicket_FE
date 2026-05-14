@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import Cookies from "js-cookie";
 import api from "@/src/lib/axios";
 import { Header } from "@/src/components/header";
 import { Footer } from "@/src/components/footer";
@@ -12,12 +11,14 @@ import { EventDetail } from "@/src/types/event";
 import { ChangeShowtimeModal } from "@/src/components/modals/ChangeShowtimeModal";
 import { useTranslations } from "next-intl";
 import { Step1SelectTicket } from "@/src/components/booking/Step1SelectTicket";
-import { store } from "@/src/store";
+import { useAppSelector } from "@/src/store/hooks";
+import { selectIsAuthenticated } from "@/src/store/slices/authSlice";
 
 export default function BookingPage() {
     const { locale, id } = useParams();
     const router = useRouter();
     const t = useTranslations("Booking");
+    const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
     const [event, setEvent] = useState<EventDetail | null>(null);
     const [loading, setLoading] = useState(true);
@@ -29,11 +30,15 @@ export default function BookingPage() {
     const [isChangeShowtimeModalOpen, setIsChangeShowtimeModalOpen] = useState(false);
 
     useEffect(() => {
+        if (!isAuthenticated) {
+            router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+            return;
+        }
         if (id) {
             fetchEventDetail(id as string);
         }
 
-    }, [id]);
+    }, [id, isAuthenticated, locale, router]);
 
     const fetchEventDetail = async (eventId: string) => {
         setLoading(true);
@@ -140,9 +145,9 @@ export default function BookingPage() {
     };
 
     // Calculate totals
-    const serviceFee = selectedTickets.length > 0 ? 2000 : 0;
+    // const serviceFee = selectedTickets.length > 0 ? 2000 : 0;
     const ticketTotal = selectedTickets.reduce((sum, t) => sum + t.price * t.quantity, 0);
-    const orderTotal = ticketTotal + serviceFee;
+    // const orderTotal = ticketTotal + serviceFee;
 
     if (loading) {
         return (
@@ -159,6 +164,8 @@ export default function BookingPage() {
 
 
     const createOrder = async () => {
+
+
         try {
             const requestBody = {
                 items: selectedTickets.map(ticket => ({
@@ -236,7 +243,7 @@ export default function BookingPage() {
             </div>
 
             <div className="max-w-[90%] mx-auto px-4 py-8 w-full flex-1">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     <Step1SelectTicket
                         event={event}
                         activeShowtime={activeShowtime}
@@ -244,8 +251,7 @@ export default function BookingPage() {
                         selectedTickets={selectedTickets}
                         hasSeatMap={hasSeatMap}
                         ticketOptions={ticketOptions}
-                        serviceFee={serviceFee}
-                        orderTotal={orderTotal}
+                        orderTotal={ticketTotal}
                         locale={locale as string}
                         setIsChangeShowtimeModalOpen={setIsChangeShowtimeModalOpen}
                         setSelectedShowtimeId={setSelectedShowtimeId}

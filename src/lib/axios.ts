@@ -113,9 +113,12 @@ api.interceptors.response.use(
 function redirectToLogin() {
     if (typeof window !== 'undefined') {
         const path = window.location.pathname;
+        const search = window.location.search;
         const segments = path.split('/');
         const locale = (segments.length > 1 && (segments[1] === 'vi' || segments[1] === 'en')) ? segments[1] : 'vi';
-        window.location.href = `/${locale}/auth/login`;
+        
+        const callbackUrl = encodeURIComponent(path + search);
+        window.location.href = `/${locale}/auth/login?callbackUrl=${callbackUrl}`;
     }
 }
 

@@ -21,7 +21,6 @@ import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headless
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import api from "@/src/lib/axios";
-import Cookies from "js-cookie";
 
 export default function MyTicketsPage() {
     const t = useTranslations("MyTickets");

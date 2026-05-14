@@ -11,7 +11,7 @@ interface Step1SelectTicketProps {
     selectedTickets: any[];
     hasSeatMap: boolean | null;
     ticketOptions: any[];
-    serviceFee: number;
+    serviceFee?: number;
     orderTotal: number;
     locale: string;
     setIsChangeShowtimeModalOpen: (isOpen: boolean) => void;
@@ -34,7 +34,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
     selectedTickets,
     hasSeatMap,
     ticketOptions,
-    serviceFee,
+    serviceFee = 0,
     orderTotal,
     locale,
     setIsChangeShowtimeModalOpen,
@@ -127,10 +127,10 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                     {hasSeatMap ? (
                         <div className="flex flex-col items-center">
                             <div className="flex gap-4 mb-8">
-                                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full border border-border-strong"></div><span className="text-xs text-text-secondary">{t("available_seat")}</span></div>
-                                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-primary border border-primary"></div><span className="text-xs text-text-secondary">{t("selecting_seat")}</span></div>
-                                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-text-muted"></div><span className="text-xs text-text-secondary">{t("sold_out_seat")}</span></div>
-                                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-feedback-error-text"></div><span className="text-xs text-text-secondary">{t("locked_seat")}</span></div>
+                                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full border border-border-strong"></div><span className="text-xs text-text-secondary">{t('available_seat')}</span></div>
+                                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-primary border border-primary"></div><span className="text-xs text-text-secondary">{t('selecting_seat')}</span></div>
+                                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-text-muted"></div><span className="text-xs text-text-secondary">{t('sold_out_seat')}</span></div>
+                                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-feedback-error-text"></div><span className="text-xs text-text-secondary">{t('locked_seat')}</span></div>
                             </div>
 
                             {/* MOCK SEAT MAP TRAPEZOID SHAPE */}
@@ -231,8 +231,8 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
             </div>
 
             {/* RIGHT COLUMN: ĐƠN HÀNG */}
-            <div className="lg:col-span-4 relative">
-                <div className="bg-payment-summary-bg-default border border-border-default rounded-xl overflow-hidden shadow-xl sticky top-24">
+            <div className="lg:col-span-4 lg:sticky lg:top-24 h-fit z-10">
+                <div className="bg-payment-summary-bg-default border border-border-default rounded-xl overflow-hidden shadow-xl">
                     <div className="p-6 flex flex-col gap-button-gap-lg">
                         <div className="text-body-large font-bold text-payment-summary-text-title">{t("your_order")}</div>
 
@@ -294,10 +294,10 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
 
                         {/* Summary */}
                         <div className="border-t border-border-strong pt-4 mb-6 flex flex-col gap-button-gap-md">
-                            <div className="flex justify-between text-sm">
+                            {/* <div className="flex justify-between text-sm">
                                 <span className="text-body-small text-payment-summary-text-title">{t("service_fee")}</span>
                                 <span className="font-medium text-text-primary">{serviceFee.toLocaleString("vi-VN")} đ</span>
-                            </div>
+                            </div> */}
                             <div className="flex justify-between items-end">
                                 <span className="text-body-small text-payment-summary-text-title">{t("subtotal")}</span>
                                 <span className="text-2xl font-bold text-text-primary">

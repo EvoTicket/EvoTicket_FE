@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import Cookies from "js-cookie";
 import api from "@/src/lib/axios";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
@@ -21,6 +20,8 @@ import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import { useAppSelector } from "@/src/store/hooks";
+import { selectIsAuthenticated } from "@/src/store/slices/authSlice";
 
 // Dynamic import for Map to avoid SSR issues
 const Map = dynamic(() => import("@/src/components/Map"), {
@@ -42,7 +43,7 @@ export default function EventDetailPage() {
     const [event, setEvent] = useState<EventDetail | null>(null);
     const [suggestedEvents, setSuggestedEvents] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
     // Expansion state for the 'introduction' block
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -61,8 +62,6 @@ export default function EventDetailPage() {
         : 0;
 
     useEffect(() => {
-        const token = Cookies.get("token");
-        setIsAuthenticated(!!token);
         if (id) {
             fetchEventDetail(id as string);
         }
@@ -82,10 +81,8 @@ export default function EventDetailPage() {
     const fetchEventDetail = async (eventId: string) => {
         setLoading(true);
         try {
-            const token = Cookies.get("token");
-            const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-            const response = await api.get(`/inventory-service/api/events/${eventId}`, { headers });
+            const response = await api.get(`/inventory-service/api/events/${eventId}`);
 
             if (response.data && response.data.data) {
                 // Mock seat map conditionally based on fake logic if API doesn't provide
@@ -326,7 +323,14 @@ export default function EventDetailPage() {
                                 <button
                                     className={`w-full py-4 px-10 rounded-button-radius font-bold text-lg transition-all shadow-lg ${isSoldOut ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default hover:shadow-xl hover:-translate-y-0.5'}`}
                                     disabled={isSoldOut}
-                                    onClick={() => !isSoldOut && router.push(`/${locale}/user/events/${id}/booking`)}
+                                    onClick={() => {
+                                        if (isSoldOut) return;
+                                        if (!isAuthenticated) {
+                                            router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+                                            return;
+                                        }
+                                        router.push(`/${locale}/user/events/${id}/booking`);
+                                    }}
                                 >
                                     {isSoldOut ? te('sold_out_temp') : te('buy_now')}
                                 </button>
@@ -530,7 +534,14 @@ export default function EventDetailPage() {
                                     <button
                                         className={`w-full py-3.5 rounded-button-radius font-semibold mb-6 transition-colors shadow-sm ${isSoldOut ? 'bg-[#5b4f8a] text-white/80 cursor-not-allowed' : 'bg-[#6D48D7] hover:bg-[#5b3bb8] text-white'}`}
                                         disabled={isSoldOut}
-                                        onClick={() => !isSoldOut && router.push(`/${locale}/user/events/${id}/booking`)}
+                                        onClick={() => {
+                                            if (isSoldOut) return;
+                                            if (!isAuthenticated) {
+                                                router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+                                                return;
+                                            }
+                                            router.push(`/${locale}/user/events/${id}/booking`);
+                                        }}
                                     >
                                         {isSoldOut ? te('sold_out_temp') : te('buy_now')}
                                     </button>

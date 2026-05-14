@@ -9,7 +9,6 @@ import { Calendar, MapPin, ChevronRight, Search, TrendingUp, Filter, CheckIcon, 
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { Footer } from "@/src/components/footer";
 import api from "@/src/lib/axios";
-import Cookies from "js-cookie";
 import { CustomDatePicker } from "@/src/components/ui/CustomDatePicker";
 import { EventItem } from "@/src/types/event";
 import { useRouter } from "next/navigation";

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { MessageCircle, X, Send, Paperclip, Loader2 } from "lucide-react";
-import Cookies from "js-cookie";
 import api from "@/src/lib/axios";
 import { toast } from "react-toastify";
 import Image from "next/image";
@@ -49,19 +48,10 @@ export function ChatBot() {
     }, [isOpen]);
 
     const fetchChatHistory = async () => {
-        const token = Cookies.get("token");
-        if (!token) {
-            toast.error(t("error_login_required"));
-            return;
-        }
 
         setIsLoadingHistory(true);
         try {
-            const response = await api.get("/inventory-service/api/chatbot/history", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await api.get("/inventory-service/api/chatbot/history");
 
             if (response.data && response.data.status === 200) {
                 const historyMessages = response.data.data.reverse();
@@ -77,12 +67,6 @@ export function ChatBot() {
 
     const handleSendMessage = async () => {
         if (!inputMessage.trim() && selectedFiles.length === 0) return;
-
-        const token = Cookies.get("token");
-        if (!token) {
-            toast.error(t("error_login_required"));
-            return;
-        }
 
         const userMessage: ChatMessage = {
             id: Date.now(),
@@ -112,7 +96,6 @@ export function ChatBot() {
                 formData,
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`,
                         "Content-Type": "multipart/form-data",
                     },
                 }

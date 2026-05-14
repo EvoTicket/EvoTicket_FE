@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Search, Bell, Ticket, Plus, ChevronDown, Moon, Sun, User, LogOut, LogInIcon, Subscript, UserPlus } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { useParams, useRouter, usePathname } from "next/navigation";
+import { useParams, useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import api from "../lib/axios";
 import {
@@ -37,6 +37,7 @@ export function Header() {
   const router = useRouter();
   const { locale } = useParams();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const t = useTranslations('Header');
 
@@ -74,7 +75,7 @@ export function Header() {
     }
     dispatch(logoutAction());
     toast.info(t("logged_out_success"));
-    router.push(`/${locale}/auth/login`);
+    router.push(`/${locale}/user/homepage`);
   };
 
   const handleCreateEvent = () => {
@@ -215,7 +216,11 @@ export function Header() {
           ) : (
             <>
               <button
-                onClick={() => router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(pathname)}`)}
+                onClick={() => {
+                  const search = searchParams.toString();
+                  const fullPath = pathname + (search ? `?${search}` : '');
+                  router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(fullPath)}`);
+                }}
                 className="flex items-center gap-2 border border-border-default rounded-lg px-4 py-2 hover:border-primary cursor-pointer transition-colors text-sm font-medium"
               >
                 <LogInIcon size={16} className="text-text-secondary" />
