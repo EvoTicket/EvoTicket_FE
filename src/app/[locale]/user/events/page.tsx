@@ -345,9 +345,9 @@ export default function EventsPage() {
                         {(startDate || endDate) && (
                             <div className="flex items-center gap-2 px-3 py-1.5 text-text-primary border border-border-default rounded-full text-sm">
                                 <span>
-                                    {startDate ? `${new Date(startDate).getDate().toString().padStart(2, '0')} tháng ${(new Date(startDate).getMonth() + 1).toString().padStart(2, '0')}, ${new Date(startDate).getFullYear()}` : "..."}
+                                    {startDate ? new Date(startDate).toLocaleDateString(locale as string === 'vi' ? "vi-VN" : "en-US", { day: '2-digit', month: '2-digit', year: 'numeric' }) : "..."}
                                     {" - "}
-                                    {endDate ? `${new Date(endDate).getDate().toString().padStart(2, '0')} tháng ${(new Date(endDate).getMonth() + 1).toString().padStart(2, '0')}, ${new Date(endDate).getFullYear()}` : "..."}
+                                    {endDate ? new Date(endDate).toLocaleDateString(locale as string === 'vi' ? "vi-VN" : "en-US", { day: '2-digit', month: '2-digit', year: 'numeric' }) : "..."}
                                 </span>
                                 <button onClick={() => { setStartDate(null); setEndDate(null); handleApplyFilters(); }} className="hover:text-primary"><X size={14} /></button>
                             </div>
@@ -701,7 +701,7 @@ export default function EventsPage() {
                                                 )}
                                                 {event.eventStatus === 'COMPLETED' && (
                                                     <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm text-button-primary-text-default text-xs font-semibold px-2.5 py-1 rounded">
-                                                        Sold out
+                                                        {t("status_sold_out")}
                                                     </div>
                                                 )}
                                             </div>
@@ -714,7 +714,7 @@ export default function EventsPage() {
 
                                                 <div className="flex items-start gap-2 text-sm text-text-secondary mb-2">
                                                     <Calendar size={16} className="mt-0.5 shrink-0" />
-                                                    <span>{new Date(event.startDatetime).toLocaleString(locale as string === 'vi' ? "vi-VN" : "en-US", { hour: '2-digit', minute: '2-digit', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }).replace('lúc', '-')}</span>
+                                                    <span>{new Date(event.startDatetime).toLocaleString(locale as string === 'vi' ? "vi-VN" : "en-US", { hour: '2-digit', minute: '2-digit', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
                                                 </div>
 
                                                 <div className="flex items-start gap-2 text-sm text-text-secondary mb-4">
@@ -772,7 +772,7 @@ export default function EventsPage() {
                                         )}
                                         {event.eventStatus === 'COMPLETED' && (
                                             <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm text-button-primary-text-default text-xs font-semibold px-2.5 py-1 rounded">
-                                                Sold out
+                                                {t("status_sold_out")}
                                             </div>
                                         )}
                                     </div>
@@ -785,7 +785,7 @@ export default function EventsPage() {
 
                                         <div className="flex items-start gap-2 text-sm text-text-secondary mb-2">
                                             <Calendar size={16} className="mt-0.5 shrink-0" />
-                                            <span>{new Date(event.startDatetime).toLocaleString(locale as string === 'vi' ? "vi-VN" : "en-US", { hour: '2-digit', minute: '2-digit', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }).replace('lúc', '-')}</span>
+                                            <span>{new Date(event.startDatetime).toLocaleString(locale as string === 'vi' ? "vi-VN" : "en-US", { hour: '2-digit', minute: '2-digit', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
                                         </div>
 
                                         <div className="flex items-start gap-2 text-sm text-text-secondary mb-4">
