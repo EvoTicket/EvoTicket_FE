@@ -243,7 +243,7 @@ export default function PaymentPage() {
                 fullName,
                 phoneNumber: phone,
                 email,
-                voucherCodes: appliedVoucherCode
+                voucherCode: appliedVoucherCode
             });
 
             if (response.data && response.data.data) {
