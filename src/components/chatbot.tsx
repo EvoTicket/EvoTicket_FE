@@ -54,7 +54,16 @@ export function ChatBot() {
             const response = await api.get("/inventory-service/api/chatbot/history");
 
             if (response.data && response.data.status === 200) {
-                const historyMessages = response.data.data.reverse();
+                // Map the new history format to ChatMessage interface
+                const historyMessages = response.data.data.map((msg: any, index: number) => ({
+                    id: index,
+                    // Remove internal session info like [Thông tin phiên: userId=...]
+                    message: msg.text ? msg.text.replace(/\n\n\[Thông tin phiên: .*\]/g, "") : "",
+                    images: msg.media || [],
+                    senderType: msg.messageType === "USER" ? "USER" : "ASSISTANT",
+                    createdAt: new Date().toISOString() // Fallback if history doesn't provide timestamp
+                }));
+
                 setMessages(historyMessages);
                 setTimeout(scrollToBottom, 100);
             }
