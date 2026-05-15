@@ -104,7 +104,7 @@ export function ChatBot() {
             // Get token and baseUrl for manual fetch (needed for streaming)
             const { store } = await import("@/src/store");
             const token = store.getState().auth.token;
-            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_BE || "";
+            const baseUrl = (process.env.NEXT_PUBLIC_API_GATEWAY_BE || "").replace(/\/$/, "");
 
             const response = await fetch(
                 `${baseUrl}/inventory-service/api/chatbot/ask`,
