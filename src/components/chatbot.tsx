@@ -110,9 +110,13 @@ export function ChatBot() {
             });
 
             if (response.data && response.data.status === 200) {
+                const answer = response.data.data.answer;
+                // Clean the response message (remove internal session info)
+                const cleanAnswer = answer ? answer.replace(/\n\n\[Thông tin phiên: .*\]/g, "") : "";
+
                 const assistantMessage: ChatMessage = {
                     id: Date.now(),
-                    message: response.data.data.answer,
+                    message: cleanAnswer,
                     images: [],
                     senderType: "ASSISTANT",
                     createdAt: new Date().toISOString(),
