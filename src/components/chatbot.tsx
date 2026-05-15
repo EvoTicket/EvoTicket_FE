@@ -135,16 +135,20 @@ export function ChatBot() {
 
             if (reader) {
                 let fullMessage = "";
+                let partialLine = "";
+
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
 
                     const chunk = decoder.decode(value, { stream: true });
-                    // Parse SSE format (data: content)
-                    const lines = chunk.split("\n");
+                    const lines = (partialLine + chunk).split("\n");
+                    partialLine = lines.pop() || ""; // Lưu lại đoạn chưa kết thúc bằng \n
+
                     for (const line of lines) {
-                        if (line.startsWith("data:")) {
-                            const content = line.substring(5);
+                        const trimmedLine = line.trim();
+                        if (trimmedLine.startsWith("data:")) {
+                            const content = trimmedLine.substring(5);
                             if (content) {
                                 fullMessage += content;
                                 setMessages((prev) =>
