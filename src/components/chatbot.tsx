@@ -96,6 +96,7 @@ export function ChatBot() {
 
         try {
             const formData = new FormData();
+            formData.append("question", messageToSend);
             filesToSend.forEach((file) => {
                 formData.append("files", file);
             });
@@ -106,7 +107,7 @@ export function ChatBot() {
             const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_BE || "";
 
             const response = await fetch(
-                `${baseUrl}/inventory-service/api/chatbot/ask?question=${encodeURIComponent(messageToSend)}`,
+                `${baseUrl}/inventory-service/api/chatbot/ask`,
                 {
                     method: "POST",
                     body: formData,
