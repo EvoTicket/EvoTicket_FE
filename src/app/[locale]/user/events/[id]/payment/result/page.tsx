@@ -38,6 +38,21 @@ function PaymentResultContent() {
         }
     }, [id, orderCode]);
 
+    useEffect(() => {
+        if (status === "CANCELLED" && orderCode) {
+            handleCancelOrder();
+        }
+    }, [status, orderCode]);
+
+    const handleCancelOrder = async () => {
+        try {
+            await api.post(`/order-service/api/v1/orders/${orderCode}/cancel`);
+            console.log("Order cancelled successfully");
+        } catch (error) {
+            console.error("Failed to cancel order", error);
+        }
+    };
+
     const fetchData = async () => {
         if (!id || !orderCode) {
             setLoading(false);
