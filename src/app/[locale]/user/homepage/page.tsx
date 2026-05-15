@@ -231,6 +231,10 @@ export default function HomePage() {
     router.push(`/${locale}/user/events/${eventId}`);
   };
 
+  const handleRedirectListings = () => {
+    router.push(`/${locale}/user/resale`);
+  };
+
   return (
     <>
       <div className="min-h-screen pb-20 bg-bg-page transition-colors duration-300">
@@ -249,7 +253,7 @@ export default function HomePage() {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="stroke-primary" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><rect x="7" y="7" width="3" height="3" /><rect x="14" y="7" width="3" height="3" /><rect x="7" y="14" width="3" height="3" /><rect x="14" y="14" width="3" height="3" /></svg>
                     <span className="text-xs font-medium text-text-primary">{t('Anti_copy_dynamic_QR_code')}</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-bg-surface hover:bg-bg-subtle transition-colors border border-border-default rounded-full px-3 py-1.5 backdrop-blur-md shadow-sm">
+                  <div onClick={() => handleRedirectListings()} className="flex items-center gap-2 bg-bg-surface hover:bg-bg-subtle transition-colors border border-border-default rounded-full px-3 py-1.5 backdrop-blur-md shadow-sm">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="stroke-primary" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg>
                     <span className="text-xs font-medium text-text-primary">{t('price_controller_release')}</span>
                   </div>
@@ -513,7 +517,7 @@ export default function HomePage() {
                 <Link key={event.id} href={`/${locale}/user/events/${event.id}`} className="block">
                   <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
                     {/* Card Image */}
-                    <div className="relative h-48 overflow-hidden bg-gray-100">
+                    <div className="relative h-48 overflow-hidden bg-bg-subtle">
                       {event.bannerImage ? (
                         <Image
                           src={event.bannerImage}
@@ -522,7 +526,7 @@ export default function HomePage() {
                           className="object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center text-gray-300">
+                        <div className="h-full w-full flex items-center justify-center text-text-muted">
                           <Calendar size={32} />
                         </div>
                       )}
@@ -589,7 +593,7 @@ export default function HomePage() {
                 <Link key={event.id} href={`/${locale}/user/events/${event.id}`} className="block">
                   <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
                     {/* Card Image */}
-                    <div className="relative h-48 overflow-hidden bg-gray-100">
+                    <div className="relative h-48 overflow-hidden bg-bg-subtle">
                       {event.bannerImage ? (
                         <Image
                           src={event.bannerImage}
@@ -598,7 +602,7 @@ export default function HomePage() {
                           className="object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center text-gray-300">
+                        <div className="h-full w-full flex items-center justify-center text-text-muted">
                           <Calendar size={32} />
                         </div>
                       )}
@@ -665,7 +669,7 @@ export default function HomePage() {
                 <Link key={event.id} href={`/${locale}/user/events/${event.id}`} className="block">
                   <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
                     {/* Card Image */}
-                    <div className="relative h-48 overflow-hidden bg-gray-100">
+                    <div className="relative h-48 overflow-hidden bg-bg-subtle">
                       {event.bannerImage ? (
                         <Image
                           src={event.bannerImage}
@@ -674,7 +678,7 @@ export default function HomePage() {
                           className="object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center text-gray-300">
+                        <div className="h-full w-full flex items-center justify-center text-text-muted">
                           <Calendar size={32} />
                         </div>
                       )}
@@ -741,7 +745,7 @@ export default function HomePage() {
                 <Link key={event.id} href={`/${locale}/user/events/${event.id}`} className="block">
                   <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
                     {/* Card Image */}
-                    <div className="relative h-48 overflow-hidden bg-gray-100">
+                    <div className="relative h-48 overflow-hidden bg-bg-subtle">
                       {event.bannerImage ? (
                         <Image
                           src={event.bannerImage}
@@ -750,7 +754,7 @@ export default function HomePage() {
                           className="object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center text-gray-300">
+                        <div className="h-full w-full flex items-center justify-center text-text-muted">
                           <Calendar size={32} />
                         </div>
                       )}

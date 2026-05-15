@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ChevronRight, ShieldCheck, CheckCircle2, HelpCircle, Network, ExternalLink, ChevronDown, ArrowLeft, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import api from "@/src/lib/axios";
@@ -10,6 +10,7 @@ import api from "@/src/lib/axios";
 export default function ResaleDetailPage() {
     const t = useTranslations("ResaleDetail");
     const params = useParams();
+    const router = useRouter();
     const locale = params?.locale || "vi";
     const listingId = params?.id;
 
@@ -63,6 +64,18 @@ export default function ResaleDetailPage() {
         }).format(date);
     };
 
+    const handleOpenProvenance = (ticketAssetId: string) => {
+        window.open(`/${locale}/user/tickets/${ticketAssetId}/provenance`, "_blank");
+    };
+
+    const handleOpenExplorer = (contractAddress: string, tokenIdNum: string) => {
+        window.open(`https://amoy.polygonscan.com/nft/${contractAddress}/${tokenIdNum}`, "_blank");
+    };
+
+    const handleBuyResaleTicket = (listingId: string) => {
+        router.push(`/${locale}/user/resale/${listingId}/checkout`);
+    }
+
     if (isLoading) {
         return (
             <div className="container mx-auto px-4 py-24 max-w-6xl flex flex-col items-center justify-center">
@@ -91,7 +104,7 @@ export default function ResaleDetailPage() {
                         </p>
                     </div>
                     <Link href={`/${locale}/user/resale`}>
-                        <button className="bg-[#f0f3f6] dark:bg-gray-800 hover:bg-[#e2e8f0] dark:hover:bg-gray-700 text-text-primary px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors active:scale-[0.98]">
+                        <button className="bg-button-secondary-bg-default hover:bg-button-secondary-bg-hover text-button-secondary-text-default px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors active:scale-[0.98]">
                             {t('back_to_marketplace')}
                         </button>
                     </Link>
@@ -108,7 +121,7 @@ export default function ResaleDetailPage() {
                         </p>
                         <button
                             onClick={() => window.history.back()}
-                            className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-full text-[13px] font-semibold transition-colors flex items-center justify-center gap-2 w-full shadow-sm"
+                            className="bg-primary hover:bg-primary-hover text-button-primary-text-default px-6 py-3 rounded-full text-[13px] font-semibold transition-colors flex items-center justify-center gap-2 w-full shadow-sm"
                         >
                             <ArrowLeft size={16} /> {t('back_to_marketplace')}
                         </button>
@@ -138,7 +151,7 @@ export default function ResaleDetailPage() {
                     </p>
                 </div>
                 <Link href={`/${locale}/user/resale`}>
-                    <button className="bg-[#f0f3f6] dark:bg-gray-800 hover:bg-[#e2e8f0] dark:hover:bg-gray-700 text-text-primary px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors active:scale-[0.98]">
+                    <button className="bg-button-secondary-bg-default hover:bg-button-secondary-bg-hover text-button-secondary-text-default px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors active:scale-[0.98]">
                         {t('back_to_marketplace')}
                     </button>
                 </Link>
@@ -156,10 +169,10 @@ export default function ResaleDetailPage() {
                     </div>
                     <div className="text-left md:text-right">
                         <div className="flex items-center gap-2 mb-3 md:justify-end">
-                            <span className="bg-[#1a1a1a] dark:bg-black text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded-sm flex items-center gap-1.5">
+                            <span className="bg-bg-inverse text-text-inverse text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded-sm flex items-center gap-1.5">
                                 <CheckCircle2 size={12} /> {t('official_resale')}
                             </span>
-                            <span className="bg-[#1a1a1a] dark:bg-black text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded-sm">
+                            <span className="bg-bg-inverse text-text-inverse text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded-sm">
                                 {t('selling')}
                             </span>
                         </div>
@@ -170,7 +183,7 @@ export default function ResaleDetailPage() {
                 <div className="border-t border-border-default pt-5 flex flex-wrap items-center gap-x-8 gap-y-3 text-[13px]">
                     <div className="text-text-secondary">{t('ticket_type')} <span className="font-semibold text-text-primary ml-1">{listingData.ticketTypeName}</span></div>
                     <div className="text-text-secondary">{t('seat_area')} <span className="font-semibold text-text-primary ml-1">-</span></div>
-                    <div className="text-text-secondary flex items-center gap-2">{t('listing_code')} <span className="font-semibold text-text-primary ml-1 px-2 py-0.5 bg-[#f3f4f6] dark:bg-[#1f2937] rounded border border-border-default font-mono text-[11px]">{listingData.listingCode}</span></div>
+                    <div className="text-text-secondary flex items-center gap-2">{t('listing_code')} <span className="font-semibold text-text-primary ml-1 px-2 py-0.5 bg-bg-subtle rounded border border-border-default font-mono text-[11px]">{listingData.listingCode}</span></div>
                 </div>
             </div>
 
@@ -183,40 +196,40 @@ export default function ResaleDetailPage() {
                     <div className="border border-border-default rounded-xl p-6 shadow-sm bg-bg-surface">
                         <h3 className="text-[16px] font-bold text-text-primary mb-5">{t('ticket_info')}</h3>
                         <div className="space-y-4 text-[13px]">
-                            <div className="flex justify-between items-center pb-3 border-b border-border-default/50 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+                            <div className="flex justify-between items-center pb-3 border-b border-border-subtle hover:bg-bg-subtle transition-colors">
                                 <span className="text-text-secondary">{t('event')}</span>
                                 <span className="font-bold text-text-primary text-right">{listingData.eventName}</span>
                             </div>
-                            <div className="flex justify-between items-center pb-3 border-b border-border-default/50 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+                            <div className="flex justify-between items-center pb-3 border-b border-border-subtle hover:bg-bg-subtle transition-colors">
                                 <span className="text-text-secondary">{t('time')}</span>
                                 <span className="font-bold text-text-primary text-right">{formatDate(listingData.eventStartTime)}</span>
                             </div>
-                            <div className="flex justify-between items-center pb-3 border-b border-border-default/50 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+                            <div className="flex justify-between items-center pb-3 border-b border-border-subtle hover:bg-bg-subtle transition-colors">
                                 <span className="text-text-secondary">{t('venue')}</span>
                                 <span className="font-bold text-text-primary text-right">{listingData.venueName}, {listingData.venueAddress}</span>
                             </div>
-                            <div className="flex justify-between items-center pb-3 border-b border-border-default/50 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+                            <div className="flex justify-between items-center pb-3 border-b border-border-subtle hover:bg-bg-subtle transition-colors">
                                 <span className="text-text-secondary">{t('ticket_type')}</span>
                                 <span className="font-bold text-text-primary">{listingData.ticketTypeName}</span>
                             </div>
-                            <div className="flex justify-between items-center pb-3 border-b border-border-default/50 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+                            <div className="flex justify-between items-center pb-3 border-b border-border-subtle hover:bg-bg-subtle transition-colors">
                                 <span className="text-text-secondary">{t('seat_area')}</span>
                                 <span className="font-bold text-text-primary">-</span>
                             </div>
-                            <div className="flex justify-between items-center pb-3 border-b border-border-default/50 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+                            <div className="flex justify-between items-center pb-3 border-b border-border-subtle hover:bg-bg-subtle transition-colors">
                                 <span className="text-text-secondary">{t('listing_code')}</span>
                                 <span className="font-bold text-text-primary font-mono text-[12px]">{listingData.listingCode}</span>
                             </div>
-                            <div className="flex justify-between items-center pb-3 border-b border-border-default/50 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+                            <div className="flex justify-between items-center pb-3 border-b border-border-subtle hover:bg-bg-subtle transition-colors">
                                 <span className="text-text-secondary">{t('listing_status')}</span>
                                 <span className="font-bold text-text-primary">{t('selling')}</span>
                             </div>
-                            <div className="flex justify-between items-center pb-3 border-b border-border-default/50 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+                            <div className="flex justify-between items-center pb-3 border-b border-border-subtle hover:bg-bg-subtle transition-colors">
                                 <span className="text-text-secondary">{t('transaction_type')}</span>
                                 <span className="font-bold text-text-primary text-right">{t('transaction_type_value')}</span>
                             </div>
                         </div>
-                        <p className="text-[12px] text-text-muted mt-5 leading-relaxed bg-[#fafafa] dark:bg-[#111827] p-3.5 rounded-lg border border-border-default">
+                        <p className="text-[12px] text-text-muted mt-5 leading-relaxed bg-bg-subtle p-3.5 rounded-lg border border-border-default">
                             {t('verified_marketplace_note')}
                         </p>
                     </div>
@@ -225,35 +238,35 @@ export default function ResaleDetailPage() {
                     <div className="border border-border-default rounded-xl p-6 shadow-sm bg-bg-surface">
                         <h3 className="text-[16px] font-bold text-text-primary mb-5">{t('verification_title')}</h3>
                         <div className="space-y-4 text-[13px] mb-5">
-                            <div className="flex justify-between items-center pb-3 border-b border-border-default/50">
+                            <div className="flex justify-between items-center pb-3 border-b border-border-subtle">
                                 <span className="text-text-secondary">{t('verification_status')}</span>
                                 <span className="font-bold text-text-primary">{t('verified')}</span>
                             </div>
-                            <div className="flex justify-between items-center pb-3 border-b border-border-default/50">
+                            <div className="flex justify-between items-center pb-3 border-b border-border-subtle">
                                 <span className="text-text-secondary">{t('token_id')}</span>
                                 <span className="font-bold text-text-primary">{listingData.tokenId}</span>
                             </div>
-                            <div className="flex justify-between items-center pb-3 border-b border-border-default/50">
+                            <div className="flex justify-between items-center pb-3 border-b border-border-subtle">
                                 <span className="text-text-secondary">{t('ticket_source')}</span>
                                 <span className="font-bold text-text-primary text-right">{t('ticket_source_value')}</span>
                             </div>
-                            <div className="flex justify-between items-center pb-3 border-b border-border-default/50">
+                            <div className="flex justify-between items-center pb-3 border-b border-border-subtle">
                                 <span className="text-text-secondary">{t('ownership_status')}</span>
                                 <span className="font-bold text-text-primary text-right">{t('ownership_status_value')}</span>
                             </div>
                         </div>
 
-                        <div className="bg-[#fafafa] dark:bg-[#111827] rounded-lg p-3.5 border border-border-default mb-5 text-[12px] text-text-secondary leading-relaxed">
+                        <div className="bg-bg-subtle rounded-lg p-3.5 border border-border-default mb-5 text-[12px] text-text-secondary leading-relaxed">
                             {t('verification_desc')}
                         </div>
 
                         <div className="flex flex-wrap gap-3">
-                            <Link href={`/${locale}/user/tickets/${listingData.ticketAssetId}/provenance`}>
-                                <button className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-full text-[12px] font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm">
+                            <div onClick={() => handleOpenProvenance(listingData.ticketAssetId)}>
+                                <button className="bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-5 py-2.5 rounded-full text-[12px] font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm">
                                     <Network size={14} /> {t('view_provenance')}
                                 </button>
-                            </Link>
-                            <button className="border border-border-default hover:bg-[#fafafa] dark:hover:bg-gray-800 text-primary px-5 py-2.5 rounded-full text-[12px] font-semibold transition-colors flex items-center justify-center gap-2 bg-white dark:bg-transparent">
+                            </div>
+                            <button onClick={() => handleOpenExplorer(listingData.contractAddress, listingData.tokenId)} className="border border-border-default hover:bg-bg-subtle text-primary px-5 py-2.5 rounded-full text-[12px] font-semibold transition-colors flex items-center justify-center gap-2 bg-bg-surface">
                                 <ExternalLink size={14} /> {t('open_explorer')}
                             </button>
                         </div>
@@ -281,7 +294,7 @@ export default function ResaleDetailPage() {
                             </div>
                         </div>
 
-                        <div className="bg-[#fafafa] dark:bg-[#111827] rounded-lg p-3.5 border border-border-default text-[12px] text-text-secondary mb-3">
+                        <div className="bg-bg-subtle rounded-lg p-3.5 border border-border-default text-[12px] text-text-secondary mb-3">
                             {t('anti_speculation_note')}
                         </div>
                         <p className="text-[11px] text-text-muted mt-2">{t('final_price_note')}</p>
@@ -299,7 +312,7 @@ export default function ResaleDetailPage() {
                     </div>
 
                     {/* Lưu ý khi mua vé bán lại */}
-                    <div className="border border-border-default rounded-xl p-6 shadow-sm bg-[#fafafa] dark:bg-[#111827]">
+                    <div className="border border-border-default rounded-xl p-6 shadow-sm bg-bg-subtle">
                         <h3 className="text-[16px] font-bold text-text-primary mb-4">{t('resale_notes_title')}</h3>
                         <ul className="space-y-3 text-[13px] text-text-secondary list-disc pl-5 mb-6 marker:text-text-muted">
                             <li>{t('resale_note_1')}</li>
@@ -320,7 +333,7 @@ export default function ResaleDetailPage() {
                         <h3 className="font-bold text-[16px] text-text-primary mb-5 border-b border-border-default pb-4">{t('listing_summary')}</h3>
 
                         <div className="mb-5">
-                            <div className="inline-flex items-center gap-2 mb-3 bg-[#1a1a1a] dark:bg-black text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded-sm">
+                            <div className="inline-flex items-center gap-2 mb-3 bg-bg-inverse text-text-inverse text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded-sm">
                                 <CheckCircle2 size={12} /> {t('official_resale')}
                             </div>
                             <h4 className="font-bold text-[14px] text-text-primary mb-2">{listingData.eventName}</h4>
@@ -346,9 +359,9 @@ export default function ResaleDetailPage() {
                             <span className="text-2xl font-bold text-text-primary">{formatCurrency(listingData.listingPrice)}</span>
                         </div>
 
-                        <div className="bg-[#fafafa] dark:bg-[#111827] rounded-lg p-4 border border-border-default mb-6">
+                        <div className="bg-bg-subtle rounded-lg p-4 border border-border-default mb-6">
                             <div className="flex items-center gap-2 text-[13px] font-bold text-text-primary mb-3">
-                                <ShieldCheck size={16} className="text-green-600" /> {t('safety_commitment')}
+                                <ShieldCheck size={16} className="text-feedback-success-text" /> {t('safety_commitment')}
                             </div>
                             <ul className="space-y-2.5 text-[11px] text-text-secondary">
                                 <li className="flex items-start gap-2">
@@ -367,18 +380,18 @@ export default function ResaleDetailPage() {
                         </div>
 
                         <div className="space-y-3">
-                            <Link href={`/${locale}/user/resale/${listingId}/checkout`} className="block">
-                                <button className="w-full py-3 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-bold transition-all duration-200 shadow-md active:scale-[0.98]">
+                            <div onClick={() => handleBuyResaleTicket(listingData.listingId)} className="block">
+                                <button className="w-full py-3 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default rounded-lg text-[13px] font-bold transition-all duration-200 shadow-md active:scale-[0.98]">
                                     {t('buy_resale_ticket')}
                                 </button>
-                            </Link>
-                            <Link href={`/${locale}/user/tickets/${listingData.ticketAssetId}/provenance`} className="block">
-                                <button className="w-full py-3 bg-[#e5e7eb]/40 dark:bg-[#1f2937] hover:bg-[#e5e7eb] dark:hover:bg-gray-700 text-text-primary rounded-lg text-[13px] font-semibold transition-colors active:scale-[0.98]">
+                            </div>
+                            <div onClick={() => handleOpenProvenance(listingData.ticketAssetId)} className="block">
+                                <button className="w-full py-3 bg-button-secondary-bg-default hover:bg-button-secondary-bg-hover text-button-secondary-text-default rounded-lg text-[13px] font-semibold transition-colors active:scale-[0.98]">
                                     {t('view_provenance')}
                                 </button>
-                            </Link>
+                            </div>
                             <Link href={`/${locale}/user/resale`} className="block">
-                                <button className="w-full py-3 bg-Bg-Surface dark:bg-transparent border border-border-default hover:bg-[#f0f3f6] dark:hover:bg-gray-800 text-text-primary rounded-lg text-[13px] font-semibold transition-colors active:scale-[0.98]">
+                                <button className="w-full py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-lg text-[13px] font-semibold transition-colors active:scale-[0.98]">
                                     {t('back_to_marketplace')}
                                 </button>
                             </Link>
