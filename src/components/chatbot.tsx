@@ -100,68 +100,26 @@ export function ChatBot() {
             filesToSend.forEach((file) => {
                 formData.append("files", file);
             });
+            formData.append("useRag", "false");
 
-            // Get token and baseUrl for manual fetch (needed for streaming)
-            const { store } = await import("@/src/store");
-            const token = store.getState().auth.token;
-            const baseUrl = (process.env.NEXT_PUBLIC_API_GATEWAY_BE || "").replace(/\/$/, "");
+            // Use axios (api) instead of fetch, as we don't need streaming anymore
+            const response = await api.post("/inventory-service/api/chatbot/ask", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
 
-            const response = await fetch(
-                `${baseUrl}/inventory-service/api/chatbot/ask`,
-                {
-                    method: "POST",
-                    body: formData,
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                    },
-                }
-            );
-
-            if (!response.ok) throw new Error("Failed to send message");
-
-            const reader = response.body?.getReader();
-            const decoder = new TextDecoder();
-
-            const assistantMessageId = Date.now() + 1;
-            const assistantMessage: ChatMessage = {
-                id: assistantMessageId,
-                message: "",
-                images: [],
-                senderType: "ASSISTANT",
-                createdAt: new Date().toISOString(),
-            };
-
-            setMessages((prev) => [...prev, assistantMessage]);
-
-            if (reader) {
-                let fullMessage = "";
-                let partialLine = "";
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-
-                    const chunk = decoder.decode(value, { stream: true });
-                    const lines = (partialLine + chunk).split("\n");
-                    partialLine = lines.pop() || ""; // Lưu lại đoạn chưa kết thúc bằng \n
-
-                    for (const line of lines) {
-                        const trimmedLine = line.trim();
-                        if (trimmedLine.startsWith("data:")) {
-                            const content = trimmedLine.substring(5);
-                            if (content) {
-                                fullMessage += content;
-                                setMessages((prev) =>
-                                    prev.map((msg) =>
-                                        msg.id === assistantMessageId
-                                            ? { ...msg, message: fullMessage }
-                                            : msg
-                                    )
-                                );
-                            }
-                        }
-                    }
-                }
+            if (response.data && response.data.status === 200) {
+                const assistantMessage: ChatMessage = {
+                    id: Date.now(),
+                    message: response.data.data.answer,
+                    images: [],
+                    senderType: "ASSISTANT",
+                    createdAt: new Date().toISOString(),
+                };
+                setMessages((prev) => [...prev, assistantMessage]);
+            } else {
+                throw new Error("Failed to get response from chatbot");
             }
         } catch (error: any) {
             if (error.response?.status === 500) {
