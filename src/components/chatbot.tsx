@@ -91,26 +91,63 @@ export function ChatBot() {
                 formData.append("files", file);
             });
 
-            const response = await api.post(
-                `/inventory-service/api/chatbot/ask?question=${encodeURIComponent(messageToSend)}`,
-                formData,
+            // Get token and baseUrl for manual fetch (needed for streaming)
+            const { store } = await import("@/src/store");
+            const token = store.getState().auth.token;
+            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_BE || "";
+
+            const response = await fetch(
+                `${baseUrl}/inventory-service/api/chatbot/ask?question=${encodeURIComponent(messageToSend)}`,
                 {
+                    method: "POST",
+                    body: formData,
                     headers: {
-                        "Content-Type": "multipart/form-data",
+                        "Authorization": `Bearer ${token}`,
                     },
                 }
             );
 
-            if (response.data && response.data.status === 200) {
-                const assistantMessage: ChatMessage = {
-                    id: Date.now() + 1,
-                    message: response.data.data.answer,
-                    images: [],
-                    senderType: "ASSISTANT",
-                    createdAt: new Date().toISOString(),
-                };
+            if (!response.ok) throw new Error("Failed to send message");
 
-                setMessages((prev) => [...prev, assistantMessage]);
+            const reader = response.body?.getReader();
+            const decoder = new TextDecoder();
+
+            const assistantMessageId = Date.now() + 1;
+            const assistantMessage: ChatMessage = {
+                id: assistantMessageId,
+                message: "",
+                images: [],
+                senderType: "ASSISTANT",
+                createdAt: new Date().toISOString(),
+            };
+
+            setMessages((prev) => [...prev, assistantMessage]);
+
+            if (reader) {
+                let fullMessage = "";
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    // Parse SSE format (data: content)
+                    const lines = chunk.split("\n");
+                    for (const line of lines) {
+                        if (line.startsWith("data:")) {
+                            const content = line.substring(5);
+                            if (content) {
+                                fullMessage += content;
+                                setMessages((prev) =>
+                                    prev.map((msg) =>
+                                        msg.id === assistantMessageId
+                                            ? { ...msg, message: fullMessage }
+                                            : msg
+                                    )
+                                );
+                            }
+                        }
+                    }
+                }
             }
         } catch (error: any) {
             if (error.response?.status === 500) {
