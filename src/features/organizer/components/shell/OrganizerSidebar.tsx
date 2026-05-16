@@ -96,11 +96,10 @@ export function OrganizerSidebar() {
                                         <Link
                                             key={item.key}
                                             href={href}
-                                            className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-                                                active
-                                                    ? "bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active"
-                                                    : "text-navbar-sidebar-text-default hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active"
-                                            }`}
+                                            className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${active
+                                                ? "bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active"
+                                                : "text-navbar-sidebar-text-default hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active"
+                                                }`}
                                         >
                                             <Icon
                                                 size={20}
@@ -124,44 +123,40 @@ export function OrganizerSidebar() {
                             <nav className="space-y-1">
                                 <Link
                                     href={`/${locale}/organizer/center`}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-                                        isActive(`/${locale}/organizer/center`) 
-                                            ? 'bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active' 
-                                            : 'text-navbar-sidebar-text-default hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active'
-                                    }`}
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive(`/${locale}/organizer/center`)
+                                        ? 'bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active'
+                                        : 'text-navbar-sidebar-text-default hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active'
+                                        }`}
                                 >
-                                    <Calendar size={20} />
+                                    <Calendar size={15} />
                                     <span>Sự kiện của tôi</span>
                                 </Link>
                                 <Link
                                     href={`/${locale}/organizer/reports`}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-                                        isActive(`/${locale}/organizer/reports`) 
-                                            ? 'bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active' 
-                                            : 'text-navbar-sidebar-text-default hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active'
-                                    }`}
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive(`/${locale}/organizer/reports`)
+                                        ? 'bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active'
+                                        : 'text-navbar-sidebar-text-default hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active'
+                                        }`}
                                 >
                                     <BarChart2 size={20} />
                                     <span>Quản lý báo cáo</span>
                                 </Link>
                                 <Link
                                     href={`/${locale}/organizer/terms`}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-                                        isActive(`/${locale}/organizer/terms`) 
-                                            ? 'bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active' 
-                                            : 'text-navbar-sidebar-text-default hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active'
-                                    }`}
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive(`/${locale}/organizer/terms`)
+                                        ? 'bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active'
+                                        : 'text-navbar-sidebar-text-default hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active'
+                                        }`}
                                 >
                                     <FileText size={20} />
                                     <span>Điều khoản cho Ban tổ chức</span>
                                 </Link>
                                 <Link
                                     href={`/${locale}/organizer/account`}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-                                        isActive(`/${locale}/organizer/account`) 
-                                            ? 'bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active' 
-                                            : 'text-navbar-sidebar-text-default hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active'
-                                    }`}
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive(`/${locale}/organizer/account`)
+                                        ? 'bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active'
+                                        : 'text-navbar-sidebar-text-default hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active'
+                                        }`}
                                 >
                                     <User size={20} />
                                     <span>Tài khoản</span>
