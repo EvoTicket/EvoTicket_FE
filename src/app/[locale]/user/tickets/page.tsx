@@ -49,9 +49,9 @@ export default function MyTicketsPage() {
 
     // Sort setup
     const sortByList = [
-        { id: "popular", name: t("sort_popular") || "Phổ biến" },
-        { id: "newest", name: t("sort_newest") || "Mới nhất" },
-        { id: "oldest", name: t("sort_oldest") || "Cũ nhất" }
+        { id: "popular", name: t("sort_popular") },
+        { id: "newest", name: t("sort_newest") },
+        { id: "oldest", name: t("sort_oldest") }
     ];
     const [sortBy, setSortBy] = useState(sortByList[1]);
 
@@ -92,11 +92,11 @@ export default function MyTicketsPage() {
     }, [qrModalOpen, qrTimer]);
 
     const tabs = [
-        { id: "all", label: t("tab_all") || "Tất cả" },
-        { id: "upcoming", label: t("tab_upcoming") || "Sắp diễn ra" },
-        { id: "used", label: t("tab_used") || "Đã sử dụng" },
-        { id: "minting", label: t("tab_minting") || "Đang mint" },
-        { id: "reselling", label: t("tab_reselling") || "Đang bán lại" },
+        { id: "all", label: t("tab_all") },
+        { id: "upcoming", label: t("tab_upcoming") },
+        { id: "used", label: t("tab_used") },
+        { id: "minting", label: t("tab_minting") },
+        { id: "reselling", label: t("tab_reselling") },
     ];
 
     const fetchTickets = async () => {
@@ -200,13 +200,21 @@ export default function MyTicketsPage() {
         }
     });
 
+    const openProvenance = (tokenId: string) => {
+        window.open(`/${locale}/user/tickets/${tokenId}/provenance`, "_blank");
+        // router.push(`/${locale}/user/tickets/${tokenId}/provenance`);
+    }
+    const openExplorer = (contractAddress: string, tokenId: string) => {
+        window.open(`https://amoy.polygonscan.com/nft/${contractAddress}/${tokenId}`, "_blank");
+    }
+
     return (
         <div className="container mx-auto px-4 pb-12 max-w-[90%]">
             {/* Breadcrumbs */}
             <div className="flex items-center gap-2 text-[13px] text-text-secondary mt-6 mb-4">
                 <span>{t('breadcrumb_account')}</span>
                 <span className="text-[10px]">›</span>
-                <span className="text-text-primary">{t('breadcrumb_my_tickets')}</span>
+                <span className="text-button-primary-bg-default font-semibold">{t('breadcrumb_my_tickets')}</span>
             </div>
 
             {/* Header section with title and global action button */}
@@ -215,15 +223,13 @@ export default function MyTicketsPage() {
                     <h1 className="text-3xl font-bold text-text-primary mb-1">{t('page_title')}</h1>
                     <p className="text-sm text-text-secondary">{t('page_subtitle')}</p>
                 </div>
-                <button className="bg-bg-surface border border-border-default hover:bg-secondary text-text-primary px-4 py-2 rounded-ds-lg outline-none font-medium transition-colors text-sm flex items-center gap-2">
-                    <Ticket size={16} className="text-text-secondary" /> {t('explore_events')}
+                <button className="bg-button-secondary-bg-default hover:bg-button-secondary-bg-hover text-button-secondary-text-default border border-button-secondary-border-default px-4 py-2 rounded-lg outline-none font-medium transition-colors text-sm flex items-center gap-2">
+                    <Ticket size={16} className="text-button-secondary-text-default" /> {t('explore_events')}
                 </button>
             </div>
 
-            {/* Stats Cards - Updated to 2 columns */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                {/* Total Tickets */}
-                <div className="bg-bg-surface border border-border-default rounded-ds-lg p-5">
+                <div className="bg-bg-surface border border-border-default rounded-lg p-5">
                     <div className="flex items-center gap-2 text-text-secondary mb-3">
                         <Ticket size={16} />
                         <span className="font-semibold text-xs">{t('total_tickets')}</span>
@@ -236,8 +242,7 @@ export default function MyTicketsPage() {
                     </div>
                 </div>
 
-                {/* Blockchain Wallet */}
-                <div className="bg-bg-surface border border-border-default rounded-ds-lg p-5">
+                <div className="bg-bg-surface border border-border-default rounded-lg p-5">
                     <div className="flex items-center gap-2 text-text-secondary mb-3">
                         <Wallet size={16} />
                         <span className="font-semibold text-xs">{t('blockchain_wallet')}</span>
@@ -251,7 +256,6 @@ export default function MyTicketsPage() {
                 </div>
             </div>
 
-            {/* Filters and Search */}
             <div className="flex flex-col gap-4 mb-6 w-full">
                 <div className="flex justify-end relative z-20">
                     <div className="relative w-full sm:w-72">
@@ -260,7 +264,7 @@ export default function MyTicketsPage() {
                         </div>
                         <input
                             type="text"
-                            className="w-full pl-9 pr-4 py-1.5 bg-bg-surface text-xs text-text-primary rounded-full border border-border-default focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
+                            className="w-full pl-9 pr-4 py-1.5 bg-bg-surface text-xs text-text-primary rounded-full border border-border-default focus:outline-none focus:ring-1 focus:ring-button-primary-bg-default focus:border-button-primary-bg-default transition-colors"
                             placeholder={t('search_placeholder')}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -275,7 +279,7 @@ export default function MyTicketsPage() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`px-2 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors ${activeTab === tab.id
-                                    ? "text-primary font-semibold"
+                                    ? "text-button-primary-bg-default font-semibold"
                                     : "text-text-secondary hover:text-text-primary"
                                     }`}
                             >
@@ -288,7 +292,7 @@ export default function MyTicketsPage() {
                         <span className="text-[13px] text-text-secondary whitespace-nowrap">{t('sort_by')}</span>
                         <div className="relative h-8 w-40">
                             <Listbox value={sortBy} onChange={setSortBy}>
-                                <ListboxButton className="w-full h-full pl-3 pr-8 bg-bg-surface border border-border-default rounded-ds-md text-text-primary outline-none focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer transition-colors text-left text-[13px] relative shadow-sm">
+                                <ListboxButton className="w-full h-full pl-3 pr-8 bg-bg-surface border border-border-default rounded-md text-text-primary outline-none focus:ring-1 focus:ring-button-primary-bg-default focus:border-button-primary-bg-default cursor-pointer transition-colors text-left text-[13px] relative shadow-sm">
                                     <span className="block truncate">{sortBy.name}</span>
                                     <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                                         <ChevronDown className="h-4 w-4 text-text-muted" aria-hidden="true" />
@@ -301,7 +305,7 @@ export default function MyTicketsPage() {
                                     {sortByList.map(item => (
                                         <ListboxOption key={item.id} value={item} className="group flex justify-between items-center px-3 py-2 cursor-pointer hover:bg-secondary">
                                             <span>{item.name}</span>
-                                            <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-primary" />
+                                            <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-button-primary-bg-default" />
                                         </ListboxOption>
                                     ))}
                                 </ListboxOptions>
@@ -311,11 +315,10 @@ export default function MyTicketsPage() {
                 </div>
             </div>
 
-            {/* TICKETS CONTENT */}
             <div className="space-y-4">
                 {isLoading ? (
-                    <div className="py-20 flex flex-col items-center justify-center bg-bg-surface border border-border-default rounded-ds-lg">
-                        <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+                    <div className="py-20 flex flex-col items-center justify-center bg-bg-surface border border-border-default rounded-lg">
+                        <Loader2 className="w-10 h-10 text-button-primary-bg-default animate-spin mb-4" />
                         <p className="text-sm text-text-secondary font-medium">{t('loading_message')}</p>
                     </div>
                 ) : filteredEvents.length === 0 ? (
@@ -328,8 +331,7 @@ export default function MyTicketsPage() {
                     filteredEvents.map((event) => {
                         const isExpanded = expandedEvents.includes(event.id);
                         return (
-                            <div key={event.id} className="bg-bg-surface border border-border-default rounded-ds-lg overflow-hidden shadow-sm">
-                                {/* Event Header Row */}
+                            <div key={event.id} className="bg-bg-surface border border-border-default rounded-lg overflow-hidden shadow-sm">
                                 <div className="p-4 sm:p-6 flex flex-col md:flex-row gap-4 justify-between md:items-center">
                                     <div className="flex-1 max-w-sm">
                                         <h3 className="font-semibold text-[15px] text-text-primary mb-1">{event.eventName}</h3>
@@ -348,8 +350,8 @@ export default function MyTicketsPage() {
                                         <button
                                             onClick={() => toggleEvent(event.id)}
                                             className={`px-3 py-1.5 border rounded-full text-[11px] font-medium transition-colors flex items-center gap-1 min-w-[90px] justify-center ${isExpanded
-                                                ? 'border-border-default bg-secondary text-text-primary hover:bg-[#e2e8f0] dark:hover:bg-gray-700'
-                                                : 'border-[#c7d2fe] dark:border-[#4f46e5] text-primary hover:bg-[#e0e7ff] dark:hover:bg-[#3730a3]'
+                                                ? 'bg-button-secondary-bg-default border-button-secondary-border-default text-button-secondary-text-default hover:bg-button-secondary-bg-hover'
+                                                : 'border-button-primary-bg-default/20 text-button-primary-bg-default hover:bg-button-primary-bg-default/10'
                                                 }`}
                                         >
                                             {isExpanded ? t('collapse') : t('view_details')}
@@ -358,9 +360,8 @@ export default function MyTicketsPage() {
                                     </div>
                                 </div>
 
-                                {/* Expanded Ticket List */}
                                 {isExpanded && event.tickets.length > 0 && (
-                                    <div className="bg-[#f8f9fa] dark:bg-[#111827]/40 border-t border-border-default p-4 sm:p-6">
+                                    <div className="bg-bg-subtle border-t border-border-default p-4 sm:p-6">
                                         <div className="mb-4">
                                             <h4 className="font-bold text-text-primary text-[13px] leading-tight">{t('ticket_list_title')}</h4>
                                             <p className="text-[11px] text-text-muted mt-1">{t('ticket_list_desc')}</p>
@@ -373,26 +374,22 @@ export default function MyTicketsPage() {
                                                 return (
                                                     <div key={ticket.id} className="bg-bg-surface border border-border-default rounded-ds-md overflow-hidden relative">
                                                         <div className="p-4 sm:px-6 sm:py-4 flex flex-col md:flex-row gap-4 justify-between md:items-center">
-                                                            {/* Ticket Info Left */}
                                                             <div className="w-full md:w-1/4 shrink-0">
                                                                 <h5 className="font-bold text-text-primary text-[13px] mb-1">{ticket.ticketName}</h5>
                                                                 <p className="text-[11px] text-text-secondary mt-1">{ticket.ticketType} • {ticket.seat}</p>
                                                             </div>
 
-                                                            {/* Ticket Info Middle */}
                                                             <div className="w-full md:w-1/3 flex flex-col gap-1 text-[11px]">
                                                                 {ticket.status === 'on_sale' ? (
                                                                     <div>
                                                                         <span className="text-text-muted">{t('listing_id')} </span>
                                                                         <span className="text-text-primary font-medium">{ticket.listingCode}</span>
-
                                                                     </div>
                                                                 ) : (
                                                                     <div>
                                                                         <span className="text-text-muted">{t('ticket_id')} </span>
                                                                         <span className="text-text-primary font-medium">{ticket.id}</span>
                                                                     </div>
-
                                                                 )}
                                                                 <div>
                                                                     <span className="text-text-muted">{t('token_id')} </span>
@@ -400,39 +397,38 @@ export default function MyTicketsPage() {
                                                                 </div>
                                                                 <div className="mt-1 flex items-center gap-2">
                                                                     {ticket.status === 'minting' && (
-                                                                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-[#e2e8f0] dark:border-[#334155] bg-[#f8fafc] dark:bg-[#1e293b] text-[#64748b] dark:text-[#94a3b8] text-[10px] font-medium whitespace-nowrap">
+                                                                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-border-default bg-bg-surface text-text-muted text-[10px] font-medium whitespace-nowrap">
                                                                             <Loader2 size={10} className="animate-spin" /> {t('minting')}
                                                                         </span>
                                                                     )}
                                                                     {ticket.status === 'active' && (
-                                                                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-[#22c55e] bg-[#f0fdf4] dark:bg-[#052e16] text-[#16a34a] dark:text-[#22c55e] text-[10px] font-medium whitespace-nowrap">
+                                                                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-feedback-success-border bg-feedback-success-bg text-feedback-success-text text-[10px] font-medium whitespace-nowrap">
                                                                             <CheckCircle2 size={10} /> {t('valid')}
                                                                         </span>
                                                                     )}
                                                                     {ticket.status === 'on_sale' && (
-                                                                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-orange-200 bg-orange-50 text-orange-600 text-[10px] font-medium whitespace-nowrap">
+                                                                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-feedback-warning-border bg-feedback-warning-bg text-feedback-warning-text text-[10px] font-medium whitespace-nowrap">
                                                                             {t('tab_reselling')}
                                                                         </span>
                                                                     )}
                                                                     {ticket.status === 'used' && (
-                                                                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-gray-200 bg-gray-50 text-gray-500 text-[10px] font-medium whitespace-nowrap">
+                                                                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-border-default bg-secondary text-text-muted text-[10px] font-medium whitespace-nowrap">
                                                                             {t('tab_used')}
                                                                         </span>
                                                                     )}
                                                                 </div>
                                                             </div>
 
-                                                            {/* Actions */}
                                                             <div className="flex items-center justify-end gap-2 shrink-0 md:flex-1 w-full md:w-auto relative z-20">
-                                                                <button 
+                                                                <button
                                                                     onClick={() => fetchQRToken(ticket.id)}
-                                                                    className="bg-primary hover:bg-primary-hover text-white px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors shadow-sm whitespace-nowrap"
+                                                                    className="bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors shadow-sm whitespace-nowrap"
                                                                 >
                                                                     {t('view_qr')}
                                                                 </button>
                                                                 {ticket.status !== 'on_sale' && (
                                                                     <Link href={`/${locale}/user/tickets/${ticket.id}/resell`}>
-                                                                        <button className="border border-[#c7d2fe] dark:border-[#4f46e5] hover:bg-[#e0e7ff] dark:hover:bg-[#3730a3] text-primary px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap block">
+                                                                        <button className="bg-button-ghost-bg-default hover:bg-button-ghost-bg-hover text-button-ghost-text-default border border-button-ghost-border-default px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap block">
                                                                             {t('resell_button')}
                                                                         </button>
                                                                     </Link>
@@ -446,19 +442,9 @@ export default function MyTicketsPage() {
                                                             </div>
                                                         </div>
 
-                                                        {/* Expanded Ticket Detail */}
                                                         {isTicketExpanded && (
                                                             <div className="px-4 sm:px-6 pb-4 sm:pb-6 relative z-10 w-full">
                                                                 <div className="flex flex-col md:flex-row gap-6 mt-2 pt-6 items-start bg-bg-surface border-t border-border-default">
-                                                                    {/* QR Code Placeholder */}
-                                                                    {/* <div className="w-full md:w-56 bg-[#FAFAFA] dark:bg-[#1a1a1a] border border-border-default p-4 flex flex-col items-center justify-center self-stretch min-h-[220px]">
-                                                                        <div className="bg-white p-2 border border-dotted border-border-default shadow-sm mb-4">
-                                                                            <QrCode size={100} className="text-[#1a1a1a]" strokeWidth={1.5} />
-                                                                        </div>
-                                                                        <p className="text-[10px] text-text-muted text-center leading-relaxed max-w-[150px]">Mã QR dùng để check-in vào cổng tại sự kiện</p>
-                                                                    </div> */}
-
-                                                                    {/* Ticket Detail Block */}
                                                                     <div className="flex-1 py-1">
                                                                         <h5 className="font-bold text-text-primary text-[13px] mb-4">{t('ticket_details_title')}</h5>
                                                                         <div className="grid grid-cols-[100px_1fr] gap-y-2.5 text-[11px] mb-6 max-w-full">
@@ -480,16 +466,23 @@ export default function MyTicketsPage() {
                                                                                 <div className="font-medium text-text-primary pl-2 text-right">{ticket.listingPrice}</div>
                                                                             }
                                                                             <div className="text-text-muted">{t('qr_status')}</div>
-                                                                            <div className="font-medium text-text-primary pl-2 text-right">Ready</div>
+                                                                            <div className="font-medium text-text-primary pl-2 text-right">{t('qr_ready')}</div>
                                                                         </div>
 
                                                                         <div className="flex justify-end flex-wrap gap-3 pointer-events-auto">
-                                                                            <Link href={`/${locale}/user/tickets/${ticket.id}/provenance`}>
-                                                                                <button className="bg-primary hover:bg-primary-hover text-white px-5 py-2 rounded-full text-[11px] font-medium transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+                                                                            <button onClick={() => openProvenance(ticket.id)}>
+                                                                                <div className="bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-5 py-2 rounded-full text-[11px] font-medium transition-colors flex items-center justify-center gap-1.5 shadow-sm">
                                                                                     <Network size={12} /> {t('view_provenance')}
-                                                                                </button>
-                                                                            </Link>
-                                                                            <button className="border border-border-default hover:bg-secondary text-primary px-5 py-2 rounded-full text-[11px] font-medium transition-colors flex items-center justify-center gap-1.5">
+                                                                                </div>
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => openExplorer(ticket.contractAddress, ticket.tokenId)}
+                                                                                disabled={!ticket.contractAddress || !ticket.tokenId}
+                                                                                className={`border px-5 py-2 rounded-full text-[11px] font-medium transition-colors flex items-center justify-center gap-1.5 ${ticket.contractAddress && ticket.tokenId
+                                                                                    ? 'border-border-default hover:bg-secondary text-button-primary-bg-default cursor-pointer'
+                                                                                    : 'border-border-default text-text-muted cursor-not-allowed opacity-50'
+                                                                                    }`}
+                                                                            >
                                                                                 <ExternalLink size={12} /> {t('open_explorer')}
                                                                             </button>
                                                                         </div>
@@ -511,7 +504,6 @@ export default function MyTicketsPage() {
 
             <div className="border-t border-border-default mt-16 mb-8"></div>
 
-            {/* QR Code Modal */}
             <Transition show={qrModalOpen} as={React.Fragment}>
                 <Dialog as="div" className="relative z-50" onClose={() => setQrModalOpen(false)}>
                     <TransitionChild
@@ -523,7 +515,7 @@ export default function MyTicketsPage() {
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                     >
-                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" />
+                        <div className="fixed inset-0 bg-modal-overlay-bg-default backdrop-blur-sm transition-opacity" />
                     </TransitionChild>
 
                     <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -541,7 +533,7 @@ export default function MyTicketsPage() {
                                     <div className="bg-bg-surface px-4 pb-4 pt-5 sm:p-6">
                                         <div className="flex justify-between items-center mb-6">
                                             <DialogTitle as="h3" className="text-lg font-bold leading-6 text-text-primary">
-                                                {t('qr_code_title') || "Mã vé QR"}
+                                                {t('qr_code_title')}
                                             </DialogTitle>
                                             <button
                                                 onClick={() => setQrModalOpen(false)}
@@ -555,31 +547,31 @@ export default function MyTicketsPage() {
                                             <div className="bg-white p-6 rounded-ds-2xl border-2 border-dashed border-border-default shadow-inner mb-6 relative">
                                                 {qrLoading ? (
                                                     <div className="w-56 h-56 flex items-center justify-center">
-                                                        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                                                        <Loader2 className="w-12 h-12 text-button-primary-bg-default animate-spin" />
                                                     </div>
                                                 ) : qrData ? (
                                                     <div className="relative">
-                                                        <QRCodeSVG 
-                                                            value={qrData.qrToken} 
-                                                            size={224} 
+                                                        <QRCodeSVG
+                                                            value={qrData.qrToken}
+                                                            size={224}
                                                             level="H"
                                                             includeMargin={false}
                                                         />
                                                         {qrTimer === 0 && (
                                                             <div className="absolute inset-0 bg-white/90 backdrop-blur-[1px] flex flex-col items-center justify-center p-4 text-center">
-                                                                <p className="text-sm font-bold text-error mb-4">{t('qr_expired') || "Mã QR đã hết hạn"}</p>
-                                                                <button 
+                                                                <p className="text-sm font-bold text-feedback-error-text mb-4">{t('qr_expired')}</p>
+                                                                <button
                                                                     onClick={refreshQRCode}
-                                                                    className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg hover:bg-primary-hover transition-all active:scale-95"
+                                                                    className="flex items-center gap-2 bg-button-primary-bg-default text-button-primary-text-default px-4 py-2 rounded-full text-xs font-bold shadow-lg hover:bg-button-primary-bg-hover transition-all active:scale-95"
                                                                 >
-                                                                    <RefreshCcw size={14} /> {t('refresh_qr') || "Làm mới mã"}
+                                                                    <RefreshCcw size={14} /> {t('refresh_qr')}
                                                                 </button>
                                                             </div>
                                                         )}
                                                     </div>
                                                 ) : (
                                                     <div className="w-56 h-56 flex items-center justify-center text-text-muted italic text-xs">
-                                                        {t('qr_not_found') || "Không tìm thấy dữ liệu QR"}
+                                                        {t('qr_not_found')}
                                                     </div>
                                                 )}
                                             </div>
@@ -587,18 +579,18 @@ export default function MyTicketsPage() {
                                             {qrTimer > 0 && (
                                                 <div className="w-full bg-bg-subtle rounded-ds-xl p-4 flex items-center justify-between">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                                        <div className="w-10 h-10 rounded-full bg-button-primary-bg-default/10 flex items-center justify-center text-button-primary-bg-default">
                                                             <Clock size={20} />
                                                         </div>
                                                         <div>
-                                                            <p className="text-[10px] text-text-muted uppercase font-bold tracking-wider">{t('qr_expires_in') || "Hết hạn sau"}</p>
+                                                            <p className="text-[10px] text-text-muted uppercase font-bold tracking-wider">{t('qr_expires_in')}</p>
                                                             <p className="text-sm font-mono font-bold text-text-primary">{qrTimer}s</p>
                                                         </div>
                                                     </div>
-                                                    <button 
+                                                    <button
                                                         onClick={refreshQRCode}
                                                         className="p-2 rounded-full hover:bg-bg-surface text-text-secondary transition-colors"
-                                                        title={t('refresh_qr') || "Làm mới"}
+                                                        title={t('refresh_qr')}
                                                     >
                                                         <RefreshCcw size={18} className={qrLoading ? "animate-spin" : ""} />
                                                     </button>
@@ -607,7 +599,7 @@ export default function MyTicketsPage() {
 
                                             <div className="mt-8 text-center">
                                                 <p className="text-[11px] text-text-muted leading-relaxed">
-                                                    {t('qr_security_note') || "Vui lòng đưa mã này cho nhân viên tại quầy soát vé để check-in. Mã QR sẽ tự động cập nhật để bảo mật."}
+                                                    {t('qr_security_note')}
                                                 </p>
                                             </div>
                                         </div>

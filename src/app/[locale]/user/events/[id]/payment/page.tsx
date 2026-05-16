@@ -279,7 +279,7 @@ export default function PaymentPage() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-bg-surface">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-button-primary-bg-default"></div>
                 <p className="ml-4 text-text-secondary">{tr('loading_result')}</p>
             </div>
         );
@@ -293,9 +293,9 @@ export default function PaymentPage() {
 
             {/* STICKY COUNTDOWN FLOATING BAR */}
             <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-[90] transition-all duration-500 transform ${isSticky ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0 pointer-events-none'}`}>
-                <div className="bg-bg-surface/80 backdrop-blur-xl border border-primary/30 px-6 py-2.5 rounded-full shadow-[0_8px_32px_rgba(109,72,215,0.25)] flex items-center gap-4">
+                <div className="bg-bg-surface/80 backdrop-blur-xl border border-button-primary-bg-default/30 px-6 py-2.5 rounded-full shadow-[0_8px_32px_var(--button-primary-bg-default-alpha-25)] flex items-center gap-4">
                     <span className="text-xs font-bold text-text-secondary uppercase tracking-widest">{tb('time_remaining')}</span>
-                    <div className="flex items-center gap-1 font-mono text-xl font-black text-primary">
+                    <div className="flex items-center gap-1 font-mono text-xl font-black text-button-primary-bg-default">
                         <OdometerDigit value={t.m1} />
                         <OdometerDigit value={t.m2} />
                         <span className="mb-1">:</span>
@@ -310,13 +310,13 @@ export default function PaymentPage() {
                 <div className="max-w-[90%] mx-auto px-4">
                     {/* BREADCRUMB */}
                     <div className="text-xs text-text-secondary flex items-center gap-2 mb-6 uppercase tracking-wider">
-                        <Link href={`/${locale}/user/homepage`} className="hover:text-primary transition-colors">{tb('home')}</Link>
+                        <Link href={`/${locale}/user/homepage`} className="hover:text-button-primary-bg-default transition-colors">{tb('home')}</Link>
                         <span>{'>'}</span>
-                        <Link href={`/${locale}/user/events`} className="hover:text-primary transition-colors">{tb('search')}</Link>
+                        <Link href={`/${locale}/user/events`} className="hover:text-button-primary-bg-default transition-colors">{tb('search')}</Link>
                         <span>{'>'}</span>
-                        <Link href={`/${locale}/user/events/${event.eventId}`} className="hover:text-primary transition-colors">{tb('event_detail')}</Link>
+                        <Link href={`/${locale}/user/events/${event.eventId}`} className="hover:text-button-primary-bg-default transition-colors">{tb('event_detail')}</Link>
                         <span>{'>'}</span>
-                        <span className="text-primary font-semibold">{tb('booking_and_payment')}</span>
+                        <span className="text-button-primary-bg-default font-semibold">{tb('booking_and_payment')}</span>
                     </div>
 
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -335,7 +335,7 @@ export default function PaymentPage() {
                         <div className="flex items-center flex-1 w-full">
                             {/* Step 1 - Done */}
                             <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-[#1e463a] border border-[#2bad7f] text-[#2bad7f] flex items-center justify-center font-bold text-sm">
+                                <div className="w-8 h-8 rounded-full bg-feedback-success-bg border border-feedback-success-border text-feedback-success-text flex items-center justify-center font-bold text-sm">
                                     <Check size={16} />
                                 </div>
                                 <span className="text-sm font-bold text-stepper-text-completed">{tb('step_1')}</span>
@@ -446,7 +446,7 @@ export default function PaymentPage() {
                                     disabled={isApplyingVoucher}
                                     className={`bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-ds-lg font-medium transition-colors flex items-center justify-center min-w-[100px] ${isApplyingVoucher ? 'opacity-70 cursor-not-allowed' : ''}`}
                                 >
-                                    {isApplyingVoucher ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : tp('apply_button')}
+                                    {isApplyingVoucher ? <span className="w-5 h-5 border-2 border-white/30 border-t-button-primary-text-default rounded-full animate-spin"></span> : tp('apply_button')}
                                 </button>
                             </div>
                             {appliedDiscount > 0 && appliedVoucherCode && (
@@ -476,7 +476,7 @@ export default function PaymentPage() {
                                         value="payos"
                                         checked={paymentMethod === "payos"}
                                         onChange={() => setPaymentMethod("payos")}
-                                        className="w-4 h-4 accent-primary"
+                                        className="w-4 h-4 accent-button-primary-bg-default"
                                     />
                                     <div className="w-8 h-8 rounded bg-white flex items-center justify-center p-1 shrink-0">
                                         <div className="text-blue-600 font-black text-xs">PayOS</div>
@@ -494,10 +494,10 @@ export default function PaymentPage() {
                                         value="sepay"
                                         checked={paymentMethod === "sepay"}
                                         onChange={() => setPaymentMethod("sepay")}
-                                        className="w-4 h-4 accent-primary"
+                                        className="w-4 h-4 accent-button-primary-bg-default"
                                     />
                                     <div className="w-8 h-8 rounded bg-bg-surface border border-border-strong flex items-center justify-center shrink-0">
-                                        <div className="text-primary font-bold text-[8px]">sepay</div>
+                                        <div className="text-button-primary-bg-default font-bold text-[8px]">sepay</div>
                                     </div>
                                     <div className="flex-1">
                                         <span className="text-sm font-bold text-text-primary">{tp('balance_label')}</span>
@@ -513,7 +513,7 @@ export default function PaymentPage() {
                                         name="payment"
                                         value="vnpay"
                                         disabled
-                                        className="w-4 h-4 accent-primary"
+                                        className="w-4 h-4 accent-button-primary-bg-default"
                                     />
                                     <div className="w-8 h-8 rounded bg-white flex items-center justify-center p-1 shrink-0">
                                         <div className="flex gap-0.5 font-bold text-[10px]"><span className="text-blue-600">VN</span><span className="text-red-500">PAY</span></div>
@@ -527,9 +527,9 @@ export default function PaymentPage() {
                                         name="payment"
                                         value="momo"
                                         disabled
-                                        className="w-4 h-4 accent-primary"
+                                        className="w-4 h-4 accent-button-primary-bg-default"
                                     />
-                                    <div className="w-8 h-8 rounded bg-[#a50064] flex items-center justify-center p-1 shrink-0">
+                                    <div className="w-8 h-8 rounded bg-brand-secondary flex items-center justify-center p-1 shrink-0">
                                         <span className="text-white font-bold text-[8px]">MoMo</span>
                                     </div>
                                     <span className="text-sm font-medium text-text-muted">{tp('momo_label')}</span>
@@ -541,7 +541,7 @@ export default function PaymentPage() {
                                         name="payment"
                                         value="zalopay"
                                         disabled
-                                        className="w-4 h-4 accent-primary"
+                                        className="w-4 h-4 accent-button-primary-bg-default"
                                     />
                                     <div className="w-8 h-8 rounded bg-white flex items-center justify-center p-1 shrink-0">
                                         <span className="text-blue-500 font-extrabold text-[8px]">Zalo</span><span className="text-green-500 font-extrabold text-[8px]">Pay</span>
@@ -586,7 +586,7 @@ export default function PaymentPage() {
                                         type="checkbox"
                                         checked={checkedInfo}
                                         onChange={(e) => setCheckedInfo(e.target.checked)}
-                                        className="mt-0.5 w-4 h-4 accent-primary shrink-0 cursor-pointer"
+                                        className="mt-0.5 w-4 h-4 accent-button-primary-bg-default shrink-0 cursor-pointer"
                                     />
                                     <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors">{tp('confirm_check')}</span>
                                 </label>
@@ -595,7 +595,7 @@ export default function PaymentPage() {
                                         type="checkbox"
                                         checked={understoodTime}
                                         onChange={(e) => setUnderstoodTime(e.target.checked)}
-                                        className="mt-0.5 w-4 h-4 accent-primary shrink-0 cursor-pointer"
+                                        className="mt-0.5 w-4 h-4 accent-button-primary-bg-default shrink-0 cursor-pointer"
                                     />
                                     <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors">{tp('confirm_time')}</span>
                                 </label>
@@ -604,7 +604,7 @@ export default function PaymentPage() {
                                         type="checkbox"
                                         checked={agreedToTerms}
                                         onChange={(e) => setAgreedToTerms(e.target.checked)}
-                                        className="mt-0.5 w-4 h-4 accent-primary shrink-0 cursor-pointer"
+                                        className="mt-0.5 w-4 h-4 accent-button-primary-bg-default shrink-0 cursor-pointer"
                                     />
                                     <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors">{tp('confirm_terms')}</span>
                                 </label>
@@ -679,12 +679,12 @@ export default function PaymentPage() {
 
                                 <p className="text-[11px] text-text-muted mb-4">
                                     {tp.rich('terms_agree_note', {
-                                        link: (chunks) => <Link href="#" className="text-primary hover:underline">{tp('terms_link_text')}</Link>
+                                        link: (chunks) => <Link href="#" className="text-button-primary-bg-default hover:underline">{tp('terms_link_text')}</Link>
                                     })}
                                 </p>
 
                                 <button
-                                    className={`w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm mb-3 ${!(agreedToTerms && checkedInfo && understoodTime) || isCreatingOrder ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-[#6D48D7] hover:bg-[#5b3bb8] text-white'}`}
+                                    className={`w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm mb-3 ${!(agreedToTerms && checkedInfo && understoodTime) || isCreatingOrder ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
                                     disabled={!(agreedToTerms && checkedInfo && understoodTime) || isCreatingOrder}
                                     onClick={() => createOrder()}
                                 >

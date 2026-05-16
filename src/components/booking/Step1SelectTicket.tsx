@@ -127,10 +127,10 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                     {hasSeatMap ? (
                         <div className="flex flex-col items-center">
                             <div className="flex gap-4 mb-8">
-                                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full border border-border-strong"></div><span className="text-xs text-text-secondary">{t('available_seat')}</span></div>
-                                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-primary border border-primary"></div><span className="text-xs text-text-secondary">{t('selecting_seat')}</span></div>
-                                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-text-muted"></div><span className="text-xs text-text-secondary">{t('sold_out_seat')}</span></div>
-                                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-feedback-error-text"></div><span className="text-xs text-text-secondary">{t('locked_seat')}</span></div>
+                                 <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full border border-border-strong"></div><span className="text-xs text-text-secondary">{t('available_seat')}</span></div>
+                                 <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-button-primary-bg-default border border-button-primary-bg-default"></div><span className="text-xs text-text-secondary">{t('selecting_seat')}</span></div>
+                                 <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-text-muted"></div><span className="text-xs text-text-secondary">{t('sold_out_seat')}</span></div>
+                                 <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-feedback-error-bg border border-feedback-error-border"></div><span className="text-xs text-text-secondary">{t('locked_seat')}</span></div>
                             </div>
 
                             {/* MOCK SEAT MAP TRAPEZOID SHAPE */}
@@ -139,13 +139,13 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                                 <div className="w-full h-12 bg-border-subtle border border-border-strong rounded shadow flex items-center justify-center text-text-muted font-bold tracking-widest text-sm mb-4">{t("stage")}</div>
                                 {/* Tiers */}
                                 <div className="flex gap-2">
-                                    {Array.from({ length: 12 }).map((_, i) => <div key={i} className="w-4 h-4 rounded-full bg-border-strong hover:bg-primary cursor-pointer"></div>)}
+                                    {Array.from({ length: 12 }).map((_, i) => <div key={i} className="w-4 h-4 rounded-full bg-border-strong hover:bg-button-primary-bg-default cursor-pointer"></div>)}
                                 </div>
                                 <div className="flex gap-2">
-                                    {Array.from({ length: 16 }).map((_, i) => <div key={i} className="w-4 h-4 rounded-full bg-border-strong hover:bg-primary cursor-pointer"></div>)}
+                                    {Array.from({ length: 16 }).map((_, i) => <div key={i} className="w-4 h-4 rounded-full bg-border-strong hover:bg-button-primary-bg-default cursor-pointer"></div>)}
                                 </div>
                                 <div className="flex gap-2">
-                                    {Array.from({ length: 20 }).map((_, i) => <div key={i} className="w-4 h-4 rounded-full bg-border-strong hover:bg-primary cursor-pointer"></div>)}
+                                    {Array.from({ length: 20 }).map((_, i) => <div key={i} className="w-4 h-4 rounded-full bg-border-strong hover:bg-button-primary-bg-default cursor-pointer"></div>)}
                                 </div>
                                 <div className="flex gap-2 opacity-50">
                                     {Array.from({ length: 24 }).map((_, i) => <div key={i} className="w-4 h-4 rounded-full bg-text-muted"></div>)}
@@ -173,7 +173,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                                                 <h4 className={`font-semibold text-body-large ${isSoldOut ? 'text-text-muted' : 'text-ticket-card-text-title'}`}>{ticket.typeName}</h4>
                                                 <p className={`text-xs mt-1 ${isSoldOut ? 'text-text-muted' : 'text-ticket-card-text-meta '}`}>{ticket.description}</p>
                                                 {(!isSoldOut && (ticket.minPurchase > 1 || ticket.maxPurchase > 0)) && (
-                                                    <p className="text-[11px] mt-1 font-medium text-primary">
+                                                    <p className="text-[11px] mt-1 font-medium text-button-primary-bg-default">
                                                         {ticket.minPurchase > 1 && t("min_purchase", { min: ticket.minPurchase })}
                                                         {ticket.maxPurchase > 0 && t("max_purchase", { max: ticket.maxPurchase })}
                                                     </p>
@@ -207,7 +207,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                                             {ticket.price.toLocaleString("vi-VN")} VND
                                         </div>
                                         <div className="mt-4 pt-4 border-t border-border-subtle flex justify-between items-center text-xs">
-                                            <span className="text-primary font-semibold hover:underline cursor-pointer">{t("view_conditions")}</span>
+                                            <span className="text-button-primary-bg-default font-semibold hover:underline cursor-pointer">{t("view_conditions")}</span>
                                             {/* icon dropdown */}
                                         </div>
                                     </div>
@@ -252,7 +252,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                                 <h4 className="font-semibold text-payment-summary-text-body">{t("selected_tickets")}</h4>
                                 {selectedTickets.length > 0 && (
                                     <button
-                                        className="text-xs text-field-text-error hover:underline"
+                                        className="text-xs text-feedback-error-text hover:underline"
                                         onClick={() => setSelectedTickets([])}
                                     >
                                         {t("clear_all")}
@@ -281,7 +281,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                                                 </div>
                                             </div>
                                             <button
-                                                className="pt-1 text-field-border-error hover:text-feedback-error-text transition-colors"
+                                                className="pt-1 text-feedback-error-text hover:text-feedback-error-text/80 transition-colors"
                                                 onClick={() => handleRemoveItem(ticket.id)}
                                             >
                                                 <Trash2 size={18} />
@@ -307,7 +307,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                         </div>
 
                         <button
-                            className={`w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm mb-3 text-body-base ${selectedTickets.length === 0 ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-[#6D48D7] hover:bg-[#5b3bb8] text-button-primary-text-default'}`}
+                            className={`w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm mb-3 text-body-base ${selectedTickets.length === 0 ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
                             disabled={selectedTickets.length === 0}
                             onClick={onNext}
                         >
@@ -315,7 +315,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                         </button>
 
                         <button
-                            className="w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm hover:bg-bg-subtle text-text-primary border border-button-outline-border-default"
+                            className="w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm bg-button-secondary-bg-default hover:bg-button-secondary-bg-hover text-button-secondary-text-default border border-button-secondary-border-default"
                             onClick={onBack}
                         >
                             {t("back_to_event")}

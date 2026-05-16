@@ -2,6 +2,7 @@ import axios from 'axios';
 import type { AxiosRequestConfig } from 'axios';
 import { store } from '@/src/store';
 import { logout, updateToken } from '@/src/store/slices/authSlice';
+import { toast } from 'react-toastify';
 
 declare module 'axios' {
     export interface AxiosRequestConfig {
@@ -86,6 +87,11 @@ api.interceptors.response.use(
                 // No refresh token, logout immediately
                 isRefreshing = false;
                 store.dispatch(logout());
+                
+                // Show toast before redirect
+                const locale = getLocaleFromPath();
+                toast.error(locale === 'en' ? "Session expired, please login again" : "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
+                
                 redirectToLogin();
                 return Promise.reject(error);
             }
@@ -118,6 +124,11 @@ api.interceptors.response.use(
                 processQueue(refreshError, null);
                 isRefreshing = false;
                 store.dispatch(logout());
+                
+                // Show toast before redirect
+                const locale = getLocaleFromPath();
+                toast.error(locale === 'en' ? "Session expired, please login again" : "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
+
                 redirectToLogin();
                 return Promise.reject(refreshError);
             }
@@ -127,12 +138,20 @@ api.interceptors.response.use(
     }
 );
 
+function getLocaleFromPath() {
+    if (typeof window !== 'undefined') {
+        const path = window.location.pathname;
+        const segments = path.split('/');
+        return (segments.length > 1 && (segments[1] === 'vi' || segments[1] === 'en')) ? segments[1] : 'vi';
+    }
+    return 'vi';
+}
+
 function redirectToLogin() {
     if (typeof window !== 'undefined') {
         const path = window.location.pathname;
         const search = window.location.search;
-        const segments = path.split('/');
-        const locale = (segments.length > 1 && (segments[1] === 'vi' || segments[1] === 'en')) ? segments[1] : 'vi';
+        const locale = getLocaleFromPath();
         
         const callbackUrl = encodeURIComponent(path + search);
         window.location.href = `/${locale}/auth/login?callbackUrl=${callbackUrl}`;

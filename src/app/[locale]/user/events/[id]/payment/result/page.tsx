@@ -99,15 +99,15 @@ function PaymentResultContent() {
     const renderIcon = () => {
         switch (status) {
             case "SUCCESS":
-                return <div className="w-16 h-16 rounded-full bg-[#82e1a3] flex items-center justify-center mb-6"><Check size={40} className="text-[#104825] stroke-[3]" /></div>;
+                return <div className="w-16 h-16 rounded-full bg-feedback-success-bg flex items-center justify-center mb-6"><Check size={40} className="text-feedback-success-text stroke-[3]" /></div>;
             case "PENDING":
-                return <div className="w-16 h-16 flex items-center justify-center mb-6"><Loader2 size={64} className="text-[#72aef8] animate-spin stroke-1" /></div>;
+                return <div className="w-16 h-16 flex items-center justify-center mb-6"><Loader2 size={64} className="text-feedback-info-text animate-spin stroke-1" /></div>;
             case "FAILED":
-                return <div className="w-16 h-16 rounded-full bg-[#f88585] flex items-center justify-center mb-6"><X size={40} className="text-[#6b1e1e] stroke-[3]" /></div>;
+                return <div className="w-16 h-16 rounded-full bg-feedback-error-bg flex items-center justify-center mb-6"><X size={40} className="text-feedback-error-text stroke-[3]" /></div>;
             case "EXPIRED":
-                return <div className="w-16 h-16 rounded-full bg-[#f6c445] flex items-center justify-center mb-6"><Clock size={40} className="text-[#64490f] stroke-[3]" /></div>;
+                return <div className="w-16 h-16 rounded-full bg-feedback-warning-bg flex items-center justify-center mb-6"><Clock size={40} className="text-feedback-warning-text stroke-[3]" /></div>;
             case "CANCELLED":
-                return <div className="w-16 h-16 rounded-full bg-[#f6c445] flex items-center justify-center mb-6"><Pause size={32} className="text-[#64490f] fill-current" /></div>;
+                return <div className="w-16 h-16 rounded-full bg-feedback-warning-bg flex items-center justify-center mb-6"><Pause size={32} className="text-feedback-warning-text fill-current" /></div>;
             case "RESOURCE_NOT_FOUND":
             case "NOT_FOUND":
             case "BOOKING_SESSION_NOT_FOUND":
@@ -160,7 +160,7 @@ function PaymentResultContent() {
 
                         <div className="w-full space-y-3">
                             <button
-                                className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors"
+                                className="w-full py-3 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default rounded-button-radius font-semibold transition-colors shadow-sm active:scale-[0.98]"
                                 onClick={() => router.push(`/${locale}/user/tickets`)}
                             >
                                 {tr('view_ticket_list')}
@@ -207,9 +207,9 @@ function PaymentResultContent() {
                         </div>
 
                         <div className="w-full space-y-3">
-                            <button className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors">{tr('refresh_status')}</button>
-                            <button className="w-full py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-button-radius font-semibold transition-colors">{tr('view_order_history')}</button>
-                            <button className="w-full py-3 bg-transparent border border-border-strong hover:bg-bg-subtle text-text-secondary rounded-button-radius font-semibold transition-colors">{tr('contact_support')}</button>
+                            <button className="w-full py-3 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default rounded-button-radius font-semibold transition-colors">{tr('refresh_status')}</button>
+                            <button className="w-full py-3 bg-button-secondary-bg-default border border-button-secondary-border-default hover:bg-button-secondary-bg-hover text-button-secondary-text-default rounded-button-radius font-semibold transition-colors">{tr('view_order_history')}</button>
+                            <button className="w-full py-3 bg-transparent border border-button-ghost-border-default hover:bg-button-ghost-bg-hover text-button-ghost-text-default rounded-button-radius font-semibold transition-colors">{tr('contact_support')}</button>
                         </div>
                     </>
                 );
@@ -242,7 +242,7 @@ function PaymentResultContent() {
                         </div>
 
                         <div className="w-full space-y-3">
-                            <button className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors">{tr('retry_payment')}</button>
+                            <button className="w-full py-3 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default rounded-button-radius font-semibold transition-colors active:scale-[0.98]">{tr('retry_payment')}</button>
                             <button
                                 className="w-full py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/events/${event.eventId}/booking`)}
@@ -290,19 +290,19 @@ function PaymentResultContent() {
 
                         <div className="w-full space-y-3">
                             <button
-                                className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors"
+                                className="w-full py-3 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/events/${event.eventId}/booking`)}
                             >
                                 {tr('reselect_tickets_btn')}
                             </button>
                             <button
-                                className="w-full py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-button-radius font-semibold transition-colors"
+                                className="w-full py-3 bg-button-secondary-bg-default border border-button-secondary-border-default hover:bg-button-secondary-bg-hover text-button-secondary-text-default rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/events`)}
                             >
                                 {tr('view_other_events')}
                             </button>
                             <button
-                                className="w-full py-3 bg-transparent border border-border-strong hover:bg-bg-subtle text-text-secondary rounded-button-radius font-semibold transition-colors"
+                                className="w-full py-3 bg-transparent border border-button-ghost-border-default hover:bg-button-ghost-bg-hover text-button-ghost-text-default rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/events/${event.eventId}`)}
                             >
                                 {tr('back_to_event_page')}
@@ -341,7 +341,7 @@ function PaymentResultContent() {
 
                         <div className="w-full space-y-3">
                             <button
-                                className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors"
+                                className="w-full py-3 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/events/${event.eventId}/payment`)}
                             >
                                 {tr('continue_payment_btn')}
@@ -379,7 +379,7 @@ function PaymentResultContent() {
 
                         <div className="w-full space-y-3">
                             <button
-                                className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors"
+                                className="w-full py-3 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/events/${event.eventId}/booking`)}
                             >
                                 {tr('back_to_booking')}
@@ -436,26 +436,26 @@ function PaymentResultContent() {
                         <div className="flex items-center w-full mb-4 md:mb-0">
                             {/* Step 1 - Done */}
                             <div className="flex items-center gap-2 flex-shrink-0">
-                                <div className="w-8 h-8 rounded-full bg-[#1e463a] border border-[#2bad7f] text-[#2bad7f] flex items-center justify-center font-bold text-sm">
+                                <div className="w-8 h-8 rounded-full bg-feedback-success-bg border border-feedback-success-border text-feedback-success-text flex items-center justify-center font-bold text-sm">
                                     <Check size={16} />
                                 </div>
                                 <span className="text-sm font-bold text-text-primary whitespace-nowrap">{tb('step_1')}</span>
                             </div>
-                            <div className="h-[1px] flex-1 bg-[#2bad7f] mx-4 opacity-50"></div>
+                            <div className="h-[1px] flex-1 bg-feedback-success-border mx-4 opacity-50"></div>
                             {/* Step 2 - Done */}
                             <div className="flex items-center gap-2 flex-shrink-0">
-                                <div className="w-8 h-8 rounded-full bg-[#1e463a] border border-[#2bad7f] text-[#2bad7f] flex items-center justify-center font-bold text-sm">
+                                <div className="w-8 h-8 rounded-full bg-feedback-success-bg border border-feedback-success-border text-feedback-success-text flex items-center justify-center font-bold text-sm">
                                     <Check size={16} />
                                 </div>
                                 <span className="text-sm font-bold text-text-primary whitespace-nowrap">{tb('step_2')}</span>
                             </div>
-                            <div className={`h-[1px] flex-1 mx-4 opacity-50 ${(status === 'SUCCESS' || status === 'CANCELLED') ? 'bg-[#2bad7f]' : 'bg-[#ad2b2b]'}`}></div>
+                            <div className={`h-[1px] flex-1 mx-4 opacity-50 ${(status === 'SUCCESS' || status === 'CANCELLED') ? 'bg-feedback-success-border' : 'bg-feedback-error-border'}`}></div>
                             {/* Step 3 - Status based */}
                             <div className="flex items-center gap-2 flex-shrink-0">
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
                                     (status === 'SUCCESS' || status === 'CANCELLED')
-                                        ? 'bg-[#1e463a] border border-[#2bad7f] text-[#2bad7f]'
-                                        : 'bg-[#461e1e] border border-[#ad2b2b] text-[#ad2b2b]'
+                                        ? 'bg-feedback-success-bg border border-feedback-success-border text-feedback-success-text'
+                                        : 'bg-feedback-error-bg border border-feedback-error-border text-feedback-error-text'
                                 }`}>
                                     {(status === 'SUCCESS' || status === 'CANCELLED') ? <Check size={16} /> : <X size={16} />}
                                 </div>

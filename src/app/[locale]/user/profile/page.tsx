@@ -52,11 +52,11 @@ export default function ProfilePage() {
                     {/* Left Column: Profile Card */}
                     <aside className="lg:w-1/3 space-y-6">
                         <div className="bg-surface/30 border border-border/50 rounded-[2.5rem] p-8 backdrop-blur-md shadow-2xl relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/20 transition-all"></div>
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-button-primary-bg-default/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-button-primary-bg-default/20 transition-all"></div>
 
                             <div className="flex flex-col items-center text-center relative">
                                 <div className="relative group/avatar mb-6">
-                                    <div className="w-32 h-32 rounded-full border-4 border-primary/20 overflow-hidden shadow-2xl relative">
+                                    <div className="w-32 h-32 rounded-full border-4 border-button-primary-bg-default/20 overflow-hidden shadow-2xl relative">
                                         <Image
                                             src={userData.avatarUrl}
                                             alt="Avatar"
@@ -65,7 +65,7 @@ export default function ProfilePage() {
                                         />
                                     </div>
                                     {isEditing && (
-                                        <button className="absolute bottom-0 right-0 bg-primary p-2.5 rounded-full text-white shadow-lg hover:scale-110 transition-all border-4 border-background">
+                                        <button className="absolute bottom-0 right-0 bg-button-primary-bg-default p-2.5 rounded-full text-button-primary-text-default shadow-lg hover:scale-110 transition-all border-4 border-background">
                                             <Camera size={18} />
                                         </button>
                                     )}
@@ -75,12 +75,12 @@ export default function ProfilePage() {
                                     {userData.lastName} {userData.firstName}
                                 </h2>
                                 <p className="text-sm text-txt-muted mb-6 flex items-center gap-2">
-                                    <Mail size={14} className="text-primary" /> {userData.email}
+                                    <Mail size={14} className="text-button-primary-bg-default" /> {userData.email}
                                 </p>
 
                                 <div className="flex flex-wrap justify-center gap-2 mb-8">
                                     {userData.roles.map(role => (
-                                        <span key={role} className="px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
+                                        <span key={role} className="px-3 py-1 bg-button-primary-bg-default/10 text-button-primary-bg-default border border-button-primary-bg-default/20 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
                                             <Shield size={10} /> {role}
                                         </span>
                                     ))}
@@ -226,7 +226,7 @@ export default function ProfilePage() {
                             {/* Additional Info Section */}
                             <div className="mt-12 pt-10 border-t border-border/30">
                                 <h4 className="text-lg font-black text-txt-primary tracking-tight mb-6 flex items-center gap-2">
-                                    <Clock size={20} className="text-primary" /> {t("account_info")}
+                                    <Clock size={20} className="text-button-primary-bg-default" /> {t("account_info")}
                                 </h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="p-6 bg-secondary/10 border border-border/30 rounded-ds-3xl group hover:border-primary/20 transition-all">
@@ -234,7 +234,7 @@ export default function ProfilePage() {
                                         <div className="flex gap-3">
                                             {userData.roles.map(r => (
                                                 <div key={r} className="flex items-center gap-2 text-sm font-bold text-txt-primary">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-button-primary-bg-default animate-pulse"></div>
                                                     {r}
                                                 </div>
                                             ))}
@@ -243,7 +243,7 @@ export default function ProfilePage() {
                                     <div className="p-6 bg-secondary/10 border border-border/30 rounded-ds-3xl group hover:border-primary/20 transition-all">
                                         <p className="text-[10px] font-black text-txt-muted uppercase tracking-widest mb-2">{t("created_at")}</p>
                                         <div className="flex items-center gap-2 text-sm font-bold text-txt-primary">
-                                            <Calendar size={14} className="text-primary" />
+                                            <Calendar size={14} className="text-button-primary-bg-default" />
                                             {new Date(userData.createdAt).toLocaleDateString('vi-VN')}
                                         </div>
                                     </div>
