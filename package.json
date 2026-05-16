@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "tokens:build": "node scripts/build-figma-tokens.mjs",
+    "tokens:check": "node scripts/build-figma-tokens.mjs --check"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
