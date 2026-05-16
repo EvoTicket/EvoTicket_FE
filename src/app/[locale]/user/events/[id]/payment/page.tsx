@@ -244,7 +244,8 @@ export default function PaymentPage() {
                 fullName,
                 phoneNumber: phone,
                 email,
-                voucherCode: appliedVoucherCode
+                voucherCode: appliedVoucherCode,
+                locale: locale
             });
 
             if (response.data && response.data.data) {

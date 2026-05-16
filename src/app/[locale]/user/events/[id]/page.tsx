@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import {
     MapPin, Calendar, Clock, User, Star, Image as ImageIcon,
-    Check, MapIcon, CircleHelp, AlertCircle, ChevronDown, ChevronUp
+    Check, MapIcon, CircleHelp, AlertCircle, ChevronDown, ChevronUp, ArrowLeft
 } from "lucide-react";
 import { Footer } from "@/src/components/footer";
 import { Header } from "@/src/components/header";
@@ -436,6 +436,35 @@ export default function EventDetailPage() {
                                         );
                                     })}
                                 </div>
+
+                                {/* Event Location Map */}
+                                {event.latitude !== 0 && event.longitude !== 0 && (
+                                    <div className="mt-8">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <MapIcon size={20} className="text-primary" />
+                                            <span className="font-bold text-text-primary">{te('location_map')}</span>
+                                        </div>
+                                        <div className="h-[350px] w-full rounded-xl overflow-hidden border border-border-default shadow-sm relative z-0">
+                                            <Map 
+                                                pos={[event.latitude, event.longitude]} 
+                                                popupText={event.venue || event.address} 
+                                            />
+                                        </div>
+                                        <div className="mt-3 flex justify-between items-center">
+                                            <p className="text-xs text-text-secondary italic">
+                                                * {te('map_instruction')}
+                                            </p>
+                                            <a 
+                                                href={`https://www.google.com/maps/search/?api=1&query=${event.latitude},${event.longitude}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                                            >
+                                                {te('open_in_google_maps')} <ArrowLeft size={12} className="rotate-180" />
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Khối Sơ đồ chỗ ngồi (Dựa theo Wireframe Seat Selection) */}

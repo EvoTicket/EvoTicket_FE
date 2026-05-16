@@ -61,14 +61,14 @@ function PaymentResultContent() {
                     setOrderDetail(data);
 
                     // Map API status to UI status
-                    const apiStatus = data.code;
+                    const apiStatus = data.status;
                     const mappedStatus = (apiStatus === "PAID" || apiStatus === "SUCCESS" || apiStatus === "success") ? "SUCCESS"
                         : (apiStatus === "PENDING" || apiStatus === "pending") ? "PENDING"
-                            : (apiStatus === "CANCELLED" || apiStatus === "cancelled") ? "CANCELLED"
-                                : (apiStatus === "FAILED" || apiStatus === "failed") ? "FAILED"
-                                    : (apiStatus === "EXPIRED" || apiStatus === "expired") ? "EXPIRED"
-                                        : (apiStatus === "RESOURCE_NOT_FOUND" || apiStatus === "RESOURCE_NOT_FOUND") ? "RESOURCE_NOT_FOUND"
-                                            : "SUCCESS";
+                        : (apiStatus === "CANCELLED" || apiStatus === "cancelled") ? "CANCELLED"
+                        : (apiStatus === "FAILED" || apiStatus === "failed") ? "FAILED"
+                        : (apiStatus === "EXPIRED" || apiStatus === "expired") ? "EXPIRED"
+                        : (apiStatus === "RESOURCE_NOT_FOUND" || apiStatus === "NOT_FOUND") ? "RESOURCE_NOT_FOUND"
+                        : status; // Fallback to current status from URL if API returns unknown
                     setStatus(mappedStatus);
                 }
             } catch (err: any) {

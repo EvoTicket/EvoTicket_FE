@@ -54,7 +54,16 @@ export function ChatBot() {
             const response = await api.get("/inventory-service/api/chatbot/history");
 
             if (response.data && response.data.status === 200) {
-                const historyMessages = response.data.data.reverse();
+                // Map the new history format to ChatMessage interface
+                const historyMessages = response.data.data.map((msg: any, index: number) => ({
+                    id: index,
+                    // Remove internal session info like [Thông tin phiên: userId=...]
+                    message: msg.text ? msg.text.replace(/\n\n\[Thông tin phiên: .*\]/g, "") : "",
+                    images: msg.media || [],
+                    senderType: msg.messageType === "USER" ? "USER" : "ASSISTANT",
+                    createdAt: new Date().toISOString() // Fallback if history doesn't provide timestamp
+                }));
+
                 setMessages(historyMessages);
                 setTimeout(scrollToBottom, 100);
             }
@@ -87,30 +96,34 @@ export function ChatBot() {
 
         try {
             const formData = new FormData();
+            formData.append("question", messageToSend);
             filesToSend.forEach((file) => {
                 formData.append("files", file);
             });
+            formData.append("useRag", "false");
 
-            const response = await api.post(
-                `/inventory-service/api/chatbot/ask?question=${encodeURIComponent(messageToSend)}`,
-                formData,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                }
-            );
+            // Use axios (api) instead of fetch, as we don't need streaming anymore
+            const response = await api.post("/inventory-service/api/chatbot/ask", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
 
             if (response.data && response.data.status === 200) {
+                const answer = response.data.data.answer;
+                // Clean the response message (remove internal session info)
+                const cleanAnswer = answer ? answer.replace(/\n\n\[Thông tin phiên: .*\]/g, "") : "";
+
                 const assistantMessage: ChatMessage = {
-                    id: Date.now() + 1,
-                    message: response.data.data.answer,
+                    id: Date.now(),
+                    message: cleanAnswer,
                     images: [],
                     senderType: "ASSISTANT",
                     createdAt: new Date().toISOString(),
                 };
-
                 setMessages((prev) => [...prev, assistantMessage]);
+            } else {
+                throw new Error("Failed to get response from chatbot");
             }
         } catch (error: any) {
             if (error.response?.status === 500) {
