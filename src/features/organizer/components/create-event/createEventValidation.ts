@@ -9,8 +9,29 @@ export type StepValidationResult = {
     firstInvalidField?: string;
 };
 
+export type CreateEventValidationSummary = StepValidationResult & {
+    firstInvalidStep?: CreateEventStep;
+    stepErrors: Partial<Record<CreateEventStep, StepErrors>>;
+};
+
+/**
+ * URL slug: only lowercase English letters (no diacritics), digits, and single
+ * hyphens between words.  Must not start/end with a hyphen, and must not
+ * contain consecutive hyphens.
+ * Valid:   "music-show", "anh-trai-say-hi-2026", "event-123"
+ * Invalid: "sự-kiện", "su kien am nhac", "music+show", "Music-Show",
+ *          "-music-show", "music-show-", "music--show"
+ */
 const EVENT_SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const GATE_CODE_REGEX = /^[A-Z0-9-]+$/;
+
+/** Quick test for characters that are definitely not valid slug material. */
+const SLUG_HAS_UPPERCASE = /[A-Z]/;
+const SLUG_HAS_WHITESPACE = /\s/;
+const SLUG_HAS_PLUS = /\+/;
+/** Detects any non-ASCII letter (covers Vietnamese diacritics and other scripts). */
+const SLUG_HAS_DIACRITICS = /[^\x00-\x7F]/;
+
+const GATE_CODE_REGEX = /^[A-Z0-9]+(?:-[A-Z0-9]+)*$/;
 
 function isBlank(value: string) {
     return value.trim().length === 0;
@@ -47,9 +68,6 @@ export function validateStep1(state: CreateEventState): StepValidationResult {
         "address",
         "shortDescription",
         "detailedDescription",
-        "organizerName",
-        "organizerEmail",
-        "organizerPhone",
     ];
 
     if (!state.thumbnailPreview) errors.thumbnailImage = "Vui lòng tải poster sự kiện.";
@@ -63,15 +81,10 @@ export function validateStep1(state: CreateEventState): StepValidationResult {
     if (isBlank(state.address)) errors.address = "Vui lòng nhập địa chỉ chi tiết.";
     if (isBlank(state.shortDescription)) errors.shortDescription = "Vui lòng nhập tóm tắt ngắn.";
     if (isBlank(state.detailedDescription)) errors.detailedDescription = "Vui lòng nhập mô tả chi tiết.";
-    if (isBlank(state.organizerName)) errors.organizerName = "Vui lòng nhập tên ban tổ chức.";
-    if (isBlank(state.organizerEmail)) {
-        errors.organizerEmail = "Vui lòng nhập email hỗ trợ.";
-    } else if (!isValidEmail(state.organizerEmail)) {
+    if (!isBlank(state.organizerEmail) && !isValidEmail(state.organizerEmail)) {
         errors.organizerEmail = "Email hỗ trợ không hợp lệ.";
     }
-    if (isBlank(state.organizerPhone)) {
-        errors.organizerPhone = "Vui lòng nhập số điện thoại hỗ trợ.";
-    } else if (!isValidPhone(state.organizerPhone)) {
+    if (!isBlank(state.organizerPhone) && !isValidPhone(state.organizerPhone)) {
         errors.organizerPhone = "Số điện thoại hỗ trợ không hợp lệ.";
     }
 
@@ -88,7 +101,9 @@ function validateTicket(ticket: TicketTypeInput, showtimeStart: string, errors: 
     };
 
     if (isBlank(ticket.typeName)) add("typeName", "Vui lòng nhập tên loại vé.");
-    if (ticket.price < 0) add("price", "Giá vé phải lớn hơn hoặc bằng 0.");
+    if (ticket.isFree || ticket.price <= 0) {
+        add("price", "Backend hiện yêu cầu giá vé lớn hơn 0. Vé miễn phí chưa được hỗ trợ.");
+    }
     if (ticket.quantityTotal <= 0) add("quantityTotal", "Số lượng vé phải lớn hơn 0.");
     if (ticket.minPurchase < 1) add("minPurchase", "Mua tối thiểu phải từ 1 vé.");
     if (ticket.maxPurchase < ticket.minPurchase) add("maxPurchase", "Mua tối đa phải lớn hơn hoặc bằng mua tối thiểu.");
@@ -168,24 +183,48 @@ export function validateStep3(state: CreateEventState): StepValidationResult {
     const errors: StepErrors = {};
     const fieldOrder = ["urlSlug", "totalGates", "expectedCheckers", "gate"];
 
-    if (isBlank(state.urlSlug)) {
-        errors.urlSlug = "Vui lòng nhập URL slug.";
-    } else if (!EVENT_SLUG_REGEX.test(state.urlSlug)) {
-        errors.urlSlug = "Slug chỉ dùng chữ thường không dấu, số và dấu gạch nối đơn.";
+    // ── URL slug ────────────────────────────────────────────────────────
+    const slug = state.urlSlug.trim();
+    if (slug.length > 0 && SLUG_HAS_DIACRITICS.test(slug)) {
+        errors.urlSlug =
+            "URL chỉ được gồm chữ thường không dấu, số và dấu gạch ngang; không dùng khoảng trắng, dấu cộng hoặc ký tự có dấu.";
+    } else if (SLUG_HAS_UPPERCASE.test(slug)) {
+        errors.urlSlug =
+            "URL chỉ được gồm chữ thường không dấu, số và dấu gạch ngang; không dùng khoảng trắng, dấu cộng hoặc ký tự có dấu.";
+    } else if (SLUG_HAS_WHITESPACE.test(slug)) {
+        errors.urlSlug =
+            "URL chỉ được gồm chữ thường không dấu, số và dấu gạch ngang; không dùng khoảng trắng, dấu cộng hoặc ký tự có dấu.";
+    } else if (SLUG_HAS_PLUS.test(slug)) {
+        errors.urlSlug =
+            "URL chỉ được gồm chữ thường không dấu, số và dấu gạch ngang; không dùng khoảng trắng, dấu cộng hoặc ký tự có dấu.";
+    } else if (slug.length > 0 && !EVENT_SLUG_REGEX.test(slug)) {
+        // Catches leading/trailing/consecutive hyphens and any other invalid chars
+        errors.urlSlug =
+            "URL chỉ được gồm chữ thường không dấu, số và dấu gạch ngang; không dùng khoảng trắng, dấu cộng hoặc ký tự có dấu.";
     }
 
-    if (state.totalGates < 1) errors.totalGates = "Số cổng phải lớn hơn hoặc bằng 1.";
-    if (state.expectedCheckers < 1) errors.expectedCheckers = "Số checker dự kiến phải lớn hơn hoặc bằng 1.";
-    if (state.gates.length === 0) errors.gate = "Vui lòng cấu hình ít nhất một cổng.";
+    // ── Gate configuration ──────────────────────────────────────────────
+    if (state.totalGates < 0) errors.totalGates = "Số cổng không được âm.";
+    if (state.expectedCheckers < 0) errors.expectedCheckers = "Số checker dự kiến không được âm.";
+
+    // Build a set of normalised gate codes for duplicate detection.
+    const seenCodes = new Map<string, string>();   // normalised → first gate.id
 
     state.gates.forEach((gate) => {
-        if (isBlank(gate.name)) {
-            errors[`gate-${gate.id}-name`] = "Tên cổng là bắt buộc.";
-            fieldOrder.push(`gate-${gate.id}-name`);
-        }
-        if (gate.code && !GATE_CODE_REGEX.test(gate.code)) {
+        const rawCode = (gate.code ?? "").trim();
+        if (rawCode.length > 0 && !GATE_CODE_REGEX.test(rawCode)) {
             errors[`gate-${gate.id}-code`] = "Mã cổng chỉ dùng chữ in hoa, số và dấu gạch nối.";
             fieldOrder.push(`gate-${gate.id}-code`);
+        } else if (rawCode.length > 0) {
+            // Duplicate check (case-insensitive, trim-insensitive)
+            const normalised = rawCode.toUpperCase();
+            const existing = seenCodes.get(normalised);
+            if (existing && existing !== gate.id) {
+                errors[`gate-${gate.id}-code`] = "Mã cổng không được trùng nhau.";
+                fieldOrder.push(`gate-${gate.id}-code`);
+            } else {
+                seenCodes.set(normalised, gate.id);
+            }
         }
     });
 
@@ -195,8 +234,6 @@ export function validateStep3(state: CreateEventState): StepValidationResult {
 export function validateStep4(state: CreateEventState): StepValidationResult {
     const errors: StepErrors = {};
     const fieldOrder = ["selectedProfileId"];
-
-    if (!state.selectedProfileId) errors.selectedProfileId = "Vui lòng chọn hồ sơ đối soát.";
 
     return result(errors, fieldOrder);
 }
@@ -214,6 +251,29 @@ export function validateStep5(state: CreateEventState): StepValidationResult {
     });
 
     return result(errors, fieldOrder);
+}
+
+export function validateCreateEvent(state: CreateEventState): CreateEventValidationSummary {
+    const stepErrors: Partial<Record<CreateEventStep, StepErrors>> = {};
+
+    for (const step of [1, 2, 3, 4] as CreateEventStep[]) {
+        const stepResult = validateStep(step, state);
+
+        if (Object.keys(stepResult.errors).length > 0) {
+            stepErrors[step] = stepResult.errors;
+            return {
+                errors: stepResult.errors,
+                firstInvalidField: stepResult.firstInvalidField,
+                firstInvalidStep: step,
+                stepErrors,
+            };
+        }
+    }
+
+    return {
+        errors: {},
+        stepErrors,
+    };
 }
 
 export function validateStep(step: CreateEventStep, state: CreateEventState): StepValidationResult {
@@ -243,9 +303,8 @@ export function getStepProgress(step: CreateEventStep, state: CreateEventState) 
             !isBlank(state.address),
             !isBlank(state.shortDescription),
             !isBlank(state.detailedDescription),
-            !isBlank(state.organizerName),
-            isValidEmail(state.organizerEmail),
-            isValidPhone(state.organizerPhone),
+            isBlank(state.organizerEmail) || isValidEmail(state.organizerEmail),
+            isBlank(state.organizerPhone) || isValidPhone(state.organizerPhone),
         ]);
     }
 
@@ -262,7 +321,7 @@ export function getStepProgress(step: CreateEventStep, state: CreateEventState) 
             const showtime = state.showtimes.find((item) => item.id === ticket.showtimeId);
             return [
                 !isBlank(ticket.typeName),
-                ticket.price >= 0,
+                !ticket.isFree && ticket.price > 0,
                 ticket.quantityTotal > 0,
                 ticket.minPurchase >= 1,
                 ticket.maxPurchase >= ticket.minPurchase && ticket.maxPurchase <= ticket.quantityTotal,
@@ -275,19 +334,22 @@ export function getStepProgress(step: CreateEventStep, state: CreateEventState) 
     }
 
     if (step === 3) {
+        const slugTrimmed = state.urlSlug.trim();
+        const gateCodes = state.gates
+            .map((g) => (g.code ?? "").trim().toUpperCase())
+            .filter(Boolean);
+        const noDuplicateCodes = new Set(gateCodes).size === gateCodes.length;
+
         return count([
-            EVENT_SLUG_REGEX.test(state.urlSlug),
-            state.totalGates >= 1,
-            state.expectedCheckers >= 1,
-            state.gates.length > 0,
-            ...state.gates.flatMap((gate) => [
-                !isBlank(gate.name),
-                !gate.code || GATE_CODE_REGEX.test(gate.code),
-            ]),
+            slugTrimmed.length === 0 || (!SLUG_HAS_DIACRITICS.test(slugTrimmed) && EVENT_SLUG_REGEX.test(slugTrimmed)),
+            state.totalGates >= 0,
+            state.expectedCheckers >= 0,
+            noDuplicateCodes,
+            ...state.gates.map((gate) => (gate.code ?? "").trim().length === 0 || GATE_CODE_REGEX.test((gate.code ?? "").trim())),
         ]);
     }
 
-    if (step === 4) return state.selectedProfileId ? 100 : 0;
+    if (step === 4) return 100;
 
     return [validateStep1, validateStep2, validateStep3, validateStep4].every(
         (validator) => Object.keys(validator(state).errors).length === 0,

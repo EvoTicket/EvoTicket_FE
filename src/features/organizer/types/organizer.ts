@@ -30,6 +30,11 @@ export interface OrgFixtureEvent {
   dateLabel: string;
   eventStatus: OrgEventStatus;
   saleStatus: SaleStatus;
+  rawStatus?: string | null;
+  rawApprovalStatus?: string | null;
+  displayStatus?: string;
+  displayStatusLabel?: string;
+  displayStatusTone?: StatusTone;
   sold: number | null;
   total: number | null;
   revenue: string;

@@ -12,7 +12,9 @@ type PageEnvelope<T> =
       totalElements?: number;
       totalPages?: number;
       last?: boolean;
-    };
+    }
+  | null
+  | undefined;
 
 export function unwrapBaseResponse<T>(payload: BaseResponse<T> | T): T {
   if (payload && typeof payload === "object" && "data" in payload) {
@@ -24,7 +26,7 @@ export function unwrapBaseResponse<T>(payload: BaseResponse<T> | T): T {
 
 export function unwrapPage<T>(payload: PageEnvelope<T>): BasePageResponse<T> {
   const maybeWrapped = payload as BaseResponse<BasePageResponse<T>>;
-  const page = (maybeWrapped?.data ?? payload) as BasePageResponse<T> & { items?: T[] };
+  const page = (maybeWrapped?.data ?? payload ?? {}) as BasePageResponse<T> & { items?: T[] };
   const content = Array.isArray(page?.content)
     ? page.content
     : Array.isArray(page?.items)

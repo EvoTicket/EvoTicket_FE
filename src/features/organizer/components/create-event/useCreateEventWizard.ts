@@ -1,24 +1,27 @@
 import { useState } from "react";
+import type { EventCategory as ApiEventCategory } from "@/src/features/organizer/types/api";
 
 export type EventType = "OFFLINE";
-export type EventCategory =
-    | "LIVESTAGE"
-    | "STAGE_ART"
-    | "WORKSHOP"
-    | "SPORTS"
-    | "EXHIBITION";
+export type EventCategory = ApiEventCategory;
 export type Visibility = "PUBLIC" | "PRIVATE" | "UNLISTED";
 
-export const EVENT_CATEGORY_OPTIONS: { value: EventCategory; label: string }[] = [
-    { value: "LIVESTAGE", label: "Nhạc sống / Concert" },
-    { value: "STAGE_ART", label: "Sân khấu / Nghệ thuật" },
-    { value: "WORKSHOP", label: "Workshop / Hội thảo" },
-    { value: "SPORTS", label: "Thể thao" },
-    { value: "EXHIBITION", label: "Triển lãm" },
-];
+const EVENT_CATEGORY_LABELS: Record<string, string> = {
+    LIVESTAGE: "Nhạc sống / Concert",
+    STAGE_ART: "Sân khấu / Nghệ thuật",
+    WORKSHOP: "Workshop / Hội thảo",
+    SPORTS: "Thể thao",
+    EXHIBITION: "Triển lãm",
+};
 
 export function getEventCategoryLabel(category: EventCategory | "") {
-    return EVENT_CATEGORY_OPTIONS.find((item) => item.value === category)?.label ?? "Chưa chọn";
+    if (!category) return "Chưa chọn";
+
+    return EVENT_CATEGORY_LABELS[category] ?? category
+        .toLowerCase()
+        .split("_")
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
 }
 
 export interface ShowtimeInput {
@@ -58,7 +61,9 @@ export interface CreateEventState {
     category: EventCategory | "";
     venue: string;
     provinceCode: number;
+    provinceName: string;
     wardCode: number;
+    wardName: string;
     address: string;
     latitude: number;
     longitude: number;
@@ -111,7 +116,9 @@ const initialState: CreateEventState = {
     category: "",
     venue: "",
     provinceCode: 0,
+    provinceName: "",
     wardCode: 0,
+    wardName: "",
     address: "",
     latitude: 10.762622,
     longitude: 106.660172,
@@ -164,7 +171,6 @@ export function useCreateEventWizard() {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState<CreateEventState>(initialState);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isSuccess, setIsSuccess] = useState(false);
 
     const updateField = <K extends keyof CreateEventState>(field: K, value: CreateEventState[K]) => {
         setFormData(prev => ({
@@ -181,18 +187,19 @@ export function useCreateEventWizard() {
         if (step > 1) setStep(s => s - 1);
     };
 
-    const submitForm = async () => {
+    const submitForm = async (submitter: (state: CreateEventState) => Promise<boolean>) => {
         if (formData.eventType !== "OFFLINE") {
             setFormData(prev => ({ ...prev, eventType: "OFFLINE" }));
-            return;
+            return false;
         }
 
         setIsSubmitting(true);
-        // Simulate API call for the fixture
-        setTimeout(() => {
+        try {
+            const created = await submitter(formData);
+            return created;
+        } finally {
             setIsSubmitting(false);
-            setIsSuccess(true);
-        }, 1500);
+        }
     };
 
     // Derived state for draft progress (simple calculation based on some key fields)
@@ -221,7 +228,6 @@ export function useCreateEventWizard() {
         prevStep,
         submitForm,
         isSubmitting,
-        isSuccess,
         draftProgress: calculateProgress(),
     };
 }

@@ -4,27 +4,44 @@
 
 Integrate real backend APIs into the Organizer flow in controlled phases, without destabilizing auth, locale routing, existing design system, or non-organizer flows. Keep working registration behavior stable. API calls must go through the existing API Gateway client and service prefixes.
 
+## Implementation Status
+
+| Task | Status | Notes |
+|---|---|---|
+| Task 1 / Phase 1 - API foundation | Completed | Added organizer API modules, backend-aligned types, and defensive response helpers. |
+| Task 2 / Phase 2 - Organizer identity/status | Completed | Workspace guard loads `GET /iam-service/api/organizations/me`; pending/rejected/not-found states do not render inventory-backed workspace content. |
+| Task 3 / Phase 3 - Organizer dashboard/reports | Completed | Reports page uses legacy `GET /inventory-service/api/v1/dashboard/organizer?days=30`; backend legacy endpoint query was fixed and now returns safe real/empty data. |
+| Task 4 / Phase 4 - Organizer Center event list | Completed | Center uses Swagger endpoint `GET /inventory-service/api/events/organizer/dashboard` with supported filter params. It does not call the legacy dashboard endpoint. |
+| Task 5 / Phase 5 - Event detail | Pending | Detail shell/pages are still mostly fixture-backed except existing detail route structure. |
+| Task 6 / Phase 6 - Category/location/upload foundation | Completed | Create wizard loads real Inventory categories/provinces/wards, handles loading/error/empty states, clears stale ward on province change, and keeps banner/thumbnail as `File` state for multipart submit later. |
+| Task 7 / Phase 7 - Create event | Completed | Create wizard validates all steps, blocks unsupported free tickets, submits multipart `event` JSON plus optional `bannerImage`/`thumbnailImage`, and redirects to Organizer Center on `data === true`. |
+| Task 8 / Phase 8 - Update event | Pending | Not implemented. |
+
 ## 1. Current State Inspection
 
 **Organizer routes and pages**
 - `/[locale]/organizer/page.tsx`: redirects to `/${locale}/organizer/center`; keep unchanged.
-- `/[locale]/organizer/register/page.tsx`: real organizer registration already works; do not change location API behavior in Phase 1.
-- `/[locale]/organizer/(workspace)/layout.tsx` + `OrganizerWorkspaceLayout`: workspace shell and organizer auth guard; keep auth behavior stable.
-- `/[locale]/organizer/(workspace)/center/page.tsx`: wraps `OrganizerCenterPage`; currently fixture-backed.
+- `/[locale]/organizer/register/page.tsx`: real organizer registration already works; do not change location API behavior in the completed phases.
+- `/[locale]/organizer/(workspace)/layout.tsx` + `OrganizerWorkspaceLayout`: workspace shell and organizer auth guard now calls `GET /iam-service/api/organizations/me` and blocks pending/rejected/not-found organizations before inventory-backed content renders.
+- `/[locale]/organizer/(workspace)/center/page.tsx`: wraps `OrganizerCenterPage`; event list, counts, and summary now load from `GET /inventory-service/api/events/organizer/dashboard`.
+- `/[locale]/organizer/(workspace)/reports/page.tsx`: wraps `OrganizerReportsPage`; reports KPIs/charts/tables now load defensively from legacy `GET /inventory-service/api/v1/dashboard/organizer?days=30`.
 - `/[locale]/organizer/(workspace)/events/[eventId]/layout.tsx`: wraps event detail shell; currently fixture-backed header.
 - Event detail pages under `/events/[eventId]/*`: mostly fixture-backed.
 - `/[locale]/organizer/(create-flow)/events/create/page.tsx`: wraps create wizard; create submit is currently fake success.
 
 **Mock/hardcoded data**
-- `features/organizer/fixtures/events.ts`: organizer hub event list, tabs, summary.
+- `features/organizer/fixtures/events.ts`: no longer the source of Organizer Center event list/counts; still exists for any remaining fallback or unrelated fixture-backed surfaces.
 - `features/organizer/fixtures/eventDetail.ts`: event detail, metrics, analytics, orders, attendees, check-in, staff, seat map, vouchers, team, finance.
-- `features/organizer/fixtures/reports.ts`: report KPIs/charts/tables.
+- `features/organizer/fixtures/reports.ts`: reports page no longer uses it as the primary data source for dashboard metrics; retained for static report metadata/remaining non-API UI if referenced.
 - `OrganizerAccountPage.tsx`: hardcoded organization/account/legal/team/history.
 - `CreateEventStep4Settlement.tsx`: hardcoded settlement profiles.
 - `useCreateEventWizard.ts`: fake `setTimeout` submit success.
 
 **Existing API calls**
 - `register/page.tsx`: uses real IAM organization registration and IAM locations. Keep stable.
+- `OrganizerWorkspaceLayout.tsx`: uses `organizationApi.getMe()` -> `GET /iam-service/api/organizations/me`.
+- `OrganizerReportsPage.tsx`: uses `organizerDashboardApi.getDashboard(30)` -> `GET /inventory-service/api/v1/dashboard/organizer?days=30`.
+- `OrganizerCenterPage.tsx`: uses `organizerEventApi.getOrganizerDashboard(params)` -> `GET /inventory-service/api/events/organizer/dashboard`.
 - `CreateEventWizard.tsx`: currently uses IAM locations; for create/edit integration, switch to confirmed Inventory location APIs.
 - `lib/axios.ts`: shared API client with Redux token injection and refresh flow; keep as source of truth.
 
@@ -32,11 +49,12 @@ Integrate real backend APIs into the Organizer flow in controlled phases, withou
 
 | API | Service | Purpose | Request | Expected response | UI | Priority |
 |---|---|---|---|---|---|---|
-| `GET /iam-service/api/organizations/me` | IAM | Load organizer profile/status | Auth token | `BaseResponse<OrganizationProfileResponse>` | Guard, center, account | P1 |
-| `GET /inventory-service/api/v1/dashboard/organizer` | Inventory | Organizer dashboard KPIs/charts | No params unless Swagger/controller confirms params | `BaseResponse<OrganizerDashboardResponse>` | Reports/dashboard | P2 |
-| `GET /inventory-service/api/events/my` | Inventory | Organizer event list | `status?`, `page`, `size`, `sortBy`, `sortDirection` | defensively unwrap `BasePageResponse<ListEventResponse>` from either `response.data` or `response.data.data` | Center list | P2 |
+| `GET /iam-service/api/organizations/me` | IAM | Load organizer profile/status | Auth token | `BaseResponse<OrganizationProfileResponse>` | Guard, center, account | Done |
+| `GET /inventory-service/api/v1/dashboard/organizer` | Inventory | Legacy organizer dashboard KPIs/charts for Reports | `days` supported by controller, currently `30` from reports UI | `BaseResponse<OrganizerDashboardMetricsResponse>` | Reports/dashboard | Done |
+| `GET /inventory-service/api/events/organizer/dashboard` | Inventory | Organizer Center list plus status counts | `keyword`, `categories`, `eventTypes`, `eventStatuses`, `approvalStatuses`, `startDate`, `endDate`, `page`, `size`, `sort` | `BaseResponse<OrgEventDto>` with `events: BasePageResponse<EventResponseDto>` | Center list | Done |
+| `GET /inventory-service/api/events/my` | Inventory | Legacy/simple organizer event list | `status?`, `page`, `size`, `sortBy`, `sortDirection` | `BasePageResponse<ListEventResponse>` | Not used by Organizer Center | Legacy |
 | `GET /inventory-service/api/events/{eventId}` | Inventory | Event detail/edit prefill | path `eventId` | `BaseResponse<EventResponse>` | Event detail/edit | P3 |
-| `POST /inventory-service/api/events` | Inventory | Create event | Must inspect controller/raw Swagger before implementation: multipart or JSON | Current inspected controller suggests `BaseResponse<boolean>` | Create wizard | P5 |
+| `POST /inventory-service/api/events` | Inventory | Create event | Multipart confirmed in inspected controller: `event`, `bannerImage`, `thumbnailImage` | Current inspected controller suggests `BaseResponse<boolean>` | Create wizard | P5 |
 | `PUT /inventory-service/api/events/{eventId}` | Inventory | Update event | path `eventId`, JSON body if backend confirms | `BaseResponse<EventResponse>` | Event edit | P6 |
 | `GET /inventory-service/api/categories` | Inventory | Event category enum options | none | `BaseResponse<EventCategory[]>` | Create/edit | P4 |
 | `GET /inventory-service/api/locations/provinces` | Inventory | Province dropdowns | none | `Province[]` | Create/edit | P4 |
@@ -45,112 +63,135 @@ Integrate real backend APIs into the Organizer flow in controlled phases, withou
 
 ## 3. Proposed Frontend API Layer
 
-Create modules under `src/features/organizer/api/` and backend-aligned types under `src/features/organizer/types/api.ts`.
+Modules under `src/features/organizer/api/` and backend-aligned types under `src/features/organizer/types/api.ts`.
 
 **Modules**
-- `organizationApi.getMe()`
-- `organizerDashboardApi.getDashboard()`
-  - No `days` param by default.
-  - Add params only if backend Swagger/controller confirms support.
-- `organizerEventApi.getMyEvents(params)`
-- `organizerEventApi.getEventById(eventId)`
-- `organizerEventApi.createEvent(payload)`
-- `organizerEventApi.updateEvent(eventId, payload)`
-- `categoryApi.getCategories()`
-- `locationApi.getProvinces()`
-- `locationApi.getWards({ provinceCode })`
-- `uploadApi.uploadImage(formData)`
+- `organizationApi.getMe()` - completed.
+- `organizerDashboardApi.getDashboard(days = 30)` - completed for Reports and aligned with legacy controller.
+- `organizerEventApi.getOrganizerDashboard(params)` - completed for Organizer Center using `/api/events/organizer/dashboard`.
+- `organizerEventApi.getMyEvents(params)` - implemented as a wrapper over `getOrganizerDashboard(params).events`; not a call to `/events/my`.
+- `organizerEventApi.getEventById(eventId)` - pending.
+- `organizerEventApi.createEvent(payload)` - completed for multipart `POST /inventory-service/api/events`.
+- `organizerEventApi.updateEvent(eventId, payload)` - pending.
+- `categoryApi.getCategories()` - completed for `BaseResponse<string[]>`.
+- `locationApi.getProvinces()` - completed for raw `ProvinceResponse[]`.
+- `locationApi.getWards(provinceCode)` - completed for raw `WardResponse[]`.
+- `uploadApi.uploadImage(formData)` - existing standalone upload helper remains available, but create wizard does not upload banner/thumbnail separately in Task 6.
 
 **Response helpers**
-- Add `unwrapBaseResponse<T>()` for `BaseResponse<T>`.
-- Add `unwrapPage<T>()` that accepts both:
+- `unwrapBaseResponse<T>()` exists for `BaseResponse<T>`.
+- `unwrapPage<T>()` exists and accepts both:
   - `response.data` as page object.
   - `response.data.data` as page object.
-- `unwrapPage` must default missing `content`/`items` to `[]` and safe pagination fields to zero/default values.
+- `unwrapPage` defaults missing `content`/`items` to `[]` and safe pagination fields to zero/default values.
 - UI must never crash on missing `content`, `items`, `totalPages`, or `totalElements`.
 
 ## 4. Type Strategy
 
-Add minimal, backend-aligned types:
+Minimal, backend-aligned types are present:
 - `BaseResponse<T>`, `BasePageResponse<T>`.
-- `OrganizationProfileResponse`, `OrganizationStatus = "PENDING" | "VERIFIED" | "APPROVED" | "ACTIVE" | "REJECTED" | string`.
-- `OrganizerDashboardResponse`.
-- `EventCategory`.
+- `OrganizationProfileResponse`, `OrganizationStatus = "PENDING" | "VERIFIED" | "REJECTED" | string`.
+- `OrganizerDashboardMetricsResponse`.
+- `OrganizerDashboardResponse` for `/events/organizer/dashboard`.
+- `EventCategory`, `EventType`, `EventStatus`, `EventApprovalStatus`.
 - `ListEventResponse`, `EventResponse`, `ShowtimeResponse`, `TicketTypeResponse`.
 - `CreateEventRequest`, `CreateShowtimeRequest`, `CreateTicketTypeRequest`.
 - `UpdateEventRequest`, `UpdateShowtimeRequest`.
-- `Province`, `Ward`.
+- `ProvinceResponse`, `WardResponse`, plus compatibility aliases `Province`, `Ward`.
 - `FileUploadResponse`.
 
-Keep backend DTOs separate from UI view models. Add mappers for hub cards, event detail header, and create/update payloads.
+Keep backend DTOs separate from UI view models. Existing mappers cover Organizer Center cards and report/dashboard derived values; event detail/create/update mappers still need completion when those phases begin.
 
 ## 5. Integration Phases
 
-**Phase 1 — API foundation**
-- Add service layer and minimal API types.
-- Add unwrap helpers, including defensive `unwrapPage`.
-- Do not change organizer register location calls.
-- Do not change UI behavior beyond low-risk imports if needed.
-- Completion: service layer compiles; targeted lint/typecheck passes.
+**Phase 1 - API foundation - Completed**
+- Added service layer and minimal API types.
+- Added unwrap helpers, including defensive `unwrapPage`.
+- Did not change organizer register location calls.
+- Completion: service layer and types are present under `src/features/organizer/api/` and `src/features/organizer/types/api.ts`.
 
-**Phase 2 — Organizer identity/status**
-- Integrate `GET /iam-service/api/organizations/me`.
-- If organization status is `PENDING` or `REJECTED`, do not call dashboard/events APIs.
-- Only call dashboard/events when status is `VERIFIED`, `APPROVED`, or `ACTIVE`.
+**Phase 2 - Organizer identity/status - Completed**
+- Integrated `GET /iam-service/api/organizations/me`.
+- If organization status is `PENDING` or `REJECTED`, workspace content is blocked and inventory-backed child pages do not render.
+- Only statuses `VERIFIED`, `APPROVED`, or `ACTIVE` allow center/report content to load.
 - Status behavior:
-  - `PENDING`: show pending state.
-  - `REJECTED`: show rejected state with reason.
-  - no organization/404: redirect or show register state.
-  - verified/approved/active: allow center data loading.
-- Completion: no redirect loop; unauthorized statuses do not trigger inventory calls.
+  - `PENDING`: shows pending state.
+  - `REJECTED`: shows rejected state with reason and resubmit action.
+  - no organization/404: redirects to register.
+  - verified/approved/active: allows center data loading.
+- Completion: no redirect loop expected; unauthorized statuses do not intentionally trigger inventory calls.
 
-**Phase 3 — Organizer dashboard**
-- Integrate `GET /inventory-service/api/v1/dashboard/organizer`.
-- Use `organizerDashboardApi.getDashboard()` with no params unless backend confirms params.
-- Replace fixture dashboard/report fields that map directly.
-- Add loading/error/empty state.
-- Completion: real dashboard renders defensively with missing arrays handled.
+**Phase 3 - Organizer dashboard/reports - Completed**
+- Integrated `GET /inventory-service/api/v1/dashboard/organizer`.
+- Uses `organizerDashboardApi.getDashboard(30)` because the backend controller confirms `days` support.
+- Replaced fixture dashboard/report fields that map directly.
+- Added loading/error/empty-safe rendering.
+- Backend note: legacy endpoint was fixed in `Inventory-Service` by removing a Hibernate fetch join on basic enum field `Event.category`; empty data now returns safe zero/list values.
+- Completion: reports page renders defensively with missing arrays handled.
 
-**Phase 4 — Organizer event list**
-- Integrate `GET /inventory-service/api/events/my`.
-- Replace `FIXTURE_EVENTS`, fixture tabs/counts, and summary with real data where available.
-- Use `unwrapPage` defensively for direct or wrapped page response.
-- Support known params: `status`, `page`, `size`, `sortBy`, `sortDirection`.
-- Keyword filtering may remain client-side if `/events/my` does not support keyword.
+**Phase 4 - Organizer Center event list - Completed**
+- Integrated `GET /inventory-service/api/events/organizer/dashboard`.
+- Replaced `FIXTURE_EVENTS`, fixture tabs/counts, and summary with real data where available.
+- Uses normalized dashboard/page response handling defensively.
+- Supports known params: `keyword`, `categories`, `eventTypes`, `eventStatuses`, `approvalStatuses`, `startDate`, `endDate`, `page`, `size`, `sort`.
+- Does not use legacy `/api/v1/dashboard/organizer` for Organizer Center.
+- Does not use `days`, `sortBy`, `sortDirection`, `status`, or `page=0` for Organizer Center.
 - Completion: empty/missing content does not crash; event cards link to existing detail routes.
 
-**Phase 5 — Event detail**
+**Phase 5 - Event detail - Pending**
 - Integrate `GET /inventory-service/api/events/{eventId}`.
 - Replace event detail header fixture and overview basics.
 - Keep secondary detail sections fixture-backed until dedicated APIs are confirmed.
 - Handle 403/404 with stable error state.
 - Completion: valid detail loads; invalid event does not crash.
 
-**Phase 6 — Category/location/upload foundation**
-- Integrate:
+**Phase 6 - Category/location/upload foundation - Completed**
+- Integrated:
   - `GET /inventory-service/api/categories`
   - `GET /inventory-service/api/locations/provinces`
-  - `GET /inventory-service/api/locations/wards`
-  - `POST /iam-service/api/upload/image`
-- Use Inventory location APIs for create/edit event first.
-- Do not modify organizer register location behavior in this phase.
-- Upload image maps `secureUrl || url` and `publicId` into form state when standalone upload is used.
-- Completion: create/edit dictionaries load from real APIs with safe fallback labels.
+  - `GET /inventory-service/api/locations/wards?provinceCode={provinceCode}`
+- Used Inventory location APIs for create event wizard.
+- Did not modify organizer register location behavior.
+- Category response is handled as wrapped `BaseResponse<string[]>`.
+- Province and ward responses are handled as raw arrays, not `BaseResponse`.
+- Ward API is not called until a province is selected.
+- Changing province clears stale `wardCode` and `wardName`.
+- Banner and thumbnail files are stored as `File` objects in wizard state; preview URLs remain UI-only state.
+- No standalone banner/thumbnail upload is performed in this phase.
+- Completion: create wizard dictionaries load from real APIs with safe loading/error/empty/retry behavior.
 
-**Phase 7 — Create event**
-- Before coding, inspect backend controller or raw Swagger again to confirm request format.
-- If backend is multipart, use exact part names confirmed by backend:
-  - currently inspected controller suggests `event`, `bannerImage`, `thumbnailImage`.
-- If backend is JSON, do not use multipart.
-- Map wizard state to `CreateEventRequest`.
-- Since current `POST /events` returns boolean, do not guess `eventId`.
-- On success: toast success, redirect to organizer center/event list, and refresh list.
-- Free ticket risk:
-  - Backend currently rejects `price = 0` for `CreateTicketTypeRequest`.
-  - Disable free ticket submit or validate with clear message before API call unless backend confirms free tickets are supported.
+**Phase 7 - Create event - Completed**
+- Confirmed backend controller uses multipart `POST /api/events`.
+- Exact part names:
+  - `event`: JSON object matching `CreateEventRequest`.
+  - `bannerImage`: optional binary.
+  - `thumbnailImage`: optional binary.
+- Event JSON shape used:
+  - `eventName`
+  - `description`
+  - `venue`
+  - `wardCode`
+  - `provinceCode`
+  - `address`
+  - `eventType`
+  - `totalSeats`
+  - `isFeatured`
+  - `latitude`
+  - `longitude`
+  - `category`
+  - `showtimes[]`
+  - `showtimes[].ticketTypes[]`
+- Nested showtimes and ticket types are included in the `event` JSON part.
+- `totalSeats` maps from total ticket quantity.
+- Dates are sent as ISO local datetime strings from `datetime-local`, matching backend `LocalDateTime`.
+- Backend rejects `price = 0`; free tickets are blocked with a clear validation message.
+- Since `POST /events` returns boolean, the UI does not guess `eventId`.
+- On success with `data === true`: shows toast, redirects to locale-preserving Organizer Center, and refreshes the route.
+- On failure: shows backend message or safe status-specific fallback, keeps user input, and does not redirect.
+- No `/api/internal/**` calls are used.
 - Completion: no fake success on API failure; invalid free ticket price gives clear UX.
 
-**Phase 8 — Update event**
+**Phase 8 - Update event - Pending**
 - Prefill edit form from `GET /events/{eventId}`.
 - Submit `PUT /events/{eventId}` using backend-confirmed JSON shape.
 - Do not overbuild unsupported nested ticket/showtime update behavior.
@@ -171,11 +212,11 @@ Every API-backed screen must include:
 
 ## 7. Risk and Unknowns
 
-Verify before/during implementation:
-- Real organization status enum: `VERIFIED` vs `APPROVED`/`ACTIVE`.
-- Whether dashboard endpoint supports `days`; do not pass until confirmed.
-- Whether `/events/my` response is direct page or wrapped page.
-- Whether `/events/my` supports keyword.
+Verify before/during future implementation:
+- Real organization status enum may still need backend confirmation beyond `VERIFIED`, `APPROVED`, and `ACTIVE`.
+- Legacy dashboard endpoint supports `days`; Reports currently passes `30`.
+- Organizer Center must continue using `/events/organizer/dashboard`, not `/events/my`.
+- `/events/organizer/dashboard` supports server-side keyword and status filters through confirmed params.
 - Whether `POST /events` is multipart or JSON in deployed Swagger.
 - Exact multipart part names if multipart.
 - `POST /events` returns boolean, so no event detail redirect unless backend changes.
@@ -186,13 +227,13 @@ Verify before/during implementation:
 ## 8. Manual Test Checklist
 
 - Active/verified organizer opens center.
-- Pending organizer opens center and inventory APIs are not called.
-- Rejected organizer opens center and inventory APIs are not called.
-- User without organization opens center/register.
-- Dashboard loads and handles missing arrays.
-- Event list loads direct page response.
-- Event list loads wrapped page response.
+- Pending organizer opens workspace and inventory-backed child content is not rendered.
+- Rejected organizer opens workspace and inventory-backed child content is not rendered.
+- User without organization opens center/register flow.
+- Reports dashboard loads and handles missing arrays.
+- Organizer Center event list loads wrapped `OrgEventDto.events` response.
 - Event list handles missing/empty content.
+- Event list sends `page` as 1-indexed and `sort`, not `sortBy`/`sortDirection`.
 - Event detail valid event loads.
 - Event detail 403/404 shows error.
 - Categories load.
@@ -208,9 +249,7 @@ Verify before/during implementation:
 
 ## 9. Execution Rules
 
-- First execution step: write this plan to `EvoTicket_FE/ORGANIZER_API_INTEGRATION_PLAN.md`.
-- Do not implement code before approval.
-- Implement one phase at a time.
+- Continue implementing one remaining phase at a time.
 - After each phase, report files changed, APIs integrated, checks run, and unresolved issues.
 - Do not refactor buyer/admin/checker flows.
 - Do not change design system/tokens unless required for API state UI.

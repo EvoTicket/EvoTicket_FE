@@ -3,7 +3,7 @@
 interface TabItem {
   key: string;
   label: string;
-  count: number;
+  count?: number | string;
 }
 
 interface OrganizerTabsProps {
@@ -18,7 +18,7 @@ interface OrganizerTabsProps {
  */
 export function OrganizerTabs({ tabs, activeKey, onTabChange }: OrganizerTabsProps) {
   return (
-    <div className="flex w-fit items-center gap-1 rounded-ds-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-1">
+    <div className="flex w-fit max-w-full flex-wrap items-center gap-1 rounded-ds-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-1">
       {tabs.map((t) => {
         const active = activeKey === t.key;
         return (
@@ -32,15 +32,17 @@ export function OrganizerTabs({ tabs, activeKey, onTabChange }: OrganizerTabsPro
             }`}
           >
             {t.label}
-            <span
-              className={`rounded-full px-1.5 text-[11px] ${
-                active
-                  ? "bg-white/20 text-white"
-                  : "bg-[var(--color-bg-elevated)] text-[var(--color-text-muted)]"
-              }`}
-            >
-              {t.count}
-            </span>
+            {t.count != null && (
+              <span
+                className={`rounded-full px-1.5 text-[11px] ${
+                  active
+                    ? "bg-white/20 text-white"
+                    : "bg-[var(--color-bg-elevated)] text-[var(--color-text-muted)]"
+                }`}
+              >
+                {t.count}
+              </span>
+            )}
           </button>
         );
       })}

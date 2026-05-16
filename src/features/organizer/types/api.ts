@@ -1,7 +1,7 @@
 export interface BaseResponse<T> {
-  status?: number;
-  message?: string;
-  data?: T;
+  status: number;
+  message: string;
+  data: T;
 }
 
 export interface BasePageResponse<T> {
@@ -47,7 +47,7 @@ export interface OrganizationProfileResponse {
   updatedAt?: string | null;
 }
 
-export interface OrganizerDashboardResponse {
+export interface OrganizerDashboardMetricsResponse {
   totalRevenue?: number | string | null;
   totalTicketsSold?: number | null;
   avgOccupancyRate?: number | null;
@@ -76,42 +76,38 @@ export interface OrganizerDashboardResponse {
   }> | null;
 }
 
-export type EventCategory =
-  | "LIVESTAGE"
-  | "STAGE_ART"
-  | "WORKSHOP"
-  | "SPORTS"
-  | "EXHIBITION"
-  | string;
+export type EventCategory = string;
 
 export type EventType = "OFFLINE" | "ONLINE" | "HYBRID" | string;
 export type EventStatus = string;
 export type EventApprovalStatus = string;
 
 export interface ListEventResponse {
-  id: number;
+  id: number | string;
+  name?: string | null;
   eventName?: string | null;
-  description?: string | null;
-  venue?: string | null;
-  fullAddress?: string | null;
-  startDatetime?: string | null;
-  endDatetime?: string | null;
-  eventStatus?: EventStatus | null;
-  eventType?: EventType | null;
-  bannerImage?: string | null;
+  title?: string | null;
+  thumbnailUrl?: string | null;
   thumbnailImage?: string | null;
-  totalSeats?: number | null;
-  organizerId?: number | null;
-  isFeatured?: boolean | null;
-  category?: EventCategory | null;
-  floorPrice?: number | string | null;
-  provinceName?: string | null;
-  ticketAvailabilityStatus?: string | null;
-  createdAt?: string | null;
+  imageUrl?: string | null;
+  category?: string | null;
+  type?: string | null;
+  startTime?: string | null;
+  startDatetime?: string | null;
+  startDate?: string | null;
+  endTime?: string | null;
+  endDatetime?: string | null;
+  endDate?: string | null;
+  venue?: string | null;
+  location?: string | null;
+  status?: string | null;
+  approvalStatus?: string | null;
+  soldTickets?: number | null;
+  totalTickets?: number | null;
+  revenue?: number | null;
+  totalCheckers?: number | null;
+  checkers?: number | null;
   updatedAt?: string | null;
-  isExpired?: boolean | null;
-  isFavorite?: boolean;
-  favoriteCount?: number | null;
 }
 
 export interface TicketTypeResponse {
@@ -174,12 +170,69 @@ export interface EventResponse {
   reviews?: unknown[] | null;
 }
 
+export type OrganizerEventCategory =
+  | "LIVESTAGE"
+  | "STAGE_ART"
+  | "WORKSHOP"
+  | "SPORTS"
+  | "EXHIBITION";
+
+export type OrganizerEventType = "ONLINE" | "OFFLINE" | "HYBRID";
+
+export type OrganizerEventStatus =
+  | "UPCOMING"
+  | "ON_SALE"
+  | "SALE_CLOSED"
+  | "ON_GOING"
+  | "COMPLETED"
+  | "CANCELLED";
+
+export type OrganizerApprovalStatus = "PENDING" | "ACCEPTED" | "REJECTED";
+
+export type OrganizerEventSort =
+  | "PRICE_ASC"
+  | "PRICE_DESC"
+  | "DATE_ASC"
+  | "NEWEST"
+  | "POPULAR";
+
+export interface OrganizerDashboardEventResponse {
+  id: number;
+  name: string;
+  thumbnailUrl?: string | null;
+  category?: OrganizerEventCategory | string | null;
+  type?: OrganizerEventType | string | null;
+  startTime?: string | null;
+  venue?: string | null;
+  status?: OrganizerEventStatus | string | null;
+  approvalStatus?: OrganizerApprovalStatus | string | null;
+  soldTickets?: number | null;
+  totalTickets?: number | null;
+  revenue?: number | null;
+  totalCheckers?: number | null;
+  updatedAt?: string | null;
+}
+
+export interface OrganizerDashboardResponse
+  extends OrganizerDashboardMetricsResponse {
+  totalEvents: number;
+  totalOnSales: number;
+  totalPending: number;
+  totalCompleted: number;
+  events: BasePageResponse<OrganizerDashboardEventResponse>;
+}
+
 export interface OrganizerEventListParams {
-  status?: string;
-  page?: number;
+  keyword?: string;
+  categories?: string[];
+  eventTypes?: string[];
+  eventStatuses?: string[];
+  approvalStatuses?: string[];
+  startDate?: string;
+  endDate?: string;
+  page?: number; // 1-indexed
   size?: number;
-  sortBy?: string;
-  sortDirection?: "ASC" | "DESC";
+  sort?: "PRICE_ASC" | "PRICE_DESC" | "DATE_ASC" | "NEWEST" | "POPULAR" | string;
 }
 
 export interface CreateTicketTypeRequest {
@@ -215,6 +268,8 @@ export interface CreateEventRequest {
   isFeatured?: boolean;
   latitude?: number;
   longitude?: number;
+  introduction?: string;
+  checkers?: number;
   category: EventCategory;
   showtimes: CreateShowtimeRequest[];
 }
@@ -252,25 +307,24 @@ export interface CreateEventMultipartPayload {
   thumbnailImage?: File | null;
 }
 
-export interface Province {
+export interface ProvinceResponse {
   code: number;
   name: string;
-  division_type?: string;
-  divisionType?: string;
-  codename?: string;
-  phone_code?: number;
-  phoneCode?: number;
+  codename: string;
+  division_type: string;
+  phone_code: number;
 }
 
-export interface Ward {
+export interface WardResponse {
   code: number;
   name: string;
-  division_type?: string;
-  divisionType?: string;
-  codename?: string;
-  province_code?: Province | number;
-  province?: Province;
+  codename: string;
+  division_type: string;
+  province_code: ProvinceResponse;
 }
+
+export type Province = ProvinceResponse;
+export type Ward = WardResponse;
 
 export interface FileUploadResponse {
   publicId?: string;

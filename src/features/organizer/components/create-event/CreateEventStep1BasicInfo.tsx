@@ -1,8 +1,9 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import { AlertTriangle, Image as ImageIcon, MapPin, AlignLeft, Building2 } from "lucide-react";
-import { CreateEventState, EVENT_CATEGORY_OPTIONS } from "./useCreateEventWizard";
+import { CreateEventState, getEventCategoryLabel } from "./useCreateEventWizard";
 import type { StepErrors } from "./createEventValidation";
+import type { EventCategory, ProvinceResponse, WardResponse } from "@/src/features/organizer/types/api";
 
 const MapPicker = dynamic(() => import("@/src/components/MapPicker"), {
     ssr: false,
@@ -12,12 +13,26 @@ const MapPicker = dynamic(() => import("@/src/components/MapPicker"), {
 interface Props {
     formData: CreateEventState;
     updateField: <K extends keyof CreateEventState>(field: K, value: CreateEventState[K]) => void;
-    provinces: { code: number; name: string }[];
-    wards: { code: number; name: string }[];
+    categories: EventCategory[];
+    provinces: ProvinceResponse[];
+    wards: WardResponse[];
+    categoryState: DictionaryState;
+    provinceState: DictionaryState;
+    wardState: DictionaryState;
     errors?: StepErrors;
     categoryError?: string;
     onCategoryChange?: () => void;
+    onProvinceChange: (provinceCode: number, provinceName: string) => void;
+    onWardChange: (wardCode: number, wardName: string) => void;
+    onRetryCategories: () => void;
+    onRetryProvinces: () => void;
+    onRetryWards: () => void;
 }
+
+type DictionaryState = {
+    loading: boolean;
+    error: string | null;
+};
 
 const EVENT_TYPE_OPTIONS = [
     { value: "OFFLINE", label: "Offline", disabled: false },
@@ -25,7 +40,24 @@ const EVENT_TYPE_OPTIONS = [
     { value: "HYBRID", label: "Hybrid", disabled: true },
 ];
 
-export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wards, errors = {}, categoryError, onCategoryChange }: Props) {
+export function CreateEventStep1BasicInfo({
+    formData,
+    updateField,
+    categories,
+    provinces,
+    wards,
+    categoryState,
+    provinceState,
+    wardState,
+    errors = {},
+    categoryError,
+    onCategoryChange,
+    onProvinceChange,
+    onWardChange,
+    onRetryCategories,
+    onRetryProvinces,
+    onRetryWards,
+}: Props) {
     const categoryMessage = categoryError ?? errors.category;
 
     const fieldClass = (field: string) =>
@@ -39,6 +71,21 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
         errors[field] ? (
             <p className="mt-1.5 text-sm text-feedback-error-text">{errors[field]}</p>
         ) : null
+    );
+
+    const renderDictionaryMessage = (message: string, retry?: () => void) => (
+        <div className="mt-2 flex items-center justify-between gap-3 rounded-ds-lg border border-border-default bg-bg-subtle px-3 py-2 text-sm text-text-muted">
+            <span>{message}</span>
+            {retry && (
+                <button
+                    type="button"
+                    onClick={retry}
+                    className="shrink-0 text-sm font-medium text-action-brand-text-default hover:underline"
+                >
+                    Thử lại
+                </button>
+            )}
+        </div>
     );
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'thumbnail') => {
@@ -196,25 +243,33 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
 
                         <div data-field="category" tabIndex={-1}>
                             <label className="block text-sm font-medium mb-2">Thể loại sự kiện <span className="text-feedback-error-text">*</span></label>
-                            <div className="flex flex-wrap gap-2">
-                                {EVENT_CATEGORY_OPTIONS.map((category) => (
-                                    <button
-                                        key={category.value}
-                                        type="button"
-                                        onClick={() => {
-                                            updateField("category", category.value);
-                                            onCategoryChange?.();
-                                        }}
-                                        className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
-                                            formData.category === category.value
-                                                ? "bg-action-brand-bg-default text-action-brand-text-default border-transparent"
-                                                : "bg-transparent border-border-default text-text-secondary hover:bg-bg-subtle"
-                                        }`}
-                                    >
-                                        {category.label}
-                                    </button>
-                                ))}
-                            </div>
+                            {categoryState.loading ? (
+                                renderDictionaryMessage("Đang tải thể loại sự kiện...")
+                            ) : categoryState.error ? (
+                                renderDictionaryMessage(categoryState.error, onRetryCategories)
+                            ) : categories.length === 0 ? (
+                                renderDictionaryMessage("Chưa có thể loại sự kiện khả dụng.", onRetryCategories)
+                            ) : (
+                                <div className="flex flex-wrap gap-2">
+                                    {categories.map((category) => (
+                                        <button
+                                            key={category}
+                                            type="button"
+                                            onClick={() => {
+                                                updateField("category", category);
+                                                onCategoryChange?.();
+                                            }}
+                                            className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                                                formData.category === category
+                                                    ? "bg-action-brand-bg-default text-action-brand-text-default border-transparent"
+                                                    : "bg-transparent border-border-default text-text-secondary hover:bg-bg-subtle"
+                                            }`}
+                                        >
+                                            {getEventCategoryLabel(category)}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                             {categoryMessage && (
                                 <p className="mt-2 rounded-ds-lg border border-feedback-error-border bg-feedback-error-bg px-3 py-2 text-sm text-feedback-error-text">
                                     {categoryMessage}
@@ -257,29 +312,50 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
                             <label className="block text-sm font-medium mb-1">Tỉnh / Thành phố <span className="text-feedback-error-text">*</span></label>
                             <select
                                 value={formData.provinceCode}
-                                onChange={(e) => updateField("provinceCode", Number(e.target.value))}
+                                onChange={(e) => {
+                                    const provinceCode = Number(e.target.value);
+                                    const provinceName = provinces.find((province) => province.code === provinceCode)?.name ?? "";
+                                    onProvinceChange(provinceCode, provinceName);
+                                }}
                                 className={fieldClass("provinceCode")}
+                                disabled={provinceState.loading || Boolean(provinceState.error) || provinces.length === 0}
                             >
-                                <option value={0}>Chọn tỉnh/thành</option>
+                                <option value={0}>
+                                    {provinceState.loading ? "Đang tải tỉnh/thành..." : "Chọn tỉnh/thành"}
+                                </option>
                                 {provinces.map((p) => (
                                     <option key={p.code} value={p.code}>{p.name}</option>
                                 ))}
                             </select>
+                            {provinceState.error && renderDictionaryMessage(provinceState.error, onRetryProvinces)}
+                            {!provinceState.loading && !provinceState.error && provinces.length === 0 && renderDictionaryMessage("Chưa có tỉnh/thành khả dụng.", onRetryProvinces)}
                             {renderError("provinceCode")}
                         </div>
                         <div data-field="wardCode">
                             <label className="block text-sm font-medium mb-1">Quận / Huyện <span className="text-feedback-error-text">*</span></label>
                             <select
                                 value={formData.wardCode}
-                                onChange={(e) => updateField("wardCode", Number(e.target.value))}
+                                onChange={(e) => {
+                                    const wardCode = Number(e.target.value);
+                                    const wardName = wards.find((ward) => ward.code === wardCode)?.name ?? "";
+                                    onWardChange(wardCode, wardName);
+                                }}
                                 className={fieldClass("wardCode")}
-                                disabled={!formData.provinceCode}
+                                disabled={!formData.provinceCode || wardState.loading || Boolean(wardState.error) || wards.length === 0}
                             >
-                                <option value={0}>Chọn quận/huyện</option>
+                                <option value={0}>
+                                    {!formData.provinceCode
+                                        ? "Chọn tỉnh/thành trước"
+                                        : wardState.loading
+                                            ? "Đang tải quận/huyện..."
+                                            : "Chọn quận/huyện"}
+                                </option>
                                 {wards.map((w) => (
                                     <option key={w.code} value={w.code}>{w.name}</option>
                                 ))}
                             </select>
+                            {formData.provinceCode > 0 && wardState.error && renderDictionaryMessage(wardState.error, onRetryWards)}
+                            {formData.provinceCode > 0 && !wardState.loading && !wardState.error && wards.length === 0 && renderDictionaryMessage("Chưa có quận/huyện cho tỉnh/thành đã chọn.", onRetryWards)}
                             {renderError("wardCode")}
                         </div>
                     </div>

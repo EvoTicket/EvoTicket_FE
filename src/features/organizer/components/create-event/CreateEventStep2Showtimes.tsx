@@ -12,7 +12,7 @@ interface Props {
 const initialTicketForm: Partial<TicketTypeInput> = {
     typeName: "",
     description: "",
-    price: 0,
+    price: 100000,
     isFree: false,
     quantityTotal: 100,
     minPurchase: 1,
@@ -100,7 +100,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
     const startEditTicket = (ticket: TicketTypeInput) => {
         setSelectedShowtimeId(ticket.showtimeId);
         setEditingTicketId(ticket.id);
-        setTicketDraft(ticket);
+        setTicketDraft({ ...ticket, isFree: false });
         setTicketDraftErrors({});
         setIsEditingTicket(true);
     };
@@ -342,11 +342,10 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                                         <label className="block text-xs font-medium mb-1 text-text-secondary">Giá vé (VND) *</label>
                                         <input
                                             type="number"
-                                            disabled={ticketDraft.isFree}
                                             value={ticketDraft.price}
                                             onChange={(event) => setTicketDraft({ ...ticketDraft, price: Number(event.target.value) })}
                                             data-field={getTicketFieldKey("price")}
-                                            className={`${fieldClass(getTicketFieldKey("price"))} disabled:opacity-50`}
+                                            className={fieldClass(getTicketFieldKey("price"))}
                                         />
                                         {renderError(getTicketFieldKey("price"))}
                                     </div>
@@ -354,10 +353,11 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                                         <input
                                             type="checkbox"
                                             checked={ticketDraft.isFree}
-                                            onChange={(event) => setTicketDraft({ ...ticketDraft, isFree: event.target.checked, price: 0 })}
+                                            disabled
+                                            onChange={() => undefined}
                                             className="w-4 h-4 rounded border-border-default"
                                         />
-                                        <span className="text-sm font-medium">Vé miễn phí</span>
+                                        <span className="text-sm font-medium text-text-muted">Vé miễn phí chưa hỗ trợ</span>
                                     </label>
                                 </div>
                             </div>

@@ -1,12 +1,17 @@
 "use client";
 
-import { Calendar, MapPin, Users, Settings, Edit3, Eye, Copy, Archive, MoreHorizontal } from "lucide-react";
+import { Archive, Calendar, Copy, Edit3, Eye, MapPin, MoreHorizontal, Settings, Users } from "lucide-react";
 import Image from "next/image";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/src/components/ui/dropdown-menu";
 import { OrganizerStatusBadge } from "../common/OrganizerStatusBadge";
 import {
   eventStatusTone,
   eventStatusLabel,
-  saleStatusTone,
   eventModeTone,
 } from "@/src/features/organizer/constants/organizerStatusMapping";
 import type { OrgFixtureEvent } from "@/src/features/organizer/types/organizer";
@@ -18,9 +23,13 @@ interface OrganizerEventCardProps {
   isLast?: boolean;
 }
 
+const EVENT_TABLE_GRID =
+  "minmax(220px,2.2fr) minmax(160px,1.35fr) minmax(110px,0.75fr) minmax(120px,0.9fr) minmax(96px,0.7fr) 64px 112px";
+
 function ActionIcon({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <button
+      type="button"
       title={label}
       className="flex h-8 w-8 items-center justify-center rounded-ds-md border border-[var(--color-border-default)] bg-transparent text-[var(--color-icon-secondary)] transition-colors hover:bg-[var(--color-bg-elevated)]"
     >
@@ -38,12 +47,16 @@ export function OrganizerEventCard({ event, basePath, isLast }: OrganizerEventCa
     event.sold != null && event.total
       ? Math.round((event.sold / event.total) * 100)
       : 0;
+  const displayStatusLabel =
+    event.displayStatusLabel ?? eventStatusLabel(event.eventStatus);
+  const displayStatusTone =
+    event.displayStatusTone ?? eventStatusTone(event.eventStatus);
 
   return (
     <div
-      className="grid items-center gap-4 px-5 py-4"
+      className="grid min-w-[980px] items-center gap-4 px-5 py-4"
       style={{
-        gridTemplateColumns: "minmax(280px,2.2fr) 1.1fr 1.2fr 1fr 0.9fr 0.9fr auto",
+        gridTemplateColumns: EVENT_TABLE_GRID,
         borderBottom: isLast
           ? "none"
           : "1px solid var(--color-border-subtle)",
@@ -79,24 +92,21 @@ export function OrganizerEventCard({ event, basePath, isLast }: OrganizerEventCa
       </a>
 
       {/* Date & venue */}
-      <div className="flex flex-col gap-1 text-xs">
-        <span className="flex items-center gap-1.5 text-[var(--color-text-primary)]">
+      <div className="flex min-w-0 flex-col gap-1 text-xs">
+        <span className="flex min-w-0 items-center gap-1.5 text-[var(--color-text-primary)]">
           <Calendar size={12} className="text-[var(--color-icon-muted)]" />
-          {event.dateLabel}
+          <span className="truncate">{event.dateLabel}</span>
         </span>
-        <span className="flex items-center gap-1.5 text-[var(--color-text-secondary)]">
+        <span className="flex min-w-0 items-center gap-1.5 text-[var(--color-text-secondary)]">
           <MapPin size={12} className="text-[var(--color-icon-muted)]" />
-          {event.venue}
+          <span className="truncate">{event.venue}</span>
         </span>
       </div>
 
       {/* Status */}
       <div className="flex flex-col gap-1.5">
-        <OrganizerStatusBadge tone={eventStatusTone(event.eventStatus)}>
-          {eventStatusLabel(event.eventStatus)}
-        </OrganizerStatusBadge>
-        <OrganizerStatusBadge tone={saleStatusTone(event.saleStatus)}>
-          {event.saleStatus}
+        <OrganizerStatusBadge tone={displayStatusTone}>
+          {displayStatusLabel}
         </OrganizerStatusBadge>
       </div>
 
@@ -129,7 +139,7 @@ export function OrganizerEventCard({ event, basePath, isLast }: OrganizerEventCa
       </div>
 
       {/* Revenue */}
-      <div className="text-[13px] font-medium text-[var(--color-text-primary)]">
+      <div className="truncate text-[13px] font-medium text-[var(--color-text-primary)]">
         {event.revenue}
       </div>
 
@@ -143,10 +153,34 @@ export function OrganizerEventCard({ event, basePath, isLast }: OrganizerEventCa
       <div className="flex items-center justify-end gap-1.5">
         <ActionIcon label="Quản trị sự kiện"><Settings size={14} /></ActionIcon>
         <ActionIcon label="Chỉnh sửa"><Edit3 size={14} /></ActionIcon>
-        <ActionIcon label="Xem trang public"><Eye size={14} /></ActionIcon>
-        <ActionIcon label="Nhân bản"><Copy size={14} /></ActionIcon>
-        <ActionIcon label="Lưu trữ"><Archive size={14} /></ActionIcon>
-        <ActionIcon label="Thêm"><MoreHorizontal size={14} /></ActionIcon>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              title="Thêm thao tác"
+              className="flex h-8 w-8 items-center justify-center rounded-ds-md border border-[var(--color-border-default)] bg-transparent text-[var(--color-icon-secondary)] transition-colors hover:bg-[var(--color-bg-elevated)]"
+            >
+              <MoreHorizontal size={14} />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="w-44 border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)]"
+          >
+            <DropdownMenuItem className="cursor-pointer">
+              <Eye size={14} />
+              Xem trang public
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">
+              <Copy size={14} />
+              Nhân bản
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer text-[var(--color-feedback-error-text)]">
+              <Archive size={14} />
+              Lưu trữ
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

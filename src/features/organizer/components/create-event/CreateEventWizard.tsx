@@ -1,8 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import api from "@/src/lib/axios";
+import { useCallback, useEffect, useState } from "react";
+import axios from "axios";
+import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { categoryApi } from "@/src/features/organizer/api/categoryApi";
+import { locationApi } from "@/src/features/organizer/api/locationApi";
+import { organizerEventApi } from "@/src/features/organizer/api/organizerEventApi";
+import type {
+    BaseResponse,
+    CreateEventMultipartPayload,
+    CreateEventRequest,
+    CreateTicketTypeRequest,
+    EventCategory,
+    ProvinceResponse,
+    WardResponse,
+} from "@/src/features/organizer/types/api";
 import { useCreateEventWizard } from "./useCreateEventWizard";
 import { CreateEventWizardShell } from "./CreateEventWizardShell";
 import { CreateEventStep1BasicInfo } from "./CreateEventStep1BasicInfo";
@@ -10,10 +23,10 @@ import { CreateEventStep2Showtimes } from "./CreateEventStep2Showtimes";
 import { CreateEventStep3Settings } from "./CreateEventStep3Settings";
 import { CreateEventStep4Settlement } from "./CreateEventStep4Settlement";
 import { CreateEventStep5Review } from "./CreateEventStep5Review";
-import { CreateEventSuccessScreen } from "./CreateEventSuccessScreen";
 import { CheckCircle2 } from "lucide-react";
 import {
     getStepProgress,
+    validateCreateEvent,
     validateStep,
     type CreateEventStep,
     type StepErrors,
@@ -23,6 +36,99 @@ type ChecklistItem = {
     label: string;
     checked: boolean;
 };
+
+type DictionaryState = {
+    loading: boolean;
+    error: string | null;
+};
+
+type ApiErrorBody = Partial<BaseResponse<unknown>> & {
+    error?: string;
+    code?: string;
+};
+
+/**
+ * HTML datetime-local inputs emit values like "2026-05-20T19:00" (no seconds).
+ * Spring's LocalDateTime parser requires at least "yyyy-MM-ddTHH:mm:ss", so
+ * we append ":00" when the seconds component is absent.
+ */
+function toLocalDateTime(value: string) {
+    const trimmed = value.trim();
+    // "2026-05-20T19:00" → 16 chars  |  "2026-05-20T19:00:00" → 19 chars
+    if (trimmed.length === 16) return `${trimmed}:00`;
+    return trimmed;
+}
+
+function buildCreateEventPayload(state: ReturnType<typeof useCreateEventWizard>["formData"]): CreateEventMultipartPayload {
+    // Backend enforces @Min(1) on totalSeats.
+    const totalSeats = Math.max(1, state.ticketTypes.reduce((sum, ticket) => sum + ticket.quantityTotal, 0));
+
+    const showtimes = state.showtimes.map((showtime) => {
+        const ticketTypes: CreateTicketTypeRequest[] = state.ticketTypes
+            .filter((ticket) => ticket.showtimeId === showtime.id)
+            .map((ticket) => ({
+                typeName: ticket.typeName.trim(),
+                description: ticket.description.trim() || undefined,
+                price: ticket.price,
+                quantityTotal: ticket.quantityTotal,
+                minPurchase: ticket.minPurchase,
+                maxPurchase: ticket.maxPurchase,
+                saleStartDate: toLocalDateTime(ticket.saleStartDate),
+                saleEndDate: toLocalDateTime(ticket.saleEndDate),
+            }));
+
+        return {
+            startDatetime: toLocalDateTime(showtime.startDatetime),
+            endDatetime: toLocalDateTime(showtime.endDatetime),
+            venue: state.venue.trim(),
+            address: state.address.trim(),
+            wardCode: state.wardCode,
+            provinceCode: state.provinceCode,
+            ticketTypes,
+        };
+    });
+
+    const event: CreateEventRequest = {
+        eventName: state.eventName.trim(),
+        introduction: state.shortDescription.trim(),
+        description: state.detailedDescription.trim(),
+        venue: state.venue.trim(),
+        wardCode: state.wardCode,
+        provinceCode: state.provinceCode,
+        address: state.address.trim(),
+        eventType: state.eventType,
+        totalSeats,
+        checkers: state.expectedCheckers,
+        isFeatured: false,
+        latitude: state.latitude,
+        longitude: state.longitude,
+        category: state.category,
+        showtimes,
+    };
+
+    return {
+        event,
+        bannerImage: state.bannerImage ?? state.bannerFile,
+        thumbnailImage: state.thumbnailImage ?? state.thumbnailFile,
+    };
+}
+
+function getCreateEventErrorMessage(error: unknown) {
+    if (axios.isAxiosError<ApiErrorBody>(error)) {
+        if (error.response?.status === 413) {
+            return "Ảnh tải lên quá lớn. Vui lòng giảm dung lượng ảnh và thử lại.";
+        }
+
+        if (error.response?.status === 401 || error.response?.status === 403) {
+            return "Phiên đăng nhập hoặc quyền tổ chức không hợp lệ. Vui lòng đăng nhập lại hoặc kiểm tra trạng thái tổ chức.";
+        }
+
+        const body = error.response?.data;
+        return body?.message || body?.error || "Không thể tạo sự kiện. Vui lòng thử lại.";
+    }
+
+    return "Không thể tạo sự kiện. Vui lòng thử lại.";
+}
 
 function RightPanelChecklist({
     draftProgress,
@@ -64,45 +170,117 @@ function RightPanelChecklist({
 }
 
 export default function CreateEventPage() {
+    const router = useRouter();
+    const params = useParams();
     const wizard = useCreateEventWizard();
     const [stepErrors, setStepErrors] = useState<Partial<Record<CreateEventStep, StepErrors>>>({});
-    
-    // We keep fetching the dictionaries required for the form here 
-    // to pass them to Step 1.
-    const [provinces, setProvinces] = useState<{ code: number; name: string }[]>([]);
-    const [wards, setWards] = useState<{ code: number; name: string }[]>([]);
 
-    useEffect(() => {
-        const loadDictionaries = async () => {
-            try {
-                const provRes = await api.get("/iam-service/api/locations/provinces");
-                if (provRes.data) setProvinces(provRes.data);
-            } catch (error) {
-                console.error("Failed to load dictionaries", error);
-            }
-        };
-        void loadDictionaries();
+    const [categories, setCategories] = useState<EventCategory[]>([]);
+    const [provinces, setProvinces] = useState<ProvinceResponse[]>([]);
+    const [wards, setWards] = useState<WardResponse[]>([]);
+    const [categoryState, setCategoryState] = useState<DictionaryState>({ loading: true, error: null });
+    const [provinceState, setProvinceState] = useState<DictionaryState>({ loading: true, error: null });
+    const [wardState, setWardState] = useState<DictionaryState>({ loading: false, error: null });
+
+    const loadCategories = useCallback(async () => {
+        setCategoryState({ loading: true, error: null });
+
+        try {
+            const nextCategories = await categoryApi.getCategories();
+            setCategories(Array.isArray(nextCategories) ? nextCategories : []);
+        } catch (error) {
+            console.error("Failed to load event categories", error);
+            setCategories([]);
+            setCategoryState({
+                loading: false,
+                error: "Không thể tải thể loại sự kiện.",
+            });
+            return;
+        }
+
+        setCategoryState({ loading: false, error: null });
+    }, []);
+
+    const loadProvinces = useCallback(async () => {
+        setProvinceState({ loading: true, error: null });
+
+        try {
+            const nextProvinces = await locationApi.getProvinces();
+            setProvinces(Array.isArray(nextProvinces) ? nextProvinces : []);
+        } catch (error) {
+            console.error("Failed to load provinces", error);
+            setProvinces([]);
+            setProvinceState({
+                loading: false,
+                error: "Không thể tải danh sách tỉnh/thành.",
+            });
+            return;
+        }
+
+        setProvinceState({ loading: false, error: null });
+    }, []);
+
+    const loadWards = useCallback(async (provinceCode: number) => {
+        if (!provinceCode) {
+            setWards([]);
+            setWardState({ loading: false, error: null });
+            return;
+        }
+
+        setWardState({ loading: true, error: null });
+
+        try {
+            const nextWards = await locationApi.getWards(provinceCode);
+            setWards(Array.isArray(nextWards) ? nextWards : []);
+        } catch (error) {
+            console.error("Failed to load wards", error);
+            setWards([]);
+            setWardState({
+                loading: false,
+                error: "Không thể tải danh sách quận/huyện.",
+            });
+            return;
+        }
+
+        setWardState({ loading: false, error: null });
     }, []);
 
     useEffect(() => {
-        if (wizard.formData.provinceCode) {
-            const loadWards = async () => {
-                try {
-                    const res = await api.get("/iam-service/api/locations/wards", {
-                        params: { provinceCode: wizard.formData.provinceCode }
-                    });
-                    if (res.data) setWards(Array.isArray(res.data) ? res.data : res.data.data || []);
-                } catch (error) {
-                    console.error("Failed to load wards", error);
-                }
-            };
-            void loadWards();
-        }
-    }, [wizard.formData.provinceCode]);
+        const timer = window.setTimeout(() => {
+            void loadCategories();
+            void loadProvinces();
+        }, 0);
 
-    if (wizard.isSuccess) {
-        return <CreateEventSuccessScreen formData={wizard.formData} />;
-    }
+        return () => window.clearTimeout(timer);
+    }, [loadCategories, loadProvinces]);
+
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            void loadWards(wizard.formData.provinceCode);
+        }, 0);
+
+        return () => window.clearTimeout(timer);
+    }, [loadWards, wizard.formData.provinceCode]);
+
+    const handleProvinceChange = useCallback(
+        (provinceCode: number, provinceName: string) => {
+            wizard.updateField("provinceCode", provinceCode);
+            wizard.updateField("provinceName", provinceName);
+            wizard.updateField("wardCode", 0);
+            wizard.updateField("wardName", "");
+            setWards([]);
+            setWardState({ loading: Boolean(provinceCode), error: null });
+        },
+        [wizard]
+    );
+
+    const handleWardChange = useCallback(
+        (wardCode: number, wardName: string) => {
+            wizard.updateField("wardCode", wardCode);
+            wizard.updateField("wardName", wardName);
+        },
+        [wizard]
+    );
 
     const scrollToField = (field?: string) => {
         if (!field) return;
@@ -135,15 +313,35 @@ export default function CreateEventPage() {
         window.scrollTo(0, 0);
     };
 
-    const handleSubmit = () => {
-        const validation = validateStep(5, wizard.formData);
-        if (Object.keys(validation.errors).length > 0) {
-            setStepErrors(prev => ({ ...prev, 5: validation.errors }));
+    const handleSubmit = async () => {
+        const validation = validateCreateEvent(wizard.formData);
+        if (validation.firstInvalidStep) {
+            setStepErrors(prev => ({ ...prev, ...validation.stepErrors }));
+            wizard.setStep(validation.firstInvalidStep);
             toast.error("Vui lòng hoàn tất tất cả các bước trước khi gửi duyệt.");
-            scrollToField(validation.firstInvalidField);
+            window.setTimeout(() => scrollToField(validation.firstInvalidField), 0);
             return;
         }
-        void wizard.submitForm();
+
+        try {
+            const created = await wizard.submitForm(async (state) => {
+                const payload = buildCreateEventPayload(state);
+                return organizerEventApi.createEvent(payload);
+            });
+
+            if (!created) {
+                toast.error("Backend chưa xác nhận tạo sự kiện thành công. Vui lòng thử lại.");
+                return;
+            }
+
+            toast.success("Tạo sự kiện thành công. Danh sách sự kiện đang được làm mới.");
+            const locale = typeof params.locale === "string" ? params.locale : "vi";
+            router.replace(`/${locale}/organizer/center?refresh=${Date.now()}`);
+            router.refresh();
+        } catch (error) {
+            console.error("Failed to create organizer event", error);
+            toast.error(getCreateEventErrorMessage(error));
+        }
     };
 
     const handleSaveDraft = () => {
@@ -159,7 +357,7 @@ export default function CreateEventPage() {
                 { label: "Thể loại", checked: !!wizard.formData.category },
                 { label: "Địa điểm", checked: !!wizard.formData.venue && wizard.formData.provinceCode !== 0 && wizard.formData.wardCode !== 0 && !!wizard.formData.address },
                 { label: "Mô tả", checked: !!wizard.formData.shortDescription && !!wizard.formData.detailedDescription },
-                { label: "Thông tin BTC", checked: !!wizard.formData.organizerName && !!wizard.formData.organizerEmail && !!wizard.formData.organizerPhone },
+                { label: "Liên hệ BTC hợp lệ", checked: Object.keys(validateStep(1, wizard.formData).errors).filter(key => key === "organizerEmail" || key === "organizerPhone").length === 0 },
             ];
         }
         if (wizard.step === 2) {
@@ -172,15 +370,15 @@ export default function CreateEventPage() {
         }
         if (wizard.step === 3) {
             return [
-                { label: "Slug hợp lệ", checked: Object.keys(validateStep(3, wizard.formData).errors).filter(key => key === "urlSlug").length === 0 },
+                { label: "Slug hợp lệ nếu nhập", checked: Object.keys(validateStep(3, wizard.formData).errors).filter(key => key === "urlSlug").length === 0 },
                 { label: "Quy tắc bán vé", checked: true },
                 { label: "Chính sách resale", checked: true },
-                { label: "Cấu hình cổng", checked: wizard.formData.gates.length > 0 && wizard.formData.gates.every(gate => gate.name) },
+                { label: "Cổng sẽ cấu hình sau", checked: true },
             ];
         }
         if (wizard.step === 4) {
             return [
-                { label: "Hồ sơ đối soát", checked: !!wizard.formData.selectedProfileId },
+                { label: "Hồ sơ đối soát sau duyệt", checked: true },
                 { label: "Ghi chú đối soát", checked: true },
             ];
         }
@@ -202,14 +400,23 @@ export default function CreateEventPage() {
                 <CreateEventStep1BasicInfo
                     formData={wizard.formData}
                     updateField={wizard.updateField}
+                    categories={categories}
                     provinces={provinces}
                     wards={wards}
+                    categoryState={categoryState}
+                    provinceState={provinceState}
+                    wardState={wardState}
                     errors={stepErrors[1]}
                     onCategoryChange={() => setStepErrors(prev => {
                         const rest = { ...(prev[1] ?? {}) };
                         delete rest.category;
                         return { ...prev, 1: rest };
                     })}
+                    onProvinceChange={handleProvinceChange}
+                    onWardChange={handleWardChange}
+                    onRetryCategories={loadCategories}
+                    onRetryProvinces={loadProvinces}
+                    onRetryWards={() => loadWards(wizard.formData.provinceCode)}
                 />
             );
             case 2: return <CreateEventStep2Showtimes formData={wizard.formData} updateField={wizard.updateField} errors={stepErrors[2]} />;
