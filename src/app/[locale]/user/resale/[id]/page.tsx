@@ -389,7 +389,8 @@ export default function ResaleDetailPage() {
                                 <button className="w-full py-3 bg-[#e5e7eb]/40 dark:bg-[#1f2937] hover:bg-[#e5e7eb] dark:hover:bg-gray-700 text-text-primary rounded-ds-lg text-[13px] font-semibold transition-colors active:scale-[0.98]">
                                     {t('view_provenance')}
                                 </button>
-                            </div>
+                            </Link>
+
                             <Link href={`/${locale}/user/resale`} className="block">
                                 <button className="w-full py-3 bg-Bg-Surface dark:bg-transparent border border-border-default hover:bg-[#f0f3f6] dark:hover:bg-gray-800 text-text-primary rounded-ds-lg text-[13px] font-semibold transition-colors active:scale-[0.98]">
                                     {t('back_to_marketplace')}
