@@ -199,7 +199,7 @@ export default function ResaleCheckoutPage() {
     if (isLoading) {
         return (
             <div className="container mx-auto px-4 py-24 max-w-6xl flex flex-col items-center justify-center">
-                <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+                <Loader2 className="w-10 h-10 text-button-primary-bg-default animate-spin mb-4" />
                 <p className="text-sm text-text-secondary font-medium">{t('processing') || "Đang tải..."}</p>
             </div>
         );
@@ -207,25 +207,13 @@ export default function ResaleCheckoutPage() {
 
     return (
         <div className="container mx-auto px-4 pb-12 max-w-[90%] pt-6">
-            {/* STICKY COUNTDOWN FLOATING BAR */}
-            {/* <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-[90] transition-all duration-500 transform ${isSticky ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0 pointer-events-none'}`}>
-                <div className="bg-bg-surface/80 backdrop-blur-xl border border-primary/30 px-6 py-2.5 rounded-full shadow-[0_8px_32px_rgba(109,72,215,0.25)] flex items-center gap-4">
-                    <span className="text-xs font-bold text-text-secondary uppercase tracking-widest">{t('time_remaining')}</span>
-                    <div className="flex items-center gap-1 font-mono text-xl font-black text-primary">
-                        <OdometerDigit value={timeObj.m1} />
-                        <OdometerDigit value={timeObj.m2} />
-                        <span className="mb-1">:</span>
-                        <OdometerDigit value={timeObj.s1} />
-                        <OdometerDigit value={timeObj.s2} />
-                    </div>
-                </div>
-            </div> */}
+
 
             {/* Breadcrumbs */}
             <div className="flex items-center gap-2 text-[13px] text-text-secondary mb-6">
-                <Link href={`/${locale}/user/resale`} className="hover:text-primary transition-colors">{t('breadcrumb_marketplace')}</Link>
+                <Link href={`/${locale}/user/resale`} className="hover:text-button-primary-bg-default transition-colors">{t('breadcrumb_marketplace')}</Link>
                 <ChevronRight size={14} />
-                <Link href={`/${locale}/user/resale/${listingId}`} className="hover:text-primary transition-colors">{t('breadcrumb_detail')}</Link>
+                <Link href={`/${locale}/user/resale/${listingId}`} className="hover:text-button-primary-bg-default transition-colors">{t('breadcrumb_detail')}</Link>
                 <ChevronRight size={14} />
                 <span className="text-text-primary">{t('breadcrumb_checkout')}</span>
             </div>
@@ -271,7 +259,7 @@ export default function ResaleCheckoutPage() {
                                             setFullName(e.target.value);
                                             if (errors.fullName) setErrors({ ...errors, fullName: "" });
                                         }}
-                                        className={`w-full pl-10 pr-4 py-2.5 bg-bg-surface border ${errors.fullName ? 'border-feedback-error-border' : 'border-border-default'} rounded-lg text-[13px] text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder-text-muted transition-colors`}
+                                        className={`w-full pl-10 pr-4 py-2.5 bg-bg-surface border ${errors.fullName ? 'border-feedback-error-border' : 'border-border-default'} rounded-lg text-[13px] text-text-primary focus:outline-none focus:border-button-primary-bg-default focus:ring-1 focus:ring-button-primary-bg-default placeholder-text-muted transition-colors`}
                                         placeholder={t('fullname_placeholder')}
                                     />
                                 </div>
@@ -292,7 +280,7 @@ export default function ResaleCheckoutPage() {
                                             setPhone(e.target.value);
                                             if (errors.phone) setErrors({ ...errors, phone: "" });
                                         }}
-                                        className={`w-full pl-10 pr-4 py-2.5 bg-bg-surface border ${errors.phone ? 'border-feedback-error-border' : 'border-border-default'} rounded-lg text-[13px] text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder-text-muted transition-colors`}
+                                        className={`w-full pl-10 pr-4 py-2.5 bg-bg-surface border ${errors.phone ? 'border-feedback-error-border' : 'border-border-default'} rounded-lg text-[13px] text-text-primary focus:outline-none focus:border-button-primary-bg-default focus:ring-1 focus:ring-button-primary-bg-default placeholder-text-muted transition-colors`}
                                         placeholder={t('phone_placeholder')}
                                     />
                                 </div>
@@ -312,7 +300,7 @@ export default function ResaleCheckoutPage() {
                                             setEmail(e.target.value);
                                             if (errors.email) setErrors({ ...errors, email: "" });
                                         }}
-                                        className={`w-full pl-10 pr-4 py-2.5 bg-bg-surface border ${errors.email ? 'border-feedback-error-border' : 'border-border-default'} rounded-lg text-[13px] text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder-text-muted transition-colors`}
+                                        className={`w-full pl-10 pr-4 py-2.5 bg-bg-surface border ${errors.email ? 'border-feedback-error-border' : 'border-border-default'} rounded-lg text-[13px] text-text-primary focus:outline-none focus:border-button-primary-bg-default focus:ring-1 focus:ring-button-primary-bg-default placeholder-text-muted transition-colors`}
                                         placeholder={t('email_placeholder')}
                                     />
                                 </div>
@@ -338,7 +326,7 @@ export default function ResaleCheckoutPage() {
                                     type="text"
                                     value={discountCode}
                                     onChange={(e) => setDiscountCode(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-bg-surface border border-border-default rounded-lg text-[13px] text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder-text-muted transition-colors"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-bg-surface border border-border-default rounded-lg text-[13px] text-text-primary focus:outline-none focus:border-button-primary-bg-default focus:ring-1 focus:ring-button-primary-bg-default placeholder-text-muted transition-colors"
                                     placeholder={t('discount_placeholder')}
                                 />
                             </div>
@@ -351,7 +339,7 @@ export default function ResaleCheckoutPage() {
                             </button>
                         </div>
                         {appliedDiscount > 0 && appliedVoucherCode && (
-                            <p className="text-[12px] text-primary font-medium mt-2">
+                            <p className="text-[12px] text-button-primary-bg-default font-medium mt-2">
                                 {t('applied_discount', {
                                     amount: formatVND(appliedDiscount)
                                 })}
@@ -370,14 +358,14 @@ export default function ResaleCheckoutPage() {
 
                         <div className="space-y-3 mb-6">
                             {/* PayOS */}
-                            <label className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all shadow-sm ${paymentMethod === 'payos' ? 'border-primary bg-primary/10' : 'border-border-default hover:bg-bg-subtle'}`}>
+                            <label className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all shadow-sm ${paymentMethod === 'payos' ? 'border-button-primary-bg-default bg-button-primary-bg-default/10' : 'border-border-default hover:bg-bg-subtle'}`}>
                                 <input
                                     type="radio"
                                     name="payment"
                                     value="payos"
                                     checked={paymentMethod === "payos"}
                                     onChange={() => setPaymentMethod("payos")}
-                                    className="w-4 h-4 accent-primary"
+                                    className="w-4 h-4 accent-button-primary-bg-default"
                                 />
                                 <div className="w-8 h-8 rounded bg-bg-surface flex items-center justify-center p-1 shrink-0">
                                     <div className="text-feedback-info-text font-black text-xs">PayOS</div>
@@ -389,17 +377,17 @@ export default function ResaleCheckoutPage() {
                             </label>
 
                             {/* Sedan Balance */}
-                            <label className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${paymentMethod === 'sepay' ? 'border-primary bg-primary/10' : 'border-border-default hover:bg-bg-subtle'}`}>
+                            <label className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${paymentMethod === 'sepay' ? 'border-button-primary-bg-default bg-button-primary-bg-default/10' : 'border-border-default hover:bg-bg-subtle'}`}>
                                 <input
                                     type="radio"
                                     name="payment"
                                     value="sepay"
                                     checked={paymentMethod === "sepay"}
                                     onChange={() => setPaymentMethod("sepay")}
-                                    className="w-4 h-4 accent-primary"
+                                    className="w-4 h-4 accent-button-primary-bg-default"
                                 />
                                 <div className="w-8 h-8 rounded bg-bg-surface border border-border-strong flex items-center justify-center shrink-0">
-                                    <div className="text-primary font-bold text-[8px]">sepay</div>
+                                    <div className="text-button-primary-bg-default font-bold text-[8px]">sepay</div>
                                 </div>
                                 <div className="flex-1">
                                     <span className="text-sm font-bold text-text-primary">{t('balance_label')}</span>
@@ -416,7 +404,7 @@ export default function ResaleCheckoutPage() {
                                     name="payment"
                                     value="vnpay"
                                     disabled
-                                    className="w-4 h-4 accent-primary"
+                                    className="w-4 h-4 accent-button-primary-bg-default"
                                 />
                                 <div className="w-8 h-8 rounded bg-bg-surface flex items-center justify-center p-1 shrink-0">
                                     <div className="flex gap-0.5 font-bold text-[10px]"><span className="text-feedback-info-text">VN</span><span className="text-feedback-error-text">PAY</span></div>
@@ -431,7 +419,7 @@ export default function ResaleCheckoutPage() {
                                     name="payment"
                                     value="momo"
                                     disabled
-                                    className="w-4 h-4 accent-primary"
+                                    className="w-4 h-4 accent-button-primary-bg-default"
                                 />
                                 <div className="w-8 h-8 rounded bg-feedback-error-bg flex items-center justify-center p-1 shrink-0">
                                     <span className="text-feedback-error-text font-bold text-[8px]">MoMo</span>
@@ -446,7 +434,7 @@ export default function ResaleCheckoutPage() {
                                     name="payment"
                                     value="zalopay"
                                     disabled
-                                    className="w-4 h-4 accent-primary"
+                                    className="w-4 h-4 accent-button-primary-bg-default"
                                 />
                                 <div className="w-8 h-8 rounded bg-bg-surface flex items-center justify-center p-1 shrink-0">
                                     <span className="text-feedback-info-text font-extrabold text-[8px]">Zalo</span><span className="text-feedback-success-text font-extrabold text-[8px]">Pay</span>
@@ -492,7 +480,7 @@ export default function ResaleCheckoutPage() {
                                         type="checkbox"
                                         checked={confirmedInfo}
                                         onChange={(e) => setConfirmedInfo(e.target.checked)}
-                                        className="w-4 h-4 rounded border-border-default text-primary focus:ring-primary"
+                                        className="w-4 h-4 rounded border-border-default text-button-primary-bg-default focus:ring-button-primary-bg-default"
                                     />
                                 </div>
                                 <span className={`text-[13px] ${confirmedInfo ? 'text-text-primary' : 'text-text-secondary'} group-hover:text-text-primary transition-colors leading-tight`}>
@@ -506,7 +494,7 @@ export default function ResaleCheckoutPage() {
                                         type="checkbox"
                                         checked={understoodOwnership}
                                         onChange={(e) => setUnderstoodOwnership(e.target.checked)}
-                                        className="w-4 h-4 rounded border-border-default text-primary focus:ring-primary"
+                                        className="w-4 h-4 rounded border-border-default text-button-primary-bg-default focus:ring-button-primary-bg-default"
                                     />
                                 </div>
                                 <span className={`text-[13px] ${understoodOwnership ? 'text-text-primary' : 'text-text-secondary'} group-hover:text-text-primary transition-colors leading-tight`}>
@@ -520,7 +508,7 @@ export default function ResaleCheckoutPage() {
                                         type="checkbox"
                                         checked={agreedToTerms}
                                         onChange={(e) => setAgreedToTerms(e.target.checked)}
-                                        className="w-4 h-4 rounded border-border-default text-primary focus:ring-primary"
+                                        className="w-4 h-4 rounded border-border-default text-button-primary-bg-default focus:ring-button-primary-bg-default"
                                     />
                                 </div>
                                 <span className={`text-[13px] ${agreedToTerms ? 'text-text-primary' : 'text-text-secondary'} group-hover:text-text-primary transition-colors leading-tight`}>
@@ -581,7 +569,7 @@ export default function ResaleCheckoutPage() {
                                 <span className="font-bold text-text-primary">{formatVND(listingData?.listingPrice || basePrice)}</span>
                             </div>
                             {appliedDiscount > 0 && (
-                                <div className="flex justify-between text-primary">
+                                <div className="flex justify-between text-button-primary-bg-default">
                                     <span className="font-medium">{t('discount_label')}</span>
                                     <span className="font-bold">- {formatVND(appliedDiscount)}</span>
                                 </div>

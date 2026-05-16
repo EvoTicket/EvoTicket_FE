@@ -19,6 +19,7 @@ import { useTranslations } from "next-intl";
 import { CustomDatePicker } from "@/src/components/ui/CustomDatePicker";
 import { EventItem, Province } from "@/src/types/event";
 import { useEventFilters } from "@/src/hooks/useEventFilters";
+import { toast } from "react-toastify";
 
 export default function EventsPage() {
     const { locale } = useParams();
@@ -139,6 +140,14 @@ export default function EventsPage() {
         try {
             const res = await api.get("/iam-service/api/locations/provinces", { skipAuth: true } as any);
             if (res.data) {
+                const locations = [
+                    { id: "all", name: t('location') },
+                    { id: "all_loc", name: t('location_all') },
+                    { id: "online", name: t('category_online') },
+                    { id: "hcm", name: "TP. Hồ Chí Minh" },
+                    { id: "hn", name: "Hà Nội" },
+                    { id: "dn", name: "Đà Nẵng" },
+                ];
                 const allOption = {
                     code: "all",
                     name: t("location_all") || "Tất cả địa điểm"
@@ -161,6 +170,18 @@ export default function EventsPage() {
     };
 
     const fetchEvents = async (isReset = false) => {
+        // Validation
+        if (priceFrom && priceTo && Number(priceFrom) >= Number(priceTo)) {
+            toast.warning(t("error_price_range") || "Giá tối thiểu phải nhỏ hơn giá tối đa");
+            setLoading(false);
+            return;
+        }
+        if (startDate && endDate && startDate > endDate) {
+            toast.warning(t("error_date_range") || "Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc");
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
             const params: any = {
@@ -305,16 +326,16 @@ export default function EventsPage() {
                 {/* --- BREADCRUMB & HEADER --- */}
                 <div className="mb-8">
                     {/* Breadcrumb */}
-                    <div className="flex items-center gap-2 text-sm text-text-muted mb-6">
-                        <Link href={`/${locale}/user/homepage`} className="hover:text-primary transition-colors">Home</Link>
-                        <ChevronRight size={14} />
-                        <span className="text-text-primary font-medium">{t("search_for")}</span>
+                    <div className="flex items-center gap-2 text-xs text-text-secondary uppercase tracking-widest">
+                        <Link href={`/${locale}/user/homepage`} className="hover:text-button-primary-bg-default transition-colors">{t('breadcrumb_home')}</Link>
+                        <span>/</span>
+                        <span className="text-button-primary-bg-default font-bold">{t('all_events')}</span>
                     </div>
 
                     {/* Title */}
                     <div className="flex items-center justify-between">
                         <h1 className="text-4xl font-bold text-text-primary mb-2">{t("search_results")}</h1>
-                        <Link href={`/${locale}/user/homepage`} className="flex items-center text-text-primary hover:text-primary transition-colors bg-bg-surface px-3 py-2 border border-border-default rounded-lg">
+                        <Link href={`/${locale}/user/homepage`} className="flex items-center text-text-primary hover:text-button-primary-bg-default transition-colors bg-bg-surface px-3 py-2 border border-border-default rounded-lg">
                             <ArrowLeft size={14} />
                             <span className="ml-2">
                                 {t("back_homepage")}
@@ -333,13 +354,13 @@ export default function EventsPage() {
                         {keyword && (
                             <div className="flex items-center gap-2 px-3 py-1.5 text-text-primary border border-border-default rounded-full text-sm">
                                 <span>{keyword}</span>
-                                <button onClick={() => { setKeyword(""); handleApplyFilters(); }} className="hover:text-primary"><X size={14} /></button>
+                                <button onClick={() => { setKeyword(""); handleApplyFilters(); }} className="hover:text-button-primary-bg-default"><X size={14} /></button>
                             </div>
                         )}
                         {selectedProvince && (
                             <div className="flex items-center gap-2 px-3 py-1.5 text-text-primary border border-border-default rounded-full text-sm">
                                 <span>{provinces.find(p => p.code === selectedProvince.code)?.name}</span>
-                                <button onClick={() => { setSelectedProvince(""); handleApplyFilters(); }} className="hover:text-primary"><X size={14} /></button>
+                                <button onClick={() => { setSelectedProvince(""); handleApplyFilters(); }} className="hover:text-button-primary-bg-default"><X size={14} /></button>
                             </div>
                         )}
                         {(startDate || endDate) && (
@@ -349,7 +370,7 @@ export default function EventsPage() {
                                     {" - "}
                                     {endDate ? new Date(endDate).toLocaleDateString(locale as string === 'vi' ? "vi-VN" : "en-US", { day: '2-digit', month: '2-digit', year: 'numeric' }) : "..."}
                                 </span>
-                                <button onClick={() => { setStartDate(null); setEndDate(null); handleApplyFilters(); }} className="hover:text-primary"><X size={14} /></button>
+                                <button onClick={() => { setStartDate(null); setEndDate(null); handleApplyFilters(); }} className="hover:text-button-primary-bg-default"><X size={14} /></button>
                             </div>
                         )}
                         {selectedCategories.length > 0 && selectedCategories.map(cat => (
@@ -358,7 +379,7 @@ export default function EventsPage() {
                                 <button onClick={() => {
                                     setSelectedCategories(selectedCategories.filter(c => c.id !== cat.id));
                                     handleApplyFilters();
-                                }} className="hover:text-primary"><X size={14} /></button>
+                                }} className="hover:text-button-primary-bg-default"><X size={14} /></button>
                             </div>
                         ))}
                     </div>
@@ -392,7 +413,7 @@ export default function EventsPage() {
                                                             setSelectedCategories([...selectedCategories, cat]);
                                                         }
                                                     }}
-                                                    className="peer appearance-none w-5 h-5 border border-border-default rounded bg-bg-surface checked:bg-button-primary-bg-default checked:border-primary transition-colors cursor-pointer"
+                                                    className="peer appearance-none w-5 h-5 border border-border-default rounded bg-bg-surface checked:bg-button-primary-bg-default checked:border-button-primary-bg-default transition-colors cursor-pointer"
                                                 />
                                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 peer-checked:opacity-100 pointer-events-none text-button-primary-text-default">
                                                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -400,7 +421,7 @@ export default function EventsPage() {
                                                     </svg>
                                                 </div>
                                             </div>
-                                            <span className="text-sm text-text-primary group-hover:text-primary transition-colors">{cat.name}</span>
+                                            <span className="text-sm text-text-primary group-hover:text-button-primary-bg-default transition-colors">{cat.name}</span>
                                         </label>
                                     ))}
                                 </div>
@@ -417,7 +438,7 @@ export default function EventsPage() {
                                                 w-full h-full p-1.5 pl-3 bg-bg-surface
                                                 border border-border-default rounded-lg
                                                 text-text-primary outline-none
-                                                focus:ring-1 focus:ring-primary focus:border-primary 
+                                                focus:ring-1 focus:ring-button-primary-bg-default focus:border-button-primary-bg-default 
                                                 cursor-pointer transition-colors text-left">
                                             {selectedProvince?.name || "Địa điểm"}
                                         </ListboxButton>
@@ -438,7 +459,7 @@ export default function EventsPage() {
                                                             group flex items-center justify-between px-3 py-2 cursor-pointer
                                                             hover:bg-secondary rounded-md">
                                                     <span>{item.name}</span>
-                                                    <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-primary ml-2" />
+                                                    <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-button-primary-bg-default ml-2" />
                                                 </ListboxOption>
                                             ))}
                                         </ListboxOptions>
@@ -518,7 +539,7 @@ export default function EventsPage() {
                                             value={priceFrom}
                                             min={0}
                                             onChange={(e) => setPriceFrom(e.target.value)}
-                                            className="w-full px-3 py-2 bg-bg-surface text-sm border border-border-default rounded-lg focus:outline-none focus:border-primary text-text-secondary"
+                                            className="w-full px-3 py-2 bg-bg-surface text-sm border border-border-default rounded-lg focus:outline-none focus:border-button-primary-bg-default text-text-secondary"
                                         />
                                     </div>
                                     <div className="flex-1">
@@ -527,7 +548,7 @@ export default function EventsPage() {
                                             type="number"
                                             value={priceTo}
                                             onChange={(e) => setPriceTo(e.target.value)}
-                                            className="w-full px-3 py-2 bg-bg-surface text-sm border border-border-default rounded-lg focus:outline-none focus:border-primary text-text-secondary"
+                                            className="w-full px-3 py-2 bg-bg-surface text-sm border border-border-default rounded-lg focus:outline-none focus:border-button-primary-bg-default text-text-secondary"
                                         />
                                     </div>
                                 </div>
@@ -552,7 +573,7 @@ export default function EventsPage() {
                                                     </svg>
                                                 </div>
                                             </div>
-                                            <span className="text-sm text-text-secondary group-hover:text-primary transition-colors">{status.name}</span>
+                                            <span className="text-sm text-text-secondary group-hover:text-button-primary-bg-default transition-colors">{status.name}</span>
                                         </label>
                                     ))}
                                 </div>
@@ -568,7 +589,7 @@ export default function EventsPage() {
                                 </button>
                                 <button
                                     onClick={clearFilters}
-                                    className="w-full bg-transparent text-primary hover:text-primary-hover py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer"
+                                    className="w-full bg-transparent text-button-primary-bg-default hover:text-button-primary-bg-hover py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer"
                                 >
                                     {t("clear_filter")}
                                 </button>
@@ -597,8 +618,8 @@ export default function EventsPage() {
                                                 w-50 h-full pl-3 bg-bg-surface
                                                 border border-border-default rounded-lg
                                                 text-text-primary outline-none
-                                                focus:ring-1 focus:ring-primary 
-                                                focus:border-primary cursor-pointer 
+                                                focus:ring-1 focus:ring-button-primary-bg-default 
+                                                focus:border-button-primary-bg-default cursor-pointer 
                                                 transition-colors text-left">
                                                 {sortBy?.name || t("location_all")}
                                             </ListboxButton>
@@ -619,7 +640,7 @@ export default function EventsPage() {
                                                     group flex justify-between items-center px-3 py-2 cursor-pointer
                                                             hover:bg-secondary rounded-md">
                                                         <span>{item.name}</span>
-                                                        <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-primary mr-2" />
+                                                        <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-button-primary-bg-default mr-2" />
                                                     </ListboxOption>
                                                 ))}
                                             </ListboxOptions>
@@ -630,14 +651,14 @@ export default function EventsPage() {
                                 {/* Icon chuyển đổi Grid / List */}
                                 <div className="flex border border-border-default rounded-lg overflow-hidden bg-bg-page">
                                     <button
-                                        className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-[#1e293b] text-button-primary-text-default' : 'text-text-muted hover:bg-secondary'}`}
+                                        className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-bg-surface-strong text-button-primary-text-default' : 'text-text-muted hover:bg-secondary'}`}
                                         onClick={() => setViewMode("grid")}
                                     >
                                         <LayoutGrid size={18} />
                                     </button>
                                     <div className="w-px bg-border"></div>
                                     <button
-                                        className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-[#1e293b] text-button-primary-text-default' : 'text-text-muted hover:bg-secondary'}`}
+                                        className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-bg-surface-strong text-button-primary-text-default' : 'text-text-muted hover:bg-secondary'}`}
                                         onClick={() => setViewMode("list")}
                                     >
                                         <ListIcon size={18} />
@@ -649,7 +670,7 @@ export default function EventsPage() {
                         {/* Event Grid body */}
                         {loading && page === 1 ? (
                             <div className="flex justify-center py-20">
-                                <Loader2 className="animate-spin text-primary" size={40} />
+                                <Loader2 className="animate-spin text-button-primary-bg-default" size={40} />
                             </div>
                         ) : events.length === 0 ? (
                             <div className="flex flex-col w-full pb-10">
@@ -690,7 +711,7 @@ export default function EventsPage() {
                                     {events.map((event) => (
                                         <Link href={`/${locale}/user/events/${event.id}`} key={`${event.id}-${Math.random()}`} className="group bg-bg-page border border-border-default rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer">
                                             {/* Phần hình ảnh */}
-                                            <div className="relative h-44 w-full bg-[#83858a] shrink-0">
+                                            <div className="relative h-44 w-full bg-bg-subtle shrink-0">
                                                 {event.bannerImage && (
                                                     <Image
                                                         src={event.bannerImage}
@@ -708,7 +729,7 @@ export default function EventsPage() {
 
                                             {/* Phần nội dung */}
                                             <div className="p-4 flex-1 flex flex-col bg-bg-page">
-                                                <h3 className="font-bold text-lg text-text-primary mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+                                                <h3 className="font-bold text-lg text-text-primary mb-3 line-clamp-2 leading-tight group-hover:text-button-primary-bg-default transition-colors">
                                                     {event.eventName}
                                                 </h3>
 
@@ -723,7 +744,7 @@ export default function EventsPage() {
                                                 </div>
 
                                                 <div className="mt-auto pt-4 flex items-center">
-                                                    <span className="text-accent font-bold text-base">{event.floorPrice ? t('price_from', { price: event.floorPrice.toLocaleString(locale as string === 'en' ? 'en-US' : 'vi-VN') }) : t('contact')}</span>
+                                                    <span className="text-button-primary-bg-default font-bold text-base">{event.floorPrice ? t('price_from', { price: event.floorPrice.toLocaleString(locale as string === 'en' ? 'en-US' : 'vi-VN') }) : t('contact')}</span>
                                                 </div>
                                             </div>
                                         </Link>
@@ -733,7 +754,7 @@ export default function EventsPage() {
                                 {/* Nút hiển thị thêm / Observer */}
                                 {page < totalPages && (
                                     <div ref={loadMoreRef} className="flex justify-center mt-12 mb-8 h-10 w-full items-center">
-                                        {loading && <Loader2 className="animate-spin text-primary" size={32} />}
+                                        {loading && <Loader2 className="animate-spin text-button-primary-bg-default" size={32} />}
                                     </div>
                                 )}
                             </>
@@ -748,11 +769,11 @@ export default function EventsPage() {
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-text-primary">{t("suggested_for_you")}</h2>
                             {isFilterApplied ? (
-                                <button onClick={clearFilters} className="text-text-secondary hover:text-primary transition-colors flex items-center gap-1 text-sm">
+                                <button onClick={clearFilters} className="text-text-secondary hover:text-button-primary-bg-default transition-colors flex items-center gap-1 text-sm">
                                     {t("view_more")} <ChevronRight size={16} />
                                 </button>
                             ) : (
-                                <Link href={`/${locale}/user/events`} className="text-text-secondary hover:text-primary transition-colors flex items-center gap-1 text-sm">
+                                <Link href={`/${locale}/user/events`} className="text-text-secondary hover:text-button-primary-bg-default transition-colors flex items-center gap-1 text-sm">
                                     {t("view_more")} <ChevronRight size={16} />
                                 </Link>
                             )}
@@ -761,7 +782,7 @@ export default function EventsPage() {
                             {suggestedEvents.map((event) => (
                                 <Link href={`/${locale}/user/events/${event.id}`} key={`suggested-full-${event.id}`} className="group bg-bg-page border border-border-default rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer">
                                     {/* Phần hình ảnh */}
-                                    <div className="relative h-44 w-full bg-[#83858a] shrink-0">
+                                    <div className="relative h-44 w-full bg-bg-subtle shrink-0">
                                         {event.bannerImage && (
                                             <Image
                                                 src={event.bannerImage}
@@ -779,7 +800,7 @@ export default function EventsPage() {
 
                                     {/* Phần nội dung */}
                                     <div className="p-4 flex-1 flex flex-col bg-bg-page">
-                                        <h3 className="font-bold text-lg text-text-primary mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+                                        <h3 className="font-bold text-lg text-text-primary mb-3 line-clamp-2 leading-tight group-hover:text-button-primary-bg-default transition-colors">
                                             {event.eventName}
                                         </h3>
 
@@ -794,7 +815,7 @@ export default function EventsPage() {
                                         </div>
 
                                         <div className="mt-auto pt-4 flex items-center">
-                                            <span className="text-accent font-bold text-base">{event.floorPrice ? t('price_from', { price: event.floorPrice.toLocaleString(locale as string === 'en' ? 'en-US' : 'vi-VN') }) : t('contact')}</span>
+                                            <span className="text-button-primary-bg-default font-bold text-base">{event.floorPrice ? t('price_from', { price: event.floorPrice.toLocaleString(locale as string === 'en' ? 'en-US' : 'vi-VN') }) : t('contact')}</span>
                                         </div>
                                     </div>
                                 </Link>

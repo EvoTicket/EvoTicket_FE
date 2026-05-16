@@ -183,7 +183,13 @@
     "category_stage_art": "Stage & Art",
     "category_workshop": "Workshop",
     "category_sport": "Sport",
-    "category_exhibition": "Exhibition"
+    "category_exhibition": "Exhibition",
+    "category_online": "Online",
+    "breadcrumb_home": "Home",
+    "all_events": "All Events",
+    "search_for": "Search Results",
+    "error_price_range": "Price range is invalid.",
+    "error_date_range": "Date range is invalid."
   },
   "Booking": {
     "home": "Home",
@@ -364,7 +370,22 @@
     "suggestion_3": "Contact customer support if you need assistance.",
     "back_to_booking": "Back to Booking",
     "loading_result": "Loading result information...",
-    "not_available": "N/A"
+    "not_available": "N/A",
+    "back_to_resale_marketplace": "Back to Resale Marketplace",
+    "back_to_resale_detail": "Back to Resale Detail",
+    "view_similar_listings": "View Similar Listings"
+  },
+  "CancelPayment": {
+    "processing_title": "Processing...",
+    "processing_desc": "Please wait a moment, the system is processing your cancellation request.",
+    "success_title": "Cancelled Successfully!",
+    "success_desc": "Your order #{orderCode} has been successfully cancelled on the system.",
+    "failed_title": "Cancellation Failed",
+    "error_not_found": "Order code not found in the URL.",
+    "error_general": "An error occurred while cancelling the order",
+    "error_failed": "Failed to cancel order",
+    "retry_button": "Retry",
+    "back_to_homepage": "Back to Homepage"
   },
   "EventDetail": {
     "loading_map": "Loading map...",
@@ -431,6 +452,7 @@
     "filter_date": "Date",
     "filter_price_range": "Price Range",
     "filter_status": "Ticket Status",
+    "filter_listing_code": "Listing Code",
     "filter_quantity": "Quantity",
     "clear_filter": "Clear Filters",
     "apply_filter": "Apply",
@@ -458,7 +480,9 @@
     "results_found": "matching tickets",
     "default_category": "Event",
     "prev_page": "Previous",
-    "next_page": "Next"
+    "next_page": "Next",
+    "error_price_range": "Minimum price must be less than maximum price",
+    "error_date_range": "Start date must be less than or equal to end date"
   },
   "ResaleCheckout": {
     "breadcrumb_marketplace": "Marketplace",

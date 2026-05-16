@@ -15,6 +15,14 @@
     --color-primary-hover: #8C84CC;
     --color-accent: #DFA92A;
 
+    /* --- BRAND PREMIUM COLORS --- */
+    --brand-gold-light: #FDE599;
+    --brand-gold-main: #D5A02B;
+    --brand-gold-dark: #996509;
+    --brand-gold-deep: #4D3A11;
+    --brand-glow-purple: #E4ADF2;
+    --brand-secondary: #a50064;
+
     --text-primary: #1F1229;
     --text-secondary: #5F4A9D;
     --text-muted: #A8A3C3;
@@ -37,6 +45,14 @@
     --color-primary: #5F4A9D;
     --color-primary-hover: #8C84CC;
     --color-accent: #DFA92A;
+
+    /* --- BRAND PREMIUM COLORS (Dark adjustments if needed, keeping gold for premium feel) --- */
+    --brand-gold-light: #FDE599;
+    --brand-gold-main: #D5A02B;
+    --brand-gold-dark: #996509;
+    --brand-gold-deep: #4D3A11;
+    --brand-glow-purple: #E4ADF2;
+    --brand-secondary: #a50064;
 
     --text-primary: #F2F1F7;
     --text-secondary: #B3ACD8;
@@ -74,6 +90,14 @@
   --color-success: var(--status-success);
   --color-warning: var(--status-warning);
   --color-error: var(--status-error);
+
+  /* Brand Premium */
+  --color-brand-gold-light: var(--brand-gold-light);
+  --color-brand-gold-main: var(--brand-gold-main);
+  --color-brand-gold-dark: var(--brand-gold-dark);
+  --color-brand-gold-deep: var(--brand-gold-deep);
+  --color-brand-glow-purple: var(--brand-glow-purple);
+  --color-brand-secondary: var(--brand-secondary);
 }
 
 /* 3. Base styles */

@@ -11,6 +11,7 @@ import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headless
 import { CustomDatePicker } from "@/src/components/ui/CustomDatePicker";
 import api from "@/src/lib/axios";
 import { useEventFilters } from "@/src/hooks/useEventFilters";
+import { toast } from "react-toastify";
 
 
 export default function ResaleMarketplacePage() {
@@ -41,6 +42,7 @@ export default function ResaleMarketplacePage() {
     const [ticketStatuses, setTicketStatuses] = useState<string[]>([]);
     const [selectedDateFilters, setSelectedDateFilters] = useState<string[]>([]);
     const [selectedQuantities, setSelectedQuantities] = useState<string[]>([]);
+    // const [listingCode, setListingCode] = useState("");
 
     const [viewMode, setViewMode] = useState<"grid" | "list">("list");
     const [provinces, setProvinces] = useState<any[]>([]);
@@ -76,15 +78,20 @@ export default function ResaleMarketplacePage() {
             };
 
             // Thêm các bộ lọc nếu có
-            if (searchQuery) params.eventName = searchQuery;
+            if (searchQuery) params.keyword = searchQuery;
             if (selectedProvince) params.provinceCode = selectedProvince.code;
             if (selectedCategories.length > 0) {
-                params.categoryIds = selectedCategories.map(c => c.id).join(",");
+                params.category = selectedCategories[0].id; // API expects single string category
             }
-            if (startDate) params.startDate = startDate.toISOString();
-            if (endDate) params.endDate = endDate.toISOString();
+            if (startDate) {
+                params.startTime = startDate.toISOString().split('T')[0];
+            }
+            if (endDate) {
+                params.endTime = endDate.toISOString().split('T')[0];
+            }
             if (priceFrom) params.minPrice = priceFrom;
             if (priceTo) params.maxPrice = priceTo;
+            // if (listingCode) params.listingCode = listingCode;
 
             // Xử lý Sort
             params.sortBy = sortBy.id;
@@ -131,19 +138,28 @@ export default function ResaleMarketplacePage() {
         setSelectedCategories([]);
         setPriceFrom("");
         setPriceTo("");
+        // setListingCode("");
         setSelectedDateFilters([]);
         setSelectedQuantities([]);
         fetchListings(0);
     };
 
     const handleApplyFilters = () => {
+        if (priceFrom && priceTo && Number(priceFrom) >= Number(priceTo)) {
+            toast.warning(t("error_price_range") || "Giá tối thiểu phải nhỏ hơn giá tối đa");
+            return;
+        }
+        if (startDate && endDate && startDate > endDate) {
+            toast.warning(t("error_date_range") || "Ngày bắt đầu phải nhỏ hơn ngày kết thúc");
+            return;
+        }
         fetchListings(0);
     };
 
     const hasResults = listings.length > 0;
 
     return (
-        <div className="min-h-screen bg-bg-page flex flex-col font-sans mb-10">
+        <div className="min-h-screen bg-bg-page flex flex-col font-sans">
             {/* <Header /> */}
 
             <div className="container mx-auto px-4 pb-8 max-w-[90%] flex flex-col gap-8 flex-1">
@@ -159,20 +175,20 @@ export default function ResaleMarketplacePage() {
                         </div>
                         {/* Badges */}
                         <div className="flex flex-col md:flex-row items-end gap-3 shrink-0">
-                            <div className="flex items-center gap-2 bg-[#2d2d2d] text-white px-3 py-1.5 rounded-md text-xs font-semibold">
+                            <div className="flex items-center gap-2 bg-bg-inverse text-text-inverse px-3 py-1.5 rounded-md text-xs font-semibold shadow-sm">
                                 <ShieldCheck size={14} /> {t("badge_official")}
                             </div>
-                            <div className="flex items-center gap-2 bg-[#1a1a1a] text-white px-3 py-1.5 rounded-md text-xs font-semibold">
+                            <div className="flex items-center gap-2 bg-bg-inverse text-text-inverse px-3 py-1.5 rounded-md text-xs font-semibold shadow-sm">
                                 <CheckCircle size={14} /> {t("badge_auto_transfer")}
                             </div>
-                            <div className="flex items-center gap-2 bg-[#111111] text-white px-3 py-1.5 rounded-md text-xs font-semibold">
+                            <div className="flex items-center gap-2 bg-bg-inverse text-text-inverse px-3 py-1.5 rounded-md text-xs font-semibold shadow-sm">
                                 <Lock size={14} /> {t("badge_price_control")}
                             </div>
                         </div>
                     </div>
 
                     {/* Search Bar */}
-                    <div className="flex flex-col gap-4 max-w-3xl mt-4">
+                    <div className="flex flex-col gap-4 max-w-full mt-4">
                         <div className="flex flex-col md:flex-row gap-4 items-center">
                             <div className="relative flex-1 w-full">
                                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-text-secondary">
@@ -180,7 +196,7 @@ export default function ResaleMarketplacePage() {
                                 </div>
                                 <input
                                     type="text"
-                                    className="w-full pl-10 pr-4 py-3 bg-bg-surface text-text-primary rounded-lg border border-border-default focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
+                                    className="w-full pl-10 pr-4 py-3 bg-bg-surface text-text-primary rounded-lg border border-border-default focus:outline-none focus:ring-1 focus:ring-button-primary-bg-default focus:border-button-primary-bg-default transition-colors"
                                     placeholder={t("search_placeholder")}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -203,11 +219,26 @@ export default function ResaleMarketplacePage() {
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
 
                     {/* SIDEBAR: BỘ LỌC (1 column) */}
-                    <aside className="lg:col-span-1 hidden lg:block sticky top-24 pr-2">
+                    <aside className="w-full lg:w-[300px] shrink-0 space-y-8">
                         <div className="bg-bg-page border border-border-default rounded-xl p-5 w-full">
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="font-bold text-xl text-text-primary">{t("filter_title")}</h2>
                             </div>
+
+                            {/* Listing Code
+                            <div className="mb-6">
+                                <h3 className="font-semibold text-sm text-text-primary mb-3">{t("filter_listing_code") || "Mã tin đăng"}</h3>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={listingCode}
+                                        onChange={(e) => setListingCode(e.target.value)}
+                                        className="w-full px-3 py-2 bg-bg-surface text-sm border border-border-default rounded-lg focus:outline-none focus:border-button-primary-bg-default text-text-secondary placeholder-text-muted"
+                                        placeholder="RES-XXXXXXXX"
+                                    />
+                                </div>
+                            </div>
+                            <div className="border-t border-border-subtle my-5"></div> */}
 
                             {/* Danh mục */}
                             <div className="mb-6">
@@ -219,8 +250,8 @@ export default function ResaleMarketplacePage() {
                                                 <input
                                                     type="checkbox"
                                                     checked={selectedCategories.some(c => c.id === cat.id)}
-                                                    onChange={() => toggleArrayItem(selectedCategories, setSelectedCategories, cat, true)}
-                                                    className="peer appearance-none w-5 h-5 border border-border-default rounded bg-bg-surface checked:bg-button-primary-bg-default checked:border-primary transition-colors cursor-pointer"
+                                                    onChange={() => setSelectedCategories(selectedCategories.some(c => c.id === cat.id) ? [] : [cat])}
+                                                    className="peer appearance-none w-5 h-5 border border-border-default rounded bg-bg-surface checked:bg-button-primary-bg-default checked:border-button-primary-bg-default transition-colors cursor-pointer"
                                                 />
                                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 peer-checked:opacity-100 pointer-events-none text-button-primary-text-default">
                                                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -228,7 +259,7 @@ export default function ResaleMarketplacePage() {
                                                     </svg>
                                                 </div>
                                             </div>
-                                            <span className="text-sm text-text-secondary group-hover:text-primary transition-colors">{cat.name}</span>
+                                            <span className="text-sm text-text-secondary group-hover:text-button-primary-bg-default transition-colors">{cat.name}</span>
                                         </label>
                                     ))}
                                 </div>
@@ -240,7 +271,7 @@ export default function ResaleMarketplacePage() {
                                 <h3 className="font-semibold text-sm text-text-primary mb-3">{t("filter_location")}</h3>
                                 <div className="relative">
                                     <Listbox value={selectedProvince} onChange={setSelectedProvince}>
-                                        <ListboxButton className="w-full relative px-3 py-2 text-left bg-bg-surface border border-border-default rounded-lg text-text-primary focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm cursor-pointer">
+                                        <ListboxButton className="w-full relative px-3 py-2 text-left bg-bg-surface border border-border-default rounded-lg text-text-primary focus:outline-none focus:ring-1 focus:ring-button-primary-bg-default focus:border-button-primary-bg-default text-sm cursor-pointer">
                                             {selectedProvince?.name || t("filter_location")}
                                             <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                                                 <ChevronDown className="h-4 w-4 text-text-muted" aria-hidden="true" />
@@ -255,11 +286,11 @@ export default function ResaleMarketplacePage() {
                                             {provinces.map(item => (
                                                 <ListboxOption key={item.code} value={item} className="group flex justify-between px-3 py-2 cursor-pointer hover:bg-secondary rounded-md">
                                                     <span>{item.name}</span>
-                                                    <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-primary" />
+                                                    <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-button-primary-bg-default" />
                                                 </ListboxOption>
                                             ))}
                                             <ListboxOption value={null} className="group flex justify-between px-3 py-2 cursor-pointer hover:bg-secondary rounded-md">
-                                                <span>Tất cả</span>
+                                                <span>{t('all_locations')}</span>
                                             </ListboxOption>
                                         </ListboxOptions>
                                     </Listbox>
@@ -290,7 +321,7 @@ export default function ResaleMarketplacePage() {
                                 </div> */}
                                 <div className="space-y-3">
                                     <div className="relative">
-                                        <label className="text-xs text-text-muted block mb-1">Từ ngày</label>
+                                        <label className="text-xs text-text-muted block mb-1">{t('from_date')}</label>
                                         <div className="w-full relative">
                                             <CustomDatePicker
                                                 selectedDate={startDate}
@@ -301,7 +332,7 @@ export default function ResaleMarketplacePage() {
                                         </div>
                                     </div>
                                     <div className="relative">
-                                        <label className="text-xs text-text-muted block mb-1">Đến ngày</label>
+                                        <label className="text-xs text-text-muted block mb-1">{t('to_date')}</label>
                                         <div className="w-full relative">
                                             <CustomDatePicker
                                                 selectedDate={endDate}
@@ -320,24 +351,24 @@ export default function ResaleMarketplacePage() {
                                 <h3 className="font-semibold text-sm text-text-primary mb-3">{t("filter_price_range")}</h3>
                                 <div className="flex items-center gap-3">
                                     <div className="flex-1">
-                                        <label className="text-xs text-text-muted block mb-1">Từ</label>
+                                        <label className="text-xs text-text-muted block mb-1">{t('from_price')}</label>
                                         <input
                                             type="number"
                                             value={priceFrom}
                                             min={0}
                                             onChange={(e) => setPriceFrom(e.target.value)}
-                                            className="w-full px-3 py-2 bg-bg-surface text-sm border border-border-default rounded-lg focus:outline-none focus:border-primary text-text-secondary placeholder-text-muted"
+                                            className="w-full px-3 py-2 bg-bg-surface text-sm border border-border-default rounded-lg focus:outline-none focus:border-button-primary-bg-default text-text-secondary placeholder-text-muted"
                                             placeholder="VNĐ"
                                         />
                                     </div>
                                     <div className="flex-1">
-                                        <label className="text-xs text-text-muted block mb-1">Đến</label>
+                                        <label className="text-xs text-text-muted block mb-1">{t('to_price')}</label>
                                         <input
                                             type="number"
                                             value={priceTo}
                                             min={0}
                                             onChange={(e) => setPriceTo(e.target.value)}
-                                            className="w-full px-3 py-2 bg-bg-surface text-sm border border-border-default rounded-lg focus:outline-none focus:border-primary text-text-secondary placeholder-text-muted"
+                                            className="w-full px-3 py-2 bg-bg-surface text-sm border border-border-default rounded-lg focus:outline-none focus:border-button-primary-bg-default text-text-secondary placeholder-text-muted"
                                             placeholder="VNĐ"
                                         />
                                     </div>
@@ -355,7 +386,7 @@ export default function ResaleMarketplacePage() {
                                 </button>
                                 <button
                                     onClick={clearFilters}
-                                    className="w-full bg-transparent text-primary hover:text-primary-hover py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer"
+                                    className="w-full bg-transparent text-button-primary-bg-default hover:text-button-primary-bg-hover py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer"
                                 >
                                     {t("clear_filter")}
                                 </button>
@@ -368,13 +399,13 @@ export default function ResaleMarketplacePage() {
                     <div className="lg:col-span-3">
 
                         {/* Banner Message */}
-                        <div className="p-4 mb-6 bg-primary/10 border border-primary/20 rounded-lg text-sm text-primary font-medium text-center">
+                        <div className="p-4 mb-6 bg-feedback-info-bg border border-feedback-info-border rounded-lg text-sm text-feedback-info-text font-medium text-center">
                             {t("banner_text")}
                         </div>
 
                         {loading ? (
                             <div className="flex flex-col items-center justify-center py-20">
-                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-button-primary-bg-default"></div>
                                 <p className="mt-4 text-text-secondary">{t("loading_listings") || "Đang tải danh sách..."}</p>
                             </div>
                         ) : hasResults ? (
@@ -383,7 +414,7 @@ export default function ResaleMarketplacePage() {
                                 <div className="flex flex-col sm:flex-row justify-between items-center mb-6 z-10 relative">
                                     <p className="text-text-secondary text-sm">
                                         <span className="font-medium text-text-primary mr-1">{pagination.totalElements}</span>
-                                        vé phù hợp
+                                        {t('results_found')}
                                     </p>
 
                                     <div className="flex items-center gap-4 mt-4 sm:mt-0">
@@ -391,7 +422,7 @@ export default function ResaleMarketplacePage() {
                                             <span className="text-sm text-text-muted whitespace-nowrap hidden sm:inline-block">{t("sort_by")}</span>
                                             <div className="relative h-9">
                                                 <Listbox value={sortBy} onChange={(val) => setSortBy(val)}>
-                                                    <ListboxButton className="w-48 h-full pl-3 pr-8 bg-bg-surface border border-border-default rounded-lg text-text-primary outline-none focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer transition-colors text-left text-sm relative">
+                                                    <ListboxButton className="w-48 h-full pl-3 pr-8 bg-bg-surface border border-border-default rounded-lg text-text-primary outline-none focus:ring-1 focus:ring-button-primary-bg-default focus:border-button-primary-bg-default cursor-pointer transition-colors text-left text-sm relative">
                                                         <span className="block truncate">{sortBy?.name}</span>
                                                         <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                                                             <ChevronDown className="h-4 w-4 text-text-muted" aria-hidden="true" />
@@ -404,7 +435,7 @@ export default function ResaleMarketplacePage() {
                                                         {sortByList.map(item => (
                                                             <ListboxOption key={item.id} value={item} className="group flex justify-between items-center px-3 py-2 cursor-pointer hover:bg-secondary">
                                                                 <span>{item.name}</span>
-                                                                <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-primary mr-2" />
+                                                                <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-button-primary-bg-default mr-2" />
                                                             </ListboxOption>
                                                         ))}
                                                     </ListboxOptions>
@@ -413,16 +444,16 @@ export default function ResaleMarketplacePage() {
                                         </div>
 
                                         {/* Icon chuyển đổi Grid / List */}
-                                        <div className="flex border border-border-default rounded-lg overflow-hidden bg-bg-page shrink-0">
+                                        <div className="flex border border-border-strong rounded-lg overflow-hidden bg-bg-page shrink-0">
                                             <button
-                                                className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-[#1e293b] text-button-primary-text-default' : 'text-text-muted hover:bg-secondary'}`}
+                                                className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-bg-inverse text-text-inverse' : 'text-text-muted hover:bg-secondary'}`}
                                                 onClick={() => setViewMode("list")}
                                             >
                                                 <ListIcon size={16} />
                                             </button>
-                                            <div className="w-px bg-border"></div>
+                                            <div className="w-px bg-border-strong"></div>
                                             <button
-                                                className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-[#1e293b] text-button-primary-text-default' : 'text-text-muted hover:bg-secondary'}`}
+                                                className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-bg-inverse text-text-inverse' : 'text-text-muted hover:bg-secondary'}`}
                                                 onClick={() => setViewMode("grid")}
                                             >
                                                 <GridIcon size={16} />
@@ -441,12 +472,17 @@ export default function ResaleMarketplacePage() {
                                         >
 
                                             {/* Image placeholder */}
-                                            <div className={`relative bg-[#83858a] shrink-0 ${viewMode === 'list' ? 'h-48 sm:h-auto sm:w-48 lg:w-56' : 'h-44 w-full'}`}>
+                                            <div className={`relative bg-bg-subtle shrink-0 ${viewMode === 'list' ? 'h-48 sm:h-auto sm:w-48 lg:w-56' : 'h-44 w-full'}`}>
                                                 <div className="absolute inset-0 flex items-center justify-center text-text-muted text-sm border-b sm:border-b-0 sm:border-r border-border-default bg-secondary">
-                                                    <Image src="https://images.unsplash.com/photo-1540039155733-d71efd44ef77?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt={ticket.eventName} fill className="object-cover opacity-60" />
+                                                    <Image
+                                                        src={ticket.bannerImage && ticket.bannerImage !== "" ? ticket.bannerImage : "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=1000&auto=format&fit=crop"}
+                                                        alt={ticket.eventName || "Event"}
+                                                        fill
+                                                        className="object-cover opacity-60"
+                                                    />
                                                 </div>
-                                                <div className="absolute top-3 left-3 bg-primary text-white text-xs font-semibold px-2 py-1 rounded">
-                                                    {ticket.category || "Sự kiện"}
+                                                <div className="absolute top-3 left-3 bg-button-primary-bg-default text-button-primary-text-default text-xs font-semibold px-2 py-1 rounded">
+                                                    {ticket.category || t('default_category')}
                                                 </div>
                                             </div>
 
@@ -455,7 +491,7 @@ export default function ResaleMarketplacePage() {
 
                                                 <div className="flex justify-between items-start mb-4">
                                                     <div className="space-y-2 pr-4">
-                                                        <h3 className="font-bold text-lg text-text-primary line-clamp-2 leading-tight group-hover:text-primary transition-colors">{ticket.eventName}</h3>
+                                                        <h3 className="font-bold text-lg text-text-primary line-clamp-2 leading-tight group-hover:text-button-primary-bg-default transition-colors">{ticket.eventName}</h3>
                                                         <div className="flex items-center gap-2 text-sm text-text-secondary mt-2">
                                                             <CalendarIcon size={14} className="shrink-0" />
                                                             <span>{new Date(ticket.eventStartTime).toLocaleString(locale === 'vi' ? "vi-VN" : "en-US", { hour: '2-digit', minute: '2-digit', weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
@@ -483,7 +519,7 @@ export default function ResaleMarketplacePage() {
 
                                                     <div className="flex justify-between items-end">
                                                         <div>
-                                                            <div className="text-xl font-bold text-primary">{ticket.listingPrice.toLocaleString(locale === 'vi' ? "vi-VN" : "en-US")}đ</div>
+                                                            <div className="text-xl font-bold text-button-primary-bg-default">{ticket.listingPrice.toLocaleString(locale === 'vi' ? "vi-VN" : "en-US")}đ</div>
                                                             <div className="text-xs text-text-muted line-through mt-0.5">{t("original_price")} {ticket.originalPrice.toLocaleString(locale === 'vi' ? "vi-VN" : "en-US")}đ</div>
                                                         </div>
 
@@ -508,7 +544,7 @@ export default function ResaleMarketplacePage() {
                                             disabled={pagination.pageNumber === 0}
                                             className="px-4 py-2 border border-border-default rounded-lg hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm text-text-primary cursor-pointer"
                                         >
-                                            {locale === 'vi' ? "Trang trước" : "Previous"}
+                                            {t('prev_page')}
                                         </button>
 
                                         <div className="flex items-center gap-2">
@@ -517,8 +553,8 @@ export default function ResaleMarketplacePage() {
                                                     key={index}
                                                     onClick={() => fetchListings(index)}
                                                     className={`w-10 h-10 rounded-lg text-sm font-semibold transition-all ${pagination.pageNumber === index
-                                                        ? 'bg-primary text-white shadow-md scale-105'
-                                                        : 'border border-border-default text-text-secondary hover:bg-secondary'
+                                                        ? 'bg-button-primary-bg-default text-button-primary-text-default shadow-md scale-105'
+                                                        : 'border border-border-default text-text-secondary hover:bg-bg-subtle'
                                                         } cursor-pointer`}
                                                 >
                                                     {index + 1}
@@ -531,7 +567,7 @@ export default function ResaleMarketplacePage() {
                                             disabled={pagination.pageNumber === pagination.totalPages - 1}
                                             className="px-4 py-2 border border-border-default rounded-lg hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm text-text-primary cursor-pointer"
                                         >
-                                            {locale === 'vi' ? "Trang sau" : "Next"}
+                                            {t('next_page')}
                                         </button>
                                     </div>
                                 )}

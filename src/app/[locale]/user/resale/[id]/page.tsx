@@ -79,7 +79,7 @@ export default function ResaleDetailPage() {
     if (isLoading) {
         return (
             <div className="container mx-auto px-4 py-24 max-w-6xl flex flex-col items-center justify-center">
-                <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+                <Loader2 className="w-10 h-10 text-button-primary-bg-default animate-spin mb-4" />
                 <p className="text-sm text-text-secondary font-medium">{t('loading_listing')}</p>
             </div>
         );
@@ -89,7 +89,7 @@ export default function ResaleDetailPage() {
         return (
             <div className="container mx-auto px-4 pb-12 max-w-[90%] pt-6">
                 <div className="flex items-center gap-2 text-[13px] text-text-secondary mb-6">
-                    <Link href={`/${locale}/user/resale`} className="hover:text-primary transition-colors">{t('marketplace')}</Link>
+                    <Link href={`/${locale}/user/resale`} className="hover:text-button-primary-bg-default transition-colors">{t('marketplace')}</Link>
                     <ChevronRight size={14} />
                     <span className="text-text-primary">{t('resale_detail_breadcrumb')}</span>
                 </div>
@@ -121,7 +121,7 @@ export default function ResaleDetailPage() {
                         </p>
                         <button
                             onClick={() => window.history.back()}
-                            className="bg-primary hover:bg-primary-hover text-button-primary-text-default px-6 py-3 rounded-full text-[13px] font-semibold transition-colors flex items-center justify-center gap-2 w-full shadow-sm"
+                            className="bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-6 py-3 rounded-full text-[13px] font-semibold transition-colors flex items-center justify-center gap-2 w-full shadow-sm"
                         >
                             <ArrowLeft size={16} /> {t('back_to_marketplace')}
                         </button>
@@ -135,7 +135,7 @@ export default function ResaleDetailPage() {
         <div className="container mx-auto px-4 pb-12 max-w-[90%] pt-6">
             {/* Breadcrumbs */}
             <div className="flex items-center gap-2 text-[13px] text-text-secondary mb-6">
-                <Link href={`/${locale}/user/resale`} className="hover:text-primary transition-colors">{t('marketplace')}</Link>
+                <Link href={`/${locale}/user/resale`} className="hover:text-button-primary-bg-default transition-colors">{t('marketplace')}</Link>
                 <ChevronRight size={14} />
                 <span className="text-text-primary">{t('resale_detail_breadcrumb')}</span>
             </div>
@@ -266,7 +266,7 @@ export default function ResaleDetailPage() {
                                     <Network size={14} /> {t('view_provenance')}
                                 </button>
                             </div>
-                            <button onClick={() => handleOpenExplorer(listingData.contractAddress, listingData.tokenId)} className="border border-border-default hover:bg-bg-subtle text-primary px-5 py-2.5 rounded-full text-[12px] font-semibold transition-colors flex items-center justify-center gap-2 bg-bg-surface">
+                            <button onClick={() => handleOpenExplorer(listingData.contractAddress, listingData.tokenId)} className="border border-border-default hover:bg-bg-subtle text-button-primary-bg-default px-5 py-2.5 rounded-full text-[12px] font-semibold transition-colors flex items-center justify-center gap-2 bg-bg-surface">
                                 <ExternalLink size={14} /> {t('open_explorer')}
                             </button>
                         </div>
@@ -320,7 +320,7 @@ export default function ResaleDetailPage() {
                             <li>{t('resale_note_3')}</li>
                             <li>{t('resale_note_4')}</li>
                         </ul>
-                        <div className="flex gap-6 text-[12px] text-primary font-medium border-t border-border-default pt-5">
+                        <div className="flex gap-6 text-[12px] text-button-primary-bg-default font-medium border-t border-border-default pt-5">
                             <span className="cursor-pointer hover:underline">{t('faq')}</span>
                             <span className="cursor-pointer hover:underline">{t('ticket_policy')}</span>
                         </div>

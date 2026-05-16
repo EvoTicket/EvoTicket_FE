@@ -161,24 +161,24 @@ function ResaleStatusContent() {
                         </div>
 
                         <div className="w-full flex gap-3 mb-3">
-                            <button 
+                            <button
                                 className="flex-1 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default py-2.5 rounded-full text-[13px] font-semibold transition-colors shadow-sm active:scale-[0.98]"
                                 onClick={() => router.push(`/${locale}/user/tickets`)}
                             >
                                 {tr('view_ticket_detail') || "Xem chi tiết vé"}
                             </button>
-                            <button 
+                            <button
                                 className="flex-1 bg-button-secondary-bg-default hover:bg-button-secondary-bg-hover text-button-secondary-text-default border border-button-secondary-border-default py-2.5 rounded-full text-[13px] font-semibold transition-colors active:scale-[0.98]"
                                 onClick={() => router.push(`/${locale}/user/tickets`)}
                             >
                                 {tr('view_ticket_list') || "Xem danh sách vé"}
                             </button>
                         </div>
-                        <button 
+                        <button
                             className="w-full bg-button-ghost-bg-default hover:bg-button-ghost-bg-hover text-button-ghost-text-default border border-button-ghost-border-default py-2.5 rounded-full text-[13px] font-semibold transition-colors active:scale-[0.98]"
                             onClick={() => router.push(`/${locale}/user/resale`)}
                         >
-                            {"Về chợ vé bán lại"}
+                            {tr('back_to_resale_marketplace')}
                         </button>
                     </>
                 );
@@ -215,20 +215,20 @@ function ResaleStatusContent() {
                         </div>
 
                         <div className="w-full flex gap-3 mb-3">
-                            <button 
+                            <button
                                 className="flex-1 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default py-2.5 rounded-full text-[13px] font-semibold transition-colors shadow-sm active:scale-[0.98]"
                                 onClick={() => fetchData()}
                             >
                                 {tr('refresh_status') || "Làm mới trạng thái"}
                             </button>
-                            <button 
+                            <button
                                 className="flex-1 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary py-2.5 rounded-full text-[13px] font-semibold transition-colors active:scale-[0.98]"
                                 onClick={() => router.push(`/${locale}/user/tickets`)}
                             >
                                 {tr('view_order_history') || "Xem lịch sử đơn hàng"}
                             </button>
                         </div>
-                        <button 
+                        <button
                             className="w-full bg-transparent border border-border-default hover:bg-bg-subtle text-button-primary-bg-default py-2.5 rounded-full text-[13px] font-semibold transition-colors active:scale-[0.98]"
                         >
                             {tr('contact_support') || "Liên hệ hỗ trợ"}
@@ -264,24 +264,24 @@ function ResaleStatusContent() {
                         </div>
 
                         <div className="w-full flex gap-3 mb-3">
-                            <button 
+                            <button
                                 className="flex-1 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default py-2.5 rounded-full text-[13px] font-semibold transition-colors shadow-sm active:scale-[0.98]"
                                 onClick={() => router.push(`/${locale}/user/resale/${listingId}/checkout`)}
                             >
                                 {tr('retry_payment') || "Thử lại thanh toán"}
                             </button>
-                            <button 
+                            <button
                                 className="flex-1 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary py-2.5 rounded-full text-[13px] font-semibold transition-colors active:scale-[0.98]"
                                 onClick={() => router.push(`/${locale}/user/resale/${listingId}/checkout`)}
                             >
                                 {tr('choose_other_method') || "Chọn phương thức khác"}
                             </button>
                         </div>
-                        <button 
+                        <button
                             className="w-full bg-transparent border border-border-default hover:bg-bg-subtle text-button-primary-bg-default py-2.5 rounded-full text-[13px] font-semibold transition-colors active:scale-[0.98]"
                             onClick={() => router.push(`/${locale}/user/resale/${listingId}`)}
                         >
-                            {"Quay lại chi tiết vé bán lại"}
+                            {tr('back_to_resale_detail')}
                         </button>
 
                         <div className="w-full bg-feedback-warning-bg border border-feedback-warning-border rounded-lg p-4 text-sm text-feedback-warning-text mt-6 text-left shadow-sm">
@@ -321,25 +321,24 @@ function ResaleStatusContent() {
                         </div>
 
                         <div className="w-full flex gap-3 mb-3">
-                            <button 
+                            <button
                                 className="flex-1 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default py-2.5 rounded-full text-[13px] font-semibold transition-colors shadow-sm active:scale-[0.98]"
                                 onClick={() => router.push(`/${locale}/user/resale/${listingId}`)}
                             >
                                 {tr('reselect_tickets_btn') || "Xem lại niêm yết"}
                             </button>
-                            <button 
+                            <button
                                 className="flex-1 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary py-2.5 rounded-full text-[13px] font-semibold transition-colors active:scale-[0.98]"
                                 onClick={() => router.push(`/${locale}/user/resale`)}
                             >
                                 {tr('view_other_events') || "Về chợ vé bán lại"}
                             </button>
                         </div>
-                        <button 
-                            <button 
-                                className="w-full bg-transparent border border-button-ghost-border-default hover:bg-button-ghost-bg-hover text-button-ghost-text-default py-2.5 rounded-full text-[13px] font-semibold transition-colors active:scale-[0.98]"
-                            >
-                                {"Xem niêm yết tương tự"}
-                            </button>
+                        <button
+                            className="w-full bg-transparent border border-button-ghost-border-default hover:bg-button-ghost-bg-hover text-button-ghost-text-default py-2.5 rounded-full text-[13px] font-semibold transition-colors active:scale-[0.98]"
+                        >
+                            {tr('view_similar_listings')}
+                        </button>
 
                         <div className="w-full bg-feedback-warning-bg border border-feedback-warning-border rounded-lg p-4 text-sm text-feedback-warning-text mt-6 text-left shadow-sm">
                             <span className="font-bold flex items-center gap-2 mb-1"><Clock size={16} /> {tb('booking_notes_title')}</span>
@@ -372,24 +371,24 @@ function ResaleStatusContent() {
                         </div>
 
                         <div className="w-full flex gap-3 mb-3">
-                            <button 
+                            <button
                                 className="flex-1 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default py-2.5 rounded-full text-[13px] font-semibold transition-colors shadow-sm active:scale-[0.98]"
                                 onClick={() => router.push(`/${locale}/user/resale/${listingId}/checkout`)}
                             >
                                 {tr('continue_payment_btn') || "Tiếp tục thanh toán"}
                             </button>
-                            <button 
+                            <button
                                 className="flex-1 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary py-2.5 rounded-full text-[13px] font-semibold transition-colors active:scale-[0.98]"
                                 onClick={() => router.push(`/${locale}/user/resale/${listingId}/checkout`)}
                             >
                                 {tr('choose_other_method') || "Chọn phương thức khác"}
                             </button>
                         </div>
-                        <button 
+                        <button
                             className="w-full bg-transparent border border-button-ghost-border-default hover:bg-button-ghost-bg-hover text-button-ghost-text-default py-2.5 rounded-full text-[13px] font-semibold transition-colors active:scale-[0.98]"
                             onClick={() => router.push(`/${locale}/user/resale/${listingId}`)}
                         >
-                            {"Quay lại chi tiết vé bán lại"}
+                            {tr('back_to_resale_detail')}
                         </button>
                     </>
                 );

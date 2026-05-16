@@ -351,7 +351,7 @@ export default function ProvenancePage() {
                                                         {item.details.txHash ? (
                                                             <button
                                                                 onClick={() => openTxExplorer(item.details.txHash)}
-                                                                className="text-primary hover:underline"
+                                                                className="text-button-primary-bg-default hover:underline"
                                                             >
                                                                 {truncateHash(item.details.txHash)}
                                                             </button>

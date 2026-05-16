@@ -183,7 +183,13 @@
     "category_stage_art": "Sân khấu & Nghệ thuật",
     "category_workshop": "Hội thảo",
     "category_sport": "Thể thao",
-    "category_exhibition": "Triển lãm"
+    "category_exhibition": "Triển lãm",
+    "category_online": "Trực tuyến",
+    "breadcrumb_home": "Trang chủ",
+    "all_events": "Tất cả sự kiện",
+    "search_for": "Kết quả tìm kiếm",
+    "error_price_range": "Khoảng giá không hợp lệ.",
+    "error_date_range": "Khoảng ngày không hợp lệ."
   },
   "Booking": {
     "home": "Trang chủ",
@@ -364,7 +370,22 @@
     "suggestion_3": "Liên hệ bộ phận chăm sóc khách hàng nếu cần hỗ trợ.",
     "back_to_booking": "Quay lại đặt vé",
     "loading_result": "Đang tải thông tin kết quả...",
-    "not_available": "Không xác định"
+    "not_available": "Không xác định",
+    "back_to_resale_marketplace": "Về chợ vé bán lại",
+    "back_to_resale_detail": "Quay lại chi tiết vé bán lại",
+    "view_similar_listings": "Xem niêm yết tương tự"
+  },
+  "CancelPayment": {
+    "processing_title": "Đang xử lý...",
+    "processing_desc": "Vui lòng chờ trong giây lát, hệ thống đang xử lý yêu cầu hủy đơn hàng của bạn.",
+    "success_title": "Hủy thành công!",
+    "success_desc": "Đơn hàng #{orderCode} của bạn đã được hủy thành công trên hệ thống.",
+    "failed_title": "Hủy thất bại",
+    "error_not_found": "Không tìm thấy mã đơn hàng (orderCode) trong đường dẫn.",
+    "error_general": "Có lỗi xảy ra khi hủy đơn hàng",
+    "error_failed": "Hủy đơn hàng thất bại",
+    "retry_button": "Thử lại",
+    "back_to_homepage": "Về trang chủ"
   },
   "EventDetail": {
     "loading_map": "Đang tải bản đồ...",
@@ -431,6 +452,7 @@
     "filter_date": "Ngày diễn",
     "filter_price_range": "Khoảng giá",
     "filter_status": "Trạng thái vé",
+    "filter_listing_code": "Mã tin đăng",
     "filter_quantity": "Số lượng",
     "clear_filter": "Xóa bộ lọc",
     "apply_filter": "Áp dụng",
@@ -458,7 +480,9 @@
     "results_found": "vé phù hợp",
     "default_category": "Sự kiện",
     "prev_page": "Trang trước",
-    "next_page": "Trang sau"
+    "next_page": "Trang sau",
+    "error_price_range": "Giá tối thiểu phải nhỏ hơn giá tối đa",
+    "error_date_range": "Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc"
   },
   "ResaleCheckout": {
     "breadcrumb_marketplace": "Marketplace",

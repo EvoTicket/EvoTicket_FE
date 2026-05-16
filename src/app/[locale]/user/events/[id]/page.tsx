@@ -28,7 +28,7 @@ const Map = dynamic(() => import("@/src/components/Map"), {
     ssr: false,
     loading: () => {
         const t = useTranslations("EventDetail");
-        return <div className="h-40 w-full bg-gray-100 animate-pulse rounded-xl flex items-center justify-center text-gray-400">{t('loading_map')}</div>
+        return <div className="h-40 w-full bg-bg-subtle animate-pulse rounded-xl flex items-center justify-center text-text-muted">{t('loading_map')}</div>
     }
 });
 
@@ -172,7 +172,7 @@ export default function EventDetailPage() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-bg-surface">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-button-primary-bg-default"></div>
             </div>
         );
     }
@@ -201,7 +201,7 @@ export default function EventDetailPage() {
                         <div className="w-full max-w-[90%] mx-auto border-t border-border-default pt-10">
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="font-semibold text-lg text-text-primary text-opacity-50 uppercase tracking-widest">{te('you_might_also_like')}</h3>
-                                <Link href={`/${locale}/user/events`} className="text-sm text-text-secondary hover:text-primary">
+                                <Link href={`/${locale}/user/events`} className="text-sm text-text-secondary hover:text-button-primary-bg-default">
                                     {te('see_more')} {'>'}
                                 </Link>
                             </div>
@@ -215,14 +215,14 @@ export default function EventDetailPage() {
                                                 <div className="w-full h-full flex items-center justify-center text-text-muted"><ImageIcon /></div>
                                             )}
                                         </div>
-                                        <h4 className="font-bold text-text-primary line-clamp-2 group-hover:text-primary transition-colors">{evt.eventName}</h4>
+                                        <h4 className="font-bold text-text-primary line-clamp-2 group-hover:text-button-primary-bg-default transition-colors">{evt.eventName}</h4>
                                         <div className="text-sm text-text-secondary mt-2 flex items-center gap-1">
                                             <Calendar size={14} /> {formatTime(evt.startDatetime)} - {formatDate(evt.startDatetime)}
                                         </div>
                                         <div className="text-sm text-text-secondary mt-1 flex items-center gap-1 line-clamp-1">
                                             <MapPin size={14} className="shrink-0" /> {evt.venue || evt.address}
                                         </div>
-                                        <div className="font-bold text-primary mt-2">
+                                        <div className="font-bold text-button-primary-bg-default mt-2">
                                             {te('from_price', { price: (evt.ticketTypes?.[0]?.price || 500000).toLocaleString(locale === 'vi' ? "vi-VN" : "en-US") })}
                                         </div>
                                     </Link>
@@ -244,11 +244,11 @@ export default function EventDetailPage() {
             <div className="bg-gradient-to-br from-bg-surface to-bg-bg-decor border-b border-border-default text-text-primary w-full">
                 <div className="max-w-[90%] mx-auto px-4 py-6 md:py-10">
                     <div className="text-xs text-text-secondary flex items-center gap-2 mb-6 uppercase tracking-wider">
-                        <Link href={`/${locale}/user/homepage`} className="hover:text-primary transition-colors">{tb('home')}</Link>
+                        <Link href={`/${locale}/user/homepage`} className="hover:text-button-primary-bg-default transition-colors">{tb('home')}</Link>
                         <span>{'>'}</span>
-                        <Link href={`/${locale}/user/events`} className="hover:text-primary transition-colors">{te('see_more')}</Link>
+                        <Link href={`/${locale}/user/events`} className="hover:text-button-primary-bg-default transition-colors">{te('see_more')}</Link>
                         <span>{'>'}</span>
-                        <span className="text-primary font-semibold">{te('event_breadcrumb')}</span>
+                        <span className="text-button-primary-bg-default font-semibold">{te('event_breadcrumb')}</span>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -292,7 +292,7 @@ export default function EventDetailPage() {
                             <div className="bg-card-bg-elevated border border-border-default shadow-sm rounded-xl p-6 mb-8 max-w-full grid grid-cols-1 gap-6">
                                 <div className="flex  items-center gap-4">
                                     <div className="bg-bg-page p-2 rounded-lg border border-border-subtle shrink-0">
-                                        <Clock size={22} className="text-primary" />
+                                        <Clock size={22} className="text-button-primary-bg-default" />
                                     </div>
                                     <div className="flex flex-row gap-4 items-center">
                                         <div className="text-xs text-text-secondary uppercase tracking-wider font-bold">{te('time_label')}</div>
@@ -301,7 +301,7 @@ export default function EventDetailPage() {
                                 </div>
                                 <div className="flex items-start gap-4">
                                     <div className="bg-bg-page p-2 rounded-lg border border-border-subtle shrink-0">
-                                        <MapPin size={22} className="text-primary" />
+                                        <MapPin size={22} className="text-button-primary-bg-default" />
                                     </div>
                                     <div>
                                         <div className="flex flex-row gap-4 items-center">
@@ -360,7 +360,7 @@ export default function EventDetailPage() {
                                 {showExpandButton && (
                                     <button
                                         onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                                        className="mt-4 text-sm font-semibold text-primary hover:text-primary-dark transition-colors w-full text-center py-2 bg-bg-page hover:bg-bg-subtle rounded-lg border border-border-default"
+                                        className="mt-4 text-sm font-semibold text-button-primary-bg-default hover:text-button-primary-bg-hover transition-colors w-full text-center py-2 bg-bg-page hover:bg-bg-subtle rounded-lg border border-border-default"
                                     >
                                         {isDescriptionExpanded ? te('collapse') : te('see_more')}
                                     </button>
@@ -381,7 +381,7 @@ export default function EventDetailPage() {
                                         return (
                                             <div
                                                 key={showtime.showtimeId}
-                                                className={`border rounded-lg overflow-hidden transition-colors ${isSelected ? 'border-primary' : 'border-border-default'}`}
+                                                className={`border rounded-lg overflow-hidden transition-colors ${isSelected ? 'border-button-primary-bg-default' : 'border-border-default'}`}
                                             >
                                                 {/* Header */}
                                                 <div
@@ -443,29 +443,29 @@ export default function EventDetailPage() {
                                 <div className="bg-card-bg-default border border-border-default rounded-xl p-6 shadow-sm">
                                     <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 ">{te('seat_map')}</h3>
                                     <div className="bg-bg-page border border-border-default rounded-xl p-6 flex flex-col items-center">
-                                        <div className="w-full max-w-sm h-12 bg-[#A59EDA] text-white flex items-center justify-center font-bold text-sm mb-8 rounded shadow-sm">
+                                        <div className="w-full max-w-sm h-12 bg-button-primary-bg-default/20 text-button-primary-bg-default flex items-center justify-center font-bold text-sm mb-8 rounded shadow-sm">
                                             {te('stage')}
                                         </div>
                                         <div className="flex flex-col gap-3 items-center w-full">
-                                            <div className="w-24 h-12 border-2 border-yellow-400 bg-yellow-100/50 flex items-center justify-center font-bold text-sm text-text-primary">VIP</div>
+                                            <div className="w-24 h-12 border-2 border-feedback-warning-border bg-feedback-warning-bg/50 flex items-center justify-center font-bold text-sm text-text-primary">VIP</div>
                                             <div className="flex gap-4">
-                                                <div className="w-20 h-10 border-2 border-red-200 bg-red-50 flex items-center justify-center font-bold text-sm text-text-primary">A</div>
-                                                <div className="w-20 h-10 border-2 border-red-200 bg-red-50 flex items-center justify-center font-bold text-sm text-text-primary">A</div>
+                                                <div className="w-20 h-10 border-2 border-feedback-error-border bg-feedback-error-bg/50 flex items-center justify-center font-bold text-sm text-text-primary">A</div>
+                                                <div className="w-20 h-10 border-2 border-feedback-error-border bg-feedback-error-bg/50 flex items-center justify-center font-bold text-sm text-text-primary">A</div>
                                             </div>
                                             <div className="flex gap-4">
-                                                <div className="w-24 h-10 border-2 border-green-200 bg-green-50 flex items-center justify-center font-bold text-sm text-text-primary">B</div>
-                                                <div className="w-24 h-10 border-2 border-green-200 bg-green-50 flex items-center justify-center font-bold text-sm text-text-primary">B</div>
+                                                <div className="w-24 h-10 border-2 border-feedback-success-border bg-feedback-success-bg/50 flex items-center justify-center font-bold text-sm text-text-primary">B</div>
+                                                <div className="w-24 h-10 border-2 border-feedback-success-border bg-feedback-success-bg/50 flex items-center justify-center font-bold text-sm text-text-primary">B</div>
                                             </div>
                                             <div className="flex gap-4">
-                                                <div className="w-20 h-10 border-2 border-blue-200 bg-blue-50 flex items-center justify-center font-bold text-sm text-text-primary">C</div>
-                                                <div className="w-20 h-10 border-2 border-blue-200 bg-blue-50 flex items-center justify-center font-bold text-sm text-text-primary">C</div>
+                                                <div className="w-20 h-10 border-2 border-border-strong bg-bg-surface flex items-center justify-center font-bold text-sm text-text-primary">C</div>
+                                                <div className="w-20 h-10 border-2 border-border-strong bg-bg-surface flex items-center justify-center font-bold text-sm text-text-primary">C</div>
                                             </div>
                                         </div>
 
                                         <div className="flex gap-6 mt-8">
-                                            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#4c3575]"></div><span className="text-xs text-text-secondary">{te('available')}</span></div>
-                                            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#8b82a3]"></div><span className="text-xs text-text-secondary">{te('fast_selling')}</span></div>
-                                            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-gray-300"></div><span className="text-xs text-text-secondary">{te('sold_out_status')}</span></div>
+                                            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-button-primary-bg-default"></div><span className="text-xs text-text-secondary">{te('available')}</span></div>
+                                            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-button-primary-bg-default/60"></div><span className="text-xs text-text-secondary">{te('fast_selling')}</span></div>
+                                            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-text-muted"></div><span className="text-xs text-text-secondary">{te('sold_out_status')}</span></div>
                                         </div>
                                     </div>
                                     <p className="text-sm text-text-secondary mt-4">{te('seat_selection_next_step')}</p>
@@ -532,7 +532,7 @@ export default function EventDetailPage() {
                                     </div>
 
                                     <button
-                                        className={`w-full py-3.5 rounded-button-radius font-semibold mb-6 transition-colors shadow-sm ${isSoldOut ? 'bg-[#5b4f8a] text-white/80 cursor-not-allowed' : 'bg-[#6D48D7] hover:bg-[#5b3bb8] text-white'}`}
+                                        className={`w-full py-3.5 rounded-button-radius font-semibold mb-6 transition-colors shadow-sm ${isSoldOut ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
                                         disabled={isSoldOut}
                                         onClick={() => {
                                             if (isSoldOut) return;
@@ -569,7 +569,7 @@ export default function EventDetailPage() {
                 <div className="w-full max-w-[90%] mx-auto border-t border-border-default pt-10 pb-20">
                     <div className="flex justify-between items-center mb-8">
                         <h3 className="font-semibold text-lg text-text-primary text-opacity-50 uppercase tracking-widest">{te('you_might_also_like')}</h3>
-                        <Link href={`/${locale}/user/events`} className="text-sm text-text-secondary hover:text-primary transition-colors flex items-center gap-1">
+                        <Link href={`/${locale}/user/events`} className="text-sm text-text-secondary hover:text-button-primary-bg-default transition-colors flex items-center gap-1">
                             {te('see_more')} <span className="text-xs">▶</span>
                         </Link>
                     </div>
@@ -607,7 +607,7 @@ export default function EventDetailPage() {
                                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
                                     </div>
                                     <div className="space-y-1.5">
-                                        <h4 className="font-bold text-text-primary line-clamp-2 group-hover:text-primary transition-colors leading-snug h-12">
+                                        <h4 className="font-bold text-text-primary line-clamp-2 group-hover:text-button-primary-bg-default transition-colors leading-snug h-12">
                                             {evt.eventName}
                                         </h4>
                                         <div className="text-[13px] text-text-secondary flex items-center gap-1.5">
@@ -618,7 +618,7 @@ export default function EventDetailPage() {
                                             <MapPin size={14} className="shrink-0" />
                                             <span>{evt.venue || evt.address}</span>
                                         </div>
-                                        <div className="font-bold text-primary mt-2 text-base">
+                                        <div className="font-bold text-button-primary-bg-default mt-2 text-base">
                                             {te('from_price', {
                                                 price: (evt.floorPrice || evt.ticketTypes?.[0]?.price || 500000).toLocaleString(locale === 'vi' ? "vi-VN" : "en-US")
                                             })}

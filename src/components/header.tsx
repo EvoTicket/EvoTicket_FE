@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Bell, Ticket, Plus, ChevronDown, Moon, Sun, User, LogOut, LogInIcon, Subscript, UserPlus } from "lucide-react";
+import { Search, Bell, Ticket, Plus, ChevronDown, Moon, Sun, User, LogOut, LogInIcon, Subscript, UserPlus, Users } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { useParams, useRouter, usePathname, useSearchParams } from "next/navigation";
@@ -111,13 +111,13 @@ export function Header() {
         {/* === LEFT: LOGO === */}
         <Link href={`/${locale}/user/homepage`} className="flex items-center gap-2 shrink-0 group">
           {/* Logo Icon */}
-          <div className="relative w-8 h-8 flex items-center justify-center border-2 border-primary rounded transition-colors group-hover:border-primary-hover">
-            <div className="w-4 h-4 border border-primary rotate-45 group-hover:border-primary-hover transition-colors"></div>
+          <div className="relative w-8 h-8 flex items-center justify-center border-2 border-button-primary-bg-default rounded transition-colors group-hover:border-button-primary-bg-hover">
+            <div className="w-4 h-4 border border-button-primary-bg-default rotate-45 group-hover:border-button-primary-bg-hover transition-colors"></div>
           </div>
           {/* Logo Text */}
           <div className="flex flex-col">
             <span className="text-2xl font-bold text-text-primary leading-none">
-              Evo<span className="text-primary">Ticket</span>
+              Evo<span className="text-button-primary-bg-default">Ticket</span>
             </span>
             <span className="text-[10px] text-text-muted uppercase tracking-wider">Event-booking</span>
           </div>
@@ -125,7 +125,7 @@ export function Header() {
 
         {/* === CENTER: SEARCH BAR === */}
         <div className="hidden md:flex flex-1 max-w-xl mx-4">
-          <div className="w-full flex items-center 	bg-bg-surface border border-border-default rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-primary focus-within:border-primary transition-all h-11">
+          <div className="w-full flex items-center 	bg-bg-surface border border-border-default rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-button-primary-bg-default focus-within:border-button-primary-bg-default transition-all h-11">
             <div className="pl-4 text-text-muted">
               <Search size={20} />
             </div>
@@ -135,7 +135,7 @@ export function Header() {
               className="flex-1 px-3 py-2 bg-transparent text-text-primary outline-none placeholder:text-text-muted"
             />
             <div className="h-6 w-px bg-border mx-2"></div>
-            <button className="px-6 py-2 text-sm font-medium text-text-secondary hover:text-primary transition-colors">
+            <button className="px-6 py-2 text-sm font-medium text-text-secondary hover:text-button-primary-bg-default transition-colors">
               {t("search_button")}
             </button>
           </div>
@@ -151,14 +151,16 @@ export function Header() {
           >
             <span className="absolute inset-0 w-full h-full bg-button-accent-bg-hover origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 z-0"></span>
             <div className="relative z-10 bg-white/20 p-0.5 rounded border border-white/30">
-              <Plus size={14} strokeWidth={3} />
+              <Users size={14} strokeWidth={3} />
             </div>
-            <span className="relative z-10">{t("create_event")}</span>
+            <span className="relative z-10">
+              {isOrganization ? t("organizer_center") : t("switch_to_organizer")}
+            </span>
           </button>
 
           {/* Nút Vé của tôi (Secondary Button) */}
           {user &&
-            <Link href={`/${locale}/user/tickets`} className="group relative overflow-hidden hidden lg:flex items-center gap-2 border border-border-default text-text-primary px-4 py-2.5 rounded-lg font-medium hover:border-primary transition-colors cursor-pointer bg-transparent">
+            <Link href={`/${locale}/user/tickets`} className="group relative overflow-hidden hidden lg:flex items-center gap-2 border border-border-default text-text-primary px-4 py-2.5 rounded-lg font-medium hover:border-button-primary-bg-default transition-colors cursor-pointer bg-transparent">
               <span className="absolute inset-0 w-full h-full bg-bg-subtle origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 z-0"></span>
               <Ticket size={18} className="relative z-10 text-text-secondary" />
               <span className="relative z-10">{t("my_tickets")}</span>
@@ -168,9 +170,9 @@ export function Header() {
           {/* Icon Notification */}
 
           {user &&
-            <button className="relative p-2.5 border border-border-default rounded-lg text-text-secondary hover:border-primary transition-colors cursor-pointer">
+            <button className="relative p-2.5 border border-border-default rounded-lg text-text-secondary hover:border-button-primary-bg-default transition-colors cursor-pointer">
               <Bell size={20} />
-              <span className="absolute -top-1.5 -right-1.5 bg-feedback-error-bgtext-button-primary-text-default text-[10px] font-bold h-5 min-w-5 px-1 flex items-center justify-center rounded-full border-2 border-main">
+              <span className="absolute -top-1.5 -right-1.5 bg-feedback-error-bg text-button-primary-text-default text-[10px] font-bold h-5 min-w-5 px-1 flex items-center justify-center rounded-full border-2 border-navbar-topbar-bg">
                 99
               </span>
             </button>
@@ -180,8 +182,8 @@ export function Header() {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="flex items-center gap-2 border border-border-default rounded-lg p-1 pr-2 hover:border-primary cursor-pointer transition-colors outline-none">
-                  <div className="w-8 h-8 rounded bg-linear-to-tr from-primary to-accent overflow-hidden relative">
+                <div className="flex items-center gap-2 border border-border-default rounded-lg p-1 pr-2 hover:border-button-primary-bg-default cursor-pointer transition-colors outline-none">
+                  <div className="w-8 h-8 rounded bg-linear-to-tr from-button-primary-bg-default to-button-accent-bg-default overflow-hidden relative">
                     <Image
                       src={user.avatarUrl || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
                       alt="User"
@@ -207,7 +209,7 @@ export function Header() {
                   <span>{t("profile")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-feedback-error-text hover:text-red-600 cursor-pointer">
+                <DropdownMenuItem onClick={handleLogout} className="text-feedback-error-text hover:text-feedback-error-text hover:bg-feedback-error-bg/10 cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>{t("logout")}</span>
                 </DropdownMenuItem>
@@ -221,7 +223,7 @@ export function Header() {
                   const fullPath = pathname + (search ? `?${search}` : '');
                   router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(fullPath)}`);
                 }}
-                className="flex items-center gap-2 border border-border-default rounded-lg px-4 py-2 hover:border-primary cursor-pointer transition-colors text-sm font-medium"
+                className="flex items-center gap-2 border border-border-default rounded-lg px-4 py-2 hover:border-button-primary-bg-default cursor-pointer transition-colors text-sm font-medium"
               >
                 <LogInIcon size={16} className="text-text-secondary" />
                 <span>{t('login', { defaultMessage: 'Đăng nhập' })}</span>
@@ -239,7 +241,7 @@ export function Header() {
           {/* === LANGUAGE TOGGLE === */}
           <button
             onClick={switchLanguage}
-            className="ml-2 w-10 h-10 flex items-center justify-center rounded-full bg-secondary text-text-secondary hover:bg-border transition-colors font-bold text-xs cursor-pointer"
+            className="ml-2 w-10 h-10 flex items-center justify-center rounded-full bg-button-secondary-bg-default text-text-secondary hover:bg-border-default transition-colors font-bold text-xs cursor-pointer"
             title="Chuyển đổi ngôn ngữ / Switch Language"
           >
             {locale === "vi" ? "VI" : "EN"}
@@ -249,7 +251,7 @@ export function Header() {
           {/* Chỉ render icon khi client đã mounted để tránh lỗi hydration */}
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="ml-2 p-2 rounded-full bg-secondary text-text-secondary hover:bg-border transition-colors cursor-pointer"
+            className="ml-2 p-2 rounded-full bg-button-secondary-bg-default text-text-secondary hover:bg-border-default transition-colors cursor-pointer"
             title="Chuyển đổi giao diện"
           >
             {mounted ? (

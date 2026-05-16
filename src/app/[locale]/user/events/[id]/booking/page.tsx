@@ -152,7 +152,7 @@ export default function BookingPage() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-bg-surface">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-button-primary-bg-default"></div>
             </div>
         );
     }
@@ -197,13 +197,13 @@ export default function BookingPage() {
                 <div className="max-w-[90%] mx-auto px-4">
                     {/* BREADCRUMB */}
                     <div className="text-xs text-text-secondary flex items-center gap-2 mb-6 uppercase tracking-wider">
-                        <Link href={`/${locale}/user/homepage`} className="hover:text-primary transition-colors">{t("home")}</Link>
+                        <Link href={`/${locale}/user/homepage`} className="hover:text-button-primary-bg-default transition-colors">{t("home")}</Link>
                         <span>{'>'}</span>
-                        <Link href={`/${locale}/user/events`} className="hover:text-primary transition-colors">{t("search")}</Link>
+                        <Link href={`/${locale}/user/events`} className="hover:text-button-primary-bg-default transition-colors">{t("search")}</Link>
                         <span>{'>'}</span>
-                        <Link href={`/${locale}/user/events/${event.eventId}`} className="hover:text-primary transition-colors">{t("event_detail")}</Link>
+                        <Link href={`/${locale}/user/events/${event.eventId}`} className="hover:text-button-primary-bg-default transition-colors">{t("event_detail")}</Link>
                         <span>{'>'}</span>
-                        <span className="text-primary font-semibold">{t("booking_and_payment")}</span>
+                        <span className="text-button-primary-bg-default font-semibold">{t("booking_and_payment")}</span>
                     </div>
 
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
