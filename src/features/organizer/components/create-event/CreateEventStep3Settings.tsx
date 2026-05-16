@@ -23,7 +23,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
     const mergedErrors = { ...errors, ...localGateErrors };
 
     const fieldClass = (field: string) =>
-        `w-full p-2.5 border rounded-lg bg-field-bg-default focus:ring-1 focus:ring-focus-ring outline-none ${
+        `w-full p-2.5 border rounded-ds-lg bg-field-bg-default focus:ring-1 focus:ring-focus-ring outline-none ${
             mergedErrors[field]
                 ? "border-feedback-error-border focus:border-feedback-error-border"
                 : "border-border-default focus:border-field-border-focus"
@@ -90,7 +90,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
 
     return (
         <div className="space-y-6">
-            <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm space-y-4">
+            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <Globe className="text-text-secondary" size={20} />
                     <h3 className="text-lg font-bold text-text-primary">Công bố sự kiện</h3>
@@ -99,7 +99,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                 <div className="space-y-4">
                     <div data-field="urlSlug">
                         <label className="block text-sm font-medium mb-1">Đường dẫn sự kiện (URL slug) <span className="text-feedback-error-text">*</span></label>
-                        <div className={`flex bg-field-bg-default border rounded-lg focus-within:ring-1 focus-within:ring-focus-ring overflow-hidden ${
+                        <div className={`flex bg-field-bg-default border rounded-ds-lg focus-within:ring-1 focus-within:ring-focus-ring overflow-hidden ${
                             mergedErrors.urlSlug ? "border-feedback-error-border" : "border-border-default focus-within:border-field-border-focus"
                         }`}>
                             <span className="px-3 py-2.5 bg-bg-subtle text-text-muted border-r border-border-default text-sm">evoticket.vn/e/</span>
@@ -126,7 +126,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                                     key={option.val}
                                     type="button"
                                     onClick={() => updateField("visibility", option.val as Visibility)}
-                                    className={`p-3 text-left rounded-xl border transition-colors ${
+                                    className={`p-3 text-left rounded-ds-xl border transition-colors ${
                                         formData.visibility === option.val
                                             ? "border-action-brand-bg-default bg-action-brand-bg-default/5 shadow-sm"
                                             : "border-border-default hover:bg-bg-subtle"
@@ -141,14 +141,14 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                 </div>
             </div>
 
-            <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm space-y-4">
+            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <Ticket className="text-text-secondary" size={20} />
                     <h3 className="text-lg font-bold text-text-primary">Quy tắc bán vé</h3>
                 </div>
 
                 <div className="space-y-4">
-                    <label className="flex items-start gap-3 cursor-pointer p-3 border border-border-default rounded-lg hover:bg-bg-subtle transition-colors">
+                    <label className="flex items-start gap-3 cursor-pointer p-3 border border-border-default rounded-ds-lg hover:bg-bg-subtle transition-colors">
                         <span className="mt-0.5">
                             <input
                                 type="checkbox"
@@ -163,7 +163,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                         </span>
                     </label>
 
-                    <label className="flex items-start gap-3 cursor-pointer p-3 border border-border-default rounded-lg hover:bg-bg-subtle transition-colors">
+                    <label className="flex items-start gap-3 cursor-pointer p-3 border border-border-default rounded-ds-lg hover:bg-bg-subtle transition-colors">
                         <span className="mt-0.5">
                             <input
                                 type="checkbox"
@@ -180,14 +180,14 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                 </div>
             </div>
 
-            <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm space-y-4">
+            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <ShieldCheck className="text-text-secondary" size={20} />
                     <h3 className="text-lg font-bold text-text-primary">Chính sách Resale & Blockchain</h3>
                 </div>
 
                 <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-bg-page border border-border-default rounded-xl">
+                    <div className="flex items-center justify-between p-4 bg-bg-page border border-border-default rounded-ds-xl">
                         <div>
                             <div className="font-bold text-text-primary">Bật tính năng Resale (Bán lại vé)</div>
                             <div className="text-xs text-text-secondary mt-1">Cho phép khách hàng bán lại vé một cách an toàn trên nền tảng EvoTicket.</div>
@@ -201,10 +201,10 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                     </div>
 
                     {formData.allowResale && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-action-brand-bg-default/30 bg-action-brand-bg-default/5 rounded-xl">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-action-brand-bg-default/30 bg-action-brand-bg-default/5 rounded-ds-xl">
                             <div>
                                 <label className="block text-xs font-medium mb-1 text-text-secondary">Giá bán lại tối đa (%)</label>
-                                <div className="flex items-center bg-bg-surface border border-border-default rounded-lg px-3 py-2">
+                                <div className="flex items-center bg-bg-surface border border-border-default rounded-ds-lg px-3 py-2">
                                     <input
                                         type="number"
                                         value={formData.resaleMaxPriceCap}
@@ -216,7 +216,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                             </div>
                             <div>
                                 <label className="block text-xs font-medium mb-1 text-text-secondary">Phí bản quyền tổ chức (%)</label>
-                                <div className="flex items-center bg-bg-surface border border-border-default rounded-lg px-3 py-2">
+                                <div className="flex items-center bg-bg-surface border border-border-default rounded-ds-lg px-3 py-2">
                                     <input
                                         type="number"
                                         value={formData.royaltyFee}
@@ -231,7 +231,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                 </div>
             </div>
 
-            <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm space-y-4" data-field="gate" tabIndex={-1}>
+            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4" data-field="gate" tabIndex={-1}>
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                         <Map className="text-text-secondary" size={20} />
@@ -243,7 +243,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                     <button
                         type="button"
                         onClick={startAddGate}
-                        className="flex items-center gap-2 rounded-lg border border-border-default px-3 py-2 text-sm font-medium text-text-primary hover:bg-bg-subtle"
+                        className="flex items-center gap-2 rounded-ds-lg border border-border-default px-3 py-2 text-sm font-medium text-text-primary hover:bg-bg-subtle"
                     >
                         <Plus size={16} />
                         Thêm cổng
@@ -276,7 +276,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                 </div>
 
                 {editingGateId && (
-                    <div className="rounded-xl border border-border-default bg-bg-page p-4 space-y-4" data-field={`gate-${editingGateId}-name`}>
+                    <div className="rounded-ds-xl border border-border-default bg-bg-page p-4 space-y-4" data-field={`gate-${editingGateId}-name`}>
                         <h4 className="font-bold text-text-primary">{editingGateId === "draft" ? "Thêm cổng" : "Chỉnh sửa cổng"}</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -306,15 +306,15 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                                 value={gateDraft.description}
                                 onChange={(event) => setGateDraft({ ...gateDraft, description: event.target.value })}
                                 rows={2}
-                                className="w-full p-2.5 border border-border-default rounded-lg bg-field-bg-default focus:border-field-border-focus outline-none resize-none text-sm"
+                                className="w-full p-2.5 border border-border-default rounded-ds-lg bg-field-bg-default focus:border-field-border-focus outline-none resize-none text-sm"
                                 placeholder="Ghi chú vận hành cho checker..."
                             />
                         </div>
                         <div className="flex justify-end gap-3">
-                            <button type="button" onClick={resetGateEditor} className="rounded-lg border border-border-default px-4 py-2 text-sm font-medium hover:bg-bg-subtle">
+                            <button type="button" onClick={resetGateEditor} className="rounded-ds-lg border border-border-default px-4 py-2 text-sm font-medium hover:bg-bg-subtle">
                                 Hủy
                             </button>
-                            <button type="button" onClick={saveGate} className="rounded-lg bg-action-brand-bg-default px-4 py-2 text-sm font-medium text-action-brand-text-default hover:bg-action-brand-bg-hover">
+                            <button type="button" onClick={saveGate} className="rounded-ds-lg bg-action-brand-bg-default px-4 py-2 text-sm font-medium text-action-brand-text-default hover:bg-action-brand-bg-hover">
                                 Lưu cổng
                             </button>
                         </div>
@@ -323,16 +323,16 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
 
                 <div className="space-y-3">
                     {formData.gates.map((gate) => (
-                        <div key={gate.id} className="flex items-center justify-between gap-4 rounded-xl border border-border-default bg-bg-page p-4">
+                        <div key={gate.id} className="flex items-center justify-between gap-4 rounded-ds-xl border border-border-default bg-bg-page p-4">
                             <div className="min-w-0">
                                 <div className="font-bold text-text-primary">{gate.name || "Chưa đặt tên cổng"}</div>
                                 <div className="text-xs text-text-muted">{gate.code || "Chưa có mã"} · {gate.description || "Chưa có ghi chú"}</div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button type="button" onClick={() => startEditGate(gate)} className="rounded-lg border border-border-default p-2 text-text-secondary hover:text-text-primary hover:bg-bg-subtle" aria-label="Sửa cổng">
+                                <button type="button" onClick={() => startEditGate(gate)} className="rounded-ds-lg border border-border-default p-2 text-text-secondary hover:text-text-primary hover:bg-bg-subtle" aria-label="Sửa cổng">
                                     <Edit3 size={16} />
                                 </button>
-                                <button type="button" onClick={() => deleteGate(gate.id)} className="rounded-lg border border-feedback-error-border p-2 text-feedback-error-text hover:bg-feedback-error-bg" aria-label="Xóa cổng">
+                                <button type="button" onClick={() => deleteGate(gate.id)} className="rounded-ds-lg border border-feedback-error-border p-2 text-feedback-error-text hover:bg-feedback-error-bg" aria-label="Xóa cổng">
                                     <Trash2 size={16} />
                                 </button>
                             </div>
@@ -341,12 +341,12 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                     {renderError("gate")}
                 </div>
 
-                <div className="rounded-lg border border-feedback-info-border bg-feedback-info-bg p-3 text-sm text-feedback-info-text">
+                <div className="rounded-ds-lg border border-feedback-info-border bg-feedback-info-bg p-3 text-sm text-feedback-info-text">
                     Checker sẽ được phân công theo event và gate sau khi sự kiện được tạo. Check-in hỗ trợ online hoặc offline có đồng bộ lại.
                 </div>
             </div>
 
-            <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm space-y-4">
+            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <Settings2 className="text-text-secondary" size={20} />
                     <h3 className="text-lg font-bold text-text-primary">Hướng dẫn cho người mua (Tùy chọn)</h3>
@@ -359,7 +359,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                             value={formData.postPurchaseNotes}
                             onChange={(event) => updateField("postPurchaseNotes", event.target.value)}
                             rows={3}
-                            className="w-full p-2.5 border border-border-default rounded-lg bg-field-bg-default focus:border-field-border-focus outline-none resize-none text-sm"
+                            className="w-full p-2.5 border border-border-default rounded-ds-lg bg-field-bg-default focus:border-field-border-focus outline-none resize-none text-sm"
                             placeholder="Cảm ơn bạn đã mua vé. Vui lòng kiểm tra email..."
                         />
                     </div>
@@ -369,7 +369,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                             value={formData.checkinReminder}
                             onChange={(event) => updateField("checkinReminder", event.target.value)}
                             rows={3}
-                            className="w-full p-2.5 border border-border-default rounded-lg bg-field-bg-default focus:border-field-border-focus outline-none resize-none text-sm"
+                            className="w-full p-2.5 border border-border-default rounded-ds-lg bg-field-bg-default focus:border-field-border-focus outline-none resize-none text-sm"
                             placeholder="Vui lòng chuẩn bị sẵn mã QR, mang theo CCCD..."
                         />
                     </div>
@@ -379,7 +379,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                             value={formData.gateNotes}
                             onChange={(event) => updateField("gateNotes", event.target.value)}
                             rows={3}
-                            className="w-full p-2.5 border border-border-default rounded-lg bg-field-bg-default focus:border-field-border-focus outline-none resize-none text-sm"
+                            className="w-full p-2.5 border border-border-default rounded-ds-lg bg-field-bg-default focus:border-field-border-focus outline-none resize-none text-sm"
                             placeholder="Khán giả nên có mặt trước giờ diễn ít nhất 30 phút..."
                         />
                     </div>

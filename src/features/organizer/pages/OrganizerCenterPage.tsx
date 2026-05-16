@@ -43,19 +43,19 @@ export default function OrganizerCenterPage() {
   if (FIXTURE_PAGE_STATE === "loading") {
     return (
       <div className="flex flex-col gap-6">
-        <div className="h-8 w-64 animate-pulse rounded-md bg-[var(--color-bg-elevated)]" />
+        <div className="h-8 w-64 animate-pulse rounded-ds-md bg-[var(--color-bg-elevated)]" />
         <div className="grid grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="h-24 animate-pulse rounded-lg bg-[var(--color-bg-elevated)]"
+              className="h-24 animate-pulse rounded-ds-lg bg-[var(--color-bg-elevated)]"
             />
           ))}
         </div>
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
-            className="h-20 animate-pulse rounded-lg bg-[var(--color-bg-elevated)]"
+            className="h-20 animate-pulse rounded-ds-lg bg-[var(--color-bg-elevated)]"
           />
         ))}
       </div>
@@ -125,7 +125,7 @@ export default function OrganizerCenterPage() {
             createHref={createHref}
           />
         ) : (
-          <div className="flex flex-col overflow-hidden rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)]">
+          <div className="flex flex-col overflow-hidden rounded-ds-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)]">
             {/* Table header */}
             <div
               className="grid items-center gap-4 border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] px-5 py-3 text-[11px] uppercase tracking-wide text-[var(--color-text-muted)]"

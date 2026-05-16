@@ -52,9 +52,9 @@ function HighlightCard({
   tone: StatusTone;
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-4">
+    <div className="flex flex-col gap-2 rounded-ds-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-4">
       <div
-        className="flex h-8 w-8 items-center justify-center rounded-md"
+        className="flex h-8 w-8 items-center justify-center rounded-ds-md"
         style={{
           background: `var(--color-badge-${tone}-bg)`,
           color: `var(--color-badge-${tone}-text)`,
@@ -84,9 +84,9 @@ function SupportCard({
   desc: string;
 }) {
   return (
-    <button className="flex flex-col items-start gap-2 rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] p-3 text-left text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-bg-surface)]">
+    <button className="flex flex-col items-start gap-2 rounded-ds-md border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] p-3 text-left text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-bg-surface)]">
       <div
-        className="flex h-8 w-8 items-center justify-center rounded-md"
+        className="flex h-8 w-8 items-center justify-center rounded-ds-md"
         style={{
           background: "var(--color-badge-brand-bg)",
           color: "var(--color-badge-brand-text)",
@@ -130,7 +130,7 @@ export default function TermsPage() {
           <OrganizerStatusBadge tone="info">
             v2026.04 · Cập nhật 12/04/2026
           </OrganizerStatusBadge>
-          <button className="flex items-center gap-2 rounded-md border border-[var(--color-border-default)] bg-transparent px-3 py-2 text-[13px] text-[var(--color-text-primary)]">
+          <button className="flex items-center gap-2 rounded-ds-md border border-[var(--color-border-default)] bg-transparent px-3 py-2 text-[13px] text-[var(--color-text-primary)]">
             <Download size={13} />
             Tải PDF
           </button>
@@ -138,7 +138,7 @@ export default function TermsPage() {
       </div>
 
       {/* Warning banner */}
-      <div className="flex items-start gap-3 rounded-lg border border-[var(--color-feedback-warning-border)] bg-[var(--color-feedback-warning-bg)] p-4">
+      <div className="flex items-start gap-3 rounded-ds-lg border border-[var(--color-feedback-warning-border)] bg-[var(--color-feedback-warning-bg)] p-4">
         <AlertTriangle
           size={18}
           className="mt-0.5 shrink-0 text-[var(--color-feedback-warning-icon)]"
@@ -193,7 +193,7 @@ export default function TermsPage() {
       <div className="grid grid-cols-[240px_minmax(0,1fr)] items-start gap-6">
         {/* Sticky sidebar nav */}
         <aside className="sticky top-6 self-start h-fit">
-          <div className="flex flex-col gap-1 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-3">
+          <div className="flex flex-col gap-1 rounded-ds-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-3">
             <div className="px-2 py-1.5 text-[11px] uppercase tracking-wide text-[var(--color-text-muted)]">
               Mục lục
             </div>
@@ -204,7 +204,7 @@ export default function TermsPage() {
                 <button
                   key={s.id}
                   onClick={() => jump(s.id)}
-                  className={`flex items-center gap-2 rounded-md px-2.5 py-2 text-left text-[12.5px] transition-colors ${isActive
+                  className={`flex items-center gap-2 rounded-ds-md px-2.5 py-2 text-left text-[12.5px] transition-colors ${isActive
                     ? "border border-[var(--color-action-brand-bg-default)] bg-[var(--color-badge-brand-bg)] font-medium text-[var(--color-text-primary)]"
                     : "border border-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)]"
                     }`}
@@ -515,7 +515,7 @@ export default function TermsPage() {
           </OrganizerPolicySection>
 
           {/* Acknowledgement */}
-          <div className="flex items-start justify-between gap-4 rounded-lg border border-[var(--color-action-brand-bg-default)] bg-[var(--color-bg-surface)] p-5">
+          <div className="flex items-start justify-between gap-4 rounded-ds-lg border border-[var(--color-action-brand-bg-default)] bg-[var(--color-bg-surface)] p-5">
             <div className="flex items-start gap-3">
               <input
                 id="ack"
@@ -541,7 +541,7 @@ export default function TermsPage() {
                 </div>
               </div>
             </div>
-            <button className="flex items-center gap-2 rounded-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3.5 py-2 text-[13px] font-medium text-[var(--color-action-brand-text-default)]">
+            <button className="flex items-center gap-2 rounded-ds-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3.5 py-2 text-[13px] font-medium text-[var(--color-action-brand-text-default)]">
               Xem quy định khi tạo sự kiện
             </button>
           </div>

@@ -30,7 +30,7 @@ export function CreateEventWizardShell({
             <div className="bg-bg-surface border-b border-border-default sticky top-0 z-30 pt-4 px-4 sm:px-6">
                 <div className="max-w-[1860px] mx-auto flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-action-brand-bg-default text-action-brand-text-default rounded-lg flex items-center justify-center font-bold text-lg">
+                        <div className="w-10 h-10 bg-action-brand-bg-default text-action-brand-text-default rounded-ds-lg flex items-center justify-center font-bold text-lg">
                             E
                         </div>
                         <div>
@@ -44,14 +44,14 @@ export function CreateEventWizardShell({
                         <button 
                             type="button"
                             onClick={onSaveDraft}
-                            className="flex items-center gap-2 px-3 py-1.5 border border-border-default rounded-md text-sm hover:bg-bg-subtle text-text-secondary"
+                            className="flex items-center gap-2 px-3 py-1.5 border border-border-default rounded-ds-md text-sm hover:bg-bg-subtle text-text-secondary"
                         >
                             <Save size={14} />
                             <span className="hidden sm:inline">Lưu nháp</span>
                         </button>
                         <Link 
                             href={`/${locale}/organizer/center`}
-                            className="p-1 text-text-muted hover:text-text-primary rounded-md hover:bg-bg-subtle transition-colors"
+                            className="p-1 text-text-muted hover:text-text-primary rounded-ds-md hover:bg-bg-subtle transition-colors"
                         >
                             <X size={20} />
                         </Link>

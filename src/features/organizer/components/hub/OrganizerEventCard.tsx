@@ -22,7 +22,7 @@ function ActionIcon({ label, children }: { label: string; children: React.ReactN
   return (
     <button
       title={label}
-      className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--color-border-default)] bg-transparent text-[var(--color-icon-secondary)] transition-colors hover:bg-[var(--color-bg-elevated)]"
+      className="flex h-8 w-8 items-center justify-center rounded-ds-md border border-[var(--color-border-default)] bg-transparent text-[var(--color-icon-secondary)] transition-colors hover:bg-[var(--color-bg-elevated)]"
     >
       {children}
     </button>
@@ -52,9 +52,9 @@ export function OrganizerEventCard({ event, basePath, isLast }: OrganizerEventCa
       {/* Event info */}
       <a
         href={`${basePath}/${event.id}/overview`}
-        className="flex min-w-0 items-center gap-3 rounded-md p-1 text-left transition-colors hover:bg-[var(--color-bg-elevated)]"
+        className="flex min-w-0 items-center gap-3 rounded-ds-md p-1 text-left transition-colors hover:bg-[var(--color-bg-elevated)]"
       >
-        <div className="h-14 w-14 shrink-0 overflow-hidden rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)]">
+        <div className="h-14 w-14 shrink-0 overflow-hidden rounded-ds-md border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)]">
           <Image
             src={event.thumbnailUrl}
             alt={event.title}

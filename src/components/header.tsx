@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Bell, Ticket, Plus, ChevronDown, Moon, Sun, User, LogOut, LogInIcon, Subscript, UserPlus } from "lucide-react";
+import { Search, Bell, Ticket, Plus, ChevronDown, Moon, Sun, User, LogOut, LogInIcon } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import api from "../lib/axios";
@@ -20,17 +20,6 @@ import { toast } from "react-toastify";
 import { useAppSelector, useAppDispatch } from "@/src/store/hooks";
 import { setUser, logout as logoutAction } from "@/src/store/slices/authSlice";
 
-// Định nghĩa kiểu dữ liệu User
-interface UserProfile {
-  id: number;
-  email: string;
-  firstName: string;
-  lastName: string;
-  avatarUrl: string;
-  phoneNumber: string;
-  roles: string[];
-}
-
 export function Header() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -44,15 +33,7 @@ export function Header() {
   // Get auth state from Redux
   const { user, token, refreshToken, isOrganization } = useAppSelector((state) => state.auth);
 
-  // Cần thiết để tránh lỗi Hydration mismatch khi icon Mặt trăng/Mặt trời khác nhau giữa server/client
-  useEffect(() => {
-    setMounted(true);
-    if (token && !user) {
-      fetchUserProfile();
-    }
-  }, [token]);
-
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     try {
       // Token auto-injected by axios interceptor
       const response = await api.get("/iam-service/api/users/me");
@@ -63,12 +44,23 @@ export function Header() {
       console.error("Failed to fetch user profile", error);
       // Axios interceptor will handle 401 and auto-logout
     }
-  };
+  }, [dispatch]);
+
+  // Cần thiết để tránh lỗi Hydration mismatch khi icon Mặt trăng/Mặt trời khác nhau giữa server/client
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setMounted(true));
+
+    if (token && !user) {
+      void fetchUserProfile();
+    }
+
+    return () => cancelAnimationFrame(frame);
+  }, [fetchUserProfile, token, user]);
 
   const handleLogout = async () => {
     if (refreshToken) {
       try {
-        await api.post("/iam-service/api/auth/logout", { refreshToken }, { skipAuth: true } as any);
+        await api.post("/iam-service/api/auth/logout", { refreshToken }, { skipAuth: true });
       } catch (error) {
         console.error("Logout API failed", error);
       }
@@ -79,10 +71,9 @@ export function Header() {
   };
 
   const handleCreateEvent = () => {
-    console.log(token);
     if (!token) {
       toast.error(t("login_required_to_create_event"));
-      router.push(`/${locale}/auth/login?callbackUrl=/${locale}/organizer/center`);
+      router.replace(`/${locale}/auth/login?callbackUrl=/${locale}/organizer/center`);
       return;
     }
 
@@ -125,7 +116,7 @@ export function Header() {
 
         {/* === CENTER: SEARCH BAR === */}
         <div className="hidden md:flex flex-1 max-w-xl mx-4">
-          <div className="w-full flex items-center 	bg-bg-surface border border-border-default rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-primary focus-within:border-primary transition-all h-11">
+          <div className="w-full flex items-center 	bg-bg-surface border border-border-default rounded-ds-lg overflow-hidden focus-within:ring-1 focus-within:ring-primary focus-within:border-primary transition-all h-11">
             <div className="pl-4 text-text-muted">
               <Search size={20} />
             </div>
@@ -147,7 +138,7 @@ export function Header() {
           {/* Nút Tạo sự kiện (Primary Button) */}
           <button
             onClick={handleCreateEvent}
-            className="group relative overflow-hidden hidden lg:flex items-center gap-2 bg-button-primary-bg-default text-button-primary-text-default px-4 py-2.5 rounded-lg font-medium transition-colors shadow-sm cursor-pointer "
+            className="group relative overflow-hidden hidden lg:flex items-center gap-2 bg-button-primary-bg-default text-button-primary-text-default px-4 py-2.5 rounded-ds-lg font-medium transition-colors shadow-sm cursor-pointer "
           >
             <span className="absolute inset-0 w-full h-full bg-button-accent-bg-hover origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 z-0"></span>
             <div className="relative z-10 bg-white/20 p-0.5 rounded border border-white/30">
@@ -158,7 +149,7 @@ export function Header() {
 
           {/* Nút Vé của tôi (Secondary Button) */}
           {user &&
-            <Link href={`/${locale}/user/tickets`} className="group relative overflow-hidden hidden lg:flex items-center gap-2 border border-border-default text-text-primary px-4 py-2.5 rounded-lg font-medium hover:border-primary transition-colors cursor-pointer bg-transparent">
+            <Link href={`/${locale}/user/tickets`} className="group relative overflow-hidden hidden lg:flex items-center gap-2 border border-border-default text-text-primary px-4 py-2.5 rounded-ds-lg font-medium hover:border-primary transition-colors cursor-pointer bg-transparent">
               <span className="absolute inset-0 w-full h-full bg-bg-subtle origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 z-0"></span>
               <Ticket size={18} className="relative z-10 text-text-secondary" />
               <span className="relative z-10">{t("my_tickets")}</span>
@@ -168,7 +159,7 @@ export function Header() {
           {/* Icon Notification */}
 
           {user &&
-            <button className="relative p-2.5 border border-border-default rounded-lg text-text-secondary hover:border-primary transition-colors cursor-pointer">
+            <button className="relative p-2.5 border border-border-default rounded-ds-lg text-text-secondary hover:border-primary transition-colors cursor-pointer">
               <Bell size={20} />
               <span className="absolute -top-1.5 -right-1.5 bg-feedback-error-bgtext-button-primary-text-default text-[10px] font-bold h-5 min-w-5 px-1 flex items-center justify-center rounded-full border-2 border-main">
                 99
@@ -180,7 +171,7 @@ export function Header() {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="flex items-center gap-2 border border-border-default rounded-lg p-1 pr-2 hover:border-primary cursor-pointer transition-colors outline-none">
+                <div className="flex items-center gap-2 border border-border-default rounded-ds-lg p-1 pr-2 hover:border-primary cursor-pointer transition-colors outline-none">
                   <div className="w-8 h-8 rounded bg-linear-to-tr from-primary to-accent overflow-hidden relative">
                     <Image
                       src={user.avatarUrl || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
@@ -221,14 +212,14 @@ export function Header() {
                   const fullPath = pathname + (search ? `?${search}` : '');
                   router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(fullPath)}`);
                 }}
-                className="flex items-center gap-2 border border-border-default rounded-lg px-4 py-2 hover:border-primary cursor-pointer transition-colors text-sm font-medium"
+                className="flex items-center gap-2 border border-border-default rounded-ds-lg px-4 py-2 hover:border-primary cursor-pointer transition-colors text-sm font-medium"
               >
                 <LogInIcon size={16} className="text-text-secondary" />
                 <span>{t('login', { defaultMessage: 'Đăng nhập' })}</span>
               </button>
               {/* <button
                 onClick={() => router.push(`/${locale}/auth/register?callbackUrl=${encodeURIComponent(pathname)}`)}
-                className="flex items-center gap-2 border border-border-default rounded-lg px-4 py-2 hover:border-primary cursor-pointer transition-colors text-sm font-medium"
+                className="flex items-center gap-2 border border-border-default rounded-ds-lg px-4 py-2 hover:border-primary cursor-pointer transition-colors text-sm font-medium"
               >
                 <UserPlus size={16} className="text-text-secondary" />
                 <span>{t('register', { defaultMessage: 'Đăng ký' })}</span>

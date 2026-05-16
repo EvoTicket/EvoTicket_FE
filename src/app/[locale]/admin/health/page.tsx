@@ -53,19 +53,19 @@ export default function AdminHealthPage() {
           <p className="text-sm text-txt-secondary mt-1">{t("health_subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex bg-surface border border-border rounded-xl p-1 shadow-sm">
+          <div className="flex bg-surface border border-border rounded-ds-xl p-1 shadow-sm">
             {["15m", "1h", "24h", "7d"].map((range) => (
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
-                className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${timeRange === range ? "bg-main text-txt-primary shadow-sm" : "text-txt-muted hover:text-txt-secondary"
+                className={`px-4 py-1.5 text-xs font-bold rounded-ds-lg transition-all ${timeRange === range ? "bg-main text-txt-primary shadow-sm" : "text-txt-muted hover:text-txt-secondary"
                   }`}
               >
                 {range}
               </button>
             ))}
           </div>
-          <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all">
+          <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-ds-xl font-bold shadow-lg shadow-primary/20 transition-all">
             <RefreshCw size={18} />
             <span>{t("btn_refresh")}</span>
           </button>
@@ -112,7 +112,7 @@ export default function AdminHealthPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center bg-surface border border-border rounded-2xl p-1 w-fit shadow-sm">
+      <div className="flex items-center bg-surface border border-border rounded-ds-2xl p-1 w-fit shadow-sm">
         <TabButton active={activeTab === "overview"} onClick={() => setActiveTab("overview")} label={t("common.tabs.overview")} />
         <TabButton active={activeTab === "services"} onClick={() => setActiveTab("services")} label={t("common.tabs.services_queues")} />
         <TabButton active={activeTab === "alerts"} onClick={() => setActiveTab("alerts")} label={t("common.tabs.alerts_incidents")} />
@@ -132,7 +132,7 @@ function TabButton({ active, onClick, label }: any) {
   return (
     <button
       onClick={onClick}
-      className={`px-6 py-2 text-sm font-bold rounded-xl transition-all ${active
+      className={`px-6 py-2 text-sm font-bold rounded-ds-xl transition-all ${active
           ? "bg-main text-primary shadow-sm border border-border"
           : "text-txt-muted hover:text-txt-secondary"
         }`}
@@ -147,7 +147,7 @@ function OverviewTab({ t }: any) {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Service Health Grid */}
       <div className="lg:col-span-2 space-y-6">
-        <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm transition-colors duration-300">
+        <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm transition-colors duration-300">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Server size={18} className="text-txt-muted" />
@@ -162,7 +162,7 @@ function OverviewTab({ t }: any) {
         </div>
 
         {/* Platform Performance Charts */}
-        <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm transition-colors duration-300">
+        <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm transition-colors duration-300">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-2">
               <BarChart3 size={18} className="text-txt-muted" />
@@ -179,7 +179,7 @@ function OverviewTab({ t }: any) {
 
       {/* Queue Health List */}
       <div className="space-y-6">
-        <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm h-fit transition-colors duration-300">
+        <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm h-fit transition-colors duration-300">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Network size={18} className="text-txt-muted" />
@@ -201,7 +201,7 @@ function ServicesTab({ t }: any) {
   return (
     <div className="space-y-6">
       {/* Service Status Table */}
-      <div className="bg-surface border border-border rounded-3xl overflow-hidden shadow-sm transition-colors duration-300">
+      <div className="bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm transition-colors duration-300">
         <div className="p-6 border-b border-border flex items-center gap-2">
           <Server size={18} className="text-txt-muted" />
           <h3 className="text-lg font-bold text-txt-primary">Service status</h3>
@@ -240,7 +240,7 @@ function ServicesTab({ t }: any) {
       </div>
 
       {/* Queue Status Table */}
-      <div className="bg-surface border border-border rounded-3xl overflow-hidden shadow-sm transition-colors duration-300">
+      <div className="bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm transition-colors duration-300">
         <div className="p-6 border-b border-border flex items-center gap-2">
           <Network size={18} className="text-txt-muted" />
           <h3 className="text-lg font-bold text-txt-primary">Queue status</h3>
@@ -287,7 +287,7 @@ function AlertsTab({ t }: any) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Incident List */}
-      <div className="lg:col-span-2 bg-surface border border-border rounded-3xl overflow-hidden shadow-sm h-fit">
+      <div className="lg:col-span-2 bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm h-fit">
         <div className="p-6 border-b border-border flex items-center gap-2">
           <AlertTriangle size={18} className="text-txt-muted" />
           <h3 className="text-lg font-bold text-txt-primary">Sự cố đang mở</h3>
@@ -325,7 +325,7 @@ function AlertsTab({ t }: any) {
                   <td className="px-6 py-4 text-xs font-bold text-txt-secondary">{inc.source}</td>
                   <td className="px-6 py-4 text-xs font-medium text-txt-muted">{inc.start}</td>
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 bg-surface border border-border rounded-lg text-[9px] font-black text-txt-primary uppercase">
+                    <span className="px-2 py-1 bg-surface border border-border rounded-ds-lg text-[9px] font-black text-txt-primary uppercase">
                       {inc.status}
                     </span>
                   </td>
@@ -340,19 +340,19 @@ function AlertsTab({ t }: any) {
       </div>
 
       {/* Incident Details Sidebar */}
-      <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm h-fit space-y-6">
+      <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm h-fit space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Info size={18} className="text-indigo-500" />
             <h3 className="text-lg font-bold text-txt-primary">Chi tiết sự cố</h3>
           </div>
-          <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded-lg text-[10px] font-black uppercase tracking-tighter">
+          <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded-ds-lg text-[10px] font-black uppercase tracking-tighter">
             Investigating
           </span>
         </div>
 
         <div className="space-y-4">
-          <div className="p-3 bg-rose-500/5 border border-rose-500/10 rounded-2xl">
+          <div className="p-3 bg-rose-500/5 border border-rose-500/10 rounded-ds-2xl">
             <span className="text-[9px] font-black text-rose-600 uppercase border border-rose-500/20 px-1.5 py-0.5 rounded bg-rose-500/10">High</span>
             <h4 className="text-sm font-black text-txt-primary mt-2">High latency on API Gateway</h4>
           </div>
@@ -365,21 +365,21 @@ function AlertsTab({ t }: any) {
 
           <div className="pt-4 border-t border-border">
             <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">Tác động hiện tại</p>
-            <div className="p-3 bg-main rounded-xl text-xs text-txt-secondary leading-relaxed">
+            <div className="p-3 bg-main rounded-ds-xl text-xs text-txt-secondary leading-relaxed">
               Một số request mua vé bị chậm trên 800ms, ảnh hương ~6% người dùng.
             </div>
           </div>
 
           <div className="pt-4">
             <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">Bước xử lý đề xuất</p>
-            <div className="p-3 bg-amber-500/5 border border-amber-500/10 rounded-xl text-xs text-amber-700 font-medium leading-relaxed">
+            <div className="p-3 bg-amber-500/5 border border-amber-500/10 rounded-ds-xl text-xs text-amber-700 font-medium leading-relaxed">
               Kiểm tra autoscaler và tăng số instance Gateway.
             </div>
           </div>
 
           <div className="flex gap-2 pt-4">
-            <button className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all">Nhận xử lý</button>
-            <button className="px-4 py-2.5 bg-surface border border-border text-txt-primary rounded-xl text-xs font-black hover:bg-main transition-all">Snooze</button>
+            <button className="flex-1 py-2.5 bg-indigo-600 text-white rounded-ds-xl text-xs font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all">Nhận xử lý</button>
+            <button className="px-4 py-2.5 bg-surface border border-border text-txt-primary rounded-ds-xl text-xs font-black hover:bg-main transition-all">Snooze</button>
           </div>
         </div>
       </div>
@@ -397,7 +397,7 @@ function StatusBadge({ status }: any) {
   };
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[9px] font-black border uppercase ${colors[status]}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-ds-lg text-[9px] font-black border uppercase ${colors[status]}`}>
       <div className={`w-1 h-1 rounded-full ${status === 'Healthy' ? 'bg-emerald-500' : status === 'Down' ? 'bg-rose-500' : 'bg-amber-500'}`} />
       {status}
     </span>
@@ -421,9 +421,9 @@ function StatusCard({ icon, label, value, sub, color }: any) {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm transition-colors">
+    <div className="bg-surface border border-border rounded-ds-2xl p-5 shadow-sm transition-colors">
       <div className="flex items-center gap-3 mb-3">
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${colors[color]}`}>
+        <div className={`w-9 h-9 rounded-ds-xl flex items-center justify-center ${colors[color]}`}>
           {icon}
         </div>
         <span className="text-[11px] font-bold text-txt-muted uppercase tracking-wider">{label}</span>
@@ -448,10 +448,10 @@ function ServiceItem({ name, status, latency, lastCheck }: any) {
   const config = statusConfig[status] || statusConfig.Healthy;
 
   return (
-    <div className="flex flex-col p-4 rounded-2xl bg-main border border-border hover:border-txt-muted/30 transition-all">
+    <div className="flex flex-col p-4 rounded-ds-2xl bg-main border border-border hover:border-txt-muted/30 transition-all">
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-bold text-txt-secondary">{name}</span>
-        <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[9px] font-black border ${config.color} ${config.bg} border-current/10`}>
+        <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-ds-lg text-[9px] font-black border ${config.color} ${config.bg} border-current/10`}>
           {config.icon}
           {config.label.toUpperCase()}
         </div>
@@ -474,7 +474,7 @@ function QueueItem({ name, queued, failed, delayed, status }: any) {
   const t = useTranslations("Admin");
   const isHealthy = status === "Healthy";
   return (
-    <div className="p-4 rounded-2xl bg-main border border-border transition-colors">
+    <div className="p-4 rounded-ds-2xl bg-main border border-border transition-colors">
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-bold text-txt-secondary line-clamp-1">{name}</span>
         <div className={`text-[8px] font-black px-1.5 py-0.5 rounded border uppercase ${isHealthy ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-amber-500/10 text-amber-600 border-amber-500/20"

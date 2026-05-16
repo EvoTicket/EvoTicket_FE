@@ -32,7 +32,7 @@ function RightPanelChecklist({
     items: ChecklistItem[];
 }) {
     return (
-        <div className="bg-bg-surface border border-border-default rounded-xl p-5 shadow-sm sticky top-24">
+        <div className="bg-bg-surface border border-border-default rounded-ds-xl p-5 shadow-sm sticky top-24">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-text-primary">Tiến độ bước hiện tại</h3>
                 <span className="font-bold text-action-brand-text-default">{draftProgress}%</span>

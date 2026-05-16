@@ -29,7 +29,7 @@ const mockProfiles = [
 export function CreateEventStep4Settlement({ formData, updateField }: Props) {
     return (
         <div className="space-y-6">
-            <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm space-y-4">
+            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <Landmark className="text-text-secondary" size={20} />
                     <h3 className="text-lg font-bold text-text-primary">Hồ sơ thanh toán và Đối soát</h3>
@@ -43,7 +43,7 @@ export function CreateEventStep4Settlement({ formData, updateField }: Props) {
                             {mockProfiles.map(profile => (
                                 <label 
                                     key={profile.id}
-                                    className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${
+                                    className={`flex items-start gap-3 p-4 rounded-ds-xl border cursor-pointer transition-colors ${
                                         formData.selectedProfileId === profile.id
                                             ? "border-action-brand-bg-default bg-action-brand-bg-default/5 shadow-sm"
                                             : "border-border-default hover:bg-bg-subtle"
@@ -84,7 +84,7 @@ export function CreateEventStep4Settlement({ formData, updateField }: Props) {
                 </div>
             </div>
 
-            <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm space-y-4">
+            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <FileText className="text-text-secondary" size={20} />
                     <h3 className="text-lg font-bold text-text-primary">Ghi chú đối soát (Tùy chọn)</h3>
@@ -96,7 +96,7 @@ export function CreateEventStep4Settlement({ formData, updateField }: Props) {
                         value={formData.reconciliationNotes}
                         onChange={e => updateField("reconciliationNotes", e.target.value)}
                         rows={4}
-                        className="w-full p-2.5 border border-border-default rounded-lg bg-field-bg-default focus:border-field-border-focus outline-none resize-none text-sm"
+                        className="w-full p-2.5 border border-border-default rounded-ds-lg bg-field-bg-default focus:border-field-border-focus outline-none resize-none text-sm"
                         placeholder="Ví dụ: Cần xuất hóa đơn VAT điện tử, tần suất đối soát 1 tuần/lần..."
                     />
                 </div>

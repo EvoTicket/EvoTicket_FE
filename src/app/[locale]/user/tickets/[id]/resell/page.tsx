@@ -142,14 +142,14 @@ export default function ResellTicketPage() {
     if (error && !ticket) {
         return (
             <div className="min-h-screen bg-[#f8f9fa] dark:bg-bg-main flex flex-col items-center justify-center p-6">
-                <div className="bg-bg-surface border border-border-default rounded-2xl p-8 max-w-md w-full text-center shadow-xl">
+                <div className="bg-bg-surface border border-border-default rounded-ds-2xl p-8 max-w-md w-full text-center shadow-xl">
                     <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
                         <AlertCircle className="w-8 h-8 text-red-500" />
                     </div>
                     <h2 className="text-xl font-bold text-text-primary mb-2">{t("error_title")}</h2>
                     <p className="text-text-secondary mb-8">{error}</p>
                     <Link href={`/${locale}/user/tickets`} className="block w-full">
-                        <button className="w-full py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-bold transition-all shadow-lg shadow-primary/20">
+                        <button className="w-full py-3 bg-primary hover:bg-primary-hover text-white rounded-ds-xl font-bold transition-all shadow-lg shadow-primary/20">
                             {t("btn_back")}
                         </button>
                     </Link>
@@ -205,7 +205,7 @@ export default function ResellTicketPage() {
                         </div>
                     </div>
                     <Link href={`/${locale}/user/tickets`}>
-                        <button className="px-5 py-2.5 bg-white dark:bg-bg-surface border border-border-default rounded-xl text-[14px] font-semibold text-text-primary hover:bg-gray-50 dark:hover:bg-gray-800 transition-all shadow-sm">
+                        <button className="px-5 py-2.5 bg-white dark:bg-bg-surface border border-border-default rounded-ds-xl text-[14px] font-semibold text-text-primary hover:bg-gray-50 dark:hover:bg-gray-800 transition-all shadow-sm">
                             {t("btn_back")}
                         </button>
                     </Link>
@@ -215,7 +215,7 @@ export default function ResellTicketPage() {
                     {/* Main Content Area */}
                     <div className="lg:col-span-2 w-full space-y-6">
                         {/* Block 1: Thông tin vé */}
-                        <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm">
+                        <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm">
                             <h2 className="text-[17px] font-bold text-text-primary mb-6">{t("ticket_info_title")}</h2>
 
                             <div className="space-y-4 text-[13px]">
@@ -253,7 +253,7 @@ export default function ResellTicketPage() {
                         </div>
 
                         {/* Block 2: Thiết lập giá bán */}
-                        <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm">
+                        <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm">
                             <h2 className="text-[17px] font-bold text-text-primary mb-2">{t("price_setting_title")}</h2>
                             <p className="text-[13px] text-text-secondary mb-6">{t("price_setting_subtitle")}</p>
 
@@ -265,7 +265,7 @@ export default function ResellTicketPage() {
                                         value={desiredPrice}
                                         onChange={handlePriceChange}
                                         placeholder="0.00"
-                                        className="w-full pl-4 pr-16 py-2.5 bg-bg-surface border border-border-default rounded-lg text-text-primary text-[15px] outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
+                                        className="w-full pl-4 pr-16 py-2.5 bg-bg-surface border border-border-default rounded-ds-lg text-text-primary text-[15px] outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
                                     />
                                     <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
                                         <span className="text-[13px] text-text-secondary font-semibold">VND</span>
@@ -273,7 +273,7 @@ export default function ResellTicketPage() {
                                 </div>
                             </div>
 
-                            <div className="bg-[#fafafa] dark:bg-[#111827] rounded-lg p-5 mb-6 text-[13px] border border-border-default">
+                            <div className="bg-[#fafafa] dark:bg-[#111827] rounded-ds-lg p-5 mb-6 text-[13px] border border-border-default">
                                 <div className="flex justify-between items-center mb-3">
                                     <span className="text-text-secondary">{t("original_price")}</span>
                                     <span className="font-bold text-text-primary">{formatVND(ticket.originalPrice)}</span>
@@ -305,7 +305,7 @@ export default function ResellTicketPage() {
                         </div>
 
                         {/* Block 3: Chi tiết doanh thu */}
-                        <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm">
+                        <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm">
                             <h2 className="text-[17px] font-bold text-text-primary mb-6">{t("revenue_detail_title")}</h2>
 
                             <div className="space-y-4 text-[13px] mb-6">
@@ -324,7 +324,7 @@ export default function ResellTicketPage() {
                                 <span className="font-bold text-text-primary">{formatVND(netReceived)}</span>
                             </div>
 
-                            <div className="bg-[#e5e7eb]/40 dark:bg-[#1f2937] rounded-lg p-4 flex justify-between items-center mb-4 border border-border-default/50">
+                            <div className="bg-[#e5e7eb]/40 dark:bg-[#1f2937] rounded-ds-lg p-4 flex justify-between items-center mb-4 border border-border-default/50">
                                 <span className="font-bold text-text-primary">{t("you_will_receive")}</span>
                                 <span className="text-xl font-bold text-text-primary">{formatVND(netReceived)}</span>
                             </div>
@@ -335,7 +335,7 @@ export default function ResellTicketPage() {
                         </div>
 
                         {/* Block 4: Lưu ý khi bán lại */}
-                        <div className="bg-[#fafafa] dark:bg-[#111827] border border-border-default rounded-xl p-6 text-[13px]">
+                        <div className="bg-[#fafafa] dark:bg-[#111827] border border-border-default rounded-ds-xl p-6 text-[13px]">
                             <h3 className="font-bold text-text-primary mb-4">{t("notes_title")}</h3>
                             <ul className="space-y-3 text-text-secondary list-disc pl-5 marker:text-text-muted">
                                 <li>{t("note_1")}</li>
@@ -348,7 +348,7 @@ export default function ResellTicketPage() {
 
                     {/* Right Column / Sidebar */}
                     <div className="lg:col-span-1">
-                        <div className="sticky top-6 border border-border-default rounded-xl p-6 shadow-sm bg-bg-surface">
+                        <div className="sticky top-6 border border-border-default rounded-ds-xl p-6 shadow-sm bg-bg-surface">
                             <h3 className="font-bold text-[15px] text-text-primary mb-6">{t("sidebar_title")}</h3>
 
                             <div className="mb-5">
@@ -383,7 +383,7 @@ export default function ResellTicketPage() {
                             <div className="space-y-3">
                                 <button
                                     onClick={handleResellSubmit}
-                                    className={`w-full py-2.5 rounded-lg text-[13px] font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${currentPriceNum > 0 && !isSubmitting
+                                    className={`w-full py-2.5 rounded-ds-lg text-[13px] font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${currentPriceNum > 0 && !isSubmitting
                                         ? 'bg-primary text-white hover:bg-primary-hover shadow-md active:scale-[0.98]'
                                         : 'bg-[#f8f9fa] border border-[#e5e7eb] dark:bg-gray-800 dark:border-gray-700 text-[#9ca3af] cursor-not-allowed'
                                         }`}
@@ -399,7 +399,7 @@ export default function ResellTicketPage() {
                                     )}
                                 </button>
                                 <Link href={`/${locale}/user/tickets`} className="block">
-                                    <button className="w-full py-2.5 bg-[#f0f3f6] dark:bg-[#1f2937] hover:bg-[#e2e8f0] dark:hover:bg-gray-700 text-text-primary rounded-lg text-[13px] font-semibold transition-colors active:scale-[0.98]">
+                                    <button className="w-full py-2.5 bg-[#f0f3f6] dark:bg-[#1f2937] hover:bg-[#e2e8f0] dark:hover:bg-gray-700 text-text-primary rounded-ds-lg text-[13px] font-semibold transition-colors active:scale-[0.98]">
                                         {t("btn_back")}
                                     </button>
                                 </Link>

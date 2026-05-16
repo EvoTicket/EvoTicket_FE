@@ -162,7 +162,7 @@ export default function AdminAccountsPage() {
           <h1 className="text-3xl font-extrabold text-txt-primary tracking-tight">{t("accounts_title")}</h1>
           <p className="text-sm text-txt-secondary mt-1">{t("accounts_subtitle")}</p>
         </div>
-        <button className="flex items-center gap-2 bg-surface hover:bg-main text-txt-primary px-5 py-2.5 rounded-xl font-bold border border-border shadow-sm transition-all">
+        <button className="flex items-center gap-2 bg-surface hover:bg-main text-txt-primary px-5 py-2.5 rounded-ds-xl font-bold border border-border shadow-sm transition-all">
           <Download size={18} />
           <span>{t("export_list")}</span>
         </button>
@@ -177,7 +177,7 @@ export default function AdminAccountsPage() {
       </div>
 
       {/* Main Content Area */}
-      <div className="bg-surface border border-border rounded-3xl shadow-sm overflow-hidden transition-colors duration-300">
+      <div className="bg-surface border border-border rounded-ds-3xl shadow-sm overflow-hidden transition-colors duration-300">
         {/* Tabs */}
         <div className="flex items-center border-b border-border px-6 overflow-x-auto whitespace-nowrap scrollbar-hide">
           <TabItem
@@ -207,7 +207,7 @@ export default function AdminAccountsPage() {
             <input
               type="text"
               placeholder={t("search_accounts_placeholder")}
-              className="w-full pl-12 pr-4 py-2.5 bg-main border border-border rounded-2xl text-sm focus:bg-surface focus:border-primary outline-none transition-all text-txt-primary placeholder:text-txt-muted"
+              className="w-full pl-12 pr-4 py-2.5 bg-main border border-border rounded-ds-2xl text-sm focus:bg-surface focus:border-primary outline-none transition-all text-txt-primary placeholder:text-txt-muted"
             />
           </div>
 
@@ -298,7 +298,7 @@ export default function AdminAccountsPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-bold border ${row.type === "Organizer"
+                    <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-ds-lg text-[10px] font-bold border ${row.type === "Organizer"
                       ? "bg-primary/10 text-primary border-primary/20"
                       : "bg-sky-500/10 text-sky-600 border-sky-500/20"
                       }`}>
@@ -318,7 +318,7 @@ export default function AdminAccountsPage() {
                   <td className="px-6 py-4 whitespace-nowrap"><span className="text-xs font-medium text-txt-muted">{row.lastActive}</span></td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <button className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-lg hover:bg-main transition-all shadow-sm" onClick={() => navigateToDetail(row)}>{t("view_details")}</button>
+                      <button className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-ds-lg hover:bg-main transition-all shadow-sm" onClick={() => navigateToDetail(row)}>{t("view_details")}</button>
                       <button className="w-8 h-8 flex items-center justify-center text-txt-muted hover:text-txt-primary transition-colors"><MoreHorizontal size={16} /></button>
                     </div>
                   </td>
@@ -328,7 +328,7 @@ export default function AdminAccountsPage() {
                 <tr key={row.id} className="hover:bg-main/30 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-xs font-bold"><Building2 size={18} /></div>
+                      <div className="w-9 h-9 rounded-ds-xl bg-primary/10 text-primary flex items-center justify-center text-xs font-bold"><Building2 size={18} /></div>
                       <div>
                         <p className="text-sm font-bold line-clamp-1">{row.name}</p>
                         <p className="text-[10px] font-medium text-txt-muted">{row.id}</p>
@@ -339,7 +339,7 @@ export default function AdminAccountsPage() {
                   <td className="px-6 py-4"><span className="text-xs font-medium text-txt-secondary">{row.sentAt}</span></td>
                   <td className="px-6 py-4"><VerificationBadge status={row.verification} /></td>
                   <td className="px-6 py-4"><PriorityBadge priority={row.priority} /></td>
-                  <td className="px-6 py-4"><button className="px-4 py-1.5 text-[10px] font-bold text-white bg-primary hover:bg-primary-hover rounded-lg transition-all shadow-sm" onClick={() => navigateToDetail(row)}>{t("view_details")}</button></td>
+                  <td className="px-6 py-4"><button className="px-4 py-1.5 text-[10px] font-bold text-white bg-primary hover:bg-primary-hover rounded-ds-lg transition-all shadow-sm" onClick={() => navigateToDetail(row)}>{t("view_details")}</button></td>
                 </tr>
               ))}
               {activeTab === "restricted" && restrictedAccountsData.map((row) => (
@@ -352,7 +352,7 @@ export default function AdminAccountsPage() {
                         <p className="text-sm font-bold line-clamp-1">{row.name}</p>
                         <div className="flex items-center gap-2">
                           <p className="text-[10px] font-medium text-txt-muted">{row.id}</p>
-                          <div className={`px-1.5 py-0.5 rounded-md text-[8px] font-bold border ${row.type === "Organizer" ? "bg-primary/5 text-primary border-primary/10" : "bg-sky-500/5 text-sky-600 border-sky-500/10"
+                          <div className={`px-1.5 py-0.5 rounded-ds-md text-[8px] font-bold border ${row.type === "Organizer" ? "bg-primary/5 text-primary border-primary/10" : "bg-sky-500/5 text-sky-600 border-sky-500/10"
                             }`}>{row.type === "Organizer" ? t("type_organizer") : t("type_buyer")}</div>
                         </div>
                       </div>
@@ -361,7 +361,7 @@ export default function AdminAccountsPage() {
                   <td className="px-6 py-4"><p className="text-xs font-medium text-txt-secondary max-w-[250px] leading-relaxed">{row.reason}</p></td>
                   <td className="px-6 py-4"><RestrictionBadge type={row.restrictionType} /></td>
                   <td className="px-6 py-4"><span className="text-xs font-medium text-txt-muted">{row.restrictedFrom}</span></td>
-                  <td className="px-6 py-4"><button className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-lg hover:bg-main transition-all shadow-sm" onClick={() => navigateToDetail(row)}>{t("view_details")}</button></td>
+                  <td className="px-6 py-4"><button className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-ds-lg hover:bg-main transition-all shadow-sm" onClick={() => navigateToDetail(row)}>{t("view_details")}</button></td>
                 </tr>
               ))}
             </tbody>
@@ -386,7 +386,7 @@ function StatusCard({ icon, label, value, color }: any) {
           <h1 className="text-3xl font-extrabold text-txt-primary tracking-tight">{t("accounts_title")}</h1>
           <p className="text-sm text-txt-secondary mt-1">{t("accounts_subtitle")}</p>
         </div>
-        <button className="flex items-center gap-2 bg-surface hover:bg-main text-txt-primary px-5 py-2.5 rounded-xl font-bold border border-border shadow-sm transition-all">
+        <button className="flex items-center gap-2 bg-surface hover:bg-main text-txt-primary px-5 py-2.5 rounded-ds-xl font-bold border border-border shadow-sm transition-all">
           <Download size={18} />
           <span>{t("export_list")}</span>
         </button>
@@ -401,7 +401,7 @@ function StatusCard({ icon, label, value, color }: any) {
       </div>
 
       {/* Main Content Area */}
-      <div className="bg-surface border border-border rounded-3xl shadow-sm overflow-hidden transition-colors duration-300">
+      <div className="bg-surface border border-border rounded-ds-3xl shadow-sm overflow-hidden transition-colors duration-300">
         {/* Tabs */}
         <div className="flex items-center border-b border-border px-6 overflow-x-auto whitespace-nowrap scrollbar-hide">
           <TabItem
@@ -431,7 +431,7 @@ function StatusCard({ icon, label, value, color }: any) {
             <input
               type="text"
               placeholder={t("search_accounts_placeholder")}
-              className="w-full pl-12 pr-4 py-2.5 bg-main border border-border rounded-2xl text-sm focus:bg-surface focus:border-primary outline-none transition-all text-txt-primary placeholder:text-txt-muted"
+              className="w-full pl-12 pr-4 py-2.5 bg-main border border-border rounded-ds-2xl text-sm focus:bg-surface focus:border-primary outline-none transition-all text-txt-primary placeholder:text-txt-muted"
             />
           </div>
 
@@ -522,7 +522,7 @@ function StatusCard({ icon, label, value, color }: any) {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-bold border ${row.type === "Organizer"
+                    <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-ds-lg text-[10px] font-bold border ${row.type === "Organizer"
                       ? "bg-primary/10 text-primary border-primary/20"
                       : "bg-sky-500/10 text-sky-600 border-sky-500/20"
                       }`}>
@@ -550,7 +550,7 @@ function StatusCard({ icon, label, value, color }: any) {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <button className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-lg hover:bg-main transition-all shadow-sm">
+                      <button className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-ds-lg hover:bg-main transition-all shadow-sm">
                         {t("view_details")}
                       </button>
                       <button className="w-8 h-8 flex items-center justify-center text-txt-muted hover:text-txt-primary transition-colors">
@@ -564,7 +564,7 @@ function StatusCard({ icon, label, value, color }: any) {
                 <tr key={row.id} className="hover:bg-main/30 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                      <div className="w-9 h-9 rounded-ds-xl bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
                         <Building2 size={18} />
                       </div>
                       <div>
@@ -589,7 +589,7 @@ function StatusCard({ icon, label, value, color }: any) {
                     <PriorityBadge priority={row.priority} />
                   </td>
                   <td className="px-6 py-4">
-                    <button className="px-4 py-1.5 text-[10px] font-bold text-white bg-primary hover:bg-primary-hover rounded-lg transition-all shadow-sm">
+                    <button className="px-4 py-1.5 text-[10px] font-bold text-white bg-primary hover:bg-primary-hover rounded-ds-lg transition-all shadow-sm">
                       {t("view_details")}
                     </button>
                   </td>
@@ -607,7 +607,7 @@ function StatusCard({ icon, label, value, color }: any) {
                         <p className="text-sm font-bold line-clamp-1">{row.name}</p>
                         <div className="flex items-center gap-2">
                           <p className="text-[10px] font-medium text-txt-muted">{row.id}</p>
-                          <div className={`px-1.5 py-0.5 rounded-md text-[8px] font-bold border ${row.type === "Organizer"
+                          <div className={`px-1.5 py-0.5 rounded-ds-md text-[8px] font-bold border ${row.type === "Organizer"
                             ? "bg-primary/5 text-primary border-primary/10"
                             : "bg-sky-500/5 text-sky-600 border-sky-500/10"
                             }`}>
@@ -627,7 +627,7 @@ function StatusCard({ icon, label, value, color }: any) {
                     <span className="text-xs font-medium text-txt-muted">{row.restrictedFrom}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <button className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-lg hover:bg-main transition-all shadow-sm">
+                    <button className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-ds-lg hover:bg-main transition-all shadow-sm">
                       {t("view_details")}
                     </button>
                   </td>
@@ -667,9 +667,9 @@ function StatsCard({ icon, label, value, color }: any) {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm transition-colors">
+    <div className="bg-surface border border-border rounded-ds-2xl p-5 shadow-sm transition-colors">
       <div className="flex items-center gap-4">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${colors[color]}`}>
+        <div className={`w-10 h-10 rounded-ds-xl flex items-center justify-center ${colors[color]}`}>
           {icon}
         </div>
         <div>
@@ -690,7 +690,7 @@ function TabItem({ active, onClick, label, count }: any) {
     >
       <div className="flex items-center gap-2">
         <span>{label}</span>
-        <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${active ? "bg-primary/10 text-primary" : "bg-main text-txt-muted"
+        <span className={`text-[10px] px-1.5 py-0.5 rounded-ds-md ${active ? "bg-primary/10 text-primary" : "bg-main text-txt-muted"
           }`}>
           {count}
         </span>
@@ -702,7 +702,7 @@ function TabItem({ active, onClick, label, count }: any) {
 
 function FilterSelect({ label, value }: any) {
   return (
-    <div className="flex items-center gap-2 px-4 py-2.5 bg-surface border border-border rounded-2xl shadow-sm cursor-pointer hover:bg-main transition-colors">
+    <div className="flex items-center gap-2 px-4 py-2.5 bg-surface border border-border rounded-ds-2xl shadow-sm cursor-pointer hover:bg-main transition-colors">
       <span className="text-[11px] font-medium text-txt-muted">{label}:</span>
       <span className="text-[11px] font-bold text-txt-primary">{value}</span>
       <ChevronDown size={14} className="text-txt-muted" />
@@ -714,7 +714,7 @@ function VerificationBadge({ status }: { status: string }) {
   const t = useTranslations("Admin");
   if (status === "Verified") {
     return (
-      <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px] font-black">
+      <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-ds-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px] font-black">
         <CheckCircle2 size={10} />
         {t("status_verified").toUpperCase()}
       </div>
@@ -722,14 +722,14 @@ function VerificationBadge({ status }: { status: string }) {
   }
   if (status === "Pending") {
     return (
-      <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[10px] font-black">
+      <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-ds-lg bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[10px] font-black">
         <Clock size={10} />
         {t("status_pending").toUpperCase()}
       </div>
     );
   }
   return (
-    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-rose-500/10 text-rose-600 border border-rose-500/20 text-[10px] font-black">
+    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-ds-lg bg-rose-500/10 text-rose-600 border border-rose-500/20 text-[10px] font-black">
       <AlertCircle size={10} />
       {t("status_missing_docs").toUpperCase()}
     </div>
@@ -753,7 +753,7 @@ function StatusBadge({ status }: { status: string }) {
   };
 
   return (
-    <div className={`inline-flex items-center px-2 py-0.5 rounded-lg border text-[10px] font-black ${styles[status] || styles["Suspended"]}`}>
+    <div className={`inline-flex items-center px-2 py-0.5 rounded-ds-lg border text-[10px] font-black ${styles[status] || styles["Suspended"]}`}>
       {labels[status]?.toUpperCase() || status.toUpperCase()}
     </div>
   );
@@ -774,7 +774,7 @@ function PriorityBadge({ priority }: { priority: string }) {
   };
 
   return (
-    <div className={`inline-flex items-center px-2 py-0.5 rounded-lg border text-[10px] font-black ${styles[priority]}`}>
+    <div className={`inline-flex items-center px-2 py-0.5 rounded-ds-lg border text-[10px] font-black ${styles[priority]}`}>
       {labels[priority] || priority}
     </div>
   );
@@ -789,7 +789,7 @@ function RestrictionBadge({ type }: { type: string }) {
   };
 
   return (
-    <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-rose-500/10 text-rose-600 border border-rose-500/20 text-[10px] font-bold">
+    <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-ds-lg bg-rose-500/10 text-rose-600 border border-rose-500/20 text-[10px] font-bold">
       <Slash size={10} />
       {labels[type] || type}
     </div>
@@ -801,7 +801,7 @@ function PaginationButton({ active, label, icon, disabled, onClick }: any) {
     <button
       disabled={disabled}
       onClick={onClick}
-      className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${active
+      className={`w-8 h-8 flex items-center justify-center rounded-ds-lg text-xs font-bold transition-all ${active
         ? "bg-primary text-white shadow-md shadow-primary/20"
         : disabled
           ? "text-txt-muted/30 cursor-not-allowed"

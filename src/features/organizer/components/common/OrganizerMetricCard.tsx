@@ -21,7 +21,7 @@ export function OrganizerMetricCard({
   tone = "brand",
 }: OrganizerMetricCardProps) {
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-4">
+    <div className="flex flex-col gap-2 rounded-ds-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-4">
       <div className="flex items-center justify-between">
         <span className="text-xs text-[var(--color-text-muted)]">{label}</span>
         <span

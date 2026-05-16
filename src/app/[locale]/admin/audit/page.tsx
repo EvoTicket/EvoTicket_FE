@@ -59,12 +59,12 @@ export default function AdminAuditPage() {
           <p className="text-sm text-txt-secondary mt-1">{t("audit_subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex bg-surface border border-border rounded-xl p-1 shadow-sm text-xs font-bold transition-colors">
+          <div className="flex bg-surface border border-border rounded-ds-xl p-1 shadow-sm text-xs font-bold transition-colors">
             {["24h", "7d", "30d", t("common.custom")].map((range) => (
-              <button key={range} className={`px-4 py-1.5 rounded-lg transition-all ${range === '30d' ? 'bg-main text-txt-primary shadow-sm' : 'text-txt-muted hover:text-txt-secondary'}`}>{range}</button>
+              <button key={range} className={`px-4 py-1.5 rounded-ds-lg transition-all ${range === '30d' ? 'bg-main text-txt-primary shadow-sm' : 'text-txt-muted hover:text-txt-secondary'}`}>{range}</button>
             ))}
           </div>
-          <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all">
+          <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-ds-xl font-bold shadow-lg shadow-primary/20 transition-all">
             <Download size={18} />
             <span>{t("btn_export_log")}</span>
           </button>
@@ -84,7 +84,7 @@ export default function AdminAuditPage() {
       </div>
 
       {/* Info Banner */}
-      <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex items-center gap-4 transition-colors">
+      <div className="bg-primary/10 border border-primary/20 rounded-ds-2xl p-4 flex items-center gap-4 transition-colors">
         <Info size={20} className="text-primary" />
         <p className="text-xs font-bold text-txt-primary">{t("audit_banner_text")}</p>
       </div>
@@ -93,7 +93,7 @@ export default function AdminAuditPage() {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         {/* Left Column - Log Master */}
         <div className="xl:col-span-8 space-y-4">
-          <div className="bg-surface border border-border rounded-3xl shadow-sm overflow-hidden transition-colors duration-300">
+          <div className="bg-surface border border-border rounded-ds-3xl shadow-sm overflow-hidden transition-colors duration-300">
             {/* Tabs & Search */}
             <div className="flex items-center justify-between border-b border-border px-6">
               <div className="flex items-center">
@@ -107,7 +107,7 @@ export default function AdminAuditPage() {
             <div className="p-4 flex flex-wrap items-center gap-3 border-b border-border bg-surface transition-colors">
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-txt-muted" size={16} />
-                <input type="text" placeholder={t("search_logs_placeholder")} className="w-full pl-10 pr-4 py-2 bg-main border border-border rounded-xl text-xs outline-none focus:bg-surface focus:border-primary text-txt-primary placeholder:text-txt-muted transition-all" />
+                <input type="text" placeholder={t("search_logs_placeholder")} className="w-full pl-10 pr-4 py-2 bg-main border border-border rounded-ds-xl text-xs outline-none focus:bg-surface focus:border-primary text-txt-primary placeholder:text-txt-muted transition-all" />
               </div>
               <FilterSelect label={t("filter_module")} value={t("common.all")} />
               <FilterSelect label={t("filter_severity")} value={t("common.all")} />
@@ -177,10 +177,10 @@ export default function AdminAuditPage() {
         {/* Right Column - Log Detail */}
         <div className="xl:col-span-4 space-y-6">
           {selectedLog ? (
-            <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm sticky top-[104px] animate-in slide-in-from-right-4 duration-300 transition-colors">
+            <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm sticky top-[104px] animate-in slide-in-from-right-4 duration-300 transition-colors">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-txt-primary">{selectedLog.action}</h3>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px] font-black">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-ds-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px] font-black">
                   <CheckCircle2 size={12} />
                   {t("common.result.success").toUpperCase()}
                 </div>
@@ -208,7 +208,7 @@ export default function AdminAuditPage() {
                 </div>
 
                 {selectedLog.note && (
-                  <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-4 mt-6">
+                  <div className="bg-amber-500/5 border border-amber-500/10 rounded-ds-2xl p-4 mt-6">
                     <div className="flex items-center gap-2 mb-2">
                       <Info size={14} className="text-amber-600" />
                       <span className="text-[10px] font-black text-amber-900 dark:text-amber-500 uppercase tracking-wider">{t("internal_note")}</span>
@@ -219,8 +219,8 @@ export default function AdminAuditPage() {
               </div>
             </div>
           ) : (
-            <div className="bg-surface border border-border rounded-3xl p-12 shadow-sm flex flex-col items-center justify-center text-center transition-colors h-fit">
-              <div className="w-16 h-16 rounded-2xl bg-main flex items-center justify-center text-txt-muted/20 mb-4">
+            <div className="bg-surface border border-border rounded-ds-3xl p-12 shadow-sm flex flex-col items-center justify-center text-center transition-colors h-fit">
+              <div className="w-16 h-16 rounded-ds-2xl bg-main flex items-center justify-center text-txt-muted/20 mb-4">
                 <History size={32} />
               </div>
               <h4 className="text-sm font-bold text-txt-muted">{t("common.select_to_view")}</h4>
@@ -242,9 +242,9 @@ function StatsCard({ icon, label, value, sub, color }: any) {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm transition-colors">
+    <div className="bg-surface border border-border rounded-ds-2xl p-5 shadow-sm transition-colors">
       <div className="flex items-center gap-3 mb-3">
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${colors[color]}`}>
+        <div className={`w-9 h-9 rounded-ds-xl flex items-center justify-center ${colors[color]}`}>
           {icon}
         </div>
         <span className="text-[11px] font-bold text-txt-muted uppercase tracking-wider">{label}</span>
@@ -270,7 +270,7 @@ function TabItem({ active, onClick, label }: any) {
 
 function FilterSelect({ label, value }: any) {
   return (
-    <div className="flex items-center gap-2 px-3 py-2 bg-surface border border-border rounded-xl shadow-sm cursor-pointer hover:bg-main transition-all text-[10px] text-txt-primary">
+    <div className="flex items-center gap-2 px-3 py-2 bg-surface border border-border rounded-ds-xl shadow-sm cursor-pointer hover:bg-main transition-all text-[10px] text-txt-primary">
       <span className="font-medium text-txt-muted">{label}:</span>
       <span className="font-bold">{value}</span>
       <ChevronDownIcon size={12} className="text-txt-muted" />
@@ -305,7 +305,7 @@ function ResultBadge({ result }: { result: string }) {
   };
 
   return (
-    <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[8px] font-black ${styles[result] || styles["Failed"]}`}>
+    <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-ds-lg border text-[8px] font-black ${styles[result] || styles["Failed"]}`}>
       <div className={`w-1.5 h-1.5 rounded-full ${result === "Success" ? "bg-emerald-500" : result === "Partial" ? "bg-amber-500" : "bg-rose-500"
         }`}></div>
       {t(`common.result.${result.toLowerCase()}`).toUpperCase()}
@@ -316,7 +316,7 @@ function ResultBadge({ result }: { result: string }) {
 function DetailRow({ icon, label, value, sub }: any) {
   return (
     <div className="flex gap-4">
-      <div className="w-8 h-8 rounded-lg bg-main flex items-center justify-center text-txt-muted flex-shrink-0 border border-border">
+      <div className="w-8 h-8 rounded-ds-lg bg-main flex items-center justify-center text-txt-muted flex-shrink-0 border border-border">
         {icon}
       </div>
       <div className="min-w-0">

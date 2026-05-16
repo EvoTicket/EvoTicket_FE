@@ -314,7 +314,7 @@ export default function EventsPage() {
                     {/* Title */}
                     <div className="flex items-center justify-between">
                         <h1 className="text-4xl font-bold text-text-primary mb-2">{t("search_results")}</h1>
-                        <Link href={`/${locale}/user/homepage`} className="flex items-center text-text-primary hover:text-primary transition-colors bg-bg-surface px-3 py-2 border border-border-default rounded-lg">
+                        <Link href={`/${locale}/user/homepage`} className="flex items-center text-text-primary hover:text-primary transition-colors bg-bg-surface px-3 py-2 border border-border-default rounded-ds-lg">
                             <ArrowLeft size={14} />
                             <span className="ml-2">
                                 {t("back_homepage")}
@@ -372,7 +372,7 @@ export default function EventsPage() {
                     {/* SIDEBAR: BỘ LỌC */}
                     <aside className="w-full lg:w-[300px] shrink-0 space-y-8">
                         {/* Container bộ lọc */}
-                        <div className="bg-bg-surface border border-border-default rounded-xl p-6">
+                        <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6">
                             <h2 className="font-bold text-2xl text-text-primary mb-6">{t("filter_title")}</h2>
 
                             {/* Danh mục sự kiện */}
@@ -415,7 +415,7 @@ export default function EventsPage() {
                                         <ListboxButton
                                             className="
                                                 w-full h-full p-1.5 pl-3 bg-bg-surface
-                                                border border-border-default rounded-lg
+                                                border border-border-default rounded-ds-lg
                                                 text-text-primary outline-none
                                                 focus:ring-1 focus:ring-primary focus:border-primary 
                                                 cursor-pointer transition-colors text-left">
@@ -429,14 +429,14 @@ export default function EventsPage() {
                                                         w-[var(--button-width)] z-50 origin-top
                                                         [--anchor-gap:4px] !max-h-60 overflow-y-auto
                                                         bg-bg-surface border border-border-default
-                                                        rounded-lg shadow-lg text-text-primary transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0">
+                                                        rounded-ds-lg shadow-lg text-text-primary transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0">
                                             {provinces.map(item => (
                                                 <ListboxOption
                                                     key={item.code}
                                                     value={item}
                                                     className="
                                                             group flex items-center justify-between px-3 py-2 cursor-pointer
-                                                            hover:bg-secondary rounded-md">
+                                                            hover:bg-secondary rounded-ds-md">
                                                     <span>{item.name}</span>
                                                     <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-primary ml-2" />
                                                 </ListboxOption>
@@ -458,7 +458,7 @@ export default function EventsPage() {
                                                 onClick={() => handleDateFilterClick(filter.id)}
                                                 className={`flex items-center gap-1 py-2 px-3 text-xs border transition-colors cursor-pointer ${isSelected
                                                     ? 'justify-between bg-chip-filter-bg-selected text-text-primary border-chip-filter-border-selected rounded-(--button-radius)'
-                                                    : 'justify-center border-border-default text-text-secondary hover:bg-secondary hover:text-text-primary rounded-sm'
+                                                    : 'justify-center border-border-default text-text-secondary hover:bg-secondary hover:text-text-primary rounded-ds-sm'
                                                     }`}
                                             >
                                                 <span>{filter.name}</span>
@@ -475,7 +475,7 @@ export default function EventsPage() {
                                                 type="date"
                                                 value={startDate}
                                                 onChange={(e) => setStartDate(e.target.value)}
-                                                className="w-full px-4 py-2 bg-bg-surface text-sm border border-border-default rounded-lg focus:outline-none focus:border-primary text-text-secondary appearance-none"
+                                                className="w-full px-4 py-2 bg-bg-surface text-sm border border-border-default rounded-ds-lg focus:outline-none focus:border-primary text-text-secondary appearance-none"
                                             />
                                         </div> */}
                                         <div className="flex-1 w-full relative">
@@ -518,7 +518,7 @@ export default function EventsPage() {
                                             value={priceFrom}
                                             min={0}
                                             onChange={(e) => setPriceFrom(e.target.value)}
-                                            className="w-full px-3 py-2 bg-bg-surface text-sm border border-border-default rounded-lg focus:outline-none focus:border-primary text-text-secondary"
+                                            className="w-full px-3 py-2 bg-bg-surface text-sm border border-border-default rounded-ds-lg focus:outline-none focus:border-primary text-text-secondary"
                                         />
                                     </div>
                                     <div className="flex-1">
@@ -527,7 +527,7 @@ export default function EventsPage() {
                                             type="number"
                                             value={priceTo}
                                             onChange={(e) => setPriceTo(e.target.value)}
-                                            className="w-full px-3 py-2 bg-bg-surface text-sm border border-border-default rounded-lg focus:outline-none focus:border-primary text-text-secondary"
+                                            className="w-full px-3 py-2 bg-bg-surface text-sm border border-border-default rounded-ds-lg focus:outline-none focus:border-primary text-text-secondary"
                                         />
                                     </div>
                                 </div>
@@ -562,13 +562,13 @@ export default function EventsPage() {
                             <div className="space-y-3">
                                 <button
                                     onClick={handleApplyFilters}
-                                    className="w-full bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default py-3 rounded-lg font-medium transition-colors cursor-pointer"
+                                    className="w-full bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default py-3 rounded-ds-lg font-medium transition-colors cursor-pointer"
                                 >
                                     {t("apply_filter")}
                                 </button>
                                 <button
                                     onClick={clearFilters}
-                                    className="w-full bg-transparent text-primary hover:text-primary-hover py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer"
+                                    className="w-full bg-transparent text-primary hover:text-primary-hover py-2 rounded-ds-lg text-sm font-medium transition-colors cursor-pointer"
                                 >
                                     {t("clear_filter")}
                                 </button>
@@ -595,7 +595,7 @@ export default function EventsPage() {
                                             <ListboxButton
                                                 className="
                                                 w-50 h-full pl-3 bg-bg-surface
-                                                border border-border-default rounded-lg
+                                                border border-border-default rounded-ds-lg
                                                 text-text-primary outline-none
                                                 focus:ring-1 focus:ring-primary 
                                                 focus:border-primary cursor-pointer 
@@ -610,14 +610,14 @@ export default function EventsPage() {
                                             w-[var(--button-width)] z-50 origin-top
                                             [--anchor-gap:4px] !max-h-60 overflow-y-auto
                                             bg-bg-surface border border-border-default
-                                            rounded-lg shadow-lg text-text-primary transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0">
+                                            rounded-ds-lg shadow-lg text-text-primary transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0">
                                                 {sortByList.map(item => (
                                                     <ListboxOption
                                                         key={item.id}
                                                         value={item}
                                                         className="
                                                     group flex justify-between items-center px-3 py-2 cursor-pointer
-                                                            hover:bg-secondary rounded-md">
+                                                            hover:bg-secondary rounded-ds-md">
                                                         <span>{item.name}</span>
                                                         <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-primary mr-2" />
                                                     </ListboxOption>
@@ -628,7 +628,7 @@ export default function EventsPage() {
                                 </div>
 
                                 {/* Icon chuyển đổi Grid / List */}
-                                <div className="flex border border-border-default rounded-lg overflow-hidden bg-bg-page">
+                                <div className="flex border border-border-default rounded-ds-lg overflow-hidden bg-bg-page">
                                     <button
                                         className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-[#1e293b] text-button-primary-text-default' : 'text-text-muted hover:bg-secondary'}`}
                                         onClick={() => setViewMode("grid")}
@@ -653,7 +653,7 @@ export default function EventsPage() {
                             </div>
                         ) : events.length === 0 ? (
                             <div className="flex flex-col w-full pb-10">
-                                <div className="flex flex-col items-center justify-center py-24 px-4 text-center bg-transparent rounded-xl">
+                                <div className="flex flex-col items-center justify-center py-24 px-4 text-center bg-transparent rounded-ds-xl">
                                     {/* Icon */}
                                     <div className="w-16 h-16 mb-6 flex items-center justify-center border border-border-default rounded shadow-sm bg-bg-surface">
                                         <CircleHelp className="text-text-muted w-8 h-8" strokeWidth={1.5} />
@@ -669,13 +669,13 @@ export default function EventsPage() {
                                     <div className="flex flex-col sm:flex-row items-center gap-4">
                                         <button
                                             onClick={clearFilters}
-                                            className="w-full sm:w-auto px-6 py-2.5 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default font-medium rounded-md transition-colors"
+                                            className="w-full sm:w-auto px-6 py-2.5 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default font-medium rounded-ds-md transition-colors"
                                         >
                                             {t("clear_filter")}
                                         </button>
                                         <button
                                             onClick={clearFilters}
-                                            className="w-full sm:w-auto px-6 py-2.5 bg-transparent border border-border-default text-text-primary hover:bg-secondary font-medium rounded-md transition-colors"
+                                            className="w-full sm:w-auto px-6 py-2.5 bg-transparent border border-border-default text-text-primary hover:bg-secondary font-medium rounded-ds-md transition-colors"
                                         >
                                             {t("explore_all")}
                                         </button>
@@ -688,7 +688,7 @@ export default function EventsPage() {
                                 {/* Lưới 3 cột */}
                                 <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
                                     {events.map((event) => (
-                                        <Link href={`/${locale}/user/events/${event.id}`} key={`${event.id}-${Math.random()}`} className="group bg-bg-page border border-border-default rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer">
+                                        <Link href={`/${locale}/user/events/${event.id}`} key={`${event.id}-${Math.random()}`} className="group bg-bg-page border border-border-default rounded-ds-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer">
                                             {/* Phần hình ảnh */}
                                             <div className="relative h-44 w-full bg-[#83858a] shrink-0">
                                                 {event.bannerImage && (
@@ -759,7 +759,7 @@ export default function EventsPage() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                             {suggestedEvents.map((event) => (
-                                <Link href={`/${locale}/user/events/${event.id}`} key={`suggested-full-${event.id}`} className="group bg-bg-page border border-border-default rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer">
+                                <Link href={`/${locale}/user/events/${event.id}`} key={`suggested-full-${event.id}`} className="group bg-bg-page border border-border-default rounded-ds-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full cursor-pointer">
                                     {/* Phần hình ảnh */}
                                     <div className="relative h-44 w-full bg-[#83858a] shrink-0">
                                         {event.bannerImage && (

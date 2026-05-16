@@ -21,7 +21,7 @@ export function CreateEventFooterActions({ currentStep, totalSteps, onBack, onNe
                         type="button"
                         onClick={onBack}
                         disabled={isSubmitting}
-                        className="px-6 py-2 rounded-lg font-medium border border-border-default text-text-secondary hover:bg-bg-subtle transition-colors"
+                        className="px-6 py-2 rounded-ds-lg font-medium border border-border-default text-text-secondary hover:bg-bg-subtle transition-colors"
                     >
                         Quay lại
                     </button>
@@ -33,7 +33,7 @@ export function CreateEventFooterActions({ currentStep, totalSteps, onBack, onNe
                     type="button"
                     onClick={onSaveDraft}
                     disabled={isSubmitting}
-                    className="px-6 py-2 rounded-lg font-medium border border-border-default text-text-primary hover:bg-bg-subtle transition-colors flex items-center gap-2"
+                    className="px-6 py-2 rounded-ds-lg font-medium border border-border-default text-text-primary hover:bg-bg-subtle transition-colors flex items-center gap-2"
                 >
                     <Save size={18} />
                     Lưu nháp
@@ -44,7 +44,7 @@ export function CreateEventFooterActions({ currentStep, totalSteps, onBack, onNe
                         type="button"
                         onClick={onSubmit}
                         disabled={isSubmitting}
-                        className="px-6 py-2 rounded-lg font-medium bg-action-brand-bg-default text-action-brand-text-default hover:bg-action-brand-bg-hover transition-colors min-w-[140px] flex items-center justify-center gap-2"
+                        className="px-6 py-2 rounded-ds-lg font-medium bg-action-brand-bg-default text-action-brand-text-default hover:bg-action-brand-bg-hover transition-colors min-w-[140px] flex items-center justify-center gap-2"
                     >
                         {isSubmitting ? (
                             <Loader2 size={18} className="animate-spin" />
@@ -55,7 +55,7 @@ export function CreateEventFooterActions({ currentStep, totalSteps, onBack, onNe
                     <button
                         type="button"
                         onClick={onNext}
-                        className="px-6 py-2 rounded-lg font-medium bg-action-brand-bg-default text-action-brand-text-default hover:bg-action-brand-bg-hover transition-colors"
+                        className="px-6 py-2 rounded-ds-lg font-medium bg-action-brand-bg-default text-action-brand-text-default hover:bg-action-brand-bg-hover transition-colors"
                     >
                         Tiếp tục
                     </button>

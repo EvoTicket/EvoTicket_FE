@@ -154,7 +154,7 @@ function PaymentResultContent() {
                             </div>
                         </div>
 
-                        <div className="w-full bg-[#19274e] border border-[#253f7f] rounded-lg p-3 text-sm text-[#87a5f8] mb-8 text-left">
+                        <div className="w-full bg-[#19274e] border border-[#253f7f] rounded-ds-lg p-3 text-sm text-[#87a5f8] mb-8 text-left">
                             {tr('nft_issuing_note')}
                         </div>
 
@@ -202,7 +202,7 @@ function PaymentResultContent() {
                             </div>
                         </div>
 
-                        <div className="w-full bg-[#19274e] border border-[#253f7f] rounded-lg p-3 text-sm text-[#87a5f8] mb-8 text-left">
+                        <div className="w-full bg-[#19274e] border border-[#253f7f] rounded-ds-lg p-3 text-sm text-[#87a5f8] mb-8 text-left">
                             {tr('auto_update_note')}
                         </div>
 
@@ -237,7 +237,7 @@ function PaymentResultContent() {
                             </div>
                         </div>
 
-                        <div className="w-full bg-[#19274e] border border-[#253f7f] rounded-lg p-3 text-sm text-[#87a5f8] mb-8 text-left">
+                        <div className="w-full bg-[#19274e] border border-[#253f7f] rounded-ds-lg p-3 text-sm text-[#87a5f8] mb-8 text-left">
                             {tr('auto_update_note')}
                         </div>
 
@@ -252,7 +252,7 @@ function PaymentResultContent() {
                             <button className="w-full py-3 bg-transparent border border-border-strong hover:bg-bg-subtle text-text-secondary rounded-button-radius font-semibold transition-colors">{tr('choose_other_method')}</button>
                         </div>
 
-                        <div className="w-full bg-[#3d2a13] border border-[#5c401d] rounded-lg p-4 text-sm text-[#d49942] mt-6 text-left">
+                        <div className="w-full bg-[#3d2a13] border border-[#5c401d] rounded-ds-lg p-4 text-sm text-[#d49942] mt-6 text-left">
                             <span className="font-bold flex items-center gap-2 mb-1"><Clock size={16} /> {tb('booking_notes_title')}</span>
                             {tr('failed_note')}
                         </div>
@@ -309,7 +309,7 @@ function PaymentResultContent() {
                             </button>
                         </div>
 
-                        <div className="w-full bg-[#3d2a13] border border-[#5c401d] rounded-lg p-4 text-sm text-[#d49942] mt-6 text-left">
+                        <div className="w-full bg-[#3d2a13] border border-[#5c401d] rounded-ds-lg p-4 text-sm text-[#d49942] mt-6 text-left">
                             <span className="font-bold flex items-center gap-2 mb-1"><Clock size={16} /> {tb('booking_notes_title')}</span>
                             {tr('expired_note')}
                         </div>
@@ -368,7 +368,7 @@ function PaymentResultContent() {
                         <h2 className="text-2xl font-bold text-text-primary mb-3">{tr('not_found_title')}</h2>
                         <p className="text-sm text-text-secondary mb-8">{tr('not_found_desc')}</p>
 
-                        <div className="w-full bg-bg-surface border border-border-default rounded-lg p-6 mb-8 text-left">
+                        <div className="w-full bg-bg-surface border border-border-default rounded-ds-lg p-6 mb-8 text-left">
                             <h4 className="font-bold text-text-primary mb-2">{tr('suggestions_title')}</h4>
                             <ul className="list-disc pl-5 space-y-2 text-sm text-text-secondary">
                                 <li>{tr('suggestion_1')}</li>
@@ -432,7 +432,7 @@ function PaymentResultContent() {
                     </div>
 
                     {/* STEPPER */}
-                    <div className="mt-8 flex flex-col md:flex-row items-center justify-between bg-card-bg-elevated border border-border-default rounded-xl p-4 px-6">
+                    <div className="mt-8 flex flex-col md:flex-row items-center justify-between bg-card-bg-elevated border border-border-default rounded-ds-xl p-4 px-6">
                         <div className="flex items-center w-full mb-4 md:mb-0">
                             {/* Step 1 - Done */}
                             <div className="flex items-center gap-2 flex-shrink-0">
@@ -481,7 +481,7 @@ function PaymentResultContent() {
             </div>
 
             <div className="max-w-7xl mx-auto px-4 py-8 w-full flex-1 flex justify-center">
-                <div className="w-full max-w-2xl bg-card-bg-elevated border border-border-default rounded-xl shadow-xl flex flex-col items-center text-center p-10">
+                <div className="w-full max-w-2xl bg-card-bg-elevated border border-border-default rounded-ds-xl shadow-xl flex flex-col items-center text-center p-10">
                     {renderIcon()}
                     {renderContent()}
                 </div>

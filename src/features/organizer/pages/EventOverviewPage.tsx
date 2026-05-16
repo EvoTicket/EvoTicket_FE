@@ -23,7 +23,7 @@ export default function EventOverviewPage() {
               {snapshot.rows.map(([label, value]) => (
                 <div
                   key={label}
-                  className="flex items-center justify-between rounded-md border border-border-subtle bg-bg-elevated px-3 py-2"
+                  className="flex items-center justify-between rounded-ds-md border border-border-subtle bg-bg-elevated px-3 py-2"
                 >
                   <span className="text-sm text-text-muted">{label}</span>
                   <span className="text-sm font-medium text-text-primary">{value}</span>
@@ -62,7 +62,7 @@ export default function EventOverviewPage() {
               "Voucher & Promotion",
               "Event Finance & Settlement",
             ].map((label) => (
-              <div key={label} className="rounded-md border border-border-subtle bg-bg-elevated px-3 py-3 text-sm font-medium text-text-primary">
+              <div key={label} className="rounded-ds-md border border-border-subtle bg-bg-elevated px-3 py-3 text-sm font-medium text-text-primary">
                 {label}
               </div>
             ))}

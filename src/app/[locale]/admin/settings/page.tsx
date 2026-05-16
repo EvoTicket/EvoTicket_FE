@@ -46,11 +46,11 @@ export default function AdminSettingsPage() {
                   <RotateCcw size={16} />
                   {t("revert")}
                </button>
-               <button className="flex items-center gap-2 text-txt-secondary bg-surface border border-border hover:bg-main px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm transition-all">
+               <button className="flex items-center gap-2 text-txt-secondary bg-surface border border-border hover:bg-main px-4 py-2.5 rounded-ds-xl font-bold text-xs shadow-sm transition-all">
                   <Eye size={16} />
                   {t("review_changes")}
                </button>
-               <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-xl font-bold text-xs shadow-lg shadow-primary/20 transition-all">
+               <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-ds-xl font-bold text-xs shadow-lg shadow-primary/20 transition-all">
                   <Lock size={16} />
                   {t("save_changes")}
                </button>
@@ -58,7 +58,7 @@ export default function AdminSettingsPage() {
          </div>
 
          {/* Tabs Control */}
-         <div className="flex items-center bg-surface border border-border rounded-2xl p-1 w-fit shadow-sm">
+         <div className="flex items-center bg-surface border border-border rounded-ds-2xl p-1 w-fit shadow-sm">
             <TabButton active={activeTab === "platform"} onClick={() => setActiveTab("platform")} icon={<Monitor size={14} />} label={t("tab_platform_config")} />
             <TabButton active={activeTab === "payments"} onClick={() => setActiveTab("payments")} icon={<CreditCard size={14} />} label={t("tab_payments")} />
             <TabButton active={activeTab === "fees"} onClick={() => setActiveTab("fees")} icon={<Percent size={14} />} label={t("tab_fees")} />
@@ -74,7 +74,7 @@ export default function AdminSettingsPage() {
 
             {/* Sidebar - Impact & History */}
             <div className="lg:col-span-4 space-y-6">
-               <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+               <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
                   <div className="flex items-center gap-2 mb-6">
                      <AlertTriangle size={18} className="text-amber-500" />
                      <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">{t("change_impact")}</h3>
@@ -96,7 +96,7 @@ export default function AdminSettingsPage() {
                   </div>
                </div>
 
-               <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+               <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
                   <div className="flex items-center gap-2 mb-6">
                      <History size={18} className="text-primary" />
                      <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">{t("change_history")}</h3>
@@ -104,7 +104,7 @@ export default function AdminSettingsPage() {
                   <p className="text-[11px] text-txt-secondary leading-relaxed mb-4">
                      {t("common.settings_sub.change_history_desc")}
                   </p>
-                  <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex gap-3 cursor-pointer hover:bg-primary/20 transition-colors group">
+                  <div className="bg-primary/10 border border-primary/20 rounded-ds-2xl p-4 flex gap-3 cursor-pointer hover:bg-primary/20 transition-colors group">
                      <ShieldCheck size={16} className="text-primary flex-shrink-0" />
                      <div className="min-w-0">
                         <p className="text-[10px] font-black text-txt-primary mb-0.5">{t("common.settings_sub.audit_logs_cta_title")}</p>
@@ -124,7 +124,7 @@ function TabButton({ active, onClick, icon, label }: any) {
    return (
       <button
          onClick={onClick}
-         className={`flex items-center gap-2 px-6 py-2 text-xs font-bold rounded-xl transition-all ${active ? "bg-main text-primary shadow-sm border border-border" : "text-txt-muted hover:text-txt-secondary"
+         className={`flex items-center gap-2 px-6 py-2 text-xs font-bold rounded-ds-xl transition-all ${active ? "bg-main text-primary shadow-sm border border-border" : "text-txt-muted hover:text-txt-secondary"
             }`}
       >
          {icon}
@@ -238,9 +238,9 @@ function FeesTab({ t }: any) {
 // Atomic UI Components
 function ConfigSection({ title, icon, children }: any) {
    return (
-      <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm overflow-hidden transition-colors duration-300">
+      <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm overflow-hidden transition-colors duration-300">
          <div className="flex items-center gap-2 mb-6">
-            <div className="p-1.5 rounded-lg bg-main text-txt-muted border border-border">
+            <div className="p-1.5 rounded-ds-lg bg-main text-txt-muted border border-border">
                {icon}
             </div>
             <h3 className="text-xs font-black text-txt-primary uppercase tracking-widest">{title}</h3>
@@ -262,7 +262,7 @@ function InputField({ label, value, sub, readonly, highImpact, suffix, t }: any)
                type="text"
                defaultValue={value}
                readOnly={readonly}
-               className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all outline-none ${readonly
+               className={`w-full px-4 py-2.5 rounded-ds-xl border text-sm transition-all outline-none ${readonly
                   ? "bg-main border-border text-txt-muted cursor-not-allowed"
                   : "bg-surface border-border text-txt-primary focus:border-primary focus:ring-4 focus:ring-primary/5"
                   } ${suffix ? "pr-10" : ""}`}
@@ -281,7 +281,7 @@ function SelectField({ label, value, sub }: any) {
       <div className="space-y-1.5">
          <label className="text-xs font-bold text-txt-secondary">{label}</label>
          <div className="relative">
-            <div className="w-full px-4 py-2.5 rounded-xl border border-border text-sm flex items-center justify-between cursor-pointer hover:bg-main transition-colors text-txt-primary">
+            <div className="w-full px-4 py-2.5 rounded-ds-xl border border-border text-sm flex items-center justify-between cursor-pointer hover:bg-main transition-colors text-txt-primary">
                <span className="font-medium">{value}</span>
                <ChevronDown size={16} className="text-txt-muted" />
             </div>
@@ -310,9 +310,9 @@ function SwitchRow({ label, sub, active, highImpact, t }: any) {
 
 function IntegrationRow({ name, sub, status, active, t }: any) {
    return (
-      <div className="flex items-center justify-between p-4 rounded-2xl bg-main border border-border">
+      <div className="flex items-center justify-between p-4 rounded-ds-2xl bg-main border border-border">
          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-txt-muted shadow-sm">
+            <div className="w-10 h-10 rounded-ds-xl bg-surface border border-border flex items-center justify-center text-txt-muted shadow-sm">
                <Settings size={20} />
             </div>
             <div>
@@ -339,7 +339,7 @@ function SecretField({ label, value, sub, t }: any) {
    const maskedValue = value.replace(/.(?=.{4})/g, '*');
 
    return (
-      <div className="p-4 rounded-2xl border border-border bg-main group">
+      <div className="p-4 rounded-ds-2xl border border-border bg-main group">
          <div className="flex items-center justify-between mb-1">
             <label className="text-[10px] font-black text-txt-muted uppercase tracking-widest">{label}</label>
             <button
@@ -360,7 +360,7 @@ function SecretField({ label, value, sub, t }: any) {
 
 function WebhookRow({ name, url, lastSeen, status, t }: any) {
    return (
-      <div className="p-4 rounded-2xl border border-border bg-surface shadow-sm flex items-center justify-between">
+      <div className="p-4 rounded-ds-2xl border border-border bg-surface shadow-sm flex items-center justify-between">
          <div className="min-w-0 flex-1 pr-4">
             <div className="flex items-center gap-2 mb-1">
                <p className="text-xs font-bold text-txt-primary">{name}</p>
@@ -372,7 +372,7 @@ function WebhookRow({ name, url, lastSeen, status, t }: any) {
             <p className="text-[10px] font-mono text-txt-muted truncate">{url}</p>
             <p className="text-[10px] text-txt-muted font-medium mt-1">{lastSeen}</p>
          </div>
-         <button className="p-2 text-txt-muted hover:bg-main rounded-lg transition-all border border-transparent hover:border-border">
+         <button className="p-2 text-txt-muted hover:bg-main rounded-ds-lg transition-all border border-transparent hover:border-border">
             <RotateCcw size={16} />
          </button>
       </div>

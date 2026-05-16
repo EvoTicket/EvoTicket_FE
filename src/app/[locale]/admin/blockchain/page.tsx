@@ -39,12 +39,12 @@ export default function AdminBlockchainPage() {
           <p className="text-sm text-txt-secondary mt-1">{t("blockchain_subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-surface border border-border rounded-xl px-4 py-2.5 shadow-sm text-xs font-bold text-txt-primary">
+          <div className="flex items-center gap-2 bg-surface border border-border rounded-ds-xl px-4 py-2.5 shadow-sm text-xs font-bold text-txt-primary">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
             Polygon Mainnet
             <ChevronDown size={14} className="text-txt-muted ml-2" />
           </div>
-          <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all">
+          <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-ds-xl font-bold shadow-lg shadow-primary/20 transition-all">
             <RefreshCw size={18} />
             <span>{t("btn_refresh")}</span>
           </button>
@@ -65,12 +65,12 @@ export default function AdminBlockchainPage() {
       </div>
 
       {/* Tabs Control */}
-      <div className="flex items-center bg-surface border border-border rounded-2xl p-1 w-fit shadow-sm">
+      <div className="flex items-center bg-surface border border-border rounded-ds-2xl p-1 w-fit shadow-sm">
         {["overview", "mint_pipeline", "sync_monitor", "contract_relayer", "token_lookup"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-6 py-2 text-xs font-bold rounded-xl transition-all ${activeTab === tab ? "bg-main text-primary shadow-sm border border-border" : "text-txt-muted hover:text-txt-secondary"
+            className={`px-6 py-2 text-xs font-bold rounded-ds-xl transition-all ${activeTab === tab ? "bg-main text-primary shadow-sm border border-border" : "text-txt-muted hover:text-txt-secondary"
               }`}
           >
             {t(`tab_${tab}`)}
@@ -94,7 +94,7 @@ function OverviewTab({ t }: any) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Mint Status */}
-      <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+      <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-6">
           <Zap size={18} className="text-primary" />
           <h3 className="text-sm font-black text-txt-primary">{t("mint_status")}</h3>
@@ -108,7 +108,7 @@ function OverviewTab({ t }: any) {
       </div>
 
       {/* On-chain / Off-chain */}
-      <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+      <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-6">
           <ArrowRightLeft size={18} className="text-primary" />
           <h3 className="text-sm font-black text-txt-primary">{t("on_chain_off_chain")}</h3>
@@ -122,7 +122,7 @@ function OverviewTab({ t }: any) {
       </div>
 
       {/* Relayer & Tx */}
-      <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+      <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-6">
           <Cpu size={18} className="text-primary" />
           <h3 className="text-sm font-black text-txt-primary">{t("relayer_tx")}</h3>
@@ -140,7 +140,7 @@ function OverviewTab({ t }: any) {
 
 function MintPipelineTab({ t }: any) {
   return (
-    <div className="bg-surface border border-border rounded-3xl overflow-hidden shadow-sm">
+    <div className="bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm">
       <div className="p-6 border-b border-border flex items-center gap-2">
         <Cpu size={18} className="text-txt-muted" />
         <h3 className="text-sm font-black text-txt-primary">Mint job queue</h3>
@@ -167,7 +167,7 @@ function MintPipelineTab({ t }: any) {
                 <td className="px-6 py-4 text-[11px] font-medium text-txt-muted">{job.ticket}</td>
                 <td className="px-6 py-4 text-[11px] font-medium text-txt-muted">{job.created}</td>
                 <td className="px-6 py-4">
-                  <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase border flex items-center gap-1 w-fit ${job.status === 'Minted' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
+                  <span className={`px-2 py-0.5 rounded-ds-lg text-[9px] font-black uppercase border flex items-center gap-1 w-fit ${job.status === 'Minted' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
                     job.status === 'Failed' ? 'bg-rose-500/10 text-rose-600 border-rose-500/20' :
                       job.status === 'Processing' ? 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20' :
                         'bg-amber-500/10 text-amber-600 border-amber-500/20'
@@ -195,7 +195,7 @@ function MintPipelineTab({ t }: any) {
 
 function SyncMonitorTab({ t }: any) {
   return (
-    <div className="bg-surface border border-border rounded-3xl overflow-hidden shadow-sm">
+    <div className="bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm">
       <div className="p-6 border-b border-border flex items-center gap-2">
         <AlertCircle size={18} className="text-txt-muted" />
         <h3 className="text-sm font-black text-txt-primary">Bất thường đồng bộ</h3>
@@ -248,7 +248,7 @@ function ContractRelayerTab({ t }: any) {
     <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
       {/* Left Sidebar - Wallet Info */}
       <div className="xl:col-span-4 space-y-6">
-        <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-6">
+        <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-6">
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-txt-muted">
               <Wallet size={16} />
@@ -268,7 +268,7 @@ function ContractRelayerTab({ t }: any) {
                 <span className="text-xs font-black text-amber-600">Active · Warning</span>
               </div>
             </div>
-            <button className="w-full py-3 bg-primary text-white rounded-xl text-xs font-black shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all">
+            <button className="w-full py-3 bg-primary text-white rounded-ds-xl text-xs font-black shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all">
               Yêu cầu top-up gas
             </button>
           </div>
@@ -314,14 +314,14 @@ function ContractRelayerTab({ t }: any) {
 
       {/* Right Content - Contract Health & Recent Txs */}
       <div className="xl:col-span-8 space-y-6">
-        <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+        <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
             <Database size={18} className="text-txt-muted" />
             <h3 className="text-sm font-black text-txt-primary">Contract health</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {blockchainMockData.contracts.map((c, i) => (
-              <div key={i} className="p-4 rounded-2xl bg-main border border-border">
+              <div key={i} className="p-4 rounded-ds-2xl bg-main border border-border">
                 <p className="text-xs font-black text-txt-primary mb-1">{c.name}</p>
                 <p className="text-[10px] font-medium text-txt-muted mb-3">{c.address}</p>
                 <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase border ${c.status === 'Healthy' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-amber-500/10 text-amber-600 border-amber-500/20'
@@ -333,7 +333,7 @@ function ContractRelayerTab({ t }: any) {
           </div>
         </div>
 
-        <div className="bg-surface border border-border rounded-3xl overflow-hidden shadow-sm">
+        <div className="bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm">
           <div className="p-6 border-b border-border flex items-center gap-2">
             <ArrowRightLeft size={18} className="text-txt-muted" />
             <h3 className="text-sm font-black text-txt-primary">Giao dịch gần đây</h3>
@@ -377,19 +377,19 @@ function TokenLookupTab({ t }: any) {
   return (
     <div className="space-y-6">
       {/* Search Bar */}
-      <div className="bg-surface border border-border rounded-3xl p-4 shadow-sm flex items-center gap-4">
+      <div className="bg-surface border border-border rounded-ds-3xl p-4 shadow-sm flex items-center gap-4">
         <Search className="text-txt-muted ml-2" size={20} />
         <input
           type="text"
           placeholder="Tra cứu theo Token ID, ví, hoặc Event ID"
           className="flex-1 bg-transparent border-none outline-none text-sm font-medium text-txt-primary placeholder:text-txt-muted"
         />
-        <div className="px-3 py-1 bg-main rounded-lg text-[10px] font-bold text-txt-muted border border-border">3 token</div>
+        <div className="px-3 py-1 bg-main rounded-ds-lg text-[10px] font-bold text-txt-muted border border-border">3 token</div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         {/* Results Table */}
-        <div className="xl:col-span-8 bg-surface border border-border rounded-3xl overflow-hidden shadow-sm h-fit">
+        <div className="xl:col-span-8 bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm h-fit">
           <div className="p-6 border-b border-border flex items-center gap-2">
             <Activity size={18} className="text-txt-muted" />
             <h3 className="text-sm font-black text-txt-primary">Kết quả token</h3>
@@ -435,7 +435,7 @@ function TokenLookupTab({ t }: any) {
         </div>
 
         {/* Token Detail Sidebar */}
-        <div className="xl:col-span-4 bg-surface border border-border rounded-3xl p-6 shadow-sm h-fit space-y-6">
+        <div className="xl:col-span-4 bg-surface border border-border rounded-ds-3xl p-6 shadow-sm h-fit space-y-6">
           <div className="flex items-center gap-2">
             <Database size={18} className="text-indigo-500" />
             <h3 className="text-sm font-black text-txt-primary">Chi tiết TKN-5821</h3>
@@ -449,7 +449,7 @@ function TokenLookupTab({ t }: any) {
             <DetailItemSidebar icon={<ArrowRightLeft size={14} />} label="Mint Tx" value="0x9af2...3c1d" />
             <DetailItemSidebar icon={<Activity size={14} />} label="Hoạt động cuối" value="Resale 25/04" />
 
-            <div className="bg-main/50 border border-border rounded-2xl p-4">
+            <div className="bg-main/50 border border-border rounded-ds-2xl p-4">
               <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">Tóm tắt sync</p>
               <p className="text-xs text-txt-secondary font-medium leading-relaxed">
                 Owner trên chuỗi khác với off-chain, cần reconcile.
@@ -473,9 +473,9 @@ function StatsCard({ icon, label, value, sub, color }: any) {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm hover:shadow-md transition-all group">
+    <div className="bg-surface border border-border rounded-ds-2xl p-5 shadow-sm hover:shadow-md transition-all group">
       <div className="flex items-center gap-3 mb-3">
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${colors[color]}`}>
+        <div className={`w-9 h-9 rounded-ds-xl flex items-center justify-center transition-transform group-hover:scale-110 ${colors[color]}`}>
           {icon}
         </div>
         <span className="text-[10px] font-bold text-txt-muted uppercase tracking-widest">{label}</span>

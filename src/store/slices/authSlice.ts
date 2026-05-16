@@ -30,13 +30,31 @@ const initialState: AuthState = {
     organizationId: -1,
 };
 
+function applyTokenClaims(state: AuthState, token: string) {
+    const payload = decodeJWT(token);
+
+    state.isAuthenticated = true;
+
+    if (!payload) {
+        state.isOrganization = false;
+        state.organizationId = -1;
+        return;
+    }
+
+    state.isOrganization = Boolean(payload.isOrganization);
+    state.organizationId = payload.organizationId ?? -1;
+
+    if (state.user) {
+        state.user.roles = payload.roles ?? state.user.roles;
+    }
+}
+
 const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
         setCredentials: (state, action: PayloadAction<{ token: string; refreshToken?: string; user?: UserProfile }>) => {
             state.token = action.payload.token;
-            state.isAuthenticated = true;
             if (action.payload.refreshToken) {
                 state.refreshToken = action.payload.refreshToken;
             }
@@ -44,12 +62,7 @@ const authSlice = createSlice({
                 state.user = action.payload.user;
             }
 
-            // Decode JWT to get organization info
-            const payload = decodeJWT(action.payload.token);
-            if (payload) {
-                state.isOrganization = payload.isOrganization;
-                state.organizationId = payload.organizationId;
-            }
+            applyTokenClaims(state, action.payload.token);
         },
 
         setUser: (state, action: PayloadAction<UserProfile>) => {
@@ -62,12 +75,7 @@ const authSlice = createSlice({
                 state.refreshToken = action.payload.refreshToken;
             }
 
-            // Update organization status from new token
-            const payload = decodeJWT(action.payload.token);
-            if (payload) {
-                state.isOrganization = payload.isOrganization;
-                state.organizationId = payload.organizationId;
-            }
+            applyTokenClaims(state, action.payload.token);
         },
 
         logout: (state) => {

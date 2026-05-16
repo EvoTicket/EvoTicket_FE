@@ -31,7 +31,7 @@ export function CreateEventWizardStepper({ currentStep, onStepClick }: Props) {
                         <button
                             type="button"
                             onClick={() => onStepClick && isCompleted && onStepClick(step.id)}
-                            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg border transition-colors ${
+                            className={`flex items-center gap-3 px-4 py-2.5 rounded-ds-lg border transition-colors ${
                                 isActive 
                                     ? "bg-bg-elevated border-border-default text-text-primary" 
                                     : isCompleted

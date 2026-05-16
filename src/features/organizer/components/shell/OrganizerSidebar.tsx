@@ -60,7 +60,7 @@ export function OrganizerSidebar() {
             {/* Logo/Brand */}
             <div className="p-6 border-b border-navbar-sidebar-border">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-action-brand-bg-default/10 rounded-lg flex items-center justify-center">
+                    <div className="w-10 h-10 bg-action-brand-bg-default/10 rounded-ds-lg flex items-center justify-center">
                         <span className="text-action-brand-bg-default font-bold text-xl">E</span>
                     </div>
                     <div>
@@ -77,7 +77,7 @@ export function OrganizerSidebar() {
                         <>
                             <Link
                                 href={`/${locale}/organizer/center`}
-                                className="mb-5 flex items-center gap-3 rounded-lg border border-navbar-sidebar-border px-4 py-3 text-sm font-medium text-navbar-sidebar-text-default transition-colors hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active"
+                                className="mb-5 flex items-center gap-3 rounded-ds-lg border border-navbar-sidebar-border px-4 py-3 text-sm font-medium text-navbar-sidebar-text-default transition-colors hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active"
                             >
                                 <ArrowLeft size={18} />
                                 <span>Sự kiện của tôi</span>
@@ -96,7 +96,7 @@ export function OrganizerSidebar() {
                                         <Link
                                             key={item.key}
                                             href={href}
-                                            className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${active
+                                            className={`flex items-center gap-3 px-4 py-3 rounded-ds-lg font-medium transition-colors ${active
                                                 ? "bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active"
                                                 : "text-navbar-sidebar-text-default hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active"
                                                 }`}
@@ -123,7 +123,7 @@ export function OrganizerSidebar() {
                             <nav className="space-y-1">
                                 <Link
                                     href={`/${locale}/organizer/center`}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive(`/${locale}/organizer/center`)
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-ds-lg font-medium transition-colors ${isActive(`/${locale}/organizer/center`)
                                         ? 'bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active'
                                         : 'text-navbar-sidebar-text-default hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active'
                                         }`}
@@ -133,7 +133,7 @@ export function OrganizerSidebar() {
                                 </Link>
                                 <Link
                                     href={`/${locale}/organizer/reports`}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive(`/${locale}/organizer/reports`)
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-ds-lg font-medium transition-colors ${isActive(`/${locale}/organizer/reports`)
                                         ? 'bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active'
                                         : 'text-navbar-sidebar-text-default hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active'
                                         }`}
@@ -143,7 +143,7 @@ export function OrganizerSidebar() {
                                 </Link>
                                 <Link
                                     href={`/${locale}/organizer/terms`}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive(`/${locale}/organizer/terms`)
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-ds-lg font-medium transition-colors ${isActive(`/${locale}/organizer/terms`)
                                         ? 'bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active'
                                         : 'text-navbar-sidebar-text-default hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active'
                                         }`}
@@ -153,7 +153,7 @@ export function OrganizerSidebar() {
                                 </Link>
                                 <Link
                                     href={`/${locale}/organizer/account`}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive(`/${locale}/organizer/account`)
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-ds-lg font-medium transition-colors ${isActive(`/${locale}/organizer/account`)
                                         ? 'bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active'
                                         : 'text-navbar-sidebar-text-default hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active'
                                         }`}
@@ -168,10 +168,10 @@ export function OrganizerSidebar() {
 
                 <div className="mt-auto p-6">
                     {/* Pro Organizer Banner */}
-                    <div className="bg-navbar-sidebar-item-bg-hover border border-navbar-sidebar-border rounded-xl p-4">
+                    <div className="bg-navbar-sidebar-item-bg-hover border border-navbar-sidebar-border rounded-ds-xl p-4">
                         <div className="text-xs font-bold text-action-brand-bg-default mb-1 uppercase">Pro Organizer</div>
                         <div className="text-sm text-navbar-sidebar-text-active mb-3">Bạn đang dùng gói Growth</div>
-                        <button className="w-full py-2 bg-navbar-sidebar-item-bg-default border border-navbar-sidebar-border hover:bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active text-sm rounded-lg transition-colors">
+                        <button className="w-full py-2 bg-navbar-sidebar-item-bg-default border border-navbar-sidebar-border hover:bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active text-sm rounded-ds-lg transition-colors">
                             Nâng cấp gói
                         </button>
                     </div>

@@ -69,7 +69,7 @@ function Panel({
   right?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-5">
+    <div className="flex flex-col gap-4 rounded-ds-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="m-0 text-[15px] font-semibold text-[var(--color-text-primary)]">
@@ -90,7 +90,7 @@ function Panel({
 
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] p-3">
+    <div className="rounded-ds-md border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] p-3">
       <div className="text-[11px] text-[var(--color-text-muted)]">{label}</div>
       <div className="mt-0.5 text-base font-semibold text-[var(--color-text-primary)]">
         {value}
@@ -109,7 +109,7 @@ function ResaleStat({
   tone: StatusTone;
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] p-4">
+    <div className="flex flex-col gap-2 rounded-ds-md border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] p-4">
       <div className="flex items-center justify-between">
         <span className="text-xs text-[var(--color-text-muted)]">{label}</span>
         <OrganizerStatusBadge tone={tone}>●</OrganizerStatusBadge>
@@ -132,7 +132,7 @@ function FormatBtn({
 }) {
   return (
     <button
-      className={`flex flex-1 items-center justify-center gap-1.5 rounded-md border px-2.5 py-2 text-xs font-medium ${
+      className={`flex flex-1 items-center justify-center gap-1.5 rounded-ds-md border px-2.5 py-2 text-xs font-medium ${
         active
           ? "border-[var(--color-action-brand-bg-default)] bg-[var(--color-action-brand-bg-pressed)] text-white"
           : "border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)]"
@@ -174,8 +174,8 @@ export default function ReportsPage() {
         </div>
 
         {/* Filter toolbar */}
-        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-3">
-          <button className="flex items-center gap-2 rounded-md border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] px-3 py-2 text-[13px] text-[var(--color-text-primary)]">
+        <div className="flex flex-wrap items-center gap-3 rounded-ds-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-3">
+          <button className="flex items-center gap-2 rounded-ds-md border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] px-3 py-2 text-[13px] text-[var(--color-text-primary)]">
             <Calendar size={14} className="text-[var(--color-icon-muted)]" />
             01/04 – 21/04/2026
           </button>
@@ -191,11 +191,11 @@ export default function ReportsPage() {
             ]}
             actions={
               <>
-                <button className="flex items-center gap-2 rounded-md border border-[var(--color-border-default)] bg-transparent px-3 py-2 text-[13px] text-[var(--color-text-secondary)]">
+                <button className="flex items-center gap-2 rounded-ds-md border border-[var(--color-border-default)] bg-transparent px-3 py-2 text-[13px] text-[var(--color-text-secondary)]">
                   <RefreshCw size={13} />
                   Làm mới
                 </button>
-                <button className="flex items-center gap-2 rounded-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3 py-2 text-[13px] font-medium text-[var(--color-action-brand-text-default)]">
+                <button className="flex items-center gap-2 rounded-ds-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3 py-2 text-[13px] font-medium text-[var(--color-action-brand-text-default)]">
                   <Download size={13} />
                   Xuất dữ liệu
                 </button>
@@ -383,7 +383,7 @@ export default function ReportsPage() {
                   >
                     <span className="flex items-center gap-2 text-[var(--color-text-secondary)]">
                       <span
-                        className="h-2 w-2 rounded-sm"
+                        className="h-2 w-2 rounded-ds-sm"
                         style={{ background: o.color }}
                       />
                       {o.name}
@@ -501,7 +501,7 @@ export default function ReportsPage() {
               title="Hiệu suất chi tiết theo sự kiện"
               subtitle="Tổng hợp các chỉ số chính"
             >
-              <div className="overflow-hidden rounded-md border border-[var(--color-border-subtle)]">
+              <div className="overflow-hidden rounded-ds-md border border-[var(--color-border-subtle)]">
                 {/* Header */}
                 <div
                   className="grid gap-3 px-4 py-2.5 text-[11px] uppercase tracking-wide text-[var(--color-text-muted)]"
@@ -598,7 +598,7 @@ export default function ReportsPage() {
                 ].map((label, i) => (
                   <label
                     key={label}
-                    className="flex cursor-pointer items-center gap-2 rounded-md border px-2.5 py-2 text-[13px] text-[var(--color-text-primary)]"
+                    className="flex cursor-pointer items-center gap-2 rounded-ds-md border px-2.5 py-2 text-[13px] text-[var(--color-text-primary)]"
                     style={{
                       background:
                         i === 0
@@ -616,7 +616,7 @@ export default function ReportsPage() {
                 ))}
               </div>
             </div>
-            <button className="mt-2 flex items-center justify-center gap-2 rounded-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3 py-2.5 text-[13px] font-medium text-[var(--color-action-brand-text-default)]">
+            <button className="mt-2 flex items-center justify-center gap-2 rounded-ds-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3 py-2.5 text-[13px] font-medium text-[var(--color-action-brand-text-default)]">
               <FileDown size={14} />
               Xuất file ngay
             </button>

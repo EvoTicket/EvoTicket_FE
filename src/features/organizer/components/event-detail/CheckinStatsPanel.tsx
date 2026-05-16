@@ -7,7 +7,7 @@ export function CheckinStatsPanel() {
       {CHECKIN_GATES.map((gate) => (
         <div
           key={gate.gate}
-          className="rounded-lg border border-border-subtle bg-bg-elevated p-4"
+          className="rounded-ds-lg border border-border-subtle bg-bg-elevated p-4"
         >
           <div className="mb-4 flex items-center justify-between">
             <div>

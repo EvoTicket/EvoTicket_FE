@@ -62,7 +62,7 @@ function CancelPaymentContent() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 p-4">
-      <div className="max-w-md w-full bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center flex flex-col items-center">
+      <div className="max-w-md w-full bg-white rounded-ds-3xl p-8 shadow-sm border border-gray-100 text-center flex flex-col items-center">
         {status === "loading" && (
           <>
             <Loader2 className="w-16 h-16 text-blue-500 animate-spin mb-6" />
@@ -82,7 +82,7 @@ function CancelPaymentContent() {
             </p>
             <Link
               href={`/${locale}/user/homepage`}
-              className="w-full bg-[#1a1a1a] hover:bg-blacktext-button-primary-text-default font-medium py-3 rounded-xl transition-colors text-sm flex items-center justify-center"
+              className="w-full bg-[#1a1a1a] hover:bg-blacktext-button-primary-text-default font-medium py-3 rounded-ds-xl transition-colors text-sm flex items-center justify-center"
             >
               Về trang chủ
             </Link>
@@ -99,13 +99,13 @@ function CancelPaymentContent() {
             <div className="flex gap-4 w-full">
               <button
                 onClick={() => window.location.reload()}
-                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-3 rounded-xl transition-colors text-sm"
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium py-3 rounded-ds-xl transition-colors text-sm"
               >
                 Thử lại
               </button>
               <Link
                 href={`/${locale}/user/homepage`}
-                className="flex-1 bg-[#1a1a1a] hover:bg-blacktext-button-primary-text-default font-medium py-3 rounded-xl transition-colors text-sm flex items-center justify-center"
+                className="flex-1 bg-[#1a1a1a] hover:bg-blacktext-button-primary-text-default font-medium py-3 rounded-ds-xl transition-colors text-sm flex items-center justify-center"
               >
                 Về trang chủ
               </Link>

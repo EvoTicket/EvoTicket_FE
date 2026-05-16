@@ -274,7 +274,7 @@ export default function HomePage() {
                       e.currentTarget.style.setProperty('--x', `${e.clientX - rect.left}px`);
                       e.currentTarget.style.setProperty('--y', `${e.clientY - rect.top}px`);
                     }}
-                    className="group relative overflow-hidden w-full sm:w-auto bg-button-primary-bg-default text-button-primary-text-default font-bold py-4 px-10 rounded-lg shadow-lg shadow-primary/30 text-center"
+                    className="group relative overflow-hidden w-full sm:w-auto bg-button-primary-bg-default text-button-primary-text-default font-bold py-4 px-10 rounded-ds-lg shadow-lg shadow-primary/30 text-center"
                   >
                     <span className="absolute w-[250%] aspect-square bg-button-accent-bg-hover rounded-full transition-transform duration-900 ease-out -translate-x-1/2 -translate-y-1/2 scale-0 group-hover:scale-100 z-0" style={{ top: 'var(--y, 50%)', left: 'var(--x, 50%)' }}></span>
                     <span className="relative z-10">{t('explore_now')}</span>
@@ -286,7 +286,7 @@ export default function HomePage() {
                       e.currentTarget.style.setProperty('--x', `${e.clientX - rect.left}px`);
                       e.currentTarget.style.setProperty('--y', `${e.clientY - rect.top}px`);
                     }}
-                    className="group relative overflow-hidden w-full sm:w-auto bg-transparent border border-border-default hover:border-border-strong text-text-primary font-bold py-4 px-8 rounded-lg text-center transition-colors"
+                    className="group relative overflow-hidden w-full sm:w-auto bg-transparent border border-border-default hover:border-border-strong text-text-primary font-bold py-4 px-8 rounded-ds-lg text-center transition-colors"
                   >
                     <span className="absolute w-[250%] aspect-square bg-bg-subtle rounded-full transition-transform duration-500 ease-out -translate-x-1/2 -translate-y-1/2 scale-0 group-hover:scale-100 z-0" style={{ top: 'var(--y, 50%)', left: 'var(--x, 50%)' }}></span>
                     <span className="relative z-10">{t('how_it_works')}</span>
@@ -306,15 +306,15 @@ export default function HomePage() {
                 {/* Tickets Placeholder */}
                 <div className="relative w-full max-w-[500px] aspect-[4/3] z-10 flex items-center justify-center">
                   {/* Fake ticket 1 */}
-                  <div className="absolute right-[5%] top-[5%] w-[180px] md:w-[240px] h-[340px] md:h-[460px] bg-gradient-to-br from-[#FDE599] via-[#D5A02B] to-[#B38018] rounded-2xl rotate-12 shadow-[0_30px_60px_rgba(0,0,0,0.6)] flex items-center justify-center overflow-hidden border border-[#FFE484]/50">
-                    <div className="absolute m-3 inset-0 border-2 border-dashed border-[#FFE484]/40 rounded-xl relative">
+                  <div className="absolute right-[5%] top-[5%] w-[180px] md:w-[240px] h-[340px] md:h-[460px] bg-gradient-to-br from-[#FDE599] via-[#D5A02B] to-[#B38018] rounded-ds-2xl rotate-12 shadow-[0_30px_60px_rgba(0,0,0,0.6)] flex items-center justify-center overflow-hidden border border-[#FFE484]/50">
+                    <div className="absolute m-3 inset-0 border-2 border-dashed border-[#FFE484]/40 rounded-ds-xl relative">
                       <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#3B1F4F] shadow-inner"></div>
                       <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#20102E] shadow-inner"></div>
                     </div>
                   </div>
                   {/* Fake ticket 2 */}
-                  <div className="absolute left-[8%] top-0 w-[160px] md:w-[220px] h-[300px] md:h-[420px] bg-gradient-to-br from-[#FAF0C0] via-[#C99119] to-[#996509] rounded-2xl -rotate-[15deg] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-center overflow-hidden border border-white/20">
-                    <div className="absolute m-3 inset-0 border border-[#FAF0C0]/30 rounded-xl relative">
+                  <div className="absolute left-[8%] top-0 w-[160px] md:w-[220px] h-[300px] md:h-[420px] bg-gradient-to-br from-[#FAF0C0] via-[#C99119] to-[#996509] rounded-ds-2xl -rotate-[15deg] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-center overflow-hidden border border-white/20">
+                    <div className="absolute m-3 inset-0 border border-[#FAF0C0]/30 rounded-ds-xl relative">
                       <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#3C1A52] shadow-inner"></div>
                       <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#2E1541] shadow-inner"></div>
                     </div>
@@ -326,44 +326,44 @@ export default function HomePage() {
 
           {/* === FLOATING FILTER BAR === */}
           <div className="absolute left-1/2 -translate-x-1/2 -bottom-16 w-full px-4 lg:px-12 z-30 flex justify-center">
-            <div className="w-full max-w-5xl bg-bg-surface/80 backdrop-blur-xl border border-border-default shadow-lg rounded-2xl p-4 md:p-6 md:px-14 md:py-10 flex flex-col md:flex-row items-center gap-4 lg:gap-6 justify-between">
+            <div className="w-full max-w-5xl bg-surface/80 backdrop-blur-xl border border-border shadow-lg rounded-ds-2xl p-4 md:p-6 md:px-14 md:py-10 flex flex-col md:flex-row items-center gap-4 lg:gap-6 justify-between">
 
               {/* Lọc: Địa điểm */}
               <div className="relative w-full md:w-[200px]">
-                <label className="hidden text-xs text-text-muted mb-1">{t("location_label")}</label>
+                <label className="hidden text-xs text-txt-muted mb-1">{t("location_label")}</label>
                 <Listbox value={locationSelected} onChange={(val) => setLocationSelected(val)}>
-                  <ListboxButton className="w-full p-4 pl-4 pr-10 bg-bg-page/80 border border-border-default rounded-xl text-text-primary outline-none focus:border-primary transition-colors text-left text-sm font-medium">
+                  <ListboxButton className="w-full p-4 pl-4 pr-10 bg-main/80 border border-border rounded-ds-xl text-txt-primary outline-none focus:border-primary transition-colors text-left text-sm font-medium">
                     {locationSelected?.name || t("location_all")}
                   </ListboxButton>
-                  <ListboxOptions anchor="bottom" modal={false} className="z-50 w-[var(--button-width)] [--anchor-gap:4px] !max-h-60 overflow-y-auto bg-bg-surface border border-border-strong rounded-xl shadow-xl text-text-primary mt-1">
+                  <ListboxOptions anchor="bottom" modal={false} className="z-50 w-[var(--button-width)] [--anchor-gap:4px] !max-h-60 overflow-y-auto bg-surface border border-border rounded-ds-xl shadow-xl text-txt-primary mt-1">
                     {locationList.map(item => (
-                      <ListboxOption key={item.code} value={item} className="group flex items-center px-4 py-3 cursor-pointer hover:bg-bg-subtle rounded-md transition-colors text-sm">
+                      <ListboxOption key={item.code} value={item} className="group flex items-center px-4 py-3 cursor-pointer hover:bg-secondary rounded-ds-md transition-colors text-sm">
                         <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-primary mr-2" />
                         <span>{item.name}</span>
                       </ListboxOption>
                     ))}
                   </ListboxOptions>
                 </Listbox>
-                <MapPin size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-icon-muted pointer-events-none" />
+                <MapPin size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" />
               </div>
 
               {/* Lọc: Thể loại */}
               <div className="relative w-full md:w-[200px]">
-                <label className="hidden text-xs text-text-muted mb-1">{t("genre_label")}</label>
+                <label className="hidden text-xs text-txt-muted mb-1">{t("genre_label")}</label>
                 <Listbox value={genreSelected} onChange={(val) => setGenreSelected(val)}>
-                  <ListboxButton className="w-full p-4 pl-4 pr-10 bg-bg-page/80 border border-border-default rounded-xl text-text-primary outline-none focus:border-primary transition-colors text-left text-sm font-medium">
+                  <ListboxButton className="w-full p-4 pl-4 pr-10 bg-main/80 border border-border rounded-ds-xl text-txt-primary outline-none focus:border-primary transition-colors text-left text-sm font-medium">
                     {genreSelected.name}
                   </ListboxButton>
-                  <ListboxOptions anchor="bottom" modal={false} className="z-50 w-[var(--button-width)] [--anchor-gap:4px] !max-h-60 overflow-y-auto bg-bg-surface border border-border-strong rounded-xl shadow-xl text-text-primary mt-1">
+                  <ListboxOptions anchor="bottom" modal={false} className="z-50 w-[var(--button-width)] [--anchor-gap:4px] !max-h-60 overflow-y-auto bg-surface border border-border rounded-ds-xl shadow-xl text-txt-primary mt-1">
                     {genre.map(item => (
-                      <ListboxOption key={item.id} value={item} className="group flex items-center px-4 py-3 cursor-pointer hover:bg-bg-subtle rounded-md transition-colors text-sm">
+                      <ListboxOption key={item.id} value={item} className="group flex items-center px-4 py-3 cursor-pointer hover:bg-secondary rounded-ds-md transition-colors text-sm">
                         <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-primary mr-2" />
                         <span>{item.name}</span>
                       </ListboxOption>
                     ))}
                   </ListboxOptions>
                 </Listbox>
-                <Filter size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-icon-muted pointer-events-none" />
+                <Filter size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" />
               </div>
 
               {/* Lọc: Ngày diễn */}
@@ -390,7 +390,7 @@ export default function HomePage() {
                       }),
                     }
                   }}
-                  className="w-full md:w-auto bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+                  className="w-full md:w-auto bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2 rounded-ds-xl font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg"
                 >
                   <Search size={18} />
                   <span>{t('search_button')}</span>
@@ -511,7 +511,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {latestEvents.length > 0 ? latestEvents.map((event) => (
                 <Link key={event.id} href={`/${locale}/user/events/${event.id}`} className="block">
-                  <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
+                  <div className="	bg-bg-surface rounded-ds-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
                     {/* Card Image */}
                     <div className="relative h-48 overflow-hidden bg-gray-100">
                       {event.bannerImage ? (
@@ -587,7 +587,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {liveStageEvents.length > 0 ? liveStageEvents.map((event) => (
                 <Link key={event.id} href={`/${locale}/user/events/${event.id}`} className="block">
-                  <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
+                  <div className="	bg-bg-surface rounded-ds-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
                     {/* Card Image */}
                     <div className="relative h-48 overflow-hidden bg-gray-100">
                       {event.bannerImage ? (
@@ -663,7 +663,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {stageAndArtEvents.length > 0 ? stageAndArtEvents.map((event) => (
                 <Link key={event.id} href={`/${locale}/user/events/${event.id}`} className="block">
-                  <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
+                  <div className="	bg-bg-surface rounded-ds-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
                     {/* Card Image */}
                     <div className="relative h-48 overflow-hidden bg-gray-100">
                       {event.bannerImage ? (
@@ -739,7 +739,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {conferencesAndWorkshopsEvents.length > 0 ? conferencesAndWorkshopsEvents.map((event) => (
                 <Link key={event.id} href={`/${locale}/user/events/${event.id}`} className="block">
-                  <div className="	bg-bg-surface rounded-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
+                  <div className="	bg-bg-surface rounded-ds-xl overflow-hidden border border-border-default hover:shadow-lg hover:shadow-primary/10 transition-all group h-full flex flex-col">
                     {/* Card Image */}
                     <div className="relative h-48 overflow-hidden bg-gray-100">
                       {event.bannerImage ? (

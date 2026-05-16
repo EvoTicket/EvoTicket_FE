@@ -14,7 +14,7 @@ export function EventMetricCard({
   tone = "brand",
 }: EventMetricCardProps) {
   return (
-    <div className="flex min-h-32 flex-col justify-between rounded-lg border border-border-subtle bg-bg-surface p-5">
+    <div className="flex min-h-32 flex-col justify-between rounded-ds-lg border border-border-subtle bg-bg-surface p-5">
       <div className="flex items-start justify-between gap-3">
         <span className="text-xs text-text-muted">{label}</span>
         <span

@@ -12,7 +12,7 @@ export function CreateEventSuccessScreen({ formData }: Props) {
 
     return (
         <div className="max-w-[800px] mx-auto py-10 px-4">
-            <div className="bg-bg-surface border border-border-default rounded-2xl overflow-hidden shadow-sm mb-8 text-center pt-10 pb-8 px-6">
+            <div className="bg-bg-surface border border-border-default rounded-ds-2xl overflow-hidden shadow-sm mb-8 text-center pt-10 pb-8 px-6">
                 <div className="w-20 h-20 bg-feedback-success-bg border-[4px] border-feedback-success-bg/30 rounded-full flex items-center justify-center mx-auto mb-6">
                     <CheckCircle2 size={40} className="text-feedback-success-text" />
                 </div>
@@ -27,13 +27,13 @@ export function CreateEventSuccessScreen({ formData }: Props) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="md:col-span-2 bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm">
+                <div className="md:col-span-2 bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm">
                     <h3 className="font-bold text-lg text-text-primary mb-4 flex items-center gap-2">
                         <FileText size={20} className="text-text-secondary"/> Thông tin sự kiện
                     </h3>
                     
                     <div className="flex gap-4">
-                        <div className="w-24 h-24 rounded-lg bg-bg-subtle border border-border-default overflow-hidden shrink-0">
+                        <div className="w-24 h-24 rounded-ds-lg bg-bg-subtle border border-border-default overflow-hidden shrink-0">
                             {formData.thumbnailPreview ? (
                                 <img src={formData.thumbnailPreview} alt="Thumbnail" className="w-full h-full object-cover" />
                             ) : (
@@ -81,7 +81,7 @@ export function CreateEventSuccessScreen({ formData }: Props) {
                 </div>
 
                 <div className="space-y-4">
-                    <div className="bg-bg-surface border border-border-default rounded-xl p-5 shadow-sm">
+                    <div className="bg-bg-surface border border-border-default rounded-ds-xl p-5 shadow-sm">
                         <h3 className="font-bold text-sm text-text-primary mb-3">Ý nghĩa các trạng thái</h3>
                         <ul className="space-y-3 text-xs">
                             <li className="flex gap-2">
@@ -99,7 +99,7 @@ export function CreateEventSuccessScreen({ formData }: Props) {
                         </ul>
                     </div>
 
-                    <div className="bg-bg-subtle border border-border-default rounded-xl p-5 text-sm text-text-secondary">
+                    <div className="bg-bg-subtle border border-border-default rounded-ds-xl p-5 text-sm text-text-secondary">
                         <span className="font-bold text-text-primary block mb-1">Lưu ý:</span>
                         Vé sẽ không được mở bán chính thức cho đến khi sự kiện chuyển sang trạng thái Published.
                     </div>
@@ -109,19 +109,19 @@ export function CreateEventSuccessScreen({ formData }: Props) {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link 
                     href={`/${locale}/organizer/events/new-event-123/overview`} // Fixture link
-                    className="px-6 py-3 bg-action-brand-bg-default text-action-brand-text-default font-bold rounded-xl hover:bg-action-brand-bg-hover transition-colors flex items-center justify-center gap-2"
+                    className="px-6 py-3 bg-action-brand-bg-default text-action-brand-text-default font-bold rounded-ds-xl hover:bg-action-brand-bg-hover transition-colors flex items-center justify-center gap-2"
                 >
                     <Settings size={18} /> Vào quản trị sự kiện này
                 </Link>
                 <button 
                     onClick={() => window.location.reload()}
-                    className="px-6 py-3 bg-bg-surface border border-border-default text-text-primary font-bold rounded-xl hover:bg-bg-subtle transition-colors flex items-center justify-center gap-2"
+                    className="px-6 py-3 bg-bg-surface border border-border-default text-text-primary font-bold rounded-ds-xl hover:bg-bg-subtle transition-colors flex items-center justify-center gap-2"
                 >
                     <PlusCircle size={18} /> Tạo sự kiện khác
                 </button>
                 <Link 
                     href={`/${locale}/organizer/center`}
-                    className="px-6 py-3 bg-transparent text-text-secondary font-bold rounded-xl hover:text-text-primary hover:bg-bg-surface transition-colors flex items-center justify-center gap-2"
+                    className="px-6 py-3 bg-transparent text-text-secondary font-bold rounded-ds-xl hover:text-text-primary hover:bg-bg-surface transition-colors flex items-center justify-center gap-2"
                 >
                     <Home size={18} /> Về Organizer Center
                 </Link>

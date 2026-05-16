@@ -120,15 +120,15 @@ export default function ProvenancePage() {
                         <h1 className="text-4xl font-bold text-text-primary mb-2">{t("page_title")}</h1>
                         <p className="text-text-secondary">{t("page_subtitle")}</p>
                     </div>
-                    <button className="bg-[#e4e7ec] hover:bg-[#d0d5dd] text-[#1d2939] dark:bg-[#1e293b] dark:text-white px-6 py-2.5 rounded-lg outline-none font-medium transition-colors text-sm">
+                    <button className="bg-[#e4e7ec] hover:bg-[#d0d5dd] text-[#1d2939] dark:bg-[#1e293b] dark:text-white px-6 py-2.5 rounded-ds-lg outline-none font-medium transition-colors text-sm">
                         {t("back_to_ticket")}
                     </button>
                 </div>
 
                 {/* Error Box */}
                 <div className="flex justify-center items-center py-20">
-                    <div className="bg-bg-surface border border-border-default rounded-xl p-8 max-w-md w-full text-center flex flex-col items-center">
-                        <div className="w-14 h-14 border border-border-default rounded-lg flex items-center justify-center mb-6 shadow-sm">
+                    <div className="bg-bg-surface border border-border-default rounded-ds-xl p-8 max-w-md w-full text-center flex flex-col items-center">
+                        <div className="w-14 h-14 border border-border-default rounded-ds-lg flex items-center justify-center mb-6 shadow-sm">
                             <HelpCircle size={24} className="text-text-secondary" />
                         </div>
                         <h3 className="text-lg font-bold text-text-primary mb-2">{t("error_title")}</h3>
@@ -138,11 +138,11 @@ export default function ProvenancePage() {
                         <div className="flex w-full gap-3 justify-center">
                             <button
                                 onClick={() => setHasError(false)}
-                                className="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-lg font-medium transition-colors text-sm flex-1 max-w-[140px]"
+                                className="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-ds-lg font-medium transition-colors text-sm flex-1 max-w-[140px]"
                             >
                                 {t("retry")}
                             </button>
-                            <button className="bg-transparent hover:bg-secondary text-primary px-6 py-2.5 rounded-lg font-medium transition-colors text-sm flex-1 max-w-[160px]">
+                            <button className="bg-transparent hover:bg-secondary text-primary px-6 py-2.5 rounded-ds-lg font-medium transition-colors text-sm flex-1 max-w-[160px]">
                                 {t("back_to_ticket")}
                             </button>
                         </div>
@@ -169,13 +169,13 @@ export default function ProvenancePage() {
                     <h1 className="text-4xl font-bold text-text-primary mb-2">{t("page_title")}</h1>
                     <p className="text-text-secondary">{t("page_subtitle")}</p>
                 </div>
-                <button className="bg-[#e4e7ec] hover:bg-[#d0d5dd] text-[#1d2939] dark:bg-[#1e293b] dark:text-white px-6 py-2.5 rounded-lg outline-none font-medium transition-colors text-sm">
+                <button className="bg-[#e4e7ec] hover:bg-[#d0d5dd] text-[#1d2939] dark:bg-[#1e293b] dark:text-white px-6 py-2.5 rounded-ds-lg outline-none font-medium transition-colors text-sm">
                     {t("back_to_ticket")}
                 </button>
             </div>
 
             {/* Ticket Info Card */}
-            <div className="bg-bg-surface border border-border-default rounded-xl p-6 mb-8">
+            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 mb-8">
                 <h2 className="text-xl font-bold text-text-primary mb-1">{MOCK_PROVENANCE.ticket.eventName}</h2>
                 <div className="text-sm text-text-secondary mb-6">
                     <p>{MOCK_PROVENANCE.ticket.eventTime} - {MOCK_PROVENANCE.ticket.eventDate}</p>
@@ -213,7 +213,7 @@ export default function ProvenancePage() {
                 {/* Left Column */}
                 <div className="lg:col-span-8 flex flex-col gap-6">
                     {/* Blockchain Verification */}
-                    <div className="bg-bg-surface border border-border-default rounded-xl p-6">
+                    <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6">
                         <div className="flex items-center gap-2 mb-6">
                             <h3 className="font-bold text-text-primary text-base flex items-center gap-2">
                                 <span className="text-lg">📦</span> {t("verified_on_blockchain")}
@@ -243,20 +243,20 @@ export default function ProvenancePage() {
                         </div>
 
                         <div className="flex flex-wrap gap-3">
-                            <button className="flex items-center gap-1.5 px-3 py-1.5 border border-border-default rounded-md text-xs font-medium text-text-primary hover:bg-secondary transition-colors">
+                            <button className="flex items-center gap-1.5 px-3 py-1.5 border border-border-default rounded-ds-md text-xs font-medium text-text-primary hover:bg-secondary transition-colors">
                                 <Copy size={14} /> {t("copy_token_id")}
                             </button>
-                            <button className="flex items-center gap-1.5 px-3 py-1.5 border border-border-default rounded-md text-xs font-medium text-text-primary hover:bg-secondary transition-colors">
+                            <button className="flex items-center gap-1.5 px-3 py-1.5 border border-border-default rounded-ds-md text-xs font-medium text-text-primary hover:bg-secondary transition-colors">
                                 <Copy size={14} /> {t("copy_tx")}
                             </button>
-                            <button className="flex items-center gap-1.5 px-3 py-1.5 border border-border-default rounded-md text-xs font-medium text-text-primary hover:bg-secondary transition-colors">
+                            <button className="flex items-center gap-1.5 px-3 py-1.5 border border-border-default rounded-ds-md text-xs font-medium text-text-primary hover:bg-secondary transition-colors">
                                 <ExternalLink size={14} /> {t("open_explorer")}
                             </button>
                         </div>
                     </div>
 
                     {/* Ticket Info */}
-                    <div className="bg-bg-surface border border-border-default rounded-xl p-6">
+                    <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6">
                         <h3 className="font-bold text-text-primary text-base mb-6">{t("ticket_info_card")}</h3>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm max-w-xl">
@@ -275,7 +275,7 @@ export default function ProvenancePage() {
                     </div>
 
                     {/* Ownership History */}
-                    <div className="bg-bg-surface border border-border-default rounded-xl p-6">
+                    <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6">
                         <h3 className="font-bold text-text-primary text-base mb-2">{t("ownership_history")}</h3>
                         <p className="text-xs text-text-secondary mb-8">{t("ownership_history_desc")}</p>
 
@@ -371,7 +371,7 @@ export default function ProvenancePage() {
                 {/* Right Column */}
                 <div className="lg:col-span-4 flex flex-col gap-6">
                     {/* Summary */}
-                    <div className="bg-[#fafafa] dark:bg-[#1a1a1a] border border-border-default rounded-xl p-6">
+                    <div className="bg-[#fafafa] dark:bg-[#1a1a1a] border border-border-default rounded-ds-xl p-6">
                         <h3 className="font-bold text-text-primary text-sm mb-4">{t("verified_summary")}</h3>
                         
                         <div className="grid grid-cols-2 gap-y-3 text-xs">
@@ -393,7 +393,7 @@ export default function ProvenancePage() {
                     </div>
 
                     {/* What is provenance */}
-                    <div className="border border-border-default rounded-xl p-6">
+                    <div className="border border-border-default rounded-ds-xl p-6">
                         <h3 className="font-bold text-text-primary flex items-center gap-2 text-sm mb-3">
                             <HelpCircle size={16} /> {t("what_is_provenance")}
                         </h3>
@@ -403,17 +403,17 @@ export default function ProvenancePage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="border border-border-default rounded-xl p-6">
+                    <div className="border border-border-default rounded-ds-xl p-6">
                         <h3 className="font-bold text-text-primary text-sm mb-4">{t("actions")}</h3>
                         
                         <div className="flex flex-col gap-3">
-                            <button className="w-full bg-[#f8f9fa] dark:bg-[#262626] hover:bg-[#e9ecef] dark:hover:bg-[#333] border border-transparent text-[#212529] dark:text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                            <button className="w-full bg-[#f8f9fa] dark:bg-[#262626] hover:bg-[#e9ecef] dark:hover:bg-[#333] border border-transparent text-[#212529] dark:text-white px-4 py-2.5 rounded-ds-lg text-sm font-medium transition-colors">
                                 {t("back_to_ticket")}
                             </button>
-                            <button className="w-full bg-[#e2e8f0] dark:bg-[#334155] hover:bg-[#cbd5e1] dark:hover:bg-[#475569] text-[#0f172a] dark:text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                            <button className="w-full bg-[#e2e8f0] dark:bg-[#334155] hover:bg-[#cbd5e1] dark:hover:bg-[#475569] text-[#0f172a] dark:text-white px-4 py-2.5 rounded-ds-lg text-sm font-medium transition-colors">
                                 {t("resell_ticket")}
                             </button>
-                            <button className="w-full bg-[#f1f5f9] dark:bg-[#1e293b] hover:bg-[#e2e8f0] dark:hover:bg-[#334155] text-[#334155] dark:text-[#cbd5e1] px-4 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                            <button className="w-full bg-[#f1f5f9] dark:bg-[#1e293b] hover:bg-[#e2e8f0] dark:hover:bg-[#334155] text-[#334155] dark:text-[#cbd5e1] px-4 py-2.5 rounded-ds-lg text-sm font-medium transition-colors">
                                 {t("contact_support")}
                             </button>
                         </div>

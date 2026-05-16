@@ -29,12 +29,12 @@ For example, instead of `bg-[#FAFBFC]`, use `bg-bg-surface` or `bg-neutral-50`.
 
 ```tsx
 // ✅ Correct
-<div className="bg-bg-page text-text-primary p-lg rounded-xl border border-border-default">
+<div className="bg-bg-page text-text-primary p-lg rounded-ds-xl border border-border-default">
   <h1 className="text-heading-h2 font-semibold">Title</h1>
 </div>
 
 // ❌ Incorrect
-<div className="bg-[#FFFFFF] text-[#121826] p-4 rounded-xl border border-[#D3DAE6]">
+<div className="bg-[#FFFFFF] text-[#121826] p-4 rounded-ds-xl border border-[#D3DAE6]">
   <h1 className="text-[36px] font-semibold">Title</h1>
 </div>
 ```

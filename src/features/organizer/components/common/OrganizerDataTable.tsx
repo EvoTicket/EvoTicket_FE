@@ -30,11 +30,11 @@ export function OrganizerDataTable<T extends TableRow>({
 }: OrganizerDataTableProps<T>) {
   if (state === "loading") {
     return (
-      <div className="flex flex-col gap-3 rounded-lg border border-border-subtle bg-bg-surface p-4">
+      <div className="flex flex-col gap-3 rounded-ds-lg border border-border-subtle bg-bg-surface p-4">
         {Array.from({ length: 5 }).map((_, index) => (
           <div
             key={index}
-            className="h-10 animate-pulse rounded-md bg-bg-elevated"
+            className="h-10 animate-pulse rounded-ds-md bg-bg-elevated"
           />
         ))}
       </div>
@@ -43,7 +43,7 @@ export function OrganizerDataTable<T extends TableRow>({
 
   if (state === "error") {
     return (
-      <div className="rounded-lg border border-feedback-error-border bg-feedback-error-bg p-5 text-sm text-feedback-error-text">
+      <div className="rounded-ds-lg border border-feedback-error-border bg-feedback-error-bg p-5 text-sm text-feedback-error-text">
         {errorMessage}
       </div>
     );
@@ -51,14 +51,14 @@ export function OrganizerDataTable<T extends TableRow>({
 
   if (state === "empty" || rows.length === 0) {
     return (
-      <div className="rounded-lg border border-border-subtle bg-bg-surface p-8 text-center text-sm text-text-muted">
+      <div className="rounded-ds-lg border border-border-subtle bg-bg-surface p-8 text-center text-sm text-text-muted">
         {emptyMessage}
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border-subtle bg-bg-surface">
+    <div className="overflow-hidden rounded-ds-lg border border-border-subtle bg-bg-surface">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[760px] border-collapse text-sm">
           <thead className="bg-bg-elevated text-[11px] uppercase tracking-wide text-text-muted">

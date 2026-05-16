@@ -18,14 +18,14 @@ interface OrganizerTabsProps {
  */
 export function OrganizerTabs({ tabs, activeKey, onTabChange }: OrganizerTabsProps) {
   return (
-    <div className="flex w-fit items-center gap-1 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-1">
+    <div className="flex w-fit items-center gap-1 rounded-ds-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-1">
       {tabs.map((t) => {
         const active = activeKey === t.key;
         return (
           <button
             key={t.key}
             onClick={() => onTabChange(t.key)}
-            className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-[13px] transition-colors ${
+            className={`flex items-center gap-2 rounded-ds-md px-3 py-1.5 text-[13px] transition-colors ${
               active
                 ? "border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] font-medium text-[var(--color-action-brand-text-default)]"
                 : "border border-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)]"

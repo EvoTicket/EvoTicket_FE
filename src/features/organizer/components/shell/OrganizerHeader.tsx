@@ -30,7 +30,7 @@ export function OrganizerHeader() {
 
             {/* Right side: Actions */}
             <div className="flex items-center gap-4">
-                <Link href={`/${locale}/organizer/events/create`} className="flex items-center gap-2 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2 rounded-lg font-medium transition-colors shadow-sm text-sm">
+                <Link href={`/${locale}/organizer/events/create`} className="flex items-center gap-2 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2 rounded-ds-lg font-medium transition-colors shadow-sm text-sm">
                     <Plus size={16} />
                     Tạo sự kiện
                 </Link>
@@ -41,7 +41,7 @@ export function OrganizerHeader() {
                 </button>
 
                 <div className="flex items-center gap-3 pl-4 border-l border-border-default cursor-pointer hover:opacity-80 transition-opacity">
-                    <div className="w-10 h-10 rounded-lg bg-action-brand-bg-default/10 flex items-center justify-center text-action-brand-bg-default font-bold">
+                    <div className="w-10 h-10 rounded-ds-lg bg-action-brand-bg-default/10 flex items-center justify-center text-action-brand-bg-default font-bold">
                         HN
                     </div>
                     <div className="hidden md:block">

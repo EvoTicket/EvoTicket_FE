@@ -103,7 +103,7 @@ export default function ProfilePage() {
                         </div>
 
                         {/* Sidebar Menu */}
-                        {/* <nav className="bg-surface/30 border border-border/50 rounded-3xl p-4 backdrop-blur-md shadow-xl overflow-hidden">
+                        {/* <nav className="bg-surface/30 border border-border/50 rounded-ds-3xl p-4 backdrop-blur-md shadow-xl overflow-hidden">
                             {[
                                 { icon: User, label: t("personal_info"), active: true },
                                 { icon: CreditCard, label: "Payment Methods", active: false },
@@ -112,7 +112,7 @@ export default function ProfilePage() {
                             ].map((item, i) => (
                                 <button
                                     key={i}
-                                    className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all group ${item.active ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/30 text-txt-muted hover:text-txt-primary'}`}
+                                    className={`w-full flex items-center justify-between p-4 rounded-ds-2xl transition-all group ${item.active ? 'bg-primary/10 text-primary' : 'hover:bg-secondary/30 text-txt-muted hover:text-txt-primary'}`}
                                 >
                                     <div className="flex items-center gap-4">
                                         <item.icon size={18} />
@@ -135,7 +135,7 @@ export default function ProfilePage() {
                                 {!isEditing ? (
                                     <button
                                         onClick={() => setIsEditing(true)}
-                                        className="px-6 py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/10"
+                                        className="px-6 py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-ds-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/10"
                                     >
                                         <Edit3 size={16} /> {t("edit_profile")}
                                     </button>
@@ -143,13 +143,13 @@ export default function ProfilePage() {
                                     <div className="flex gap-3">
                                         <button
                                             onClick={handleCancel}
-                                            className="px-5 py-2.5 bg-secondary/50 text-txt-muted border border-border/50 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:text-txt-primary transition-all"
+                                            className="px-5 py-2.5 bg-secondary/50 text-txt-muted border border-border/50 rounded-ds-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:text-txt-primary transition-all"
                                         >
                                             <X size={16} /> {t("cancel")}
                                         </button>
                                         <button
                                             onClick={handleSave}
-                                            className="px-8 py-2.5 bg-primary text-white rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:bg-primary-hover transition-all shadow-xl shadow-primary/20"
+                                            className="px-8 py-2.5 bg-primary text-white rounded-ds-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:bg-primary-hover transition-all shadow-xl shadow-primary/20"
                                         >
                                             <Save size={16} /> {t("save_changes")}
                                         </button>
@@ -161,7 +161,7 @@ export default function ProfilePage() {
                                 {/* First Name */}
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-txt-muted uppercase tracking-[0.2em] ml-1">{t("first_name")}</label>
-                                    <div className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${isEditing ? 'bg-surface border-primary/50 shadow-inner' : 'bg-secondary/20 border-border/30'}`}>
+                                    <div className={`flex items-center gap-4 p-4 rounded-ds-2xl border transition-all ${isEditing ? 'bg-surface border-primary/50 shadow-inner' : 'bg-secondary/20 border-border/30'}`}>
                                         <User size={18} className={isEditing ? 'text-primary' : 'text-txt-muted'} />
                                         {isEditing ? (
                                             <input
@@ -179,7 +179,7 @@ export default function ProfilePage() {
                                 {/* Last Name */}
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-txt-muted uppercase tracking-[0.2em] ml-1">{t("last_name")}</label>
-                                    <div className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${isEditing ? 'bg-surface border-primary/50 shadow-inner' : 'bg-secondary/20 border-border/30'}`}>
+                                    <div className={`flex items-center gap-4 p-4 rounded-ds-2xl border transition-all ${isEditing ? 'bg-surface border-primary/50 shadow-inner' : 'bg-secondary/20 border-border/30'}`}>
                                         <User size={18} className={isEditing ? 'text-primary' : 'text-txt-muted'} />
                                         {isEditing ? (
                                             <input
@@ -197,7 +197,7 @@ export default function ProfilePage() {
                                 {/* Email (Read-only usually) */}
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-txt-muted uppercase tracking-[0.2em] ml-1">{t("email")}</label>
-                                    <div className="flex items-center gap-4 p-4 rounded-2xl border bg-secondary/20 border-border/30 opacity-70 cursor-not-allowed">
+                                    <div className="flex items-center gap-4 p-4 rounded-ds-2xl border bg-secondary/20 border-border/30 opacity-70 cursor-not-allowed">
                                         <Mail size={18} className="text-txt-muted" />
                                         <span className="text-sm font-bold text-txt-muted">{userData.email}</span>
                                         <ShieldCheck size={14} className="text-success ml-auto" />
@@ -207,7 +207,7 @@ export default function ProfilePage() {
                                 {/* Phone */}
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-txt-muted uppercase tracking-[0.2em] ml-1">{t("phone")}</label>
-                                    <div className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${isEditing ? 'bg-surface border-primary/50 shadow-inner' : 'bg-secondary/20 border-border/30'}`}>
+                                    <div className={`flex items-center gap-4 p-4 rounded-ds-2xl border transition-all ${isEditing ? 'bg-surface border-primary/50 shadow-inner' : 'bg-secondary/20 border-border/30'}`}>
                                         <Phone size={18} className={isEditing ? 'text-primary' : 'text-txt-muted'} />
                                         {isEditing ? (
                                             <input
@@ -229,7 +229,7 @@ export default function ProfilePage() {
                                     <Clock size={20} className="text-primary" /> {t("account_info")}
                                 </h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="p-6 bg-secondary/10 border border-border/30 rounded-3xl group hover:border-primary/20 transition-all">
+                                    <div className="p-6 bg-secondary/10 border border-border/30 rounded-ds-3xl group hover:border-primary/20 transition-all">
                                         <p className="text-[10px] font-black text-txt-muted uppercase tracking-widest mb-2">{t("roles")}</p>
                                         <div className="flex gap-3">
                                             {userData.roles.map(r => (
@@ -240,7 +240,7 @@ export default function ProfilePage() {
                                             ))}
                                         </div>
                                     </div>
-                                    <div className="p-6 bg-secondary/10 border border-border/30 rounded-3xl group hover:border-primary/20 transition-all">
+                                    <div className="p-6 bg-secondary/10 border border-border/30 rounded-ds-3xl group hover:border-primary/20 transition-all">
                                         <p className="text-[10px] font-black text-txt-muted uppercase tracking-widest mb-2">{t("created_at")}</p>
                                         <div className="flex items-center gap-2 text-sm font-bold text-txt-primary">
                                             <Calendar size={14} className="text-primary" />

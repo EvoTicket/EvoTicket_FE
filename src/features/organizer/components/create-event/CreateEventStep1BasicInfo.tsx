@@ -6,7 +6,7 @@ import type { StepErrors } from "./createEventValidation";
 
 const MapPicker = dynamic(() => import("@/src/components/MapPicker"), {
     ssr: false,
-    loading: () => <div className="h-64 w-full bg-bg-subtle animate-pulse rounded-lg flex items-center justify-center border border-border-default">Loading Map...</div>
+    loading: () => <div className="h-64 w-full bg-bg-subtle animate-pulse rounded-ds-lg flex items-center justify-center border border-border-default">Loading Map...</div>
 });
 
 interface Props {
@@ -29,7 +29,7 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
     const categoryMessage = categoryError ?? errors.category;
 
     const fieldClass = (field: string) =>
-        `w-full p-2.5 border rounded-lg bg-field-bg-default focus:ring-1 focus:ring-focus-ring outline-none ${
+        `w-full p-2.5 border rounded-ds-lg bg-field-bg-default focus:ring-1 focus:ring-focus-ring outline-none ${
             errors[field]
                 ? "border-feedback-error-border focus:border-feedback-error-border"
                 : "border-border-default focus:border-field-border-focus"
@@ -60,7 +60,7 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
     return (
         <div className="space-y-6">
             {/* Hình ảnh sự kiện */}
-            <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm space-y-4">
+            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <ImageIcon className="text-text-secondary" size={20} />
                     <h3 className="text-lg font-bold text-text-primary">Hình ảnh sự kiện</h3>
@@ -70,7 +70,7 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="col-span-1" data-field="thumbnailImage" tabIndex={-1}>
                         <label className="block text-sm font-medium mb-2">Poster sự kiện <span className="text-feedback-error-text">*</span></label>
-                        <div className={`relative aspect-[3/4] border-2 border-dashed rounded-lg hover:bg-bg-subtle transition-colors cursor-pointer text-center overflow-hidden flex flex-col items-center justify-center ${
+                        <div className={`relative aspect-[3/4] border-2 border-dashed rounded-ds-lg hover:bg-bg-subtle transition-colors cursor-pointer text-center overflow-hidden flex flex-col items-center justify-center ${
                             errors.thumbnailImage ? "border-feedback-error-border" : "border-border-default"
                         }`}>
                             <input
@@ -95,7 +95,7 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
                     </div>
                     <div className="col-span-1 md:col-span-2" data-field="bannerImage" tabIndex={-1}>
                         <label className="block text-sm font-medium mb-2">Ảnh nền / Cover <span className="text-feedback-error-text">*</span></label>
-                        <div className={`relative aspect-video border-2 border-dashed rounded-lg hover:bg-bg-subtle transition-colors cursor-pointer text-center overflow-hidden flex flex-col items-center justify-center bg-bg-subtle ${
+                        <div className={`relative aspect-video border-2 border-dashed rounded-ds-lg hover:bg-bg-subtle transition-colors cursor-pointer text-center overflow-hidden flex flex-col items-center justify-center bg-bg-subtle ${
                             errors.bannerImage ? "border-feedback-error-border" : "border-border-default"
                         }`}>
                             <input
@@ -121,14 +121,14 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
                     </div>
                 </div>
 
-                <div className="mt-4 p-3 bg-feedback-warning-bg border border-feedback-warning-border text-feedback-warning-text rounded-lg flex items-start gap-2 text-sm">
+                <div className="mt-4 p-3 bg-feedback-warning-bg border border-feedback-warning-border text-feedback-warning-text rounded-ds-lg flex items-start gap-2 text-sm">
                     <svg className="shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                     <span>Ảnh phải đúng chuẩn hiển thị để được duyệt. Tránh để text quan trọng ngoài vùng an toàn.</span>
                 </div>
             </div>
 
             {/* Thông tin cơ bản */}
-            <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm space-y-4">
+            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <AlignLeft className="text-text-secondary" size={20} />
                     <h3 className="text-lg font-bold text-text-primary">Thông tin cơ bản</h3>
@@ -159,7 +159,7 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
                             type="text"
                             value={formData.tagline}
                             onChange={(e) => updateField("tagline", e.target.value)}
-                            className="w-full p-2.5 border border-border-default rounded-lg bg-field-bg-default focus:border-field-border-focus focus:ring-1 focus:ring-focus-ring outline-none"
+                            className="w-full p-2.5 border border-border-default rounded-ds-lg bg-field-bg-default focus:border-field-border-focus focus:ring-1 focus:ring-focus-ring outline-none"
                             placeholder="Tagline..."
                         />
                     </div>
@@ -167,7 +167,7 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div data-field="eventType" tabIndex={-1}>
                             <label className="block text-sm font-medium mb-2">Hình thức sự kiện <span className="text-feedback-error-text">*</span></label>
-                            <div className={`flex p-1 bg-bg-subtle rounded-lg border ${errors.eventType ? "border-feedback-error-border" : "border-border-default"}`}>
+                            <div className={`flex p-1 bg-bg-subtle rounded-ds-lg border ${errors.eventType ? "border-feedback-error-border" : "border-border-default"}`}>
                                 {EVENT_TYPE_OPTIONS.map((type) => (
                                     <button
                                         key={type.value}
@@ -179,7 +179,7 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
                                                 updateField("eventType", "OFFLINE");
                                             }
                                         }}
-                                        className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                                        className={`flex-1 py-1.5 text-sm font-medium rounded-ds-md transition-colors ${
                                             formData.eventType === type.value
                                                 ? "bg-bg-surface text-text-primary shadow-sm border border-border-subtle" 
                                                 : type.disabled
@@ -216,7 +216,7 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
                                 ))}
                             </div>
                             {categoryMessage && (
-                                <p className="mt-2 rounded-lg border border-feedback-error-border bg-feedback-error-bg px-3 py-2 text-sm text-feedback-error-text">
+                                <p className="mt-2 rounded-ds-lg border border-feedback-error-border bg-feedback-error-bg px-3 py-2 text-sm text-feedback-error-text">
                                     {categoryMessage}
                                 </p>
                             )}
@@ -226,14 +226,14 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
             </div>
 
             {/* Địa điểm */}
-            <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm space-y-4">
+            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center gap-2">
                         <MapPin className="text-text-secondary" size={20} />
                         <h3 className="text-lg font-bold text-text-primary">Địa điểm / nền tảng tổ chức</h3>
                     </div>
                     {formData.eventType !== "OFFLINE" && (
-                        <span className="px-2 py-1 bg-bg-elevated text-text-muted text-xs rounded-md border border-border-default">
+                        <span className="px-2 py-1 bg-bg-elevated text-text-muted text-xs rounded-ds-md border border-border-default">
                             {formData.eventType}
                         </span>
                     )}
@@ -298,7 +298,7 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
 
                     <div className="mt-4">
                         <label className="block text-sm font-medium mb-2">Ghim vị trí trên bản đồ</label>
-                        <div className="h-[250px] w-full rounded-xl overflow-hidden border border-border-default relative">
+                        <div className="h-[250px] w-full rounded-ds-xl overflow-hidden border border-border-default relative">
                             <MapPicker
                                 onLocationSelect={(lat, lng) => {
                                     updateField("latitude", lat);
@@ -316,7 +316,7 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
             </div>
 
             {/* Mô tả sự kiện */}
-            <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm space-y-4">
+            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <AlignLeft className="text-text-secondary" size={20} />
                     <h3 className="text-lg font-bold text-text-primary">Mô tả sự kiện</h3>
@@ -341,7 +341,7 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
                     <div data-field="detailedDescription">
                         <label className="block text-sm font-medium mb-1">Mô tả chi tiết <span className="text-feedback-error-text">*</span></label>
                         {/* Placeholder for Rich Text Editor */}
-                        <div className={`border rounded-lg overflow-hidden bg-field-bg-default focus-within:ring-1 focus-within:ring-focus-ring transition-shadow ${
+                        <div className={`border rounded-ds-lg overflow-hidden bg-field-bg-default focus-within:ring-1 focus-within:ring-focus-ring transition-shadow ${
                             errors.detailedDescription
                                 ? "border-feedback-error-border focus-within:border-feedback-error-border"
                                 : "border-border-default focus-within:border-field-border-focus"
@@ -365,7 +365,7 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
                         {renderError("detailedDescription")}
                     </div>
 
-                    <div className="rounded-lg border border-feedback-warning-border bg-feedback-warning-bg p-3 text-sm text-feedback-warning-text flex items-start gap-2">
+                    <div className="rounded-ds-lg border border-feedback-warning-border bg-feedback-warning-bg p-3 text-sm text-feedback-warning-text flex items-start gap-2">
                         <AlertTriangle className="shrink-0 mt-0.5" size={16} />
                         <span>Không đưa thông tin liên hệ trái quy định (SĐT, email, link bên ngoài) trong nội dung hiển thị công khai. Vi phạm có thể khiến sự kiện bị từ chối duyệt.</span>
                     </div>
@@ -373,7 +373,7 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
             </div>
 
             {/* Thông tin ban tổ chức */}
-            <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm space-y-4">
+            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <Building2 className="text-text-secondary" size={20} />
                     <h3 className="text-lg font-bold text-text-primary">Thông tin ban tổ chức</h3>
@@ -382,7 +382,7 @@ export function CreateEventStep1BasicInfo({ formData, updateField, provinces, wa
 
                 <div className="flex flex-col sm:flex-row gap-6">
                     <div className="shrink-0">
-                        <div className="w-24 h-24 bg-action-brand-bg-default text-action-brand-text-default rounded-xl flex items-center justify-center font-bold text-2xl mx-auto">
+                        <div className="w-24 h-24 bg-action-brand-bg-default text-action-brand-text-default rounded-ds-xl flex items-center justify-center font-bold text-2xl mx-auto">
                             ECS
                         </div>
                         <button type="button" className="text-xs text-text-secondary hover:text-text-primary w-full text-center mt-2">

@@ -42,7 +42,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
     const getTicketFieldKey = (field: keyof TicketTypeInput) => `ticket-${editingTicketId ?? "draft"}-${field}`;
 
     const fieldClass = (fieldKey: string) =>
-        `w-full p-2 border rounded-lg bg-field-bg-default text-sm outline-none ${
+        `w-full p-2 border rounded-ds-lg bg-field-bg-default text-sm outline-none ${
             mergedErrors[fieldKey]
                 ? "border-feedback-error-border focus:border-feedback-error-border"
                 : "border-border-default focus:border-field-border-focus"
@@ -155,21 +155,21 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-bg-surface border border-border-default rounded-xl p-4 flex flex-col justify-center shadow-sm">
+                <div className="bg-bg-surface border border-border-default rounded-ds-xl p-4 flex flex-col justify-center shadow-sm">
                     <span className="text-xs text-text-muted font-semibold uppercase">Tổng số vé</span>
                     <span className="text-2xl font-bold text-text-primary mt-1">
                         {formData.ticketTypes.reduce((acc, ticket) => acc + ticket.quantityTotal, 0)}
                     </span>
                 </div>
-                <div className="bg-bg-surface border border-border-default rounded-xl p-4 flex flex-col justify-center shadow-sm">
+                <div className="bg-bg-surface border border-border-default rounded-ds-xl p-4 flex flex-col justify-center shadow-sm">
                     <span className="text-xs text-text-muted font-semibold uppercase">Tổng loại vé</span>
                     <span className="text-2xl font-bold text-text-primary mt-1">{formData.ticketTypes.length}</span>
                 </div>
-                <div className="bg-bg-surface border border-border-default rounded-xl p-4 flex flex-col justify-center shadow-sm">
+                <div className="bg-bg-surface border border-border-default rounded-ds-xl p-4 flex flex-col justify-center shadow-sm">
                     <span className="text-xs text-text-muted font-semibold uppercase">Số suất diễn</span>
                     <span className="text-2xl font-bold text-text-primary mt-1">{formData.showtimes.length}</span>
                 </div>
-                <div className="bg-bg-surface border border-border-default rounded-xl p-4 flex flex-col justify-center shadow-sm">
+                <div className="bg-bg-surface border border-border-default rounded-ds-xl p-4 flex flex-col justify-center shadow-sm">
                     <span className="text-xs text-text-muted font-semibold uppercase">Sử dụng sơ đồ ghế</span>
                     <div className="mt-2">
                         <label className="flex items-center gap-2 cursor-pointer">
@@ -184,14 +184,14 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
             </div>
 
             {formData.ticketTypes.length === 0 && (
-                <div className="p-3 bg-feedback-warning-bg border border-feedback-warning-border text-feedback-warning-text rounded-lg flex items-start gap-2 text-sm" data-field="showtime">
+                <div className="p-3 bg-feedback-warning-bg border border-feedback-warning-border text-feedback-warning-text rounded-ds-lg flex items-start gap-2 text-sm" data-field="showtime">
                     <AlertCircle className="shrink-0 mt-0.5" size={16} />
                     <span>Sự kiện chưa có vé. Vui lòng tạo ít nhất 1 loại vé để tiếp tục.</span>
                 </div>
             )}
 
             {warningMessages.length > 0 && (
-                <div className="p-4 bg-feedback-warning-bg border border-feedback-warning-border text-feedback-warning-text rounded-xl flex items-start justify-between gap-4 text-sm">
+                <div className="p-4 bg-feedback-warning-bg border border-feedback-warning-border text-feedback-warning-text rounded-ds-xl flex items-start justify-between gap-4 text-sm">
                     <div className="flex items-start gap-3">
                         <AlertCircle className="shrink-0 mt-0.5" size={18} />
                         <div>
@@ -199,7 +199,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                             <p>{warningMessages[0]}</p>
                         </div>
                     </div>
-                    <button type="button" className="shrink-0 rounded-lg border border-feedback-warning-border px-3 py-1.5 text-sm font-medium">
+                    <button type="button" className="shrink-0 rounded-ds-lg border border-feedback-warning-border px-3 py-1.5 text-sm font-medium">
                         Xem chi tiết
                     </button>
                 </div>
@@ -212,7 +212,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                         <button
                             type="button"
                             onClick={handleAddShowtime}
-                            className="p-1.5 rounded-md hover:bg-bg-subtle border border-border-default text-text-secondary"
+                            className="p-1.5 rounded-ds-md hover:bg-bg-subtle border border-border-default text-text-secondary"
                             aria-label="Thêm suất diễn"
                         >
                             <Plus size={16} />
@@ -224,7 +224,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                             <div
                                 key={showtime.id}
                                 onClick={() => setSelectedShowtimeId(showtime.id)}
-                                className={`p-4 rounded-xl border transition-all cursor-pointer relative ${
+                                className={`p-4 rounded-ds-xl border transition-all cursor-pointer relative ${
                                     selectedShowtimeId === showtime.id
                                         ? "border-action-brand-bg-default bg-action-brand-bg-default/5 shadow-sm"
                                         : "border-border-default bg-bg-surface hover:border-border-strong"
@@ -299,7 +299,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                     </div>
                 </div>
 
-                <div className="w-full md:w-2/3 bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm min-h-[500px]">
+                <div className="w-full md:w-2/3 bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm min-h-[500px]">
                     <div className="flex items-center justify-between mb-6">
                         <div>
                             <h3 className="font-bold text-lg text-text-primary flex items-center gap-2">
@@ -311,7 +311,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                         <button
                             type="button"
                             onClick={startCreateTicket}
-                            className="flex items-center gap-2 px-4 py-2 bg-button-primary-bg-default text-button-primary-text-default rounded-lg text-sm font-medium hover:bg-button-primary-bg-hover"
+                            className="flex items-center gap-2 px-4 py-2 bg-button-primary-bg-default text-button-primary-text-default rounded-ds-lg text-sm font-medium hover:bg-button-primary-bg-hover"
                         >
                             <Plus size={16} />
                             Tạo loại vé
@@ -319,7 +319,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                     </div>
 
                     {isEditingTicket ? (
-                        <div className="bg-bg-page border border-action-brand-bg-default/30 rounded-xl p-5 shadow-sm" data-field={`ticket-${editingTicketId ?? "draft"}-typeName`}>
+                        <div className="bg-bg-page border border-action-brand-bg-default/30 rounded-ds-xl p-5 shadow-sm" data-field={`ticket-${editingTicketId ?? "draft"}-typeName`}>
                             <h4 className="font-bold text-text-primary mb-4 border-b border-border-default pb-2">
                                 {editingTicketId ? "Chỉnh sửa loại vé" : "Thêm loại vé mới"}
                             </h4>
@@ -368,7 +368,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                                     value={ticketDraft.description}
                                     onChange={(event) => setTicketDraft({ ...ticketDraft, description: event.target.value })}
                                     rows={2}
-                                    className="w-full p-2 border border-border-default rounded-lg bg-field-bg-default text-sm focus:border-field-border-focus outline-none resize-none"
+                                    className="w-full p-2 border border-border-default rounded-ds-lg bg-field-bg-default text-sm focus:border-field-border-focus outline-none resize-none"
                                     placeholder="Mô tả quyền lợi của vé..."
                                 />
                             </div>
@@ -438,14 +438,14 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                                 <button
                                     type="button"
                                     onClick={resetTicketEditor}
-                                    className="px-4 py-2 border border-border-default rounded-lg text-sm font-medium hover:bg-bg-surface"
+                                    className="px-4 py-2 border border-border-default rounded-ds-lg text-sm font-medium hover:bg-bg-surface"
                                 >
                                     Hủy
                                 </button>
                                 <button
                                     type="button"
                                     onClick={handleSaveTicket}
-                                    className="px-4 py-2 bg-action-brand-bg-default text-action-brand-text-default rounded-lg text-sm font-medium hover:bg-action-brand-bg-hover"
+                                    className="px-4 py-2 bg-action-brand-bg-default text-action-brand-text-default rounded-ds-lg text-sm font-medium hover:bg-action-brand-bg-hover"
                                 >
                                     {editingTicketId ? "Lưu thay đổi" : "Lưu loại vé"}
                                 </button>
@@ -454,7 +454,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                     ) : (
                         <div className="space-y-3" data-field={activeShowtime ? `showtime-${activeShowtime.id}-tickets` : "ticketType"} tabIndex={-1}>
                             {activeTickets.length === 0 ? (
-                                <div className="text-center py-10 border-2 border-dashed border-border-default rounded-xl bg-bg-page/50">
+                                <div className="text-center py-10 border-2 border-dashed border-border-default rounded-ds-xl bg-bg-page/50">
                                     <Ticket size={48} className="mx-auto text-text-muted mb-3 opacity-50" />
                                     <p className="text-text-secondary">Chưa có loại vé nào cho suất diễn này</p>
                                     <button
@@ -472,7 +472,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                                         key={ticket.id}
                                         data-field={`ticket-${ticket.id}-saleEndDate`}
                                         tabIndex={-1}
-                                        className={`flex flex-col sm:flex-row gap-4 p-4 border rounded-xl bg-bg-page hover:border-border-strong transition-colors relative group ${
+                                        className={`flex flex-col sm:flex-row gap-4 p-4 border rounded-ds-xl bg-bg-page hover:border-border-strong transition-colors relative group ${
                                             Object.keys(errors).some((key) => key.startsWith(`ticket-${ticket.id}-`))
                                                 ? "border-feedback-error-border"
                                                 : "border-border-default"
@@ -498,7 +498,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                                             </button>
                                         </div>
 
-                                        <div className="w-12 h-12 bg-action-brand-bg-default/10 text-action-brand-text-default flex items-center justify-center rounded-lg shrink-0 border border-action-brand-bg-default/20">
+                                        <div className="w-12 h-12 bg-action-brand-bg-default/10 text-action-brand-text-default flex items-center justify-center rounded-ds-lg shrink-0 border border-action-brand-bg-default/20">
                                             <Ticket size={24} />
                                         </div>
 
@@ -517,7 +517,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                                                 <p className="text-xs text-text-secondary line-clamp-1 mb-2">{ticket.description}</p>
                                             )}
 
-                                            <div className="flex flex-wrap items-center gap-3 mt-2 text-[11px] text-text-muted bg-bg-surface inline-flex px-2 py-1 rounded-md border border-border-default">
+                                            <div className="flex flex-wrap items-center gap-3 mt-2 text-[11px] text-text-muted bg-bg-surface inline-flex px-2 py-1 rounded-ds-md border border-border-default">
                                                 <span className="flex items-center gap-1">
                                                     <Calendar size={12} /> Bán: {formatDate(ticket.saleStartDate)} - {formatDate(ticket.saleEndDate)}
                                                 </span>

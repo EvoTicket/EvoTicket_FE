@@ -51,12 +51,12 @@ export default function AdminResalePage() {
           <p className="text-sm text-txt-secondary mt-1">{t("resale_subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex bg-surface border border-border rounded-xl p-1 shadow-sm text-xs font-bold transition-colors">
+          <div className="flex bg-surface border border-border rounded-ds-xl p-1 shadow-sm text-xs font-bold transition-colors">
             {["24h", "7d", "30d", t("common.custom")].map((range) => (
-              <button key={range} className={`px-4 py-1.5 rounded-lg transition-all ${range === '7d' ? 'bg-main text-txt-primary shadow-sm' : 'text-txt-muted hover:text-txt-secondary'}`}>{range}</button>
+              <button key={range} className={`px-4 py-1.5 rounded-ds-lg transition-all ${range === '7d' ? 'bg-main text-txt-primary shadow-sm' : 'text-txt-muted hover:text-txt-secondary'}`}>{range}</button>
             ))}
           </div>
-          <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all">
+          <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-ds-xl font-bold shadow-lg shadow-primary/20 transition-all">
             <Download size={18} />
             <span>{t("btn_export_report")}</span>
           </button>
@@ -73,12 +73,12 @@ export default function AdminResalePage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center bg-surface border border-border rounded-2xl p-1 w-fit shadow-sm">
+      <div className="flex items-center bg-surface border border-border rounded-ds-2xl p-1 w-fit shadow-sm">
         {["monitoring", "listings_review", "disputes_exceptions"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-6 py-2 text-sm font-bold rounded-xl transition-all ${activeTab === tab ? "bg-main text-primary shadow-sm border border-border" : "text-txt-muted hover:text-txt-secondary"
+            className={`px-6 py-2 text-sm font-bold rounded-ds-xl transition-all ${activeTab === tab ? "bg-main text-primary shadow-sm border border-border" : "text-txt-muted hover:text-txt-secondary"
               }`}
           >
             {t(`tab_${tab}`)}
@@ -106,7 +106,7 @@ function MonitoringTab({ t }: any) {
           <ChartCard title={t("avg_resale_price")} value="1.42M" sub={t("common.resale_sub.million_vnd")} data={resaleMockData.priceTrendData} dataKey="price" color="#8b5cf6" />
         </div>
 
-        <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+        <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
             <Layers size={18} className="text-txt-muted" />
             <h3 className="text-lg font-bold text-txt-primary">{t("top_resale_events")}</h3>
@@ -121,7 +121,7 @@ function MonitoringTab({ t }: any) {
 
       {/* Right Column - Compliance & Spikes */}
       <div className="lg:col-span-4 space-y-6">
-        <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+        <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
             <ShieldAlert size={18} className="text-primary" />
             <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">{t("price_cap_compliance")}</h3>
@@ -131,13 +131,13 @@ function MonitoringTab({ t }: any) {
             <ComplianceBar label={t("near_cap")} count={14} total={214} color="bg-amber-500" />
             <ComplianceBar label={t("over_cap")} count={7} total={214} color="bg-rose-500" />
           </div>
-          <div className="bg-main border border-border rounded-2xl p-4 flex gap-3">
+          <div className="bg-main border border-border rounded-ds-2xl p-4 flex gap-3">
             <Info size={16} className="text-txt-muted flex-shrink-0" />
             <p className="text-[10px] text-txt-muted font-medium leading-relaxed italic">{t("price_cap_info")}</p>
           </div>
         </div>
 
-        <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+        <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
             <Zap size={18} className="text-rose-500" />
             <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">{t("suspicious_spikes")}</h3>
@@ -165,21 +165,21 @@ function ListingsReviewTab({ t }: any) {
   return (
     <div className="space-y-6">
       {/* Search & Filters */}
-      <div className="bg-surface border border-border rounded-3xl p-4 shadow-sm flex flex-wrap items-center gap-4">
+      <div className="bg-surface border border-border rounded-ds-3xl p-4 shadow-sm flex flex-wrap items-center gap-4">
         <div className="relative flex-1 min-w-[300px]">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-txt-muted" size={18} />
           <input
             type="text"
             placeholder="Tìm theo Listing ID, event hoặc seller"
-            className="w-full pl-12 pr-4 py-2.5 bg-main border border-border rounded-2xl text-sm focus:bg-surface focus:border-primary outline-none transition-all"
+            className="w-full pl-12 pr-4 py-2.5 bg-main border border-border rounded-ds-2xl text-sm focus:bg-surface focus:border-primary outline-none transition-all"
           />
         </div>
-        <div className="flex bg-main border border-border rounded-xl p-1">
+        <div className="flex bg-main border border-border rounded-ds-xl p-1">
           {["Tất cả", "Active", "Locked", "Over cap", "Under review", "Removed"].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all ${filter === f ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-txt-muted hover:text-txt-secondary'}`}
+              className={`px-4 py-1.5 text-[10px] font-black rounded-ds-lg transition-all ${filter === f ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-txt-muted hover:text-txt-secondary'}`}
             >
               {f.toUpperCase()}
             </button>
@@ -189,7 +189,7 @@ function ListingsReviewTab({ t }: any) {
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         {/* Listings Table */}
-        <div className="xl:col-span-8 bg-surface border border-border rounded-3xl overflow-hidden shadow-sm h-fit">
+        <div className="xl:col-span-8 bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm h-fit">
           <div className="p-6 border-b border-border flex items-center gap-2">
             <Layers size={18} className="text-txt-muted" />
             <h3 className="text-sm font-black text-txt-primary">Listings cần rà soát</h3>
@@ -241,7 +241,7 @@ function ListingsReviewTab({ t }: any) {
         {/* Listing Detail Sidebar */}
         {selectedListing && (
           <div className="xl:col-span-4 space-y-6">
-            <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-6 animate-in slide-in-from-right-4">
+            <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-6 animate-in slide-in-from-right-4">
               <div className="flex items-center gap-2">
                 <DatabaseIcon size={18} className="text-txt-muted" />
                 <h3 className="text-sm font-black text-txt-primary">Chi tiết {selectedListing.id}</h3>
@@ -267,7 +267,7 @@ function ListingsReviewTab({ t }: any) {
 
               {selectedListing.flag !== '—' && (
 
-                <div className="p-4 bg-orange-500/5 border border-orange-500/10 rounded-2xl flex gap-3">
+                <div className="p-4 bg-orange-500/5 border border-orange-500/10 rounded-ds-2xl flex gap-3">
                   <Flag size={16} className="text-orange-600 flex-shrink-0" />
                   <div>
                     <p className="text-[10px] font-black text-orange-900 uppercase">System flag</p>
@@ -294,13 +294,13 @@ function ListingsReviewTab({ t }: any) {
                 <textarea
                   placeholder="Ghi chú nội bộ về listing này..."
                   defaultValue={selectedListing.note}
-                  className="w-full p-4 bg-main border border-border rounded-2xl text-xs outline-none focus:border-primary transition-all min-h-[100px] resize-none"
+                  className="w-full p-4 bg-main border border-border rounded-ds-2xl text-xs outline-none focus:border-primary transition-all min-h-[100px] resize-none"
                 ></textarea>
                 <div className="grid grid-cols-2 gap-2">
-                  <button className="py-2.5 bg-surface border border-border rounded-xl text-[10px] font-black hover:bg-main transition-all">Thêm ghi chú</button>
-                  <button className="py-2.5 bg-surface border border-border rounded-xl text-[10px] font-black hover:bg-main transition-all">Mark under review</button>
-                  <button className="py-2.5 bg-surface border border-border rounded-xl text-[10px] font-black hover:bg-main transition-all text-amber-600">Escalate</button>
-                  <button className="py-2.5 bg-rose-600 text-white rounded-xl text-[10px] font-black shadow-lg shadow-rose-600/20 hover:bg-rose-700 transition-all">Remove listing</button>
+                  <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all">Thêm ghi chú</button>
+                  <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all">Mark under review</button>
+                  <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all text-amber-600">Escalate</button>
+                  <button className="py-2.5 bg-rose-600 text-white rounded-ds-xl text-[10px] font-black shadow-lg shadow-rose-600/20 hover:bg-rose-700 transition-all">Remove listing</button>
                 </div>
               </div>
             </div>
@@ -317,7 +317,7 @@ function DisputesTab({ t }: any) {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
       {/* Disputes Table */}
-      <div className="xl:col-span-8 bg-surface border border-border rounded-3xl overflow-hidden shadow-sm h-fit">
+      <div className="xl:col-span-8 bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm h-fit">
         <div className="p-6 border-b border-border flex items-center gap-2">
           <Scale size={18} className="text-txt-muted" />
           <h3 className="text-sm font-black text-txt-primary">Hàng đợi disputes resale</h3>
@@ -354,7 +354,7 @@ function DisputesTab({ t }: any) {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 bg-surface border border-border rounded-lg text-[9px] font-black uppercase">
+                    <span className="px-2 py-1 bg-surface border border-border rounded-ds-lg text-[9px] font-black uppercase">
                       {d.status}
                     </span>
                   </td>
@@ -371,7 +371,7 @@ function DisputesTab({ t }: any) {
 
       {/* Case Detail Sidebar */}
       {selectedCase && (
-        <div className="xl:col-span-4 bg-surface border border-border rounded-3xl p-6 shadow-sm h-fit space-y-6">
+        <div className="xl:col-span-4 bg-surface border border-border rounded-ds-3xl p-6 shadow-sm h-fit space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MessageSquare size={18} className="text-indigo-500" />
@@ -397,7 +397,7 @@ function DisputesTab({ t }: any) {
 
             <div className="pt-6 border-t border-border">
               <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">Mô tả</p>
-              <div className="p-4 bg-main rounded-2xl text-xs text-txt-secondary leading-relaxed font-medium">
+              <div className="p-4 bg-main rounded-ds-2xl text-xs text-txt-secondary leading-relaxed font-medium">
                 {selectedCase.description}
               </div>
             </div>
@@ -406,15 +406,15 @@ function DisputesTab({ t }: any) {
               <textarea
                 placeholder="Ghi chú nội bộ về case..."
                 defaultValue={selectedCase.note}
-                className="w-full p-4 bg-main border border-border rounded-2xl text-xs outline-none focus:border-primary transition-all min-h-[100px] resize-none"
+                className="w-full p-4 bg-main border border-border rounded-ds-2xl text-xs outline-none focus:border-primary transition-all min-h-[100px] resize-none"
               ></textarea>
             </div>
 
             <div className="grid grid-cols-2 gap-2 pt-2">
-              <button className="py-2.5 bg-surface border border-border rounded-xl text-[10px] font-black hover:bg-main transition-all">Thêm ghi chú</button>
-              <button className="py-2.5 bg-surface border border-border rounded-xl text-[10px] font-black hover:bg-main transition-all text-amber-600">Escalate</button>
-              <button className="py-2.5 bg-surface border border-border rounded-xl text-[10px] font-black hover:bg-main transition-all text-rose-600">Remove listing</button>
-              <button className="py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all">Resolve case</button>
+              <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all">Thêm ghi chú</button>
+              <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all text-amber-600">Escalate</button>
+              <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all text-rose-600">Remove listing</button>
+              <button className="py-2.5 bg-indigo-600 text-white rounded-ds-xl text-[10px] font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all">Resolve case</button>
             </div>
           </div>
         </div>
@@ -433,9 +433,9 @@ function StatsCard({ icon, label, value, sub, color }: any) {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm transition-colors">
+    <div className="bg-surface border border-border rounded-ds-2xl p-5 shadow-sm transition-colors">
       <div className="flex items-center gap-3 mb-3">
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${colors[color]}`}>
+        <div className={`w-9 h-9 rounded-ds-xl flex items-center justify-center ${colors[color]}`}>
           {icon}
         </div>
         <span className="text-[10px] font-bold text-txt-muted uppercase tracking-widest">{label}</span>
@@ -448,7 +448,7 @@ function StatsCard({ icon, label, value, sub, color }: any) {
 
 function ChartCard({ title, value, sub, data, dataKey, color }: any) {
   return (
-    <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm transition-colors">
+    <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm transition-colors">
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-xs font-bold text-txt-muted flex items-center gap-2">
           <Activity size={14} />
@@ -535,7 +535,7 @@ function SpikeAlert({ level, title, desc }: any) {
   };
 
   return (
-    <div className={`p-3.5 rounded-2xl border ${styles[level]} flex items-center justify-between group cursor-pointer hover:shadow-sm transition-all`}>
+    <div className={`p-3.5 rounded-ds-2xl border ${styles[level]} flex items-center justify-between group cursor-pointer hover:shadow-sm transition-all`}>
       <div className="flex items-center gap-3">
         <div className="text-[9px] font-black uppercase tracking-widest">{level}</div>
         <div className="w-px h-3 bg-current/20"></div>

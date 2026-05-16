@@ -18,7 +18,7 @@ interface OrganizerToolbarProps {
 
 function FilterSelect({ label }: { label: string }) {
   return (
-    <button className="flex items-center gap-2 rounded-md border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-3 py-2 text-[13px] text-[var(--color-text-secondary)]"
+    <button className="flex items-center gap-2 rounded-ds-md border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-3 py-2 text-[13px] text-[var(--color-text-secondary)]"
       style={{ minWidth: 150, justifyContent: "space-between" }}
     >
       <span>{label}</span>
@@ -45,7 +45,7 @@ export function OrganizerToolbar({
     <div className="flex flex-wrap items-center gap-3">
       {/* Search */}
       <div
-        className="flex flex-1 items-center gap-2 rounded-md border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-3 py-2"
+        className="flex flex-1 items-center gap-2 rounded-ds-md border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-3 py-2"
         style={{ minWidth: 320, maxWidth: 420 }}
       >
         <Search size={14} className="text-[var(--color-icon-muted)]" />
@@ -67,7 +67,7 @@ export function OrganizerToolbar({
       {onClearFilters && (
         <button
           onClick={onClearFilters}
-          className="flex items-center gap-1.5 rounded-md border border-[var(--color-border-default)] bg-transparent px-3 py-2 text-[13px] text-[var(--color-text-secondary)]"
+          className="flex items-center gap-1.5 rounded-ds-md border border-[var(--color-border-default)] bg-transparent px-3 py-2 text-[13px] text-[var(--color-text-secondary)]"
         >
           <X size={13} />
           Xóa bộ lọc

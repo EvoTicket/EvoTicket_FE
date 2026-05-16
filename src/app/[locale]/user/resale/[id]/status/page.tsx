@@ -52,7 +52,7 @@ export default function ResalePaymentStatusPage() {
         switch(status) {
             case 'success':
                 return (
-                    <div className="bg-[#fafafa] dark:bg-[#111827] border border-border-default rounded-xl p-8 max-w-2xl w-full flex flex-col items-center shadow-sm">
+                    <div className="bg-[#fafafa] dark:bg-[#111827] border border-border-default rounded-ds-xl p-8 max-w-2xl w-full flex flex-col items-center shadow-sm">
                         <StatusIcon />
                         <h2 className="text-2xl font-bold text-text-primary mb-3">Mua vé bán lại thành công</h2>
                         <p className="text-[13px] text-text-secondary text-center mb-6 leading-relaxed">
@@ -86,7 +86,7 @@ export default function ResalePaymentStatusPage() {
                             </div>
                         </div>
 
-                        <div className="w-full bg-[#f0f4ff] dark:bg-[#1e1b4b] text-[#3b82f6] dark:text-[#818cf8] text-[12px] p-4 rounded-lg text-center mb-6 border border-[#bfdbfe] dark:border-[#4338ca]">
+                        <div className="w-full bg-[#f0f4ff] dark:bg-[#1e1b4b] text-[#3b82f6] dark:text-[#818cf8] text-[12px] p-4 rounded-ds-lg text-center mb-6 border border-[#bfdbfe] dark:border-[#4338ca]">
                             Vé bán lại sẽ xuất hiện trong Ví vé của bạn ngay sau khi hệ thống hoàn tất cập nhật quyền sở hữu.
                         </div>
 
@@ -105,7 +105,7 @@ export default function ResalePaymentStatusPage() {
                 );
             case 'pending':
                 return (
-                    <div className="bg-[#fafafa] dark:bg-[#111827] border border-border-default rounded-xl p-8 max-w-2xl w-full flex flex-col items-center shadow-sm">
+                    <div className="bg-[#fafafa] dark:bg-[#111827] border border-border-default rounded-ds-xl p-8 max-w-2xl w-full flex flex-col items-center shadow-sm">
                         <StatusIcon />
                         <h2 className="text-2xl font-bold text-text-primary mb-3">Đang xác nhận thanh toán vé bán lại</h2>
                         <p className="text-[13px] text-text-secondary text-center mb-6 leading-relaxed">
@@ -135,7 +135,7 @@ export default function ResalePaymentStatusPage() {
                             </div>
                         </div>
 
-                        <div className="w-full bg-[#f0f4ff] dark:bg-[#1e1b4b] text-[#3b82f6] dark:text-[#818cf8] text-[12px] p-4 rounded-lg text-center mb-6 border border-[#bfdbfe] dark:border-[#4338ca]">
+                        <div className="w-full bg-[#f0f4ff] dark:bg-[#1e1b4b] text-[#3b82f6] dark:text-[#818cf8] text-[12px] p-4 rounded-ds-lg text-center mb-6 border border-[#bfdbfe] dark:border-[#4338ca]">
                             Niêm yết này đang được giữ tạm cho bạn trong thời gian xác nhận thanh toán.
                         </div>
 
@@ -155,7 +155,7 @@ export default function ResalePaymentStatusPage() {
             case 'failed':
                 return (
                     <div className="w-full max-w-2xl">
-                        <div className="bg-[#fafafa] dark:bg-[#111827] border border-border-default rounded-xl p-8 w-full flex flex-col items-center shadow-sm">
+                        <div className="bg-[#fafafa] dark:bg-[#111827] border border-border-default rounded-ds-xl p-8 w-full flex flex-col items-center shadow-sm">
                             <StatusIcon />
                             <h2 className="text-2xl font-bold text-text-primary mb-3 text-center">Thanh toán vé bán lại không thành công</h2>
                             <p className="text-[13px] text-text-secondary text-center mb-6 leading-relaxed">
@@ -197,7 +197,7 @@ export default function ResalePaymentStatusPage() {
                         </div>
 
                         {/* Bottom Warning */}
-                        <div className="mt-4 border border-border-default rounded-lg p-4 bg-white dark:bg-transparent flex gap-3 shadow-sm">
+                        <div className="mt-4 border border-border-default rounded-ds-lg p-4 bg-white dark:bg-transparent flex gap-3 shadow-sm">
                             <AlertCircle size={18} className="text-[#ef4444] shrink-0 mt-0.5" />
                             <div>
                                 <h4 className="text-[13px] font-bold text-[#ef4444] mb-1">Lưu ý</h4>
@@ -209,7 +209,7 @@ export default function ResalePaymentStatusPage() {
             case 'expired':
                 return (
                     <div className="w-full max-w-2xl">
-                        <div className="bg-[#fafafa] dark:bg-[#111827] border border-border-default rounded-xl p-8 w-full flex flex-col items-center shadow-sm">
+                        <div className="bg-[#fafafa] dark:bg-[#111827] border border-border-default rounded-ds-xl p-8 w-full flex flex-col items-center shadow-sm">
                             <StatusIcon />
                             <h2 className="text-2xl font-bold text-text-primary mb-3">Phiên thanh toán vé bán lại đã hết hạn</h2>
                             <p className="text-[13px] text-text-secondary text-center mb-6 leading-relaxed">
@@ -253,7 +253,7 @@ export default function ResalePaymentStatusPage() {
                         </div>
 
                         {/* Bottom Warning */}
-                        <div className="mt-4 border border-border-default rounded-lg p-4 bg-white dark:bg-transparent flex gap-3 shadow-sm">
+                        <div className="mt-4 border border-border-default rounded-ds-lg p-4 bg-white dark:bg-transparent flex gap-3 shadow-sm">
                             <AlertCircle size={18} className="text-[#ef4444] shrink-0 mt-0.5" />
                             <div>
                                 <h4 className="text-[13px] font-bold text-[#ef4444] mb-1">Lưu ý</h4>
@@ -264,7 +264,7 @@ export default function ResalePaymentStatusPage() {
                 );
             case 'cancelled':
                 return (
-                    <div className="bg-[#fafafa] dark:bg-[#111827] border border-border-default rounded-xl p-8 max-w-2xl w-full flex flex-col items-center shadow-sm">
+                    <div className="bg-[#fafafa] dark:bg-[#111827] border border-border-default rounded-ds-xl p-8 max-w-2xl w-full flex flex-col items-center shadow-sm">
                         <StatusIcon />
                         <h2 className="text-2xl font-bold text-text-primary mb-3">Bạn đã hủy thanh toán vé bán lại</h2>
                         <p className="text-[13px] text-text-secondary text-center mb-6 leading-relaxed">

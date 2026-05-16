@@ -91,14 +91,14 @@ export default function ResaleDetailPage() {
                         </p>
                     </div>
                     <Link href={`/${locale}/user/resale`}>
-                        <button className="bg-[#f0f3f6] dark:bg-gray-800 hover:bg-[#e2e8f0] dark:hover:bg-gray-700 text-text-primary px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors active:scale-[0.98]">
+                        <button className="bg-[#f0f3f6] dark:bg-gray-800 hover:bg-[#e2e8f0] dark:hover:bg-gray-700 text-text-primary px-5 py-2.5 rounded-ds-lg text-sm font-semibold transition-colors active:scale-[0.98]">
                             {t('back_to_marketplace')}
                         </button>
                     </Link>
                 </div>
 
                 <div className="py-24 flex justify-center">
-                    <div className="bg-bg-surface border border-border-default rounded-xl p-10 max-w-md w-full flex flex-col items-center text-center shadow-sm">
+                    <div className="bg-bg-surface border border-border-default rounded-ds-xl p-10 max-w-md w-full flex flex-col items-center text-center shadow-sm">
                         <div className="w-14 h-14 rounded-full border border-border-default flex items-center justify-center mb-6">
                             <HelpCircle size={28} className="text-text-secondary" />
                         </div>
@@ -138,14 +138,14 @@ export default function ResaleDetailPage() {
                     </p>
                 </div>
                 <Link href={`/${locale}/user/resale`}>
-                    <button className="bg-[#f0f3f6] dark:bg-gray-800 hover:bg-[#e2e8f0] dark:hover:bg-gray-700 text-text-primary px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors active:scale-[0.98]">
+                    <button className="bg-[#f0f3f6] dark:bg-gray-800 hover:bg-[#e2e8f0] dark:hover:bg-gray-700 text-text-primary px-5 py-2.5 rounded-ds-lg text-sm font-semibold transition-colors active:scale-[0.98]">
                         {t('back_to_marketplace')}
                     </button>
                 </Link>
             </div>
 
             {/* Hero Event Info */}
-            <div className="bg-bg-surface border border-border-default rounded-xl p-6 mb-8 shadow-sm">
+            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 mb-8 shadow-sm">
                 <div className="flex flex-col md:flex-row justify-between md:items-end gap-6 mb-6">
                     <div>
                         <h2 className="text-2xl font-bold text-text-primary mb-3">{listingData.eventName}</h2>
@@ -156,10 +156,10 @@ export default function ResaleDetailPage() {
                     </div>
                     <div className="text-left md:text-right">
                         <div className="flex items-center gap-2 mb-3 md:justify-end">
-                            <span className="bg-[#1a1a1a] dark:bg-black text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded-sm flex items-center gap-1.5">
+                            <span className="bg-[#1a1a1a] dark:bg-black text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded-ds-sm flex items-center gap-1.5">
                                 <CheckCircle2 size={12} /> {t('official_resale')}
                             </span>
-                            <span className="bg-[#1a1a1a] dark:bg-black text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded-sm">
+                            <span className="bg-[#1a1a1a] dark:bg-black text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded-ds-sm">
                                 {t('selling')}
                             </span>
                         </div>
@@ -180,7 +180,7 @@ export default function ResaleDetailPage() {
                 {/* Left Column */}
                 <div className="lg:col-span-2 space-y-6 w-full">
                     {/* Thông tin vé */}
-                    <div className="border border-border-default rounded-xl p-6 shadow-sm bg-bg-surface">
+                    <div className="border border-border-default rounded-ds-xl p-6 shadow-sm bg-bg-surface">
                         <h3 className="text-[16px] font-bold text-text-primary mb-5">{t('ticket_info')}</h3>
                         <div className="space-y-4 text-[13px]">
                             <div className="flex justify-between items-center pb-3 border-b border-border-default/50 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
@@ -216,13 +216,13 @@ export default function ResaleDetailPage() {
                                 <span className="font-bold text-text-primary text-right">{t('transaction_type_value')}</span>
                             </div>
                         </div>
-                        <p className="text-[12px] text-text-muted mt-5 leading-relaxed bg-[#fafafa] dark:bg-[#111827] p-3.5 rounded-lg border border-border-default">
+                        <p className="text-[12px] text-text-muted mt-5 leading-relaxed bg-[#fafafa] dark:bg-[#111827] p-3.5 rounded-ds-lg border border-border-default">
                             {t('verified_marketplace_note')}
                         </p>
                     </div>
 
                     {/* Xác thực vé */}
-                    <div className="border border-border-default rounded-xl p-6 shadow-sm bg-bg-surface">
+                    <div className="border border-border-default rounded-ds-xl p-6 shadow-sm bg-bg-surface">
                         <h3 className="text-[16px] font-bold text-text-primary mb-5">{t('verification_title')}</h3>
                         <div className="space-y-4 text-[13px] mb-5">
                             <div className="flex justify-between items-center pb-3 border-b border-border-default/50">
@@ -243,7 +243,7 @@ export default function ResaleDetailPage() {
                             </div>
                         </div>
 
-                        <div className="bg-[#fafafa] dark:bg-[#111827] rounded-lg p-3.5 border border-border-default mb-5 text-[12px] text-text-secondary leading-relaxed">
+                        <div className="bg-[#fafafa] dark:bg-[#111827] rounded-ds-lg p-3.5 border border-border-default mb-5 text-[12px] text-text-secondary leading-relaxed">
                             {t('verification_desc')}
                         </div>
 
@@ -260,7 +260,7 @@ export default function ResaleDetailPage() {
                     </div>
 
                     {/* Giá vé */}
-                    <div className="border border-border-default rounded-xl p-6 shadow-sm bg-bg-surface">
+                    <div className="border border-border-default rounded-ds-xl p-6 shadow-sm bg-bg-surface">
                         <h3 className="text-[16px] font-bold text-text-primary mb-5">{t('price_title')}</h3>
                         <div className="space-y-4 text-[13px] mb-6">
                             <div className="flex justify-between items-center">
@@ -281,14 +281,14 @@ export default function ResaleDetailPage() {
                             </div>
                         </div>
 
-                        <div className="bg-[#fafafa] dark:bg-[#111827] rounded-lg p-3.5 border border-border-default text-[12px] text-text-secondary mb-3">
+                        <div className="bg-[#fafafa] dark:bg-[#111827] rounded-ds-lg p-3.5 border border-border-default text-[12px] text-text-secondary mb-3">
                             {t('anti_speculation_note')}
                         </div>
                         <p className="text-[11px] text-text-muted mt-2">{t('final_price_note')}</p>
                     </div>
 
                     {/* Sau khi bạn mua */}
-                    <div className="border border-border-default rounded-xl p-6 shadow-sm bg-bg-surface">
+                    <div className="border border-border-default rounded-ds-xl p-6 shadow-sm bg-bg-surface">
                         <h3 className="text-[16px] font-bold text-text-primary mb-4">{t('after_purchase_title')}</h3>
                         <ul className="space-y-3 text-[13px] text-text-secondary list-disc pl-5 marker:text-text-muted">
                             <li>{t('after_purchase_1')}</li>
@@ -299,7 +299,7 @@ export default function ResaleDetailPage() {
                     </div>
 
                     {/* Lưu ý khi mua vé bán lại */}
-                    <div className="border border-border-default rounded-xl p-6 shadow-sm bg-[#fafafa] dark:bg-[#111827]">
+                    <div className="border border-border-default rounded-ds-xl p-6 shadow-sm bg-[#fafafa] dark:bg-[#111827]">
                         <h3 className="text-[16px] font-bold text-text-primary mb-4">{t('resale_notes_title')}</h3>
                         <ul className="space-y-3 text-[13px] text-text-secondary list-disc pl-5 mb-6 marker:text-text-muted">
                             <li>{t('resale_note_1')}</li>
@@ -316,11 +316,11 @@ export default function ResaleDetailPage() {
 
                 {/* Right Column / Sidebar */}
                 <div className="lg:col-span-1">
-                    <div className="sticky top-6 border border-border-default rounded-xl p-6 shadow-sm bg-bg-surface">
+                    <div className="sticky top-6 border border-border-default rounded-ds-xl p-6 shadow-sm bg-bg-surface">
                         <h3 className="font-bold text-[16px] text-text-primary mb-5 border-b border-border-default pb-4">{t('listing_summary')}</h3>
 
                         <div className="mb-5">
-                            <div className="inline-flex items-center gap-2 mb-3 bg-[#1a1a1a] dark:bg-black text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded-sm">
+                            <div className="inline-flex items-center gap-2 mb-3 bg-[#1a1a1a] dark:bg-black text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded-ds-sm">
                                 <CheckCircle2 size={12} /> {t('official_resale')}
                             </div>
                             <h4 className="font-bold text-[14px] text-text-primary mb-2">{listingData.eventName}</h4>
@@ -346,7 +346,7 @@ export default function ResaleDetailPage() {
                             <span className="text-2xl font-bold text-text-primary">{formatCurrency(listingData.listingPrice)}</span>
                         </div>
 
-                        <div className="bg-[#fafafa] dark:bg-[#111827] rounded-lg p-4 border border-border-default mb-6">
+                        <div className="bg-[#fafafa] dark:bg-[#111827] rounded-ds-lg p-4 border border-border-default mb-6">
                             <div className="flex items-center gap-2 text-[13px] font-bold text-text-primary mb-3">
                                 <ShieldCheck size={16} className="text-green-600" /> {t('safety_commitment')}
                             </div>
@@ -368,17 +368,17 @@ export default function ResaleDetailPage() {
 
                         <div className="space-y-3">
                             <Link href={`/${locale}/user/resale/${listingId}/checkout`} className="block">
-                                <button className="w-full py-3 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-bold transition-all duration-200 shadow-md active:scale-[0.98]">
+                                <button className="w-full py-3 bg-primary hover:bg-primary-hover text-white rounded-ds-lg text-[13px] font-bold transition-all duration-200 shadow-md active:scale-[0.98]">
                                     {t('buy_resale_ticket')}
                                 </button>
                             </Link>
                             <Link href={`/${locale}/user/tickets/${listingData.ticketAssetId}/provenance`} className="block">
-                                <button className="w-full py-3 bg-[#e5e7eb]/40 dark:bg-[#1f2937] hover:bg-[#e5e7eb] dark:hover:bg-gray-700 text-text-primary rounded-lg text-[13px] font-semibold transition-colors active:scale-[0.98]">
+                                <button className="w-full py-3 bg-[#e5e7eb]/40 dark:bg-[#1f2937] hover:bg-[#e5e7eb] dark:hover:bg-gray-700 text-text-primary rounded-ds-lg text-[13px] font-semibold transition-colors active:scale-[0.98]">
                                     {t('view_provenance')}
                                 </button>
                             </Link>
                             <Link href={`/${locale}/user/resale`} className="block">
-                                <button className="w-full py-3 bg-Bg-Surface dark:bg-transparent border border-border-default hover:bg-[#f0f3f6] dark:hover:bg-gray-800 text-text-primary rounded-lg text-[13px] font-semibold transition-colors active:scale-[0.98]">
+                                <button className="w-full py-3 bg-Bg-Surface dark:bg-transparent border border-border-default hover:bg-[#f0f3f6] dark:hover:bg-gray-800 text-text-primary rounded-ds-lg text-[13px] font-semibold transition-colors active:scale-[0.98]">
                                     {t('back_to_marketplace')}
                                 </button>
                             </Link>

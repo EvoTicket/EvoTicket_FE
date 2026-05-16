@@ -24,7 +24,7 @@ export function EventDetailLayout({ children }: EventDetailLayoutProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="rounded-lg border border-border-subtle bg-bg-surface">
+      <section className="rounded-ds-lg border border-border-subtle bg-bg-surface">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border-subtle p-5">
           <div className="flex min-w-0 items-center gap-4">
             <div className="min-w-0">
@@ -42,13 +42,13 @@ export function EventDetailLayout({ children }: EventDetailLayoutProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 rounded-md border border-border-default bg-transparent px-3 py-2 text-sm text-text-primary transition-colors hover:bg-bg-elevated">
+            <button className="flex items-center gap-2 rounded-ds-md border border-border-default bg-transparent px-3 py-2 text-sm text-text-primary transition-colors hover:bg-bg-elevated">
               <ExternalLink size={15} />
               Mở trang public
             </button>
             <Link
               href={`${basePath}/edit`}
-              className="flex items-center gap-2 rounded-md border border-action-brand-bg-hover bg-action-brand-bg-default px-3 py-2 text-sm font-medium text-action-brand-text-default transition-colors hover:bg-action-brand-bg-hover"
+              className="flex items-center gap-2 rounded-ds-md border border-action-brand-bg-hover bg-action-brand-bg-default px-3 py-2 text-sm font-medium text-action-brand-text-default transition-colors hover:bg-action-brand-bg-hover"
             >
               <Pencil size={15} />
               Chỉnh sửa sự kiện

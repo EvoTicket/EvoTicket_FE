@@ -18,7 +18,7 @@ export function CreateEventStep5Review({ formData, setStep, errors = {} }: Props
 
     return (
         <div className="space-y-6">
-            <div className="bg-feedback-info-bg/30 border border-feedback-info-border text-text-primary rounded-xl p-4 flex gap-3 text-sm">
+            <div className="bg-feedback-info-bg/30 border border-feedback-info-border text-text-primary rounded-ds-xl p-4 flex gap-3 text-sm">
                 <AlertCircle className="shrink-0 text-feedback-info-text mt-0.5" size={18} />
                 <div>
                     <span className="font-bold">Kiểm tra thông tin trước khi gửi duyệt</span>
@@ -28,14 +28,14 @@ export function CreateEventStep5Review({ formData, setStep, errors = {} }: Props
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* 1. Nhận diện sự kiện */}
-                <div className="bg-bg-surface border border-border-default rounded-xl overflow-hidden shadow-sm flex flex-col">
+                <div className="bg-bg-surface border border-border-default rounded-ds-xl overflow-hidden shadow-sm flex flex-col">
                     <div className="px-4 py-3 border-b border-border-default flex justify-between items-center bg-bg-page/50">
                         <h4 className="font-bold text-text-primary text-sm">1. Thông tin cơ bản</h4>
                         <button type="button" onClick={() => setStep(1)} className="text-action-brand-text-default text-xs font-medium hover:underline">Sửa</button>
                     </div>
                     <div className="p-4 flex-1">
                         <div className="mb-4 grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-4">
-                            <div className="aspect-[3/4] rounded-lg bg-bg-subtle overflow-hidden border border-border-default">
+                            <div className="aspect-[3/4] rounded-ds-lg bg-bg-subtle overflow-hidden border border-border-default">
                                 {formData.thumbnailPreview ? (
                                     <img src={formData.thumbnailPreview} alt="Poster" className="w-full h-full object-cover" />
                                 ) : (
@@ -45,7 +45,7 @@ export function CreateEventStep5Review({ formData, setStep, errors = {} }: Props
                                     </div>
                                 )}
                             </div>
-                            <div className="aspect-video rounded-lg bg-bg-subtle overflow-hidden border border-border-default">
+                            <div className="aspect-video rounded-ds-lg bg-bg-subtle overflow-hidden border border-border-default">
                                 {formData.bannerPreview ? (
                                     <img src={formData.bannerPreview} alt="Cover" className="w-full h-full object-cover" />
                                 ) : (
@@ -80,18 +80,18 @@ export function CreateEventStep5Review({ formData, setStep, errors = {} }: Props
                 </div>
 
                 {/* 2. Suất diễn & Vé */}
-                <div className="bg-bg-surface border border-border-default rounded-xl overflow-hidden shadow-sm flex flex-col">
+                <div className="bg-bg-surface border border-border-default rounded-ds-xl overflow-hidden shadow-sm flex flex-col">
                     <div className="px-4 py-3 border-b border-border-default flex justify-between items-center bg-bg-page/50">
                         <h4 className="font-bold text-text-primary text-sm">2. Suất diễn & Vé</h4>
                         <button type="button" onClick={() => setStep(2)} className="text-action-brand-text-default text-xs font-medium hover:underline">Sửa</button>
                     </div>
                     <div className="p-4 flex-1 space-y-4">
                         <div className="flex items-center gap-4 text-sm">
-                            <div className="flex-1 bg-bg-subtle p-3 rounded-lg border border-border-default text-center">
+                            <div className="flex-1 bg-bg-subtle p-3 rounded-ds-lg border border-border-default text-center">
                                 <span className="block text-text-muted text-xs mb-1">Suất diễn</span>
                                 <span className="font-bold text-text-primary text-lg">{formData.showtimes.length}</span>
                             </div>
-                            <div className="flex-1 bg-bg-subtle p-3 rounded-lg border border-border-default text-center">
+                            <div className="flex-1 bg-bg-subtle p-3 rounded-ds-lg border border-border-default text-center">
                                 <span className="block text-text-muted text-xs mb-1">Tổng vé</span>
                                 <span className="font-bold text-text-primary text-lg">{totalTickets}</span>
                             </div>
@@ -101,7 +101,7 @@ export function CreateEventStep5Review({ formData, setStep, errors = {} }: Props
                             {formData.showtimes.map(st => {
                                 const tickets = formData.ticketTypes.filter(t => t.showtimeId === st.id);
                                 return (
-                                    <div key={st.id} className="border border-border-default rounded-lg p-3 text-sm">
+                                    <div key={st.id} className="border border-border-default rounded-ds-lg p-3 text-sm">
                                         <div className="font-bold text-text-primary mb-1 flex items-center justify-between">
                                             <span>{st.name}</span>
                                             <span className="text-xs text-text-muted font-normal flex items-center gap-1"><Calendar size={12}/> {formatShowtimeDate(st.startDatetime)}</span>
@@ -124,7 +124,7 @@ export function CreateEventStep5Review({ formData, setStep, errors = {} }: Props
                 </div>
 
                 {/* 3. Cài đặt & Resale */}
-                <div className="bg-bg-surface border border-border-default rounded-xl overflow-hidden shadow-sm flex flex-col">
+                <div className="bg-bg-surface border border-border-default rounded-ds-xl overflow-hidden shadow-sm flex flex-col">
                     <div className="px-4 py-3 border-b border-border-default flex justify-between items-center bg-bg-page/50">
                         <h4 className="font-bold text-text-primary text-sm">3. Cài đặt & Phân phối</h4>
                         <button type="button" onClick={() => setStep(3)} className="text-action-brand-text-default text-xs font-medium hover:underline">Sửa</button>
@@ -168,14 +168,14 @@ export function CreateEventStep5Review({ formData, setStep, errors = {} }: Props
                 </div>
 
                 {/* 4. Hồ sơ thanh toán */}
-                <div className="bg-bg-surface border border-border-default rounded-xl overflow-hidden shadow-sm flex flex-col">
+                <div className="bg-bg-surface border border-border-default rounded-ds-xl overflow-hidden shadow-sm flex flex-col">
                     <div className="px-4 py-3 border-b border-border-default flex justify-between items-center bg-bg-page/50">
                         <h4 className="font-bold text-text-primary text-sm">4. Đối soát & Thanh toán</h4>
                         <button type="button" onClick={() => setStep(4)} className="text-action-brand-text-default text-xs font-medium hover:underline">Sửa</button>
                     </div>
                     <div className="p-4 flex-1">
                         {formData.selectedProfileId ? (
-                            <div className="bg-bg-subtle p-3 rounded-lg border border-border-default">
+                            <div className="bg-bg-subtle p-3 rounded-ds-lg border border-border-default">
                                 <span className="block text-xs text-text-muted mb-1">Hồ sơ đã chọn</span>
                                 <div className="font-bold text-text-primary text-sm mb-1">Hồ sơ chính (Công ty TNHH Evo Culture)</div>
                                 <div className="text-xs text-text-secondary mt-2 grid grid-cols-1 gap-y-1">
@@ -200,7 +200,7 @@ export function CreateEventStep5Review({ formData, setStep, errors = {} }: Props
             </div>
 
             {errors.review && (
-                <div className="rounded-xl border border-feedback-error-border bg-feedback-error-bg p-4 text-sm text-feedback-error-text" data-field="review" tabIndex={-1}>
+                <div className="rounded-ds-xl border border-feedback-error-border bg-feedback-error-bg p-4 text-sm text-feedback-error-text" data-field="review" tabIndex={-1}>
                     <div className="flex items-start gap-2">
                         <AlertCircle className="shrink-0 mt-0.5" size={18} />
                         <span>{errors.review}</span>

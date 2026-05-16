@@ -25,7 +25,7 @@ export default function CheckerPage() {
                 <span className="text-lg">Gate B</span>
               </div>
             </div>
-            <span className="bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-1 rounded-md">
+            <span className="bg-gray-200 text-gray-800 text-xs font-semibold px-2.5 py-1 rounded-ds-md">
               Online
             </span>
           </div>
@@ -53,7 +53,7 @@ export default function CheckerPage() {
         <div className="flex-1 p-4 flex flex-col gap-4 overflow-y-auto">
           
           {/* SCANNER CONTAINER */}
-          <div className="relative bg-[#151515] rounded-3xl aspect-[3/4] w-full overflow-hidden flex flex-col items-center justify-center shadow-lg">
+          <div className="relative bg-[#151515] rounded-ds-3xl aspect-[3/4] w-full overflow-hidden flex flex-col items-center justify-center shadow-lg">
             {/* Camera feed placeholder. The user will inject their 3rd party scanner here. */}
             <div id="camera-container" className="absolute inset-0 z-0 bg-black/40"></div>
             
@@ -87,7 +87,7 @@ export default function CheckerPage() {
           </div>
 
           {/* STATUS CARD */}
-          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-col gap-2 relative overflow-hidden">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-ds-2xl p-4 flex flex-col gap-2 relative overflow-hidden">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
@@ -102,7 +102,7 @@ export default function CheckerPage() {
           </div>
 
           {/* MANUAL INPUT */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+          <div className="bg-white border border-gray-200 rounded-ds-2xl p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3 text-gray-900 font-bold text-sm">
               <Keyboard className="w-4 h-4 text-gray-500" />
               <h3>Nhập mã vé thủ công</h3>
@@ -113,9 +113,9 @@ export default function CheckerPage() {
                 value={ticketCode}
                 onChange={(e) => setTicketCode(e.target.value)}
                 placeholder="EVT-ATSH-B2-01928"
-                className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium uppercase placeholder:normal-case"
+                className="flex-1 bg-gray-50 border border-gray-200 rounded-ds-xl px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium uppercase placeholder:normal-case"
               />
-              <button className="bg-[#0F0F1A] hover:bg-black text-white font-bold text-sm px-4 py-2 rounded-xl transition-colors whitespace-nowrap shadow-md">
+              <button className="bg-[#0F0F1A] hover:bg-black text-white font-bold text-sm px-4 py-2 rounded-ds-xl transition-colors whitespace-nowrap shadow-md">
                 Xác minh
               </button>
             </div>

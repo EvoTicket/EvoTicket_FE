@@ -19,7 +19,7 @@ export default function LoginPage() {
       <div className="flex flex-col md:flex-row items-center gap-10 max-w-5xl w-full justify-center">
 
         {/* --- CỘT TRÁI: FORM ĐĂNG NHẬP --- */}
-        <div className="w-full max-w-[400px] bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-gray-100">
+        <div className="w-full max-w-[400px] bg-white rounded-ds-3xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-gray-100">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-1">{t('login_title')}</h1>
             <p className="text-sm text-gray-500">
@@ -36,7 +36,7 @@ export default function LoginPage() {
               <input
                 type="email"
                 placeholder="name@example.com"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm"
+                className="w-full px-3 py-2 border border-gray-200 rounded-ds-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm"
               />
             </div>
 
@@ -56,7 +56,7 @@ export default function LoginPage() {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm pr-10"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-ds-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm pr-10"
                 />
                 <button
                   type="button"
@@ -73,7 +73,7 @@ export default function LoginPage() {
             </div>
 
             {/* Nút Đăng nhập */}
-            <button className="w-full bg-[#1a1a1a] hover:bg-blacktext-button-primary-text-default font-medium py-2.5 rounded-lg transition-colors text-sm mt-2">
+            <button className="w-full bg-[#1a1a1a] hover:bg-blacktext-button-primary-text-default font-medium py-2.5 rounded-ds-lg transition-colors text-sm mt-2">
               {t('login_button')}
             </button>
           </form>
@@ -91,7 +91,7 @@ export default function LoginPage() {
           </div>
 
           {/* Nút Google */}
-          <button className="w-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm">
+          <button className="w-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-ds-lg flex items-center justify-center gap-2 transition-colors text-sm">
             <GoogleIcon />
             Google
           </button>

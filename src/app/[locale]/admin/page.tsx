@@ -82,12 +82,12 @@ export default function AdminDashboard() {
           <p className="text-sm text-txt-secondary mt-1">{t("overview_subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-surface border border-border rounded-xl px-4 py-2.5 shadow-sm">
+          <div className="flex items-center gap-2 bg-surface border border-border rounded-ds-xl px-4 py-2.5 shadow-sm">
             <Calendar size={18} className="text-txt-muted" />
             <span className="text-sm font-bold text-txt-secondary">{dateRange}</span>
             <ChevronDown size={14} className="text-txt-muted ml-2" />
           </div>
-          <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all">
+          <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-ds-xl font-bold shadow-lg shadow-primary/20 transition-all">
             <Download size={18} />
             <span>{t("export_summary")}</span>
           </button>
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Chart Section */}
-      <div className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
+      <div className="bg-surface border border-border rounded-ds-3xl p-8 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <h3 className="text-lg font-bold text-txt-primary">{t("platform_trend")}</h3>
@@ -143,10 +143,10 @@ export default function AdminDashboard() {
               {chartView === "revenue" ? t("trend_revenue_subtitle") : t("trend_tickets_subtitle")}
             </p>
           </div>
-          <div className="flex bg-main p-1 rounded-xl border border-border self-start sm:self-auto">
+          <div className="flex bg-main p-1 rounded-ds-xl border border-border self-start sm:self-auto">
             <button
               onClick={() => setChartView("revenue")}
-              className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${chartView === "revenue"
+              className={`px-4 py-1.5 text-xs font-bold rounded-ds-lg transition-all ${chartView === "revenue"
                 ? "bg-surface text-primary shadow-sm border border-border"
                 : "text-txt-muted hover:text-txt-secondary"
                 }`}
@@ -155,7 +155,7 @@ export default function AdminDashboard() {
             </button>
             <button
               onClick={() => setChartView("tickets")}
-              className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${chartView === "tickets"
+              className={`px-4 py-1.5 text-xs font-bold rounded-ds-lg transition-all ${chartView === "tickets"
                 ? "bg-surface text-primary shadow-sm border border-border"
                 : "text-txt-muted hover:text-txt-secondary"
                 }`}
@@ -167,7 +167,7 @@ export default function AdminDashboard() {
               <button
                 key={range}
                 onClick={() => setChartTimeRange(range)}
-                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${chartTimeRange === range
+                className={`px-3 py-1.5 text-xs font-bold rounded-ds-lg transition-all ${chartTimeRange === range
                   ? "bg-primary text-white shadow-sm"
                   : "text-txt-muted hover:text-txt-secondary"
                   }`}
@@ -232,13 +232,13 @@ export default function AdminDashboard() {
       {/* Secondary Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Finance & Settlement */}
-        <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+        <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-lg font-bold text-txt-primary">{t("finance_settlement")}</h3>
               <p className="text-xs text-txt-muted">{t("weekly_summary")}</p>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-ds-lg bg-amber-500/10 flex items-center justify-center">
               <DollarSign size={16} className="text-amber-600" />
             </div>
           </div>
@@ -268,13 +268,13 @@ export default function AdminDashboard() {
         </div>
 
         {/* Governance & Review */}
-        <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+        <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-lg font-bold text-txt-primary">{t("governance_review")}</h3>
               <p className="text-xs text-txt-muted">{t("pending_processing")}</p>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-ds-lg bg-primary/10 flex items-center justify-center">
               <ShieldCheck size={16} className="text-primary" />
             </div>
           </div>
@@ -305,10 +305,10 @@ export default function AdminDashboard() {
       </div>
 
       {/* Operational Alerts */}
-      <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+      <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-600">
+            <div className="w-10 h-10 rounded-ds-xl bg-rose-500/10 flex items-center justify-center text-rose-600">
               <AlertTriangle size={24} />
             </div>
             <div>
@@ -383,9 +383,9 @@ function StatsCard({ label, value, trend, isUp, icon, color, vsText }: any) {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm group hover:border-primary/30 transition-all">
+    <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm group hover:border-primary/30 transition-all">
       <div className="flex items-center justify-between mb-4">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${colorClasses[color] || "bg-main text-txt-muted"}`}>
+        <div className={`w-10 h-10 rounded-ds-xl flex items-center justify-center ${colorClasses[color] || "bg-main text-txt-muted"}`}>
           {icon}
         </div>
         <div className="flex items-center gap-1 text-[10px] font-bold">
@@ -406,8 +406,8 @@ function StatsCard({ label, value, trend, isUp, icon, color, vsText }: any) {
 
 function SummaryItem({ icon, label, sub, value, bg }: any) {
   return (
-    <div className={`flex items-center gap-4 p-4 rounded-2xl ${bg} transition-transform hover:scale-[1.02] cursor-pointer`}>
-      <div className="w-10 h-10 rounded-xl bg-surface shadow-sm flex items-center justify-center text-txt-secondary border border-border">
+    <div className={`flex items-center gap-4 p-4 rounded-ds-2xl ${bg} transition-transform hover:scale-[1.02] cursor-pointer`}>
+      <div className="w-10 h-10 rounded-ds-xl bg-surface shadow-sm flex items-center justify-center text-txt-secondary border border-border">
         {icon}
       </div>
       <div className="flex-1 min-w-0">
@@ -429,8 +429,8 @@ function AlertRow({ type, title, status, desc, meta, t }: any) {
   };
 
   return (
-    <div className="flex items-center gap-4 p-4 rounded-2xl bg-surface border border-border hover:border-primary/20 transition-all group">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${typeColors[type]}`}>
+    <div className="flex items-center gap-4 p-4 rounded-ds-2xl bg-surface border border-border hover:border-primary/20 transition-all group">
+      <div className={`w-10 h-10 rounded-ds-xl flex items-center justify-center ${typeColors[type]}`}>
         {type === 'error' ? <AlertTriangle size={20} /> : type === 'warning' ? <AlertTriangle size={20} /> : <Info size={20} />}
       </div>
       <div className="flex-1 min-w-0">
@@ -441,7 +441,7 @@ function AlertRow({ type, title, status, desc, meta, t }: any) {
         <p className="text-xs text-txt-secondary line-clamp-1">{desc}</p>
         <p className="text-[10px] text-txt-muted mt-1">{meta}</p>
       </div>
-      <button className="px-4 py-2 text-xs font-bold text-txt-secondary bg-main hover:bg-border rounded-xl border border-border transition-colors">
+      <button className="px-4 py-2 text-xs font-bold text-txt-secondary bg-main hover:bg-border rounded-ds-xl border border-border transition-colors">
         {t("common.open_module")}
       </button>
     </div>
@@ -450,8 +450,8 @@ function AlertRow({ type, title, status, desc, meta, t }: any) {
 
 function QuickAccessCard({ icon, title, sub, badge }: any) {
   return (
-    <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-primary/20 transition-all group cursor-pointer relative overflow-hidden">
-      <div className="w-12 h-12 rounded-xl bg-main flex items-center justify-center text-txt-muted group-hover:bg-primary/5 group-hover:text-primary transition-colors mb-4">
+    <div className="bg-surface border border-border rounded-ds-2xl p-5 shadow-sm hover:shadow-md hover:border-primary/20 transition-all group cursor-pointer relative overflow-hidden">
+      <div className="w-12 h-12 rounded-ds-xl bg-main flex items-center justify-center text-txt-muted group-hover:bg-primary/5 group-hover:text-primary transition-colors mb-4">
         {icon}
       </div>
       <h4 className="text-sm font-bold text-txt-primary mb-1">{title}</h4>

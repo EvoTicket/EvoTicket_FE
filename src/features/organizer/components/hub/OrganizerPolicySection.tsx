@@ -24,7 +24,7 @@ export function OrganizerPolicySection({
   return (
     <section
       id={id}
-      className="flex flex-col gap-4 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-6"
+      className="flex flex-col gap-4 rounded-ds-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-6"
       style={{ scrollMarginTop: 80 }}
     >
       <div className="flex items-start justify-between gap-3">
@@ -61,9 +61,9 @@ export function OrganizerPolicyRule({
   children,
 }: PolicyRuleProps) {
   return (
-    <div className="flex gap-3 rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] p-3">
+    <div className="flex gap-3 rounded-ds-md border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] p-3">
       <div
-        className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
+        className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-ds-md"
         style={{
           background: `var(--color-badge-${tone}-bg)`,
           color: `var(--color-badge-${tone}-text)`,

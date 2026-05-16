@@ -21,7 +21,7 @@ export function OrganizerEmptyState({
   createLabel = "Tạo sự kiện đầu tiên",
 }: OrganizerEmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-6 py-16 text-center">
+    <div className="flex flex-col items-center justify-center gap-3 rounded-ds-lg border border-dashed border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-6 py-16 text-center">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-bg-elevated)] text-[var(--color-icon-muted)]">
         <Filter size={20} />
       </div>
@@ -35,7 +35,7 @@ export function OrganizerEmptyState({
         {onClear && (
           <button
             onClick={onClear}
-            className="rounded-md border border-[var(--color-border-default)] bg-transparent px-3 py-2 text-[13px] text-[var(--color-text-primary)]"
+            className="rounded-ds-md border border-[var(--color-border-default)] bg-transparent px-3 py-2 text-[13px] text-[var(--color-text-primary)]"
           >
             Xóa bộ lọc
           </button>
@@ -43,7 +43,7 @@ export function OrganizerEmptyState({
         {createHref && (
           <a
             href={createHref}
-            className="rounded-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3 py-2 text-[13px] font-medium text-[var(--color-action-brand-text-default)]"
+            className="rounded-ds-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3 py-2 text-[13px] font-medium text-[var(--color-action-brand-text-default)]"
           >
             {createLabel}
           </a>
