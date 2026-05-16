@@ -6,13 +6,15 @@ import Link from "next/link";
 import api from "@/src/lib/axios";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/src/store/hooks";
 import { setAppLoading, selectAppLoading } from "@/src/store/slices/appSlice";
 
 export default function RegisterPage() {
   const router = useRouter();
   const { locale } = useParams();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl');
   const dispatch = useAppDispatch();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -109,7 +111,8 @@ export default function RegisterPage() {
       const data = response.data;
       if (data.status === 201) {
         toast.success(data.message || "Đăng ký thành công!");
-        router.push(`/${locale}/auth/login`);
+        const loginPath = `/${locale}/auth/login${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`;
+        router.push(loginPath);
       }
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {
@@ -280,7 +283,10 @@ export default function RegisterPage() {
         {/* Footer */}
         <div className="text-center mt-8 text-[12px] text-gray-500">
           Bạn đã có tài khoản?{" "}
-          <Link href={`/${locale}/auth/login`} className="text-gray-300 hover:text-white underline decoration-white/30 underline-offset-4 transition-colors">
+          <Link 
+            href={`/${locale}/auth/login${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`} 
+            className="text-gray-300 hover:text-white underline decoration-white/30 underline-offset-4 transition-colors"
+          >
             Đăng nhập
           </Link>
         </div>

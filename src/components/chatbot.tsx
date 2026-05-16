@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { MessageCircle, X, Send, Paperclip, Loader2 } from "lucide-react";
-import Cookies from "js-cookie";
 import api from "@/src/lib/axios";
 import { toast } from "react-toastify";
 import Image from "next/image";
@@ -49,22 +48,22 @@ export function ChatBot() {
     }, [isOpen]);
 
     const fetchChatHistory = async () => {
-        const token = Cookies.get("token");
-        if (!token) {
-            toast.error(t("error_login_required"));
-            return;
-        }
 
         setIsLoadingHistory(true);
         try {
-            const response = await api.get("/inventory-service/api/chatbot/history", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await api.get("/inventory-service/api/chatbot/history");
 
             if (response.data && response.data.status === 200) {
-                const historyMessages = response.data.data.reverse();
+                // Map the new history format to ChatMessage interface
+                const historyMessages = response.data.data.map((msg: any, index: number) => ({
+                    id: index,
+                    // Remove internal session info like [Thông tin phiên: userId=...]
+                    message: msg.text ? msg.text.replace(/\n\n\[Thông tin phiên: .*\]/g, "") : "",
+                    images: msg.media || [],
+                    senderType: msg.messageType === "USER" ? "USER" : "ASSISTANT",
+                    createdAt: new Date().toISOString() // Fallback if history doesn't provide timestamp
+                }));
+
                 setMessages(historyMessages);
                 setTimeout(scrollToBottom, 100);
             }
@@ -77,12 +76,6 @@ export function ChatBot() {
 
     const handleSendMessage = async () => {
         if (!inputMessage.trim() && selectedFiles.length === 0) return;
-
-        const token = Cookies.get("token");
-        if (!token) {
-            toast.error(t("error_login_required"));
-            return;
-        }
 
         const userMessage: ChatMessage = {
             id: Date.now(),
@@ -103,31 +96,34 @@ export function ChatBot() {
 
         try {
             const formData = new FormData();
+            formData.append("question", messageToSend);
             filesToSend.forEach((file) => {
                 formData.append("files", file);
             });
+            formData.append("useRag", "false");
 
-            const response = await api.post(
-                `/inventory-service/api/chatbot/ask?question=${encodeURIComponent(messageToSend)}`,
-                formData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "multipart/form-data",
-                    },
-                }
-            );
+            // Use axios (api) instead of fetch, as we don't need streaming anymore
+            const response = await api.post("/inventory-service/api/chatbot/ask", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
 
             if (response.data && response.data.status === 200) {
+                const answer = response.data.data.answer;
+                // Clean the response message (remove internal session info)
+                const cleanAnswer = answer ? answer.replace(/\n\n\[Thông tin phiên: .*\]/g, "") : "";
+
                 const assistantMessage: ChatMessage = {
-                    id: Date.now() + 1,
-                    message: response.data.data.answer,
+                    id: Date.now(),
+                    message: cleanAnswer,
                     images: [],
                     senderType: "ASSISTANT",
                     createdAt: new Date().toISOString(),
                 };
-
                 setMessages((prev) => [...prev, assistantMessage]);
+            } else {
+                throw new Error("Failed to get response from chatbot");
             }
         } catch (error: any) {
             if (error.response?.status === 500) {

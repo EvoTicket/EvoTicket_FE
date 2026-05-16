@@ -3,41 +3,84 @@
 import { useState, useEffect, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Cookies from "js-cookie";
 import api from "@/src/lib/axios";
-import { Header } from "@/src/components/header";
-import { Footer } from "@/src/components/footer";
 import { ArrowLeft, Check, X, Clock, Pause, Loader2 } from "lucide-react";
 import { EventDetail } from "@/src/types/event";
+import { useTranslations } from "next-intl";
 
 function PaymentResultContent() {
     const { locale, id } = useParams();
     const router = useRouter();
     const searchParams = useSearchParams();
-    
-    // Status can be: 'success', 'pending', 'failed', 'expired', 'cancelled'
-    const status = searchParams.get("status") || "success"; 
+    const orderCode = searchParams.get("orderCode");
 
     const [event, setEvent] = useState<EventDetail | null>(null);
+    const [orderDetail, setOrderDetail] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const tb = useTranslations("Booking");
+    const tp = useTranslations("Payment");
+    const tr = useTranslations("Result");
+
+    const rawStatus = searchParams.get("status");
+    const [status, setStatus] = useState<string>(
+        (rawStatus === "PAID" || rawStatus === "SUCCESS" || rawStatus === "success") ? "SUCCESS"
+            : (rawStatus === "PENDING" || rawStatus === "pending") ? "PENDING"
+                : (rawStatus === "CANCELLED" || rawStatus === "cancelled") ? "CANCELLED"
+                    : (rawStatus === "FAILED" || rawStatus === "failed") ? "FAILED"
+                        : (rawStatus === "EXPIRED" || rawStatus === "expired") ? "EXPIRED"
+                            : (rawStatus === "RESOURCE_NOT_FOUND" || rawStatus === "NOT_FOUND") ? "RESOURCE_NOT_FOUND"
+                                : "SUCCESS"
+    );
 
     useEffect(() => {
         if (id) {
-            fetchEventDetail(id as string);
+            fetchData();
         }
-    }, [id]);
+    }, [id, orderCode]);
 
-    const fetchEventDetail = async (eventId: string) => {
+    const fetchData = async () => {
+        if (!id || !orderCode) {
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
-            const token = Cookies.get("token");
-            const headers = token ? { Authorization: `Bearer ${token}` } : {};
-            const response = await api.get(`/inventory-service/api/events/${eventId}`, { headers });
-            if (response.data && response.data.data) {
-                setEvent(response.data.data);
+
+            // Fetch event detail
+            const eventRes = await api.get(`/inventory-service/api/events/${id}`);
+            if (eventRes.data && eventRes.data.data) {
+                setEvent(eventRes.data.data);
+            }
+
+            // Fetch order detail from payment-service
+            try {
+                const orderRes = await api.get(`/payment-service/api/v1/payments/${orderCode}`);
+                if (orderRes.data && orderRes.data.data) {
+                    const data = orderRes.data.data;
+                    setOrderDetail(data);
+
+                    // Map API status to UI status
+                    const apiStatus = data.status;
+                    const mappedStatus = (apiStatus === "PAID" || apiStatus === "SUCCESS" || apiStatus === "success") ? "SUCCESS"
+                        : (apiStatus === "PENDING" || apiStatus === "pending") ? "PENDING"
+                        : (apiStatus === "CANCELLED" || apiStatus === "cancelled") ? "CANCELLED"
+                        : (apiStatus === "FAILED" || apiStatus === "failed") ? "FAILED"
+                        : (apiStatus === "EXPIRED" || apiStatus === "expired") ? "EXPIRED"
+                        : (apiStatus === "RESOURCE_NOT_FOUND" || apiStatus === "NOT_FOUND") ? "RESOURCE_NOT_FOUND"
+                        : status; // Fallback to current status from URL if API returns unknown
+                    setStatus(mappedStatus);
+                }
+            } catch (err: any) {
+                console.error("Failed to fetch order detail", err);
+                const errorData = err.response?.data;
+                if (err.response?.status === 404 || errorData?.code === "RESOURCE_NOT_FOUND") {
+                    setOrderDetail(null);
+                    setStatus("RESOURCE_NOT_FOUND");
+                }
             }
         } catch (error) {
-            console.error("Failed to fetch event detail", error);
+            console.error("Failed to fetch data", error);
         } finally {
             setLoading(false);
         }
@@ -55,16 +98,20 @@ function PaymentResultContent() {
 
     const renderIcon = () => {
         switch (status) {
-            case "success":
+            case "SUCCESS":
                 return <div className="w-16 h-16 rounded-full bg-[#82e1a3] flex items-center justify-center mb-6"><Check size={40} className="text-[#104825] stroke-[3]" /></div>;
-            case "pending":
+            case "PENDING":
                 return <div className="w-16 h-16 flex items-center justify-center mb-6"><Loader2 size={64} className="text-[#72aef8] animate-spin stroke-1" /></div>;
-            case "failed":
+            case "FAILED":
                 return <div className="w-16 h-16 rounded-full bg-[#f88585] flex items-center justify-center mb-6"><X size={40} className="text-[#6b1e1e] stroke-[3]" /></div>;
-            case "expired":
+            case "EXPIRED":
                 return <div className="w-16 h-16 rounded-full bg-[#f6c445] flex items-center justify-center mb-6"><Clock size={40} className="text-[#64490f] stroke-[3]" /></div>;
-            case "cancelled":
+            case "CANCELLED":
                 return <div className="w-16 h-16 rounded-full bg-[#f6c445] flex items-center justify-center mb-6"><Pause size={32} className="text-[#64490f] fill-current" /></div>;
+            case "RESOURCE_NOT_FOUND":
+            case "NOT_FOUND":
+            case "BOOKING_SESSION_NOT_FOUND":
+                return <div className="w-16 h-16 rounded-full bg-bg-subtle flex items-center justify-center mb-6"><X size={40} className="text-text-muted stroke-[2]" /></div>;
             default:
                 return null;
         }
@@ -72,106 +119,118 @@ function PaymentResultContent() {
 
     const renderContent = () => {
         switch (status) {
-            case "success":
+            case "SUCCESS":
                 return (
                     <>
-                        <h2 className="text-2xl font-bold text-text-primary mb-3">Thanh toán thành công</h2>
-                        <p className="text-sm text-text-secondary mb-8">Đơn hàng của bạn đã được xác nhận. Vé sẽ xuất hiện trong Ví của bạn ngay khi hệ thống hoàn tất phát hành.</p>
-                        
+                        <h2 className="text-2xl font-bold text-text-primary mb-3">{tr('success_title')}</h2>
+                        <p className="text-sm text-text-secondary mb-8">{tr('success_desc')}</p>
+
                         <div className="w-full space-y-4 text-sm mb-8 border-t border-b border-border-strong py-6">
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Mã đơn hàng</span>
-                                <span className="font-bold text-text-primary">#EVO-88291.</span>
+                                <span className="text-text-secondary">{tr('order_code_label')}</span>
+                                <span className="font-bold text-text-primary">#{orderDetail?.orderCode || orderCode || tr('not_available')}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Phương thức thanh toán</span>
-                                <span className="font-bold text-text-primary">Momo</span>
+                                <span className="text-text-secondary">{tr('payment_method_label')}</span>
+                                <span className="font-bold text-text-primary">{orderDetail?.paymentMethod || tr('not_available')}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Mã giao dịch</span>
-                                <span className="font-bold text-text-primary">123acd45679</span>
+                                <span className="text-text-secondary">{tr('transaction_id_label')}</span>
+                                <span className="font-bold text-text-primary">{orderDetail?.transactionId || tr('not_available')}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Thời gian thanh toán thành công</span>
-                                <span className="font-bold text-text-primary">20:14 - 15/09/2025</span>
+                                <span className="text-text-secondary">{tr('payment_time_label')}</span>
+                                <span className="font-bold text-text-primary">
+                                    {orderDetail?.transactionDateTime
+                                        ? new Date(orderDetail.transactionDateTime).toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US')
+                                        : orderDetail?.updatedAt
+                                            ? new Date(orderDetail.updatedAt).toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US')
+                                            : tr('not_available')}
+                                </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Email nhận vé / email xác nhận</span>
-                                <span className="font-bold text-text-primary text-right max-w-[200px] break-all">phuc.nguyenlehoang707@hcmut.edu.vn</span>
+                                <span className="text-text-secondary">{tr('receipt_email_label')}</span>
+                                <span className="font-bold text-text-primary text-right max-w-[200px] break-all">{orderDetail?.buyerEmail || orderDetail?.email || tr('not_available')}</span>
                             </div>
                         </div>
 
                         <div className="w-full bg-[#19274e] border border-[#253f7f] rounded-lg p-3 text-sm text-[#87a5f8] mb-8 text-left">
-                            NFT ticket đang được phát hành ở nền. Bạn vẫn có thể theo dõi trạng thái trong Ví của tôi.
+                            {tr('nft_issuing_note')}
                         </div>
 
                         <div className="w-full space-y-3">
-                            <button className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors">Xem chi tiết vé</button>
-                            <button className="w-full py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-button-radius font-semibold transition-colors">Xem danh sách vé</button>
-                            <button 
+                            <button
+                                className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors"
+                                onClick={() => router.push(`/${locale}/user/tickets`)}
+                            >
+                                {tr('view_ticket_list')}
+                            </button>
+                            <button
                                 className="w-full py-3 bg-transparent border border-border-strong hover:bg-bg-subtle text-text-secondary rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/homepage`)}
                             >
-                                Về trang chủ
+                                {tr('back_to_homepage')}
                             </button>
                         </div>
                     </>
                 );
 
-            case "pending":
+            case "PENDING":
                 return (
                     <>
-                        <h2 className="text-2xl font-bold text-text-primary mb-3">Đang xác nhận thanh toán</h2>
-                        <p className="text-sm text-text-secondary mb-8">Chúng tôi đang kiểm tra kết quả từ cổng thanh toán. Vui lòng không đóng trang trong lúc hệ thống xác nhận giao dịch.</p>
-                        
+                        <h2 className="text-2xl font-bold text-text-primary mb-3">{tr('pending_title')}</h2>
+                        <p className="text-sm text-text-secondary mb-8">{tr('pending_desc')}</p>
+
                         <div className="w-full space-y-4 text-sm mb-8 border-t border-b border-border-strong py-6">
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Mã đơn hàng</span>
-                                <span className="font-bold text-text-primary">#EVO-88291.</span>
+                                <span className="text-text-secondary">{tr('order_code_label')}</span>
+                                <span className="font-bold text-text-primary">#{orderDetail?.orderCode || orderCode || tr('not_available')}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Phương thức thanh toán</span>
-                                <span className="font-bold text-text-primary">Momo</span>
+                                <span className="text-text-secondary">{tr('payment_method_label')}</span>
+                                <span className="font-bold text-text-primary">{orderDetail?.paymentMethod || tr('not_available')}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Mã giao dịch</span>
-                                <span className="font-bold text-text-primary">123acd45679</span>
+                                <span className="text-text-secondary">{tr('transaction_id_label')}</span>
+                                <span className="font-bold text-text-primary">{orderDetail?.transactionId || orderDetail?.paymentId || tr('not_available')}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Thời gian ghi nhận giao dịch</span>
-                                <span className="font-bold text-text-primary">20:14 - 15/09/2025</span>
+                                <span className="text-text-secondary">{tr('recorded_time_label')}</span>
+                                <span className="font-bold text-text-primary">
+                                    {orderDetail?.updatedAt ? new Date(orderDetail.updatedAt).toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US') : tr('not_available')}
+                                </span>
                             </div>
                         </div>
 
                         <div className="w-full bg-[#19274e] border border-[#253f7f] rounded-lg p-3 text-sm text-[#87a5f8] mb-8 text-left">
-                            Hệ thống sẽ tự động cập nhật khi có kết quả.
+                            {tr('auto_update_note')}
                         </div>
 
                         <div className="w-full space-y-3">
-                            <button className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors">Làm mới trạng thái</button>
-                            <button className="w-full py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-button-radius font-semibold transition-colors">Xem lịch sử đơn hàng</button>
-                            <button className="w-full py-3 bg-transparent border border-border-strong hover:bg-bg-subtle text-text-secondary rounded-button-radius font-semibold transition-colors">Liên hệ hỗ trợ</button>
+                            <button className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors">{tr('refresh_status')}</button>
+                            <button className="w-full py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-button-radius font-semibold transition-colors">{tr('view_order_history')}</button>
+                            <button className="w-full py-3 bg-transparent border border-border-strong hover:bg-bg-subtle text-text-secondary rounded-button-radius font-semibold transition-colors">{tr('contact_support')}</button>
                         </div>
                     </>
                 );
 
-            case "failed":
+            case "FAILED":
                 return (
                     <>
-                        <h2 className="text-2xl font-bold text-text-primary mb-3">Thanh toán không thành công</h2>
-                        <p className="text-sm text-text-secondary mb-8 text-left w-full">Giao dịch của bạn chưa được hoàn tất. Bạn có thể thử lại bằng phương thức hiện tại hoặc chọn phương thức khác.</p>
-                        
+                        <h2 className="text-2xl font-bold text-text-primary mb-3">{tr('failed_title')}</h2>
+                        <p className="text-sm text-text-secondary mb-8 text-left w-full">{tr('failed_desc')}</p>
+
                         <div className="w-full text-sm mb-8 border-t border-b border-border-strong py-6 text-left flex gap-12">
                             <div className="flex-1">
-                                <span className="font-bold text-text-primary block mb-2">Nguyên nhân có thể</span>
+                                <span className="font-bold text-text-primary block mb-2">{tr('possible_causes')}</span>
                                 <ul className="list-disc pl-5 text-text-secondary space-y-1">
-                                    <li>giao dịch bị từ chối,</li>
-                                    <li>hết thời gian xác thực,</li>
-                                    <li>hoặc có lỗi xác minh từ ngân hàng.</li>
+                                    <li>{tr('cause_rejected')}</li>
+                                    <li>{tr('cause_timeout')}</li>
+                                    <li>{tr('cause_bank_error')}</li>
                                 </ul>
                             </div>
                             <div className="flex-1">
-                                <span className="font-bold text-text-primary block mb-2">Mã tham chiếu lỗi</span>
+                                <span className="font-bold text-text-primary block mb-2">{tr('error_ref_code')}</span>
                                 <ul className="list-disc pl-5 text-text-secondary space-y-1">
                                     <li>404</li>
                                 </ul>
@@ -179,184 +238,235 @@ function PaymentResultContent() {
                         </div>
 
                         <div className="w-full bg-[#19274e] border border-[#253f7f] rounded-lg p-3 text-sm text-[#87a5f8] mb-8 text-left">
-                            Hệ thống sẽ tự động cập nhật khi có kết quả.
+                            {tr('auto_update_note')}
                         </div>
 
                         <div className="w-full space-y-3">
-                            <button className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors">Thử lại thanh toán</button>
-                            <button 
+                            <button className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors">{tr('retry_payment')}</button>
+                            <button
                                 className="w-full py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/events/${event.eventId}/booking`)}
                             >
-                                Quay lại chọn vé
+                                {tr('reselect_tickets')}
                             </button>
-                            <button className="w-full py-3 bg-transparent border border-border-strong hover:bg-bg-subtle text-text-secondary rounded-button-radius font-semibold transition-colors">Chọn phương thức khác</button>
+                            <button className="w-full py-3 bg-transparent border border-border-strong hover:bg-bg-subtle text-text-secondary rounded-button-radius font-semibold transition-colors">{tr('choose_other_method')}</button>
                         </div>
 
                         <div className="w-full bg-[#3d2a13] border border-[#5c401d] rounded-lg p-4 text-sm text-[#d49942] mt-6 text-left">
-                            <span className="font-bold flex items-center gap-2 mb-1"><Clock size={16} /> Lưu ý</span>
-                            Nếu tài khoản đã bị trừ tiền nhưng trạng thái vẫn báo thất bại, vui lòng kiểm tra lịch sử đơn hàng hoặc liên hệ hỗ trợ.
+                            <span className="font-bold flex items-center gap-2 mb-1"><Clock size={16} /> {tb('booking_notes_title')}</span>
+                            {tr('failed_note')}
                         </div>
                     </>
                 );
 
-            case "expired":
+            case "EXPIRED":
                 return (
                     <>
-                        <h2 className="text-2xl font-bold text-text-primary mb-3">Đơn hàng đã hết hạn</h2>
-                        <p className="text-sm text-text-secondary mb-8 text-left w-full">Thời gian giữ vé đã kết thúc trước khi giao dịch được xác nhận. Vé/ghế đã được giải phóng và bạn cần chọn lại để tiếp tục.</p>
-                        
+                        <h2 className="text-2xl font-bold text-text-primary mb-3">{tr('expired_title')}</h2>
+                        <p className="text-sm text-text-secondary mb-8 text-left w-full">{tr('expired_desc')}</p>
+
                         <div className="w-full space-y-4 text-sm mb-8 border-t border-b border-border-strong py-6">
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Mã đơn hàng</span>
-                                <span className="font-bold text-text-primary">EVT-2025-0915-00128</span>
+                                <span className="text-text-secondary">{tr('order_code_label')}</span>
+                                <span className="font-bold text-text-primary">#{orderDetail?.orderCode || orderCode || tr('not_available')}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Phương thức thanh toán</span>
-                                <span className="font-bold text-text-primary">VNPay</span>
+                                <span className="text-text-secondary">{tr('payment_method_label')}</span>
+                                <span className="font-bold text-text-primary">{orderDetail?.paymentMethod || tr('not_available')}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Thời điểm bắt đầu giữ vé</span>
-                                <span className="font-bold text-text-primary">10:14 - 15/09/2025</span>
+                                <span className="text-text-secondary">{tr('creation_time_label')}</span>
+                                <span className="font-bold text-text-primary">
+                                    {orderDetail?.createdAt ? new Date(orderDetail.createdAt).toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US') : tr('not_available')}
+                                </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Thời điểm hết hạn</span>
-                                <span className="font-bold text-text-primary">20:14 - 15/09/2025</span>
+                                <span className="text-text-secondary">{tr('expiration_time_label')}</span>
+                                <span className="font-bold text-text-primary">
+                                    {orderDetail?.expiredAt ? new Date(orderDetail.expiredAt).toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US') : tr('not_available')}
+                                </span>
                             </div>
                         </div>
 
                         <div className="w-full space-y-3">
-                            <button 
+                            <button
                                 className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/events/${event.eventId}/booking`)}
                             >
-                                Chọn vé lại
+                                {tr('reselect_tickets_btn')}
                             </button>
-                            <button 
+                            <button
                                 className="w-full py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/events`)}
                             >
-                                Xem sự kiện khác
+                                {tr('view_other_events')}
                             </button>
-                            <button 
+                            <button
                                 className="w-full py-3 bg-transparent border border-border-strong hover:bg-bg-subtle text-text-secondary rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/events/${event.eventId}`)}
                             >
-                                Về trang sự kiện
+                                {tr('back_to_event_page')}
                             </button>
                         </div>
-                        
+
                         <div className="w-full bg-[#3d2a13] border border-[#5c401d] rounded-lg p-4 text-sm text-[#d49942] mt-6 text-left">
-                            <span className="font-bold flex items-center gap-2 mb-1"><Clock size={16} /> Lưu ý</span>
-                            Nếu bạn đã thanh toán thành công tại ngân hàng nhưng màn hình này vẫn xuất hiện, vui lòng liên hệ hỗ trợ kèm mã đơn hàng.
+                            <span className="font-bold flex items-center gap-2 mb-1"><Clock size={16} /> {tb('booking_notes_title')}</span>
+                            {tr('expired_note')}
                         </div>
                     </>
                 );
 
-            case "cancelled":
+            case "CANCELLED":
                 return (
                     <>
-                        <h2 className="text-2xl font-bold text-text-primary mb-3">Bạn đã hủy thanh toán</h2>
-                        <p className="text-sm text-text-secondary mb-8 text-left w-full">Giao dịch chưa được thực hiện. Bạn vẫn có thể quay lại để tiếp tục thanh toán nếu thời gian giữ vé còn hiệu lực.</p>
-                        
+                        <h2 className="text-2xl font-bold text-text-primary mb-3">{tr('cancelled_title')}</h2>
+                        <p className="text-sm text-text-secondary mb-8 text-left w-full">{tr('cancelled_desc')}</p>
+
                         <div className="w-full space-y-4 text-sm mb-8 border-t border-b border-border-strong py-6">
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Mã đơn hàng</span>
-                                <span className="font-bold text-text-primary">EVT-2025-0915-00128</span>
+                                <span className="text-text-secondary">{tr('order_code_label')}</span>
+                                <span className="font-bold text-text-primary">#{orderDetail?.orderCode || orderCode || tr('not_available')}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Phương thức thanh toán</span>
-                                <span className="font-bold text-text-primary">VNPay</span>
+                                <span className="text-text-secondary">{tr('payment_method_label')}</span>
+                                <span className="font-bold text-text-primary">{orderDetail?.paymentMethod || tr('not_available')}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-text-secondary">Thời điểm hủy</span>
-                                <span className="font-bold text-text-primary">10:14 - 15/09/2025</span>
+                                <span className="text-text-secondary">{tr('cancellation_time_label')}</span>
+                                <span className="font-bold text-text-primary">
+                                    {orderDetail?.updatedAt ? new Date(orderDetail.updatedAt).toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US') : tr('not_available')}
+                                </span>
                             </div>
                         </div>
 
                         <div className="w-full space-y-3">
-                            <button 
+                            <button
                                 className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/events/${event.eventId}/payment`)}
                             >
-                                Tiếp tục thanh toán
+                                {tr('continue_payment_btn')}
                             </button>
-                            <button 
+                            <button
                                 className="w-full py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/events/${event.eventId}/booking`)}
                             >
-                                Quay lại chọn vé
+                                {tr('reselect_tickets')}
                             </button>
                             <button className="w-full py-3 bg-transparent border border-border-strong hover:bg-bg-subtle text-text-secondary rounded-button-radius font-semibold transition-colors">
-                                Chọn phương thức khác
+                                {tr('choose_other_method')}
+                            </button>
+                        </div>
+                    </>
+                );
+
+            case "NOT_FOUND":
+            case "BOOKING_SESSION_NOT_FOUND":
+            case "not_found":
+            case "RESOURCE_NOT_FOUND":
+                return (
+                    <>
+                        <h2 className="text-2xl font-bold text-text-primary mb-3">{tr('not_found_title')}</h2>
+                        <p className="text-sm text-text-secondary mb-8">{tr('not_found_desc')}</p>
+
+                        <div className="w-full bg-bg-surface border border-border-default rounded-lg p-6 mb-8 text-left">
+                            <h4 className="font-bold text-text-primary mb-2">{tr('suggestions_title')}</h4>
+                            <ul className="list-disc pl-5 space-y-2 text-sm text-text-secondary">
+                                <li>{tr('suggestion_1')}</li>
+                                <li>{tr('suggestion_2')}</li>
+                                <li>{tr('suggestion_3')}</li>
+                            </ul>
+                        </div>
+
+                        <div className="w-full space-y-3">
+                            <button
+                                className="w-full py-3 bg-[#6D48D7] hover:bg-[#5b3bb8] text-white rounded-button-radius font-semibold transition-colors"
+                                onClick={() => router.push(`/${locale}/user/events/${event.eventId}/booking`)}
+                            >
+                                {tr('back_to_booking')}
+                            </button>
+                            <button
+                                className="w-full py-3 bg-transparent border border-border-strong hover:bg-bg-subtle text-text-secondary rounded-button-radius font-semibold transition-colors"
+                                onClick={() => router.push(`/${locale}/user/homepage`)}
+                            >
+                                {tr('back_to_homepage')}
                             </button>
                         </div>
                     </>
                 );
 
             default:
-                return null;
+                return (
+                    <div className="py-12 flex flex-col items-center">
+                        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+                        <p className="text-text-secondary">{tr('loading_result')}</p>
+                    </div>
+                );
         }
     };
 
     return (
         <div className="min-h-screen bg-bg-page flex flex-col font-sans">
-            <Header />
 
             {/* TOP HEADER */}
             <div className="bg-bg-page border-b border-border-default pt-6 pb-4">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="text-xs text-text-secondary flex items-center gap-2 mb-6 uppercase tracking-wider">
-                        <Link href={`/${locale}/user/homepage`} className="hover:text-primary transition-colors">Home</Link>
+                        <Link href={`/${locale}/user/homepage`} className="hover:text-primary transition-colors">{tb('home')}</Link>
                         <span>{'>'}</span>
-                        <Link href={`/${locale}/user/events`} className="hover:text-primary transition-colors">Tìm kiếm</Link>
+                        <Link href={`/${locale}/user/events`} className="hover:text-primary transition-colors">{tb('search')}</Link>
                         <span>{'>'}</span>
-                        <Link href={`/${locale}/user/events/${event.eventId}`} className="hover:text-primary transition-colors">Chi tiết sự kiện</Link>
+                        <Link href={`/${locale}/user/events/${event.eventId}`} className="hover:text-primary transition-colors">{tb('event_detail')}</Link>
                         <span>{'>'}</span>
-                        <span className="text-primary font-semibold">Đặt vé và thanh toán</span>
+                        <span className="text-primary font-semibold">{tb('booking_and_payment')}</span>
                     </div>
 
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold text-text-primary mb-2">Đặt vé & Thanh toán</h1>
-                            <p className="text-sm text-text-secondary mb-1">Thực hiện trọn vẹn quy trình 03 bước để sở hữu vé</p>
-                            <p className="text-[11px] text-text-muted">Vui lòng hoàn tất các bước trong thời gian giữ vé để tránh mất các vé đã chọn.</p>
+                            <h1 className="text-3xl font-bold text-text-primary mb-2">{tb('booking_title')}</h1>
+                            <p className="text-sm text-text-secondary mb-1">{tb('booking_subtitle')}</p>
+                            <p className="text-[11px] text-text-muted">{tb('booking_warning')}</p>
                         </div>
                         <Link href={`/${locale}/user/events/${event.eventId}`} className="flex items-center gap-2 px-4 py-2 bg-bg-surface border border-border-default rounded-button-radius hover:bg-bg-subtle transition-colors text-sm font-semibold text-text-primary h-fit">
-                            <ArrowLeft size={16} /> Quay lại chi tiết vé
+                            <ArrowLeft size={16} /> {tb('back_to_event')}
                         </Link>
                     </div>
 
                     {/* STEPPER */}
-                    <div className="mt-8 flex flex-col md:flex-row items-center justify-between bg-card-bg-elevated border border-border-default rounded-xl p-4">
-                        <div className="flex items-center w-full md:w-auto mb-4 md:mb-0">
+                    <div className="mt-8 flex flex-col md:flex-row items-center justify-between bg-card-bg-elevated border border-border-default rounded-xl p-4 px-6">
+                        <div className="flex items-center w-full mb-4 md:mb-0">
                             {/* Step 1 - Done */}
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-shrink-0">
                                 <div className="w-8 h-8 rounded-full bg-[#1e463a] border border-[#2bad7f] text-[#2bad7f] flex items-center justify-center font-bold text-sm">
                                     <Check size={16} />
                                 </div>
-                                <span className="text-sm font-bold text-text-primary">Chọn vé</span>
+                                <span className="text-sm font-bold text-text-primary whitespace-nowrap">{tb('step_1')}</span>
                             </div>
-                            <div className="h-[1px] w-12 md:w-24 bg-[#2bad7f] mx-4 opacity-50"></div>
+                            <div className="h-[1px] flex-1 bg-[#2bad7f] mx-4 opacity-50"></div>
                             {/* Step 2 - Done */}
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-shrink-0">
                                 <div className="w-8 h-8 rounded-full bg-[#1e463a] border border-[#2bad7f] text-[#2bad7f] flex items-center justify-center font-bold text-sm">
                                     <Check size={16} />
                                 </div>
-                                <span className="text-sm font-bold text-text-primary">Thanh toán</span>
+                                <span className="text-sm font-bold text-text-primary whitespace-nowrap">{tb('step_2')}</span>
                             </div>
-                            <div className="h-[1px] w-12 md:w-24 bg-[#2bad7f] mx-4 opacity-50"></div>
-                            {/* Step 3 - Active */}
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-bg-surface border border-primary text-primary flex items-center justify-center font-bold text-sm">3</div>
-                                <span className="text-sm font-bold text-text-primary">Hoàn tất</span>
+                            <div className={`h-[1px] flex-1 mx-4 opacity-50 ${(status === 'SUCCESS' || status === 'CANCELLED') ? 'bg-[#2bad7f]' : 'bg-[#ad2b2b]'}`}></div>
+                            {/* Step 3 - Status based */}
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                                    (status === 'SUCCESS' || status === 'CANCELLED')
+                                        ? 'bg-[#1e463a] border border-[#2bad7f] text-[#2bad7f]'
+                                        : 'bg-[#461e1e] border border-[#ad2b2b] text-[#ad2b2b]'
+                                }`}>
+                                    {(status === 'SUCCESS' || status === 'CANCELLED') ? <Check size={16} /> : <X size={16} />}
+                                </div>
+                                <span className="text-sm font-bold text-text-primary whitespace-nowrap">{tb('step_3')}</span>
                             </div>
                         </div>
 
                         {/* Only show timer if not success or expired, adjust based on real logic, here just mocking disabled state */}
-                        {status !== 'success' && status !== 'expired' && status !== 'failed' && (
+                        {status !== 'SUCCESS' && status !== 'EXPIRED' && status !== 'FAILED' && status !== 'CANCELLED' && status !== 'RESOURCE_NOT_FOUND' && (
                             <div className="flex items-center gap-3">
-                                <span className="text-sm text-text-secondary">Thời gian giữ vé còn lại:</span>
+                                <span className="text-sm text-text-secondary">{tb('time_remaining')}</span>
                                 <div className="flex items-center gap-1 font-mono text-lg font-bold text-feedback-error-text">
                                     <div className="w-8 py-1 bg-bg-surface border border-border-strong rounded flex justify-center items-center">0</div>
                                     <div className="w-8 py-1 bg-bg-surface border border-border-strong rounded flex justify-center items-center">9</div>
@@ -377,7 +487,6 @@ function PaymentResultContent() {
                 </div>
             </div>
 
-            <Footer />
         </div>
     );
 }

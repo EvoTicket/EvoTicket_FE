@@ -9,24 +9,18 @@ import { Calendar, MapPin, ChevronRight, Search, TrendingUp, Filter, CheckIcon, 
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { Footer } from "@/src/components/footer";
 import api from "@/src/lib/axios";
-import Cookies from "js-cookie";
 import { CustomDatePicker } from "@/src/components/ui/CustomDatePicker";
 import { EventItem } from "@/src/types/event";
 import { useRouter } from "next/navigation";
 import { useEventFilters } from "@/src/hooks/useEventFilters";
+import { TICKET_AVAILABILITY_OPTIONS } from "@/src/constants/eventFilters";
 
-// Mock Data: Sự kiện thịnh hành (Table) - Giữ nguyên mock do chưa có API ranking/finance
-const trendingEvents = [
-  { id: 1, rank: "01", title: "Nhà Gia Tiên", organizer: "Tên nhà tổ chức", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "+125%" },
-  { id: 2, rank: "02", title: "[BẾN THÀNH] Đêm Nhạc", organizer: "Space Speakers", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "+125%" },
-  { id: 3, rank: "03", title: "Concert Chillies", organizer: "SpaceSpeakers", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "-12%" },
-  { id: 4, rank: "04", title: "Concert Chillies", organizer: "SpaceSpeakers", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "+1%" },
-  { id: 5, rank: "05", title: "Concert Chillies", organizer: "SpaceSpeakers", price: "130,000 VND", volume: "1,507,054,100 VND", growth: "+125%" },
-];
+
 
 export default function HomePage() {
   const { locale } = useParams();
   const t = useTranslations("Homepage");
+  const te = useTranslations("Events");
   const router = useRouter();
 
   // const location = [
@@ -60,6 +54,13 @@ export default function HomePage() {
   const [loadingEvents, setLoadingEvents] = useState(true);
 
 
+
+  // Helper to map ticket status
+  const getTicketStatusLabel = (status?: string) => {
+    if (!status) return t("event_default");
+    const option = TICKET_AVAILABILITY_OPTIONS.find(opt => opt.id === status);
+    return option ? te(option.translationKey as any) : status;
+  };
 
   // Fetch Latest Events
   useEffect(() => {
@@ -217,8 +218,12 @@ export default function HomePage() {
   }, []);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+    return new Date(dateString).toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -325,7 +330,7 @@ export default function HomePage() {
 
               {/* Lọc: Địa điểm */}
               <div className="relative w-full md:w-[200px]">
-                <label className="hidden text-xs text-text-muted mb-1">Địa điểm</label>
+                <label className="hidden text-xs text-text-muted mb-1">{t("location_label")}</label>
                 <Listbox value={locationSelected} onChange={(val) => setLocationSelected(val)}>
                   <ListboxButton className="w-full p-4 pl-4 pr-10 bg-bg-page/80 border border-border-default rounded-xl text-text-primary outline-none focus:border-primary transition-colors text-left text-sm font-medium">
                     {locationSelected?.name || t("location_all")}
@@ -344,7 +349,7 @@ export default function HomePage() {
 
               {/* Lọc: Thể loại */}
               <div className="relative w-full md:w-[200px]">
-                <label className="hidden text-xs text-text-muted mb-1">Thể loại</label>
+                <label className="hidden text-xs text-text-muted mb-1">{t("genre_label")}</label>
                 <Listbox value={genreSelected} onChange={(val) => setGenreSelected(val)}>
                   <ListboxButton className="w-full p-4 pl-4 pr-10 bg-bg-page/80 border border-border-default rounded-xl text-text-primary outline-none focus:border-primary transition-colors text-left text-sm font-medium">
                     {genreSelected.name}
@@ -423,17 +428,34 @@ export default function HomePage() {
                       </td>
                       <td className="py-4 text-left">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded bg-gradient-to-br from-[#FDE599] to-[#D5A02B]"></div>
+                          <div className="relative w-10 h-10 rounded overflow-hidden bg-bg-subtle flex-shrink-0 border border-border-default">
+                            {event.thumbnailImage || event.bannerImage ? (
+                              <Image
+                                src={event.thumbnailImage || event.bannerImage || ""}
+                                alt={event.eventName}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-[#FDE599] to-[#D5A02B] flex items-center justify-center">
+                                <Calendar size={16} className="text-white/50" />
+                              </div>
+                            )}
+                          </div>
                           <div>
                             <p className="font-bold text-text-primary text-sm line-clamp-1">{event.eventName}</p>
                             <p className="text-xs text-text-muted italic">({event.organizerName})</p>
                           </div>
                         </div>
                       </td>
-                      <td className="py-4 text-right text-sm text-text-secondary font-medium">{event.floorPrice}</td>
-                      <td className="py-4 text-right text-sm text-text-muted">{event.volume24H}</td>
-                      <td className={`py-4 text-right text-sm font-bold ${event.hotness?.toString().includes('-') ? 'text-error' : 'text-success'}`}>
-                        {event.hotness}
+                      <td className="py-4 text-right text-sm text-text-secondary font-medium">
+                        {event.floorPrice ? `${event.floorPrice.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US')} VND` : t("contact")}
+                      </td>
+                      <td className="py-4 text-right text-sm text-text-muted">
+                        {event.volume24H ? `${event.volume24H.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US')} VND` : '-'}
+                      </td>
+                      <td className={`py-4 text-right text-sm font-bold ${event.hotness && event.hotness < 0 ? 'text-error' : 'text-success'}`}>
+                        {event.hotness !== undefined ? (event.hotness > 0 ? `+${event.hotness}%` : `${event.hotness}%`) : '-'}
                       </td>
                     </tr>
                   ))}
@@ -449,9 +471,9 @@ export default function HomePage() {
                 </span>
               </div>
               <div onClick={() => handleOpenEvent(top1TrendingEvents?.id)} className="relative w-full aspect-square md:aspect-[4/5] rounded-[2rem] overflow-hidden border-2 border-border-strong shadow-xl group cursor-pointer mt-4">
-                {top1TrendingEvents?.bannerImage ? (
+                {top1TrendingEvents?.thumbnailImage ? (
                   <Image
-                    src={top1TrendingEvents.bannerImage}
+                    src={top1TrendingEvents.thumbnailImage}
                     alt={top1TrendingEvents?.eventName || "Top 1 Event"}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -504,8 +526,8 @@ export default function HomePage() {
                           <Calendar size={32} />
                         </div>
                       )}
-                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-smtext-button-primary-text-default text-xs px-2 py-1 rounded">
-                        {event.categoryName || "Event"}
+                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-button-primary-text-default text-xs px-2 py-1 rounded">
+                        {getTicketStatusLabel(event.ticketAvailabilityStatus)}
                       </div>
                     </div>
 
@@ -522,14 +544,18 @@ export default function HomePage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin size={14} className="text-primary shrink-0" />
-                          <span className="line-clamp-1">{event.venue || "Online"}</span>
+                          <span className="line-clamp-1">{event.venue || t("online_default")}</span>
                         </div>
                       </div>
 
                       <div className="mt-4 pt-3 border-t border-border-default">
                         <span className="text-primary font-bold block">
                           {/* Placeholder for price, as list API might not explicitly return it in sample */}
-                          {t("contact")}
+                          {/* {t("contact")} */}
+                          {event.floorPrice ? <div className="text-body-base-semibold text-feedback-warning-text">
+                            {t('from_price', { price: event.floorPrice?.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US') })}
+                          </div> : t("contact")}
+                          {/* event.floorPrice ? event.floorPrice : t("contact") */}
                         </span>
                       </div>
                     </div>
@@ -576,8 +602,8 @@ export default function HomePage() {
                           <Calendar size={32} />
                         </div>
                       )}
-                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-smtext-button-primary-text-default text-xs px-2 py-1 rounded">
-                        {event.categoryName || "Event"}
+                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-button-primary-text-default text-xs px-2 py-1 rounded">
+                        {getTicketStatusLabel(event.ticketAvailabilityStatus)}
                       </div>
                     </div>
 
@@ -594,14 +620,18 @@ export default function HomePage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin size={14} className="text-primary shrink-0" />
-                          <span className="line-clamp-1">{event.venue || "Online"}</span>
+                          <span className="line-clamp-1">{event.venue || t("online_default")}</span>
                         </div>
                       </div>
 
                       <div className="mt-4 pt-3 border-t border-border-default">
                         <span className="text-primary font-bold block">
                           {/* Placeholder for price, as list API might not explicitly return it in sample */}
-                          {t("contact")}
+                          {/* {t("contact")} */}
+                          {event.floorPrice ? <div className="text-body-base-semibold text-feedback-warning-text">
+                            {t('from_price', { price: event.floorPrice?.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US') })}
+                          </div> : t("contact")}
+                          {/* event.floorPrice ? event.floorPrice : t("contact") */}
                         </span>
                       </div>
                     </div>
@@ -648,8 +678,8 @@ export default function HomePage() {
                           <Calendar size={32} />
                         </div>
                       )}
-                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-smtext-button-primary-text-default text-xs px-2 py-1 rounded">
-                        {event.categoryName || "Event"}
+                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-button-primary-text-default text-xs px-2 py-1 rounded">
+                        {getTicketStatusLabel(event.ticketAvailabilityStatus)}
                       </div>
                     </div>
 
@@ -666,14 +696,18 @@ export default function HomePage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin size={14} className="text-primary shrink-0" />
-                          <span className="line-clamp-1">{event.venue || "Online"}</span>
+                          <span className="line-clamp-1">{event.venue || t("online_default")}</span>
                         </div>
                       </div>
 
                       <div className="mt-4 pt-3 border-t border-border-default">
                         <span className="text-primary font-bold block">
                           {/* Placeholder for price, as list API might not explicitly return it in sample */}
-                          {t("contact")}
+                          {/* {t("contact")} */}
+                          {event.floorPrice ? <div className="text-body-base-semibold text-feedback-warning-text">
+                            {t('from_price', { price: event.floorPrice?.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US') })}
+                          </div> : t("contact")}
+                          {/* event.floorPrice ? event.floorPrice : t("contact") */}
                         </span>
                       </div>
                     </div>
@@ -720,8 +754,8 @@ export default function HomePage() {
                           <Calendar size={32} />
                         </div>
                       )}
-                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-smtext-button-primary-text-default text-xs px-2 py-1 rounded">
-                        {event.categoryName || "Event"}
+                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-button-primary-text-default text-xs px-2 py-1 rounded">
+                        {getTicketStatusLabel(event.ticketAvailabilityStatus)}
                       </div>
                     </div>
 
@@ -738,14 +772,18 @@ export default function HomePage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin size={14} className="text-primary shrink-0" />
-                          <span className="line-clamp-1">{event.venue || "Online"}</span>
+                          <span className="line-clamp-1">{event.venue || t("online_default")}</span>
                         </div>
                       </div>
 
                       <div className="mt-4 pt-3 border-t border-border-default">
                         <span className="text-primary font-bold block">
                           {/* Placeholder for price, as list API might not explicitly return it in sample */}
-                          {t("contact")}
+                          {/* {t("contact")} */}
+                          {event.floorPrice ? <div className="text-body-base-semibold text-feedback-warning-text">
+                            {t('from_price', { price: event.floorPrice?.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US') })}
+                          </div> : t("contact")}
+                          {/* event.floorPrice ? event.floorPrice : t("contact") */}
                         </span>
                       </div>
                     </div>

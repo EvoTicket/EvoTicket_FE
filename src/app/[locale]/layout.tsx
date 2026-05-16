@@ -9,6 +9,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ChatBot } from '@/src/components/chatbot';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { ScrollToTop } from '@/src/components/ScrollToTop';
 
 type Props = {
   children: ReactNode;
@@ -50,6 +51,7 @@ export default async function LocaleLayout({ children, params }: Props) {
               </GoogleOAuthProvider>
               <ToastContainer />
               <ChatBot />
+              <ScrollToTop />
             </ThemeProvider>
           </NextIntlClientProvider>
         </StoreProvider>

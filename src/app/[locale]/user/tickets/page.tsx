@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { QRCodeSVG } from "qrcode.react";
 import {
     Search,
     ChevronDown,
@@ -15,13 +16,15 @@ import {
     Network,
     Search as SearchIcon,
     Loader2,
-    CheckCircle2
+    CheckCircle2,
+    X,
+    RefreshCcw,
+    Clock
 } from "lucide-react";
-import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import api from "@/src/lib/axios";
-import Cookies from "js-cookie";
 
 export default function MyTicketsPage() {
     const t = useTranslations("MyTickets");
@@ -37,12 +40,56 @@ export default function MyTicketsPage() {
     const [events, setEvents] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    // QR Code Modal State
+    const [qrModalOpen, setQrModalOpen] = useState(false);
+    const [qrData, setQrData] = useState<any>(null);
+    const [qrTimer, setQrTimer] = useState(0);
+    const [qrLoading, setQrLoading] = useState(false);
+    const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+
     // Sort setup
     const sortByList = [
         { id: "popular", name: t("sort_popular") || "Phổ biến" },
-        { id: "nearest", name: t("sort_nearest_date") || "Gần ngày diễn nhất" },
+        { id: "newest", name: t("sort_newest") || "Mới nhất" },
+        { id: "oldest", name: t("sort_oldest") || "Cũ nhất" }
     ];
-    const [sortBy, setSortBy] = useState(sortByList[0]);
+    const [sortBy, setSortBy] = useState(sortByList[1]);
+
+    const fetchQRToken = async (ticketAssetId: number) => {
+        setSelectedTicketId(ticketAssetId);
+        setQrLoading(true);
+        setQrModalOpen(true);
+        try {
+            const response = await api.get(`/checkin-service/api/v1/tickets/${ticketAssetId}/qr-token`, { skipAuth: false } as any);
+            if (response.data && response.data.data) {
+                setQrData(response.data.data);
+                setQrTimer(response.data.data.refreshAfterSeconds);
+            }
+        } catch (error) {
+            console.error("Failed to fetch QR token", error);
+            // toast.error(t('qr_fetch_failed') || "Không thể tải mã QR");
+        } finally {
+            setQrLoading(false);
+        }
+    };
+
+    const refreshQRCode = () => {
+        if (selectedTicketId) {
+            fetchQRToken(selectedTicketId);
+        }
+    };
+
+    useEffect(() => {
+        let interval: any;
+        if (qrModalOpen && qrTimer > 0) {
+            interval = setInterval(() => {
+                setQrTimer(prev => prev - 1);
+            }, 1000);
+        } else if (qrTimer === 0) {
+            clearInterval(interval);
+        }
+        return () => clearInterval(interval);
+    }, [qrModalOpen, qrTimer]);
 
     const tabs = [
         { id: "all", label: t("tab_all") || "Tất cả" },
@@ -377,7 +424,10 @@ export default function MyTicketsPage() {
 
                                                             {/* Actions */}
                                                             <div className="flex items-center justify-end gap-2 shrink-0 md:flex-1 w-full md:w-auto relative z-20">
-                                                                <button className="bg-primary hover:bg-primary-hover text-white px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors shadow-sm whitespace-nowrap">
+                                                                <button 
+                                                                    onClick={() => fetchQRToken(ticket.id)}
+                                                                    className="bg-primary hover:bg-primary-hover text-white px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors shadow-sm whitespace-nowrap"
+                                                                >
                                                                     {t('view_qr')}
                                                                 </button>
                                                                 {ticket.status !== 'on_sale' && (
@@ -460,6 +510,114 @@ export default function MyTicketsPage() {
             </div>
 
             <div className="border-t border-border-default mt-16 mb-8"></div>
+
+            {/* QR Code Modal */}
+            <Transition show={qrModalOpen} as={React.Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={() => setQrModalOpen(false)}>
+                    <TransitionChild
+                        as={React.Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" />
+                    </TransitionChild>
+
+                    <div className="fixed inset-0 z-10 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                            <TransitionChild
+                                as={React.Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                            >
+                                <DialogPanel className="relative transform overflow-hidden rounded-2xl bg-bg-surface text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-sm">
+                                    <div className="bg-bg-surface px-4 pb-4 pt-5 sm:p-6">
+                                        <div className="flex justify-between items-center mb-6">
+                                            <DialogTitle as="h3" className="text-lg font-bold leading-6 text-text-primary">
+                                                {t('qr_code_title') || "Mã vé QR"}
+                                            </DialogTitle>
+                                            <button
+                                                onClick={() => setQrModalOpen(false)}
+                                                className="rounded-full p-1 hover:bg-bg-subtle text-text-muted transition-colors"
+                                            >
+                                                <X size={20} />
+                                            </button>
+                                        </div>
+
+                                        <div className="flex flex-col items-center">
+                                            <div className="bg-white p-6 rounded-2xl border-2 border-dashed border-border-default shadow-inner mb-6 relative">
+                                                {qrLoading ? (
+                                                    <div className="w-56 h-56 flex items-center justify-center">
+                                                        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                                                    </div>
+                                                ) : qrData ? (
+                                                    <div className="relative">
+                                                        <QRCodeSVG 
+                                                            value={qrData.qrToken} 
+                                                            size={224} 
+                                                            level="H"
+                                                            includeMargin={false}
+                                                        />
+                                                        {qrTimer === 0 && (
+                                                            <div className="absolute inset-0 bg-white/90 backdrop-blur-[1px] flex flex-col items-center justify-center p-4 text-center">
+                                                                <p className="text-sm font-bold text-error mb-4">{t('qr_expired') || "Mã QR đã hết hạn"}</p>
+                                                                <button 
+                                                                    onClick={refreshQRCode}
+                                                                    className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg hover:bg-primary-hover transition-all active:scale-95"
+                                                                >
+                                                                    <RefreshCcw size={14} /> {t('refresh_qr') || "Làm mới mã"}
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-56 h-56 flex items-center justify-center text-text-muted italic text-xs">
+                                                        {t('qr_not_found') || "Không tìm thấy dữ liệu QR"}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {qrTimer > 0 && (
+                                                <div className="w-full bg-bg-subtle rounded-xl p-4 flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                                            <Clock size={20} />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] text-text-muted uppercase font-bold tracking-wider">{t('qr_expires_in') || "Hết hạn sau"}</p>
+                                                            <p className="text-sm font-mono font-bold text-text-primary">{qrTimer}s</p>
+                                                        </div>
+                                                    </div>
+                                                    <button 
+                                                        onClick={refreshQRCode}
+                                                        className="p-2 rounded-full hover:bg-bg-surface text-text-secondary transition-colors"
+                                                        title={t('refresh_qr') || "Làm mới"}
+                                                    >
+                                                        <RefreshCcw size={18} className={qrLoading ? "animate-spin" : ""} />
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            <div className="mt-8 text-center">
+                                                <p className="text-[11px] text-text-muted leading-relaxed">
+                                                    {t('qr_security_note') || "Vui lòng đưa mã này cho nhân viên tại quầy soát vé để check-in. Mã QR sẽ tự động cập nhật để bảo mật."}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </DialogPanel>
+                            </TransitionChild>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
         </div>
     );
 }

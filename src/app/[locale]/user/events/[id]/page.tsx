@@ -4,14 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import Cookies from "js-cookie";
 import api from "@/src/lib/axios";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import {
     MapPin, Calendar, Clock, User, Star, Image as ImageIcon,
-    Check, MapIcon, CircleHelp, AlertCircle, ChevronDown, ChevronUp
+    Check, MapIcon, CircleHelp, AlertCircle, ChevronDown, ChevronUp, ArrowLeft
 } from "lucide-react";
 import { Footer } from "@/src/components/footer";
 import { Header } from "@/src/components/header";
@@ -21,6 +20,8 @@ import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import { useAppSelector } from "@/src/store/hooks";
+import { selectIsAuthenticated } from "@/src/store/slices/authSlice";
 
 // Dynamic import for Map to avoid SSR issues
 const Map = dynamic(() => import("@/src/components/Map"), {
@@ -42,7 +43,7 @@ export default function EventDetailPage() {
     const [event, setEvent] = useState<EventDetail | null>(null);
     const [suggestedEvents, setSuggestedEvents] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
     // Expansion state for the 'introduction' block
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -61,8 +62,6 @@ export default function EventDetailPage() {
         : 0;
 
     useEffect(() => {
-        const token = Cookies.get("token");
-        setIsAuthenticated(!!token);
         if (id) {
             fetchEventDetail(id as string);
         }
@@ -82,10 +81,8 @@ export default function EventDetailPage() {
     const fetchEventDetail = async (eventId: string) => {
         setLoading(true);
         try {
-            const token = Cookies.get("token");
-            const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-            const response = await api.get(`/inventory-service/api/events/${eventId}`, { headers });
+            const response = await api.get(`/inventory-service/api/events/${eventId}`);
 
             if (response.data && response.data.data) {
                 // Mock seat map conditionally based on fake logic if API doesn't provide
@@ -326,7 +323,14 @@ export default function EventDetailPage() {
                                 <button
                                     className={`w-full py-4 px-10 rounded-button-radius font-bold text-lg transition-all shadow-lg ${isSoldOut ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default hover:shadow-xl hover:-translate-y-0.5'}`}
                                     disabled={isSoldOut}
-                                    onClick={() => !isSoldOut && router.push(`/${locale}/user/events/${id}/booking`)}
+                                    onClick={() => {
+                                        if (isSoldOut) return;
+                                        if (!isAuthenticated) {
+                                            router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+                                            return;
+                                        }
+                                        router.push(`/${locale}/user/events/${id}/booking`);
+                                    }}
                                 >
                                     {isSoldOut ? te('sold_out_temp') : te('buy_now')}
                                 </button>
@@ -432,6 +436,35 @@ export default function EventDetailPage() {
                                         );
                                     })}
                                 </div>
+
+                                {/* Event Location Map */}
+                                {event.latitude !== 0 && event.longitude !== 0 && (
+                                    <div className="mt-8">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <MapIcon size={20} className="text-primary" />
+                                            <span className="font-bold text-text-primary">{te('location_map')}</span>
+                                        </div>
+                                        <div className="h-[350px] w-full rounded-xl overflow-hidden border border-border-default shadow-sm relative z-0">
+                                            <Map 
+                                                pos={[event.latitude, event.longitude]} 
+                                                popupText={event.venue || event.address} 
+                                            />
+                                        </div>
+                                        <div className="mt-3 flex justify-between items-center">
+                                            <p className="text-xs text-text-secondary italic">
+                                                * {te('map_instruction')}
+                                            </p>
+                                            <a 
+                                                href={`https://www.google.com/maps/search/?api=1&query=${event.latitude},${event.longitude}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                                            >
+                                                {te('open_in_google_maps')} <ArrowLeft size={12} className="rotate-180" />
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Khối Sơ đồ chỗ ngồi (Dựa theo Wireframe Seat Selection) */}
@@ -530,7 +563,14 @@ export default function EventDetailPage() {
                                     <button
                                         className={`w-full py-3.5 rounded-button-radius font-semibold mb-6 transition-colors shadow-sm ${isSoldOut ? 'bg-[#5b4f8a] text-white/80 cursor-not-allowed' : 'bg-[#6D48D7] hover:bg-[#5b3bb8] text-white'}`}
                                         disabled={isSoldOut}
-                                        onClick={() => !isSoldOut && router.push(`/${locale}/user/events/${id}/booking`)}
+                                        onClick={() => {
+                                            if (isSoldOut) return;
+                                            if (!isAuthenticated) {
+                                                router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+                                                return;
+                                            }
+                                            router.push(`/${locale}/user/events/${id}/booking`);
+                                        }}
                                     >
                                         {isSoldOut ? te('sold_out_temp') : te('buy_now')}
                                     </button>
