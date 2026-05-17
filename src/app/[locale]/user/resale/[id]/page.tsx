@@ -6,6 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { ChevronRight, ShieldCheck, CheckCircle2, HelpCircle, Network, ExternalLink, ChevronDown, ArrowLeft, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import api from "@/src/lib/axios";
+import { toast } from "react-toastify";
+import { AxiosError } from "axios";
 
 export default function ResaleDetailPage() {
     const t = useTranslations("ResaleDetail");
@@ -72,8 +74,18 @@ export default function ResaleDetailPage() {
         window.open(`https://amoy.polygonscan.com/nft/${contractAddress}/${tokenIdNum}`, "_blank");
     };
 
-    const handleBuyResaleTicket = (listingId: string) => {
-        router.push(`/${locale}/user/resale/${listingId}/checkout`);
+    const handleReserveResaleTicket = async (listingId: string) => {
+        try {
+            const response = await api.post(`/order-service/api/v1/resale/listings/${listingId}/reserve`);
+            if (response.data && response.data.data) {
+                toast.success(t('bought_resale_ticket_successfully'));
+                sessionStorage.setItem('listing_to_buy', JSON.stringify(response.data.data.resaleSessionId));
+                router.push(`/${locale}/user/tickets`);
+            }
+        } catch (error: any) {
+            console.error("Failed to buy resale ticket:", error);
+            toast.error(error?.response?.data?.message || t('failed_to_buy_resale_ticket'));
+        }
     }
 
     if (isLoading) {
@@ -380,7 +392,7 @@ export default function ResaleDetailPage() {
                         </div>
 
                         <div className="space-y-3">
-                            <div onClick={() => handleBuyResaleTicket(listingData.listingId)} className="block">
+                            <div onClick={() => handleReserveResaleTicket(listingData.listingId)} className="block">
                                 <button className="w-full py-3 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default rounded-lg text-[13px] font-bold transition-all duration-200 shadow-md active:scale-[0.98]">
                                     {t('buy_resale_ticket')}
                                 </button>

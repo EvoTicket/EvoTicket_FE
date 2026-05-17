@@ -85,7 +85,7 @@ export default function ResaleCheckoutPage() {
     const [isTimeoutModalOpen, setIsTimeoutModalOpen] = useState(false);
 
     useEffect(() => {
-        const bookingSessionIdData = sessionStorage.getItem('booking_session_ID');
+        const bookingSessionIdData = sessionStorage.getItem('listing_to_buy');
         if (bookingSessionIdData) {
             try {
                 setBookingSessionId(JSON.parse(bookingSessionIdData));
