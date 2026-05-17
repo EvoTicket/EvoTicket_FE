@@ -62,7 +62,7 @@ export default function RegisterPage() {
         </div>
 
         {/* --- CỘT PHẢI: FORM ĐĂNG KÝ --- */}
-        <div className="w-full max-w-[400px] bg-white rounded-3xl p-6 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+        <div className="w-full max-w-[400px] bg-white rounded-ds-3xl p-6 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
           <div className="text-left mb-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-1">Tạo tài khoản mới</h1>
             <p className="text-sm text-gray-500">
@@ -80,7 +80,7 @@ export default function RegisterPage() {
               <input
                 type="text"
                 placeholder="Nguyễn Văn A"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm"
+                className="w-full px-3 py-2 border border-gray-200 rounded-ds-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm"
               />
             </div>
 
@@ -92,7 +92,7 @@ export default function RegisterPage() {
               <input
                 type="email"
                 placeholder="name@example.com"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm"
+                className="w-full px-3 py-2 border border-gray-200 rounded-ds-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm"
               />
               <p className="text-[11px] text-gray-500">
                 EvoTicket sử dụng email để tạo ví lưu ký, và sẽ không tiết lộ cho bên thứ ba.
@@ -107,7 +107,7 @@ export default function RegisterPage() {
               <input
                 type="tel"
                 placeholder="0912 xxx xxx"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm"
+                className="w-full px-3 py-2 border border-gray-200 rounded-ds-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm"
               />
             </div>
 
@@ -120,7 +120,7 @@ export default function RegisterPage() {
                 <input
                   type={showPassword ? "text" : "password"}
                   onChange={handlePasswordChange}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm pr-10"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-ds-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm pr-10"
                 />
                 <button
                   type="button"
@@ -157,7 +157,7 @@ export default function RegisterPage() {
               <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm pr-10"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-ds-lg focus:outline-none focus:ring-2 focus:ring-black/5 text-sm pr-10"
                 />
                 <button
                   type="button"
@@ -174,7 +174,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Nút Tạo tài khoản */}
-            <button className="w-full bg-[#1a1a1a] hover:bg-blacktext-button-primary-text-default font-medium py-2.5 rounded-lg transition-colors text-sm mt-4">
+            <button className="w-full bg-[#1a1a1a] hover:bg-blacktext-button-primary-text-default font-medium py-2.5 rounded-ds-lg transition-colors text-sm mt-4">
               Tạo tài khoản
             </button>
           </form>
@@ -192,7 +192,7 @@ export default function RegisterPage() {
           </div>
 
           {/* Nút Google */}
-          <button className="w-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm">
+          <button className="w-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-ds-lg flex items-center justify-center gap-2 transition-colors text-sm">
             <GoogleIcon />
             Google
           </button>

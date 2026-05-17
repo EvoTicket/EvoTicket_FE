@@ -15,7 +15,7 @@ export function TimeOutModal({ isOpen, onClose }: TimeOutModalProps) {
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-            <div className="bg-bg-page border border-border-strong rounded-2xl w-full max-w-md p-6 text-center shadow-2xl relative">
+            <div className="bg-bg-page border border-border-strong rounded-ds-2xl w-full max-w-md p-6 text-center shadow-2xl relative">
                 {/* <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-feedback-error-bg mb-4">
                     <X className="h-6 w-6 text-feedback-error-text" />
                 </div> */}

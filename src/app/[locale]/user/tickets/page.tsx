@@ -301,7 +301,7 @@ export default function MyTicketsPage() {
                                 <ListboxOptions
                                     anchor="bottom"
                                     modal={false}
-                                    className="absolute right-0 mt-1 w-[var(--button-width)] bg-bg-surface border border-border-default rounded-md shadow-lg text-text-primary text-[13px] py-1 z-50">
+                                    className="absolute right-0 mt-1 w-[var(--button-width)] bg-bg-surface border border-border-default rounded-ds-md shadow-lg text-text-primary text-[13px] py-1 z-50">
                                     {sortByList.map(item => (
                                         <ListboxOption key={item.id} value={item} className="group flex justify-between items-center px-3 py-2 cursor-pointer hover:bg-secondary">
                                             <span>{item.name}</span>
@@ -322,7 +322,7 @@ export default function MyTicketsPage() {
                         <p className="text-sm text-text-secondary font-medium">{t('loading_message')}</p>
                     </div>
                 ) : filteredEvents.length === 0 ? (
-                    <div className="py-12 bg-bg-surface border border-border-default rounded-lg text-center flex flex-col items-center">
+                    <div className="py-12 bg-bg-surface border border-border-default rounded-ds-lg text-center flex flex-col items-center">
                         <Ticket size={48} className="text-text-muted mb-4 opacity-50" />
                         <h3 className="text-lg font-semibold text-text-primary mb-1">{t('empty_title')}</h3>
                         <p className="text-sm text-text-secondary w-3/4 max-w-md">{t('empty_subtitle')}</p>
@@ -372,7 +372,7 @@ export default function MyTicketsPage() {
                                                 const isTicketExpanded = expandedTickets.includes(ticket.id);
 
                                                 return (
-                                                    <div key={ticket.id} className="bg-bg-surface border border-border-default rounded-md overflow-hidden relative">
+                                                    <div key={ticket.id} className="bg-bg-surface border border-border-default rounded-ds-md overflow-hidden relative">
                                                         <div className="p-4 sm:px-6 sm:py-4 flex flex-col md:flex-row gap-4 justify-between md:items-center">
                                                             <div className="w-full md:w-1/4 shrink-0">
                                                                 <h5 className="font-bold text-text-primary text-[13px] mb-1">{ticket.ticketName}</h5>
@@ -529,7 +529,7 @@ export default function MyTicketsPage() {
                                 leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                                 leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                             >
-                                <DialogPanel className="relative transform overflow-hidden rounded-2xl bg-bg-surface text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-sm">
+                                <DialogPanel className="relative transform overflow-hidden rounded-ds-2xl bg-bg-surface text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-sm">
                                     <div className="bg-bg-surface px-4 pb-4 pt-5 sm:p-6">
                                         <div className="flex justify-between items-center mb-6">
                                             <DialogTitle as="h3" className="text-lg font-bold leading-6 text-text-primary">
@@ -544,7 +544,7 @@ export default function MyTicketsPage() {
                                         </div>
 
                                         <div className="flex flex-col items-center">
-                                            <div className="bg-white p-6 rounded-2xl border-2 border-dashed border-border-default shadow-inner mb-6 relative">
+                                            <div className="bg-white p-6 rounded-ds-2xl border-2 border-dashed border-border-default shadow-inner mb-6 relative">
                                                 {qrLoading ? (
                                                     <div className="w-56 h-56 flex items-center justify-center">
                                                         <Loader2 className="w-12 h-12 text-button-primary-bg-default animate-spin" />
@@ -577,7 +577,7 @@ export default function MyTicketsPage() {
                                             </div>
 
                                             {qrTimer > 0 && (
-                                                <div className="w-full bg-bg-subtle rounded-xl p-4 flex items-center justify-between">
+                                                <div className="w-full bg-bg-subtle rounded-ds-xl p-4 flex items-center justify-between">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-10 h-10 rounded-full bg-button-primary-bg-default/10 flex items-center justify-center text-button-primary-bg-default">
                                                             <Clock size={20} />

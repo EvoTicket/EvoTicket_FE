@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import axios from "axios";
 import api from "@/src/lib/axios";
 import { toast } from "react-toastify";
 import { Building2, FileText, Phone, Mail, Globe, Upload, MapPin } from "lucide-react";
 import { useAppSelector, useAppDispatch } from "@/src/store/hooks";
 import { updateToken } from "@/src/store/slices/authSlice";
+import { persistor } from "@/src/store";
 
 interface OrganizerFormData {
     organizationName: string;
@@ -38,9 +40,30 @@ interface Ward {
     province_code: number | null;
 }
 
+interface OrganizationRegisterResponse {
+    status?: number;
+    message?: string;
+    newToken?: string;
+    token?: string;
+    data?: {
+        newToken?: string;
+        token?: string;
+        organizationProfile?: unknown;
+    } | null;
+}
+
+interface ApiErrorResponse {
+    message?: string;
+}
+
+function extractOrganizationToken(response: OrganizationRegisterResponse): string | undefined {
+    return response.data?.newToken ?? response.newToken ?? response.data?.token ?? response.token;
+}
+
 export default function RegisterOrganizerPage() {
     const router = useRouter();
-    const { locale } = useParams();
+    const params = useParams();
+    const locale = typeof params.locale === "string" ? params.locale : "vi";
     const dispatch = useAppDispatch();
     const { token } = useAppSelector((state) => state.auth);
 
@@ -64,22 +87,7 @@ export default function RegisterOrganizerPage() {
         businessLicenseUrl: "",
     });
 
-    // Fetch provinces on component mount
-    useEffect(() => {
-        fetchProvinces();
-    }, []);
-
-    // Fetch wards when province changes
-    useEffect(() => {
-        if (formData.provinceCode > 0) {
-            fetchWards(formData.provinceCode);
-        } else {
-            setWards([]);
-            setFormData(prev => ({ ...prev, wardCode: 0 }));
-        }
-    }, [formData.provinceCode]);
-
-    const fetchProvinces = async () => {
+    const fetchProvinces = useCallback(async () => {
         setIsLoadingProvinces(true);
         try {
             // Token auto-injected by axios interceptor
@@ -94,9 +102,9 @@ export default function RegisterOrganizerPage() {
         } finally {
             setIsLoadingProvinces(false);
         }
-    };
+    }, []);
 
-    const fetchWards = async (provinceCode: number) => {
+    const fetchWards = useCallback(async (provinceCode: number) => {
         setIsLoadingWards(true);
         try {
             // Token auto-injected by axios interceptor
@@ -113,52 +121,101 @@ export default function RegisterOrganizerPage() {
         } finally {
             setIsLoadingWards(false);
         }
-    };
+    }, []);
+
+    // Fetch provinces on component mount
+    useEffect(() => {
+        const frame = requestAnimationFrame(() => {
+            void fetchProvinces();
+        });
+
+        return () => cancelAnimationFrame(frame);
+    }, [fetchProvinces]);
+
+    // Fetch wards when province changes
+    useEffect(() => {
+        if (formData.provinceCode > 0) {
+            const frame = requestAnimationFrame(() => {
+                void fetchWards(formData.provinceCode);
+            });
+
+            return () => cancelAnimationFrame(frame);
+        }
+    }, [fetchWards, formData.provinceCode]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
+        const nextValue = name === "wardCode" || name === "provinceCode" ? parseInt(value) || 0 : value;
+
+        if (name === "provinceCode") {
+            setWards([]);
+            setFormData((prev) => ({
+                ...prev,
+                provinceCode: nextValue as number,
+                wardCode: 0,
+            }));
+            return;
+        }
+
         setFormData((prev) => ({
             ...prev,
-            [name]: name === "wardCode" || name === "provinceCode" ? parseInt(value) || 0 : value,
+            [name]: nextValue,
         }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (isLoading) {
+            return;
+        }
+
         if (!token) {
             toast.error("Vui lòng đăng nhập để tiếp tục");
-            router.push(`/${locale}/auth/login`);
+            router.replace(`/${locale}/auth/login?callbackUrl=/${locale}/organizer/register`);
             return;
         }
 
         setIsLoading(true);
 
         try {
-            // Token auto-injected by axios interceptor
-            const response = await api.post(
+            const response = await api.post<OrganizationRegisterResponse>(
                 "/iam-service/api/organizations",
                 formData
             );
 
-            if (response.data && response.data.status === 201) {
+            if (response.status === 201 || response.data?.status === 201) {
+                const newToken = extractOrganizationToken(response.data);
+
+                if (!newToken) {
+                    console.error("Missing newToken in organization creation response:", response.data);
+                    toast.error("Đăng ký thành công nhưng không nhận được token mới.");
+                    return;
+                }
+
+                dispatch(updateToken({ token: newToken }));
+                await persistor.flush();
+
                 toast.success("Đăng ký organizer thành công!");
 
-                // Lấy token mới từ response và update vào Redux
-                const newToken = response.data.data["New token"];
-                dispatch(updateToken(newToken));
-
-                // Chuyển đến trang Organizer Center
-                router.push(`/${locale}/organizer/center`);
+                router.replace(`/${locale}/organizer/center`);
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Failed to register organizer", error);
+
+            if (!axios.isAxiosError<ApiErrorResponse>(error)) {
+                toast.error("Đăng ký thất bại. Vui lòng thử lại.");
+                return;
+            }
+
             if (error.response?.status === 400) {
                 toast.error("Thông tin không hợp lệ. Vui lòng kiểm tra lại.");
+            } else if (error.response?.status === 401 || error.response?.status === 403) {
+                toast.error("Phiên đăng nhập không hợp lệ hoặc bạn không có quyền thực hiện thao tác này.");
             } else if (error.response?.status === 409) {
                 toast.error("Tổ chức đã tồn tại.");
             } else {
-                toast.error("Đăng ký thất bại. Vui lòng thử lại.");
+                toast.error(error.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.");
             }
         } finally {
             setIsLoading(false);
@@ -168,7 +225,7 @@ export default function RegisterOrganizerPage() {
     return (
         <div className="min-h-screen 	bg-bg-surface py-12 px-4">
             <div className="max-w-4xl mx-auto">
-                <div className="bg-bg-page border border-border-default rounded-lg shadow-lg p-8">
+                <div className="bg-bg-page border border-border-default rounded-ds-lg shadow-lg p-8">
                     {/* Header */}
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-text-primary mb-2">
@@ -194,7 +251,7 @@ export default function RegisterOrganizerPage() {
                                     value={formData.organizationName}
                                     onChange={handleChange}
                                     required
-                                    className="w-full px-4 py-2 border border-border-default rounded-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                                     placeholder="VD: Công ty ABC"
                                 />
                             </div>
@@ -210,7 +267,7 @@ export default function RegisterOrganizerPage() {
                                     value={formData.legalName}
                                     onChange={handleChange}
                                     required
-                                    className="w-full px-4 py-2 border border-border-default rounded-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                                     placeholder="VD: Công ty TNHH ABC"
                                 />
                             </div>
@@ -229,7 +286,7 @@ export default function RegisterOrganizerPage() {
                                     onChange={handleChange}
                                     required
                                     pattern="[0-9]{10}"
-                                    className="w-full px-4 py-2 border border-border-default rounded-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                                     placeholder="VD: 0123456789"
                                 />
                             </div>
@@ -246,7 +303,7 @@ export default function RegisterOrganizerPage() {
                                     onChange={handleChange}
                                     required
                                     pattern="[0-9]{10}"
-                                    className="w-full px-4 py-2 border border-border-default rounded-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                                     placeholder="VD: 0901234567"
                                 />
                             </div>
@@ -265,7 +322,7 @@ export default function RegisterOrganizerPage() {
                                     value={formData.businessEmail}
                                     onChange={handleChange}
                                     required
-                                    className="w-full px-4 py-2 border border-border-default rounded-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                                     placeholder="VD: contact@abc.com"
                                 />
                             </div>
@@ -280,7 +337,7 @@ export default function RegisterOrganizerPage() {
                                     name="website"
                                     value={formData.website}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-border-default rounded-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                                     placeholder="VD: https://abc.com"
                                 />
                             </div>
@@ -298,7 +355,7 @@ export default function RegisterOrganizerPage() {
                                 value={formData.businessAddress}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-4 py-2 border border-border-default rounded-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                                className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                                 placeholder="VD: 123 Đường ABC"
                             />
                         </div>
@@ -316,7 +373,7 @@ export default function RegisterOrganizerPage() {
                                     onChange={handleChange}
                                     required
                                     disabled={isLoadingProvinces}
-                                    className="w-full px-4 py-2 border border-border-default rounded-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <option value="">
                                         {isLoadingProvinces ? "Đang tải..." : "-- Chọn tỉnh/thành phố --"}
@@ -340,7 +397,7 @@ export default function RegisterOrganizerPage() {
                                     onChange={handleChange}
                                     required
                                     disabled={isLoadingWards || !formData.provinceCode || wards.length === 0}
-                                    className="w-full px-4 py-2 border border-border-default rounded-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <option value="">
                                         {isLoadingWards
@@ -370,7 +427,7 @@ export default function RegisterOrganizerPage() {
                                 value={formData.description}
                                 onChange={handleChange}
                                 rows={4}
-                                className="w-full px-4 py-2 border border-border-default rounded-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                                 placeholder="Mô tả ngắn về tổ chức của bạn..."
                             />
                         </div>
@@ -386,7 +443,7 @@ export default function RegisterOrganizerPage() {
                                 name="businessLicenseUrl"
                                 value={formData.businessLicenseUrl}
                                 onChange={handleChange}
-                                className="w-full px-4 py-2 border border-border-default rounded-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                                className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                                 placeholder="VD: https://example.com/license.pdf"
                             />
                         </div>
@@ -396,14 +453,14 @@ export default function RegisterOrganizerPage() {
                             <button
                                 type="button"
                                 onClick={() => router.back()}
-                                className="flex-1 px-6 py-3 border border-border-default text-text-primary rounded-lg font-medium hover:bg-secondary transition-colors"
+                                className="flex-1 px-6 py-3 border border-border-default text-text-primary rounded-ds-lg font-medium hover:bg-secondary transition-colors"
                             >
                                 Hủy
                             </button>
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="flex-1 px-6 py-3 bg-button-primary-bg-defaul hover:bg-button-primary-bg-defaul-hovertext-button-primary-text-default rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 px-6 py-3 bg-button-primary-bg-defaul hover:bg-button-primary-bg-defaul-hovertext-button-primary-text-default rounded-ds-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isLoading ? "Đang xử lý..." : "Đăng ký"}
                             </button>

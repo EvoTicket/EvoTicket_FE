@@ -61,7 +61,7 @@ export default function RegisterPage() {
     const isCompleted = checkRequirement(index);
     return (
       <li key={index} className="flex items-center gap-2 text-[11px] text-gray-500 mb-1.5">
-        <div className={`w-3 h-3 flex items-center justify-center rounded-sm ${isCompleted ? 'bg-[#25233c] text-primary' : 'bg-[#25233c] border border-white/5'}`}>
+        <div className={`w-3 h-3 flex items-center justify-center rounded-ds-sm ${isCompleted ? 'bg-[#25233c] text-primary' : 'bg-[#25233c] border border-white/5'}`}>
           {isCompleted && (
              <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                <polyline points="20 6 9 17 4 12"></polyline>
@@ -138,7 +138,7 @@ export default function RegisterPage() {
       </div>
       
       {/* Auth Card */}
-      <div className="z-10 w-full max-w-[420px] bg-[#1e1b38]/60 backdrop-blur-xl border border-white/5 rounded-2xl p-8 shadow-2xl mx-4 my-8 max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <div className="z-10 w-full max-w-[420px] bg-[#1e1b38]/60 backdrop-blur-xl border border-white/5 rounded-ds-2xl p-8 shadow-2xl mx-4 my-8 max-h-[90vh] overflow-y-auto custom-scrollbar">
         
         <div className="text-center mb-8">
           <h1 className="text-[26px] font-bold text-white mb-2">Tạo tài khoản mới</h1>
@@ -157,7 +157,7 @@ export default function RegisterPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Nguyễn Văn A"
-              className="w-full px-4 py-2.5 bg-[#25233c] text-gray-200 border border-white/5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500"
+              className="w-full px-4 py-2.5 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500"
               required
             />
           </div>
@@ -170,7 +170,7 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="abc@gmail.com"
-              className="w-full px-4 py-2.5 bg-[#25233c] text-gray-200 border border-white/5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500 mb-1.5"
+              className="w-full px-4 py-2.5 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500 mb-1.5"
               required
             />
             <p className="text-[10.5px] text-gray-500 leading-tight">
@@ -186,7 +186,7 @@ export default function RegisterPage() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="0988 xxx xxx"
-              className="w-full px-4 py-2.5 bg-[#25233c] text-gray-200 border border-white/5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500"
+              className="w-full px-4 py-2.5 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500"
               required
             />
           </div>
@@ -200,7 +200,7 @@ export default function RegisterPage() {
                 placeholder="••••••"
                 value={password}
                 onChange={handlePasswordChange}
-                className="w-full px-4 py-2.5 bg-[#25233c] text-gray-200 border border-white/5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500 pr-10"
+                className="w-full px-4 py-2.5 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500 pr-10"
                 required
               />
               <button
@@ -236,7 +236,7 @@ export default function RegisterPage() {
                 placeholder="••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-2.5 bg-[#25233c] text-gray-200 border border-white/5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500 pr-10"
+                className="w-full px-4 py-2.5 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500 pr-10"
                 required
               />
               <button
@@ -255,7 +255,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-xl transition-all active:scale-[0.98] text-[14px] shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-ds-xl transition-all active:scale-[0.98] text-[14px] shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? "Đang xử lý..." : "Tạo tài khoản"}
             </button>
@@ -275,7 +275,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Nút Google */}
-        <button className="w-full bg-[#25233c] hover:bg-[#2d2a45] border border-white/5 text-gray-300 font-medium py-2.5 rounded-xl flex items-center justify-center gap-3 transition-colors text-[13px]">
+        <button className="w-full bg-[#25233c] hover:bg-[#2d2a45] border border-white/5 text-gray-300 font-medium py-2.5 rounded-ds-xl flex items-center justify-center gap-3 transition-colors text-[13px]">
           <GoogleIcon />
           Đăng ký bằng Google
         </button>

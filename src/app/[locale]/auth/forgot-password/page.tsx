@@ -140,7 +140,7 @@ export default function ForgotPasswordPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Trần Văn A"
-            className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500"
+            className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500"
             required
           />
         </div>
@@ -152,7 +152,7 @@ export default function ForgotPasswordPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="abc@gmail.com"
-            className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500"
+            className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500"
             required
           />
         </div>
@@ -164,7 +164,7 @@ export default function ForgotPasswordPage() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="0988 xxx xxx"
-            className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500"
+            className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500"
             required
           />
         </div>
@@ -173,7 +173,7 @@ export default function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-xl transition-all active:scale-[0.98] text-[14px] shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-ds-xl transition-all active:scale-[0.98] text-[14px] shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {loading ? "Đang xử lý..." : "Nhận mã xác nhận OTP"}
           </button>
@@ -181,7 +181,7 @@ export default function ForgotPasswordPage() {
           <button
             type="button"
             onClick={() => router.push(`/${locale}/auth/login`)}
-            className="w-full bg-[#25233c] hover:bg-[#2d2a45] border border-white/5 text-gray-300 font-medium py-3 rounded-xl transition-colors text-[14px]"
+            className="w-full bg-[#25233c] hover:bg-[#2d2a45] border border-white/5 text-gray-300 font-medium py-3 rounded-ds-xl transition-colors text-[14px]"
           >
             Quay lại đăng nhập
           </button>
@@ -202,7 +202,7 @@ export default function ForgotPasswordPage() {
       <div className="pt-2 space-y-3">
         <button
           onClick={() => setStep('otp')}
-          className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-xl transition-all active:scale-[0.98] text-[14px] shadow-lg shadow-primary/20"
+          className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-ds-xl transition-all active:scale-[0.98] text-[14px] shadow-lg shadow-primary/20"
         >
           Nhập mã OTP
         </button>
@@ -210,7 +210,7 @@ export default function ForgotPasswordPage() {
         <button
           onClick={() => handleRequestSubmit()}
           disabled={loading}
-          className="w-full bg-[#25233c] hover:bg-[#2d2a45] border border-white/5 text-gray-300 font-medium py-3 rounded-xl transition-colors text-[14px] disabled:opacity-70"
+          className="w-full bg-[#25233c] hover:bg-[#2d2a45] border border-white/5 text-gray-300 font-medium py-3 rounded-ds-xl transition-colors text-[14px] disabled:opacity-70"
         >
           {loading ? "Đang gửi..." : "Gửi lại email"}
         </button>
@@ -249,7 +249,7 @@ export default function ForgotPasswordPage() {
               value={digit}
               onChange={(e) => handleOtpChange(index, e.target.value)}
               onKeyDown={(e) => handleOtpKeyDown(index, e)}
-              className="w-10 h-12 sm:w-12 sm:h-14 bg-[#25233c] text-white text-center text-xl font-bold rounded-xl border border-white/5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all shadow-sm"
+              className="w-10 h-12 sm:w-12 sm:h-14 bg-[#25233c] text-white text-center text-xl font-bold rounded-ds-xl border border-white/5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all shadow-sm"
               required
             />
           ))}
@@ -258,7 +258,7 @@ export default function ForgotPasswordPage() {
         <button
           type="submit"
           disabled={loading || otp.join("").length < 6}
-          className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-xl transition-all active:scale-[0.98] text-[14px] shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed mt-4"
+          className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-ds-xl transition-all active:scale-[0.98] text-[14px] shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed mt-4"
         >
           {loading ? "Đang kiểm tra..." : "Xác nhận mã OTP"}
         </button>
@@ -291,7 +291,7 @@ export default function ForgotPasswordPage() {
               placeholder="••••••"
               value={newPassword}
               onChange={handlePasswordChange}
-              className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500 pr-10"
+              className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500 pr-10"
               required
             />
             <button
@@ -321,7 +321,7 @@ export default function ForgotPasswordPage() {
               placeholder="••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500 pr-10"
+              className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500 pr-10"
               required
             />
             <button
@@ -339,7 +339,7 @@ export default function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-xl transition-all active:scale-[0.98] text-[14px] shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-ds-xl transition-all active:scale-[0.98] text-[14px] shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {loading ? "Đang xử lý..." : "Đặt lại mật khẩu"}
           </button>
@@ -358,7 +358,7 @@ export default function ForgotPasswordPage() {
         </svg>
       </div>
       
-      <div className="z-10 w-full max-w-[420px] bg-[#1e1b38]/60 backdrop-blur-xl border border-white/5 rounded-2xl p-8 shadow-2xl relative">
+      <div className="z-10 w-full max-w-[420px] bg-[#1e1b38]/60 backdrop-blur-xl border border-white/5 rounded-ds-2xl p-8 shadow-2xl relative">
         {step === 'request' && renderRequestForm()}
         {step === 'sent' && renderSentInfo()}
         {step === 'otp' && renderOtpForm()}

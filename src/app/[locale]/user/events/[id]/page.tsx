@@ -28,7 +28,7 @@ const Map = dynamic(() => import("@/src/components/Map"), {
     ssr: false,
     loading: () => {
         const t = useTranslations("EventDetail");
-        return <div className="h-40 w-full bg-bg-subtle animate-pulse rounded-xl flex items-center justify-center text-text-muted">{t('loading_map')}</div>
+        return <div className="h-40 w-full bg-gray-100 animate-pulse rounded-ds-xl flex items-center justify-center text-gray-400">{t('loading_map')}</div>
     }
 });
 
@@ -208,7 +208,7 @@ export default function EventDetailPage() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 2xl:grid-cols-5 gap-6">
                                 {suggestedEvents.map(evt => (
                                     <Link key={evt.eventId} href={`/${locale}/user/events/${evt.id}`} className="group cursor-pointer">
-                                        <div className="aspect-[4/3] rounded-xl bg-secondary mb-3 overflow-hidden relative">
+                                        <div className="aspect-[4/3] rounded-ds-xl bg-secondary mb-3 overflow-hidden relative">
                                             {evt.bannerImage ? (
                                                 <Image src={evt.bannerImage} alt={evt.eventName} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
                                             ) : (
@@ -260,7 +260,7 @@ export default function EventDetailPage() {
                                     {event.category}
                                 </div>
                             </div>
-                            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl bg-bg-surface border border-border-default">
+                            <div className="relative aspect-[4/3] rounded-ds-2xl overflow-hidden shadow-xl bg-bg-surface border border-border-default">
                                 {event.bannerImage ? (
                                     <Image
                                         src={event.bannerImage}
@@ -289,10 +289,10 @@ export default function EventDetailPage() {
                                 {event.description}
                             </p>
 
-                            <div className="bg-card-bg-elevated border border-border-default shadow-sm rounded-xl p-6 mb-8 max-w-full grid grid-cols-1 gap-6">
+                            <div className="bg-card-bg-elevated border border-border-default shadow-sm rounded-ds-xl p-6 mb-8 max-w-full grid grid-cols-1 gap-6">
                                 <div className="flex  items-center gap-4">
-                                    <div className="bg-bg-page p-2 rounded-lg border border-border-subtle shrink-0">
-                                        <Clock size={22} className="text-button-primary-bg-default" />
+                                    <div className="bg-bg-page p-2 rounded-ds-lg border border-border-subtle shrink-0">
+                                        <Clock size={22} className="text-primary" />
                                     </div>
                                     <div className="flex flex-row gap-4 items-center">
                                         <div className="text-xs text-text-secondary uppercase tracking-wider font-bold">{te('time_label')}</div>
@@ -300,8 +300,8 @@ export default function EventDetailPage() {
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-4">
-                                    <div className="bg-bg-page p-2 rounded-lg border border-border-subtle shrink-0">
-                                        <MapPin size={22} className="text-button-primary-bg-default" />
+                                    <div className="bg-bg-page p-2 rounded-ds-lg border border-border-subtle shrink-0">
+                                        <MapPin size={22} className="text-primary" />
                                     </div>
                                     <div>
                                         <div className="flex flex-row gap-4 items-center">
@@ -349,7 +349,7 @@ export default function EventDetailPage() {
                         <div className="lg:col-span-8 flex flex-col gap-6">
 
                             {/* Khối Giới thiệu */}
-                            <div className="bg-card-bg-default border border-border-default rounded-xl p-6 shadow-sm">
+                            <div className="bg-card-bg-default border border-border-default rounded-ds-xl p-6 shadow-sm">
                                 <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 ">{te('event_intro')}</h3>
                                 <div
                                     ref={descriptionRef}
@@ -360,7 +360,7 @@ export default function EventDetailPage() {
                                 {showExpandButton && (
                                     <button
                                         onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                                        className="mt-4 text-sm font-semibold text-button-primary-bg-default hover:text-button-primary-bg-hover transition-colors w-full text-center py-2 bg-bg-page hover:bg-bg-subtle rounded-lg border border-border-default"
+                                        className="mt-4 text-sm font-semibold text-primary hover:text-primary-dark transition-colors w-full text-center py-2 bg-bg-page hover:bg-bg-subtle rounded-ds-lg border border-border-default"
                                     >
                                         {isDescriptionExpanded ? te('collapse') : te('see_more')}
                                     </button>
@@ -368,7 +368,7 @@ export default function EventDetailPage() {
                             </div>
 
                             {/* Khối Thời gian & Địa điểm (Chia 2 cột) */}
-                            <div className="bg-card-bg-default border border-border-default rounded-xl p-6 shadow-sm">
+                            <div className="bg-card-bg-default border border-border-default rounded-ds-xl p-6 shadow-sm">
                                 <h3 className="text-lg font-bold text-text-primary mb-1">{te('schedule_venue')}</h3>
                                 <p className="text-sm text-text-secondary mb-4">{te('schedule_note')}</p>
 
@@ -381,7 +381,7 @@ export default function EventDetailPage() {
                                         return (
                                             <div
                                                 key={showtime.showtimeId}
-                                                className={`border rounded-lg overflow-hidden transition-colors ${isSelected ? 'border-button-primary-bg-default' : 'border-border-default'}`}
+                                                className={`border rounded-ds-lg overflow-hidden transition-colors ${isSelected ? 'border-primary' : 'border-border-default'}`}
                                             >
                                                 {/* Header */}
                                                 <div
@@ -444,7 +444,7 @@ export default function EventDetailPage() {
                                             <MapIcon size={20} className="text-primary" />
                                             <span className="font-bold text-text-primary">{te('location_map')}</span>
                                         </div>
-                                        <div className="h-[350px] w-full rounded-xl overflow-hidden border border-border-default shadow-sm relative z-0">
+                                        <div className="h-[350px] w-full rounded-ds-xl overflow-hidden border border-border-default shadow-sm relative z-0">
                                             <Map 
                                                 pos={[event.latitude, event.longitude]} 
                                                 popupText={event.venue || event.address} 
@@ -469,10 +469,10 @@ export default function EventDetailPage() {
 
                             {/* Khối Sơ đồ chỗ ngồi (Dựa theo Wireframe Seat Selection) */}
                             {event.hasSeatMap && (
-                                <div className="bg-card-bg-default border border-border-default rounded-xl p-6 shadow-sm">
+                                <div className="bg-card-bg-default border border-border-default rounded-ds-xl p-6 shadow-sm">
                                     <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 ">{te('seat_map')}</h3>
-                                    <div className="bg-bg-page border border-border-default rounded-xl p-6 flex flex-col items-center">
-                                        <div className="w-full max-w-sm h-12 bg-button-primary-bg-default/20 text-button-primary-bg-default flex items-center justify-center font-bold text-sm mb-8 rounded shadow-sm">
+                                    <div className="bg-bg-page border border-border-default rounded-ds-xl p-6 flex flex-col items-center">
+                                        <div className="w-full max-w-sm h-12 bg-[#A59EDA] text-white flex items-center justify-center font-bold text-sm mb-8 rounded shadow-sm">
                                             {te('stage')}
                                         </div>
                                         <div className="flex flex-col gap-3 items-center w-full">
@@ -502,7 +502,7 @@ export default function EventDetailPage() {
                             )}
 
                             {/* Khối Thông tin tham dự */}
-                            <div className="bg-card-bg-default border border-border-default rounded-xl p-6 shadow-sm">
+                            <div className="bg-card-bg-default border border-border-default rounded-ds-xl p-6 shadow-sm">
                                 <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 ">{te('attendance_info')}</h3>
                                 <ul className="list-disc list-outside pl-5 space-y-2 text-sm text-text-secondary marker:text-text-muted">
                                     <li>{te('attendance_note_1')}</li>
@@ -513,10 +513,10 @@ export default function EventDetailPage() {
                             </div>
 
                             {/* Khối Đơn vị tổ chức */}
-                            <div className="bg-card-bg-default border border-border-default rounded-xl p-6 shadow-sm">
+                            <div className="bg-card-bg-default border border-border-default rounded-ds-xl p-6 shadow-sm">
                                 <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 ">{te('organizer')}</h3>
                                 <div className="flex items-start gap-4">
-                                    <div className="relative w-16 h-16 rounded-md overflow-hidden bg-bg-page border border-border-default shrink-0">
+                                    <div className="relative w-16 h-16 rounded-ds-md overflow-hidden bg-bg-page border border-border-default shrink-0">
                                         <Image src={event.orgInternalResponse?.logoUrl || "/placeholder-avatar.png"} alt="logo" fill className="object-cover" />
                                     </div>
                                     <div>
@@ -535,7 +535,7 @@ export default function EventDetailPage() {
 
                         {/* RIGHT COLUMN: Sticky Sidebar Card */}
                         <div className="lg:col-span-4 relative">
-                            <div className="bg-payment-summary-bg-default border border-border-default rounded-xl overflow-hidden shadow-xl sticky top-24">
+                            <div className="bg-payment-summary-bg-default border border-border-default rounded-ds-xl overflow-hidden shadow-xl sticky top-24">
                                 <div className="p-6">
                                     <div className="text-2xl font-extrabold text-feedback-warning-text mb-6">
                                         {te('from_price', { price: minPrice?.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US') })}
@@ -620,7 +620,7 @@ export default function EventDetailPage() {
                         {suggestedEvents.map(evt => (
                             <SwiperSlide key={evt.eventId || evt.id}>
                                 <Link href={`/${locale}/user/events/${evt.id}`} className="group cursor-pointer block h-full">
-                                    <div className="aspect-[4/3] rounded-xl bg-secondary mb-3 overflow-hidden relative shadow-sm group-hover:shadow-md transition-all duration-300">
+                                    <div className="aspect-[4/3] rounded-ds-xl bg-secondary mb-3 overflow-hidden relative shadow-sm group-hover:shadow-md transition-all duration-300">
                                         {evt.bannerImage ? (
                                             <Image
                                                 src={evt.bannerImage}

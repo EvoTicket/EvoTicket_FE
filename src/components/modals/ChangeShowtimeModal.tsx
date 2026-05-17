@@ -82,7 +82,7 @@ export function ChangeShowtimeModal({ isOpen, onClose, event, selectedShowtimeId
 
     return (
         <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-200 ${isClosing ? 'opacity-0' : 'animate-in fade-in'}`}>
-            <div className={`bg-surface border border-border rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col relative shadow-2xl ${isClosing ? 'animate-thu-chai' : 'animate-quang-chai'}`}>
+            <div className={`bg-surface border border-border rounded-ds-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col relative shadow-2xl ${isClosing ? 'animate-thu-chai' : 'animate-quang-chai'}`}>
                 <button
                     className="absolute top-4 right-4 text-txt-muted hover:text-txt-primary transition-colors hover:bg-secondary rounded-full p-1"
                     onClick={handleClose}
@@ -99,7 +99,7 @@ export function ChangeShowtimeModal({ isOpen, onClose, event, selectedShowtimeId
                         const isExpanded = expandedShowtimeId === st.showtimeId;
                         const isTempSelected = tempShowtimeId === st.showtimeId;
                         return (
-                            <div key={st.showtimeId} className={`border rounded-xl transition-colors overflow-hidden ${isTempSelected ? 'border-primary' : 'border-border bg-secondary/30'}`}>
+                            <div key={st.showtimeId} className={`border rounded-ds-xl transition-colors overflow-hidden ${isTempSelected ? 'border-primary' : 'border-border bg-secondary/30'}`}>
                                 <div
                                     className="p-5 flex gap-4 justify-between items-center cursor-pointer hover:bg-secondary/50"
                                     onClick={() => setExpandedShowtimeId(isExpanded ? null : st.showtimeId)}

@@ -148,8 +148,8 @@ export default function ProvenancePage() {
 
                 {/* Error Box */}
                 <div className="flex justify-center items-center py-20">
-                    <div className="bg-bg-surface border border-border-default rounded-xl p-8 max-w-md w-full text-center flex flex-col items-center">
-                        <div className="w-14 h-14 border border-border-default rounded-lg flex items-center justify-center mb-6 shadow-sm">
+                    <div className="bg-bg-surface border border-border-default rounded-ds-xl p-8 max-w-md w-full text-center flex flex-col items-center">
+                        <div className="w-14 h-14 border border-border-default rounded-ds-lg flex items-center justify-center mb-6 shadow-sm">
                             <HelpCircle size={24} className="text-text-secondary" />
                         </div>
                         <h3 className="text-lg font-bold text-text-primary mb-2">{t("error_title")}</h3>
@@ -243,7 +243,7 @@ export default function ProvenancePage() {
                 {/* Left Column */}
                 <div className="lg:col-span-8 flex flex-col gap-6">
                     {/* Blockchain Verification */}
-                    <div className="bg-bg-surface border border-border-default rounded-xl p-6">
+                    <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6">
                         <div className="flex items-center gap-2 mb-6">
                             <h3 className="font-bold text-text-primary text-base flex items-center gap-2">
                                 <span className="text-lg">📦</span> {t("verified_on_blockchain")}
@@ -295,7 +295,7 @@ export default function ProvenancePage() {
                     </div>
 
                     {/* Ticket Info */}
-                    <div className="bg-bg-surface border border-border-default rounded-xl p-6">
+                    <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6">
                         <h3 className="font-bold text-text-primary text-base mb-6">{t("ticket_info_card")}</h3>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm max-w-full">
@@ -314,7 +314,7 @@ export default function ProvenancePage() {
                     </div>
 
                     {/* Ownership History */}
-                    <div className="bg-bg-surface border border-border-default rounded-xl p-6">
+                    <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6">
                         <h3 className="font-bold text-text-primary text-base mb-2">{t("ownership_history")}</h3>
                         <p className="text-xs text-text-secondary mb-8">{t("ownership_history_desc")}</p>
 
@@ -450,7 +450,7 @@ export default function ProvenancePage() {
                     </div>
 
                     {/* What is provenance */}
-                    <div className="border border-border-default rounded-xl p-6">
+                    <div className="border border-border-default rounded-ds-xl p-6">
                         <h3 className="font-bold text-text-primary flex items-center gap-2 text-sm mb-3">
                             <HelpCircle size={16} /> {t("what_is_provenance")}
                         </h3>
@@ -460,7 +460,7 @@ export default function ProvenancePage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="border border-border-default rounded-xl p-6">
+                    <div className="border border-border-default rounded-ds-xl p-6">
                         <h3 className="font-bold text-text-primary text-sm mb-4">{t("actions")}</h3>
 
                         <div className="flex flex-col gap-3">

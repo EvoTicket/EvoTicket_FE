@@ -106,7 +106,7 @@ export default function LoginPage() {
       </div>
       
       {/* Auth Card */}
-      <div className="z-10 w-full max-w-[420px] bg-[#1e1b38]/60 backdrop-blur-xl border border-white/5 rounded-2xl p-8 shadow-2xl mx-4">
+      <div className="z-10 w-full max-w-[420px] bg-[#1e1b38]/60 backdrop-blur-xl border border-white/5 rounded-ds-2xl p-8 shadow-2xl mx-4">
         
         <div className="text-center mb-8">
           <h1 className="text-[28px] font-bold text-white mb-2">{t('login_title')}</h1>
@@ -124,7 +124,7 @@ export default function LoginPage() {
             <input
               type="text"
               placeholder="Nguyễn Văn A"
-              className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[14px] placeholder-gray-500"
+              className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[14px] placeholder-gray-500"
               value={email} // Using email state but placeholder is from design
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -148,7 +148,7 @@ export default function LoginPage() {
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••"
-                className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[14px] placeholder-gray-500 pr-12"
+                className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[14px] placeholder-gray-500 pr-12"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -167,7 +167,7 @@ export default function LoginPage() {
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-xl transition-all active:scale-[0.98] text-[15px] shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-ds-xl transition-all active:scale-[0.98] text-[15px] shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
               disabled={loading}
             >
               {loading ? t('processing', { defaultMessage: "Đang xử lý..." }) : t('login_button')}
@@ -192,7 +192,7 @@ export default function LoginPage() {
           type="button"
           onClick={() => loginWithGoogle()}
           disabled={loading}
-          className="w-full bg-[#25233c] hover:bg-[#2d2a45] border border-white/5 text-gray-300 font-medium py-3 rounded-xl flex items-center justify-center gap-3 transition-colors text-[14px] disabled:opacity-70 disabled:cursor-not-allowed"
+          className="w-full bg-[#25233c] hover:bg-[#2d2a45] border border-white/5 text-gray-300 font-medium py-3 rounded-ds-xl flex items-center justify-center gap-3 transition-colors text-[14px] disabled:opacity-70 disabled:cursor-not-allowed"
         >
           <GoogleIcon />
           Đăng nhập bằng Google

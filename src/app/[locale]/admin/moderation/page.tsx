@@ -231,7 +231,7 @@ export default function AdminModerationPage() {
           <h1 className="text-3xl font-black text-txt-primary tracking-tight">Kiểm duyệt sự kiện</h1>
           <p className="text-sm text-txt-secondary mt-1">Quản lý hàng chờ duyệt, sự kiện bị gắn cờ và các yêu cầu chỉnh sửa</p>
         </div>
-        <button className="flex items-center gap-2 bg-surface hover:bg-main text-txt-primary px-5 py-2.5 rounded-xl text-xs font-bold border border-border shadow-sm transition-all whitespace-nowrap">
+        <button className="flex items-center gap-2 bg-surface hover:bg-main text-txt-primary px-5 py-2.5 rounded-ds-xl text-xs font-bold border border-border shadow-sm transition-all whitespace-nowrap">
           <Download size={16} />
           <span>Xuất hàng chờ</span>
         </button>
@@ -248,7 +248,7 @@ export default function AdminModerationPage() {
       {/* Main Content Area */}
       <div className="space-y-6">
         {/* Table Section - Full Width */}
-        <div className="bg-surface border border-border rounded-3xl shadow-sm overflow-hidden transition-colors duration-300">
+        <div className="bg-surface border border-border rounded-ds-3xl shadow-sm overflow-hidden transition-colors duration-300">
           {/* Header Bar */}
           <div className="flex items-center justify-between border-b border-border px-6 py-4 bg-main/10">
             <h2 className="text-sm font-black text-txt-primary uppercase tracking-tight">Danh sách sự kiện hàng chờ</h2>
@@ -274,7 +274,7 @@ export default function AdminModerationPage() {
                   value={filters.search}
                   onChange={(e) => handleFilterChange("search", e.target.value)}
                   placeholder="Tìm theo tên sự kiện, tổ chức, mã EVT"
-                  className="w-full pl-11 pr-4 py-2.5 bg-main border border-border rounded-2xl text-[13px] focus:bg-surface focus:border-primary outline-none transition-all text-txt-primary placeholder:text-txt-muted shadow-inner"
+                  className="w-full pl-11 pr-4 py-2.5 bg-main border border-border rounded-ds-2xl text-[13px] focus:bg-surface focus:border-primary outline-none transition-all text-txt-primary placeholder:text-txt-muted shadow-inner"
                 />
               </div>
 
@@ -341,7 +341,7 @@ export default function AdminModerationPage() {
                   <tr key={row.id} className="hover:bg-main/20 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-surface border border-border flex items-center justify-center text-txt-muted shadow-sm shrink-0">
+                        <div className="w-10 h-10 rounded-ds-xl bg-surface border border-border flex items-center justify-center text-txt-muted shadow-sm shrink-0">
                           <ImageIcon size={18} />
                         </div>
                         <div className="min-w-0">
@@ -387,7 +387,7 @@ export default function AdminModerationPage() {
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           href={`/${locale}/admin/moderation/${row.id}`}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500 text-indigo-600 hover:text-white rounded-xl text-[10px] font-black transition-all border border-indigo-500/20 shadow-sm uppercase tracking-tighter"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500 text-indigo-600 hover:text-white rounded-ds-xl text-[10px] font-black transition-all border border-indigo-500/20 shadow-sm uppercase tracking-tighter"
                         >
                           Xem chi tiết
                         </Link>
@@ -411,7 +411,7 @@ export default function AdminModerationPage() {
               <button
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${currentPage === 1 ? "text-txt-muted/30 cursor-not-allowed" : "text-txt-muted hover:bg-main"}`}
+                className={`w-8 h-8 flex items-center justify-center rounded-ds-lg transition-all ${currentPage === 1 ? "text-txt-muted/30 cursor-not-allowed" : "text-txt-muted hover:bg-main"}`}
               >
                 <ChevronLeft size={16} />
               </button>
@@ -428,7 +428,7 @@ export default function AdminModerationPage() {
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${currentPage === totalPages ? "text-txt-muted/30 cursor-not-allowed" : "text-txt-muted hover:bg-main"}`}
+                className={`w-8 h-8 flex items-center justify-center rounded-ds-lg transition-all ${currentPage === totalPages ? "text-txt-muted/30 cursor-not-allowed" : "text-txt-muted hover:bg-main"}`}
               >
                 <ChevronRight size={16} />
               </button>
@@ -440,7 +440,7 @@ export default function AdminModerationPage() {
       {/* Bottom Context Sections - 2 Columns */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Triage Guide */}
-        <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+        <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-xs font-black text-txt-primary uppercase tracking-tight">Hướng dẫn triage</h3>
             <ShieldAlert size={14} className="text-txt-muted" />
@@ -451,13 +451,13 @@ export default function AdminModerationPage() {
 
           <div className="space-y-4">
             {triageGuide.map((guide) => (
-              <div key={guide.id} className={`p-4 rounded-2xl border transition-all hover:shadow-md group cursor-help ${guide.color === "sky" ? "bg-sky-500/5 border-sky-500/10" :
+              <div key={guide.id} className={`p-4 rounded-ds-2xl border transition-all hover:shadow-md group cursor-help ${guide.color === "sky" ? "bg-sky-500/5 border-sky-500/10" :
                 guide.color === "amber" ? "bg-amber-500/5 border-amber-500/10" :
                   guide.color === "rose" ? "bg-rose-500/5 border-rose-500/10" :
                     "bg-indigo-500/5 border-indigo-500/10"
                 }`}>
                 <div className="flex gap-3">
-                  <div className={`p-2 rounded-xl shrink-0 transition-transform group-hover:scale-110 ${guide.color === "sky" ? "bg-sky-500/10 text-sky-600" :
+                  <div className={`p-2 rounded-ds-xl shrink-0 transition-transform group-hover:scale-110 ${guide.color === "sky" ? "bg-sky-500/10 text-sky-600" :
                     guide.color === "amber" ? "bg-amber-500/10 text-amber-600" :
                       guide.color === "rose" ? "bg-rose-500/10 text-rose-600" :
                         "bg-indigo-500/10 text-indigo-600"
@@ -477,7 +477,7 @@ export default function AdminModerationPage() {
         </div>
 
         {/* SLA Section */}
-        <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm overflow-hidden relative h-fit ">
+        <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm overflow-hidden relative h-fit ">
           <div className="flex items-center gap-2 mb-6">
             <Clock size={16} className="text-txt-muted" />
             <h3 className="text-xs font-black text-txt-primary uppercase tracking-tight">SLA xử lý duyệt</h3>
@@ -504,9 +504,9 @@ function StatsCard({ icon, label, value, color }: any) {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-3xl p-5 shadow-sm hover:shadow-md transition-all">
+    <div className="bg-surface border border-border rounded-ds-3xl p-5 shadow-sm hover:shadow-md transition-all">
       <div className="flex items-center gap-4">
-        <div className={`p-3 rounded-2xl ${colors[color] || colors.indigo} border`}>
+        <div className={`p-3 rounded-ds-2xl ${colors[color] || colors.indigo} border`}>
           {icon}
         </div>
         <div>
@@ -522,19 +522,19 @@ function StatsCard({ icon, label, value, color }: any) {
 function FilterSelect({ label, value, options, onChange }: any) {
   return (
     <div className="relative group">
-      <div className="flex items-center gap-2 px-4 py-2.5 bg-surface border border-border rounded-2xl shadow-sm cursor-pointer hover:bg-main transition-colors text-[11px]">
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-surface border border-border rounded-ds-2xl shadow-sm cursor-pointer hover:bg-main transition-colors text-[11px]">
         <span className="font-bold text-txt-muted">{label}:</span>
         <span className="font-black text-txt-primary">{value}</span>
         <ChevronDown size={14} className="text-txt-muted ml-1" />
       </div>
 
       {/* Mini Dropdown (Simple implementation) */}
-      <div className="absolute top-full left-0 mt-2 w-48 bg-surface border border-border rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2">
+      <div className="absolute top-full left-0 mt-2 w-48 bg-surface border border-border rounded-ds-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2">
         {options?.map((opt: string) => (
           <button
             key={opt}
             onClick={() => onChange?.(opt)}
-            className={`w-full text-left px-3 py-2 rounded-lg text-[11px] font-bold transition-colors ${value === opt ? "bg-primary text-white" : "text-txt-secondary hover:bg-main"
+            className={`w-full text-left px-3 py-2 rounded-ds-lg text-[11px] font-bold transition-colors ${value === opt ? "bg-primary text-white" : "text-txt-secondary hover:bg-main"
               }`}
           >
             {opt}
@@ -554,7 +554,7 @@ function StatusBadge({ status }: { status: string }) {
   };
 
   return (
-    <div className={`inline-flex items-center px-2.5 py-1 rounded-lg border text-[8px] font-black uppercase tracking-widest ${styles[status]}`}>
+    <div className={`inline-flex items-center px-2.5 py-1 rounded-ds-lg border text-[8px] font-black uppercase tracking-widest ${styles[status]}`}>
       {status}
     </div>
   );
@@ -568,7 +568,7 @@ function PriorityBadge({ level }: { level: string }) {
   };
 
   return (
-    <div className={`inline-flex items-center px-2 py-0.5 rounded-md border text-[9px] font-black ${styles[level]}`}>
+    <div className={`inline-flex items-center px-2 py-0.5 rounded-ds-md border text-[9px] font-black ${styles[level]}`}>
       {level}
     </div>
   );
@@ -583,7 +583,7 @@ function FlagReasonBadge({ flag }: { flag: IModerationFlag }) {
   };
 
   return (
-    <div className={`inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-md border text-[8px] font-black leading-none ${styles[flag.type]}`}>
+    <div className={`inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-ds-md border text-[8px] font-black leading-none ${styles[flag.type]}`}>
       <Flag size={8} />
       {flag.reason}
     </div>
@@ -594,7 +594,7 @@ function PaginationButton({ active, label, onClick }: any) {
   return (
     <button
       onClick={onClick}
-      className={`w-8 h-8 flex items-center justify-center rounded-xl text-[11px] font-black transition-all ${active
+      className={`w-8 h-8 flex items-center justify-center rounded-ds-xl text-[11px] font-black transition-all ${active
         ? "bg-primary text-white shadow-lg shadow-primary/30 scale-105"
         : "text-txt-muted bg-surface border border-border hover:bg-main"
         }`}
@@ -618,7 +618,7 @@ function SLACard({ label, target, current, color, percentage }: any) {
   };
 
   return (
-    <div className={`p-4 rounded-2xl border ${colorStyles[color].split(" ")[2]} flex flex-col gap-2 relative overflow-hidden group`}>
+    <div className={`p-4 rounded-ds-2xl border ${colorStyles[color].split(" ")[2]} flex flex-col gap-2 relative overflow-hidden group`}>
       <div className={`absolute left-0 top-0 bottom-0 w-1 ${progressColors[color]}`}></div>
       <div className="flex items-center justify-between">
         <div>

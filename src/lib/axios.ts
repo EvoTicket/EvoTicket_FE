@@ -1,7 +1,15 @@
 import axios from 'axios';
+import type { AxiosRequestConfig } from 'axios';
 import { store } from '@/src/store';
 import { logout, updateToken } from '@/src/store/slices/authSlice';
 import { toast } from 'react-toastify';
+
+declare module 'axios' {
+    export interface AxiosRequestConfig {
+        skipAuth?: boolean;
+        _retry?: boolean;
+    }
+}
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_GATEWAY_BE,
@@ -15,12 +23,11 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         // Skip auth if explicitly set (e.g., login, register)
-        if ((config as any).skipAuth) {
+        if (config.skipAuth) {
             return config;
         }
 
         const token = store.getState().auth.token;
-        console.log(token);
         if (token && !config.headers.Authorization) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -49,15 +56,22 @@ const processQueue = (error: unknown, token: string | null = null) => {
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
-        const originalRequest = error.config;
+        const originalRequest = error.config as AxiosRequestConfig | undefined;
 
-        if (error.response && error.response.status === 401 && !originalRequest._retry && !(originalRequest as any).skipAuth) {
+        if (!originalRequest) {
+            return Promise.reject(error);
+        }
+
+        if (error.response && error.response.status === 401 && !originalRequest._retry && !originalRequest.skipAuth) {
             if (isRefreshing) {
                 // If already refreshing, queue this request
                 return new Promise((resolve, reject) => {
                     failedQueue.push({ resolve, reject });
                 }).then(token => {
-                    originalRequest.headers.Authorization = `Bearer ${token}`;
+                    originalRequest.headers = {
+                        ...originalRequest.headers,
+                        Authorization: `Bearer ${token}`,
+                    };
                     return api(originalRequest);
                 }).catch(err => {
                     return Promise.reject(err);
@@ -94,7 +108,10 @@ api.interceptors.response.use(
                 store.dispatch(updateToken({ token: newToken, refreshToken: newRefreshToken }));
 
                 // Update the failed request with new token and retry
-                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                originalRequest.headers = {
+                    ...originalRequest.headers,
+                    Authorization: `Bearer ${newToken}`,
+                };
 
                 // Process queued requests
                 processQueue(null, newToken);

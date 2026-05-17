@@ -48,7 +48,7 @@ export function CustomTimePicker({ selectedTime, onChange, width = "100%", place
         <Popover className="relative" style={{ width }}>
             <PopoverButton 
                 onClick={onOpen}
-                className="w-full flex items-center justify-between bg-secondary/30 border-2 border-border/30 rounded-2xl px-5 py-4 outline-none focus:border-primary/50 focus:bg-surface transition-all text-sm font-bold shadow-sm group"
+                className="w-full flex items-center justify-between bg-secondary/30 border-2 border-border/30 rounded-ds-2xl px-5 py-4 outline-none focus:border-primary/50 focus:bg-surface transition-all text-sm font-bold shadow-sm group"
             >
                 <div className="flex items-center gap-3">
                     <Clock size={18} className="text-txt-muted group-hover:text-primary transition-colors" />
@@ -59,7 +59,7 @@ export function CustomTimePicker({ selectedTime, onChange, width = "100%", place
                 <ChevronDown size={16} className="text-txt-muted" />
             </PopoverButton>
 
-            <PopoverPanel className="absolute z-[100] mt-3 inset-x-0 bg-surface/90 border border-border/50 rounded-3xl shadow-2xl p-5 backdrop-blur-3xl animate-in fade-in zoom-in duration-200 origin-top">
+            <PopoverPanel className="absolute z-[100] mt-3 inset-x-0 bg-surface/90 border border-border/50 rounded-ds-3xl shadow-2xl p-5 backdrop-blur-3xl animate-in fade-in zoom-in duration-200 origin-top">
                 <div className="grid grid-cols-2 gap-4 h-[320px]">
                     {/* Hour Column */}
                     <div className="space-y-3 flex flex-col h-full overflow-hidden">
@@ -70,7 +70,7 @@ export function CustomTimePicker({ selectedTime, onChange, width = "100%", place
                                     key={h}
                                     data-active={currentHour === h}
                                     onClick={() => handleSelectHour(h)}
-                                    className={`w-full py-2.5 rounded-xl text-sm font-black transition-all ${
+                                    className={`w-full py-2.5 rounded-ds-xl text-sm font-black transition-all ${
                                         currentHour === h 
                                         ? "bg-primary text-white shadow-lg scale-105" 
                                         : "text-txt-muted hover:bg-secondary/50 hover:text-txt-primary"
@@ -91,7 +91,7 @@ export function CustomTimePicker({ selectedTime, onChange, width = "100%", place
                                     key={m}
                                     data-active={currentMinute === m}
                                     onClick={() => handleSelectMinute(m)}
-                                    className={`w-full py-2.5 rounded-xl text-sm font-black transition-all ${
+                                    className={`w-full py-2.5 rounded-ds-xl text-sm font-black transition-all ${
                                         currentMinute === m 
                                         ? "bg-primary text-white shadow-lg scale-105" 
                                         : "text-txt-muted hover:bg-secondary/50 hover:text-txt-primary"

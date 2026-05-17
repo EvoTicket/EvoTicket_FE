@@ -215,7 +215,7 @@ export default function ResellTicketPage() {
                     {/* Main Content Area */}
                     <div className="lg:col-span-2 w-full space-y-6">
                         {/* Block 1: Thông tin vé */}
-                        <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm">
+                        <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm">
                             <h2 className="text-[17px] font-bold text-text-primary mb-6">{t("ticket_info_title")}</h2>
 
                             <div className="space-y-4 text-[13px]">
@@ -253,7 +253,7 @@ export default function ResellTicketPage() {
                         </div>
 
                         {/* Block 2: Thiết lập giá bán */}
-                        <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm">
+                        <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm">
                             <h2 className="text-[17px] font-bold text-text-primary mb-2">{t("price_setting_title")}</h2>
                             <p className="text-[13px] text-text-secondary mb-6">{t("price_setting_subtitle")}</p>
 
@@ -305,7 +305,7 @@ export default function ResellTicketPage() {
                         </div>
 
                         {/* Block 3: Chi tiết doanh thu */}
-                        <div className="bg-bg-surface border border-border-default rounded-xl p-6 shadow-sm">
+                        <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm">
                             <h2 className="text-[17px] font-bold text-text-primary mb-6">{t("revenue_detail_title")}</h2>
 
                             <div className="space-y-4 text-[13px] mb-6">
@@ -348,7 +348,7 @@ export default function ResellTicketPage() {
 
                     {/* Right Column / Sidebar */}
                     <div className="lg:col-span-1">
-                        <div className="sticky top-6 border border-border-default rounded-xl p-6 shadow-sm bg-bg-surface">
+                        <div className="sticky top-6 border border-border-default rounded-ds-xl p-6 shadow-sm bg-bg-surface">
                             <h3 className="font-bold text-[15px] text-text-primary mb-6">{t("sidebar_title")}</h3>
 
                             <div className="mb-5">

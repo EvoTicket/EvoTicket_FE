@@ -51,7 +51,7 @@ export default function AdminAIKBPage() {
           <h1 className="text-3xl font-extrabold text-txt-primary tracking-tight">{t("aikb_title")}</h1>
           <p className="text-sm text-txt-secondary mt-1">{t("aikb_subtitle")}</p>
         </div>
-        <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all">
+        <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-ds-xl font-bold shadow-lg shadow-primary/20 transition-all">
           <Plus size={18} />
           <span>{t("btn_add_kb_item")}</span>
         </button>
@@ -66,8 +66,8 @@ export default function AdminAIKBPage() {
       </div>
 
       {/* Info Banner */}
-      <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex gap-4 items-center shadow-sm">
-        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+      <div className="bg-primary/10 border border-primary/20 rounded-ds-2xl p-4 flex gap-4 items-center shadow-sm">
+        <div className="w-8 h-8 rounded-ds-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
           <Info size={18} />
         </div>
         <div className="min-w-0">
@@ -85,7 +85,7 @@ export default function AdminAIKBPage() {
 
       {/* Tabs & Search Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center bg-surface border border-border rounded-2xl p-1 shadow-sm">
+        <div className="flex items-center bg-surface border border-border rounded-ds-2xl p-1 shadow-sm">
           <TabButton active={activeTab === "items"} onClick={() => setActiveTab("items")} icon={<LayoutGrid size={14} />} label={t("tab_kb_items")} />
           <TabButton active={activeTab === "review"} onClick={() => setActiveTab("review")} icon={<History size={14} />} label={t("tab_review_version")} />
           <TabButton active={activeTab === "quality"} onClick={() => setActiveTab("quality")} icon={<Activity size={14} />} label={t("tab_usage_quality")} />
@@ -95,14 +95,14 @@ export default function AdminAIKBPage() {
           <div className="flex items-center gap-3">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-txt-muted" size={16} />
-              <input type="text" placeholder={t("aikb_sub.search_placeholder")} className="pl-10 pr-4 py-2 bg-surface border border-border rounded-xl text-xs outline-none focus:border-primary shadow-sm min-w-[280px] text-txt-primary placeholder:text-txt-muted" />
+              <input type="text" placeholder={t("aikb_sub.search_placeholder")} className="pl-10 pr-4 py-2 bg-surface border border-border rounded-ds-xl text-xs outline-none focus:border-primary shadow-sm min-w-[280px] text-txt-primary placeholder:text-txt-muted" />
             </div>
-            <div className="flex items-center bg-surface border border-border rounded-xl p-1 shadow-sm text-[10px] font-bold">
+            <div className="flex items-center bg-surface border border-border rounded-ds-xl p-1 shadow-sm text-[10px] font-bold">
               {["all", "Published", "Draft", "Needs Review", "Disabled"].map((f) => (
                 <button
                   key={f}
                   onClick={() => setStatusFilter(f)}
-                  className={`px-3 py-1 rounded-lg transition-all ${statusFilter === f ? "bg-main text-txt-primary" : "text-txt-muted hover:text-txt-secondary uppercase"}`}
+                  className={`px-3 py-1 rounded-ds-lg transition-all ${statusFilter === f ? "bg-main text-txt-primary" : "text-txt-muted hover:text-txt-secondary uppercase"}`}
                 >
                   {f === 'all' ? t("common.all") : f}
                 </button>
@@ -124,7 +124,7 @@ function KBItemsTab({ selectedId, setSelectedId, t, selectedItem }: any) {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
       {/* Left Column - KB Table */}
-      <div className="xl:col-span-8 bg-surface border border-border rounded-3xl shadow-sm overflow-hidden transition-colors duration-300">
+      <div className="xl:col-span-8 bg-surface border border-border rounded-ds-3xl shadow-sm overflow-hidden transition-colors duration-300">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-main/50 border-b border-border">
@@ -152,7 +152,7 @@ function KBItemsTab({ selectedId, setSelectedId, t, selectedItem }: any) {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-[10px] font-bold border border-primary/20">
+                  <span className="px-2.5 py-1 rounded-ds-lg bg-primary/10 text-primary text-[10px] font-bold border border-primary/20">
                     {item.category}
                   </span>
                 </td>
@@ -183,7 +183,7 @@ function KBItemsTab({ selectedId, setSelectedId, t, selectedItem }: any) {
       {/* Right Column - Detail Preview */}
       <div className="xl:col-span-4 space-y-6 sticky top-[104px]">
         {selectedItem ? (
-          <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm animate-in slide-in-from-right-4 duration-300 transition-colors">
+          <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm animate-in slide-in-from-right-4 duration-300 transition-colors">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-txt-primary">{selectedItem.title}</h3>
               <MoreHorizontal size={18} className="text-txt-muted cursor-pointer hover:text-txt-primary" />
@@ -191,11 +191,11 @@ function KBItemsTab({ selectedId, setSelectedId, t, selectedItem }: any) {
 
             <div className="flex flex-wrap gap-2 mb-8">
               <StatusBadge status={selectedItem.status} />
-              <span className="px-2.5 py-1 rounded-lg bg-main text-txt-secondary text-[10px] font-bold border border-border">
+              <span className="px-2.5 py-1 rounded-ds-lg bg-main text-txt-secondary text-[10px] font-bold border border-border">
                 {selectedItem.category}
               </span>
               {selectedItem.version && (
-                <span className="px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-[10px] font-black border border-primary/20">
+                <span className="px-2.5 py-1 rounded-ds-lg bg-primary/10 text-primary text-[10px] font-black border border-primary/20">
                   {selectedItem.version}
                 </span>
               )}
@@ -211,7 +211,7 @@ function KBItemsTab({ selectedId, setSelectedId, t, selectedItem }: any) {
 
               <div className="pt-6 border-t border-border">
                 <p className="text-[10px] font-black text-txt-muted uppercase tracking-widest mb-3">{t("kb_summary")}</p>
-                <div className="bg-main border border-border rounded-2xl p-4">
+                <div className="bg-main border border-border rounded-ds-2xl p-4">
                   <p className="text-xs text-txt-secondary font-medium leading-relaxed italic">
                     "{selectedItem.summary || t("aikb_sub.no_summary")}"
                   </p>
@@ -219,7 +219,7 @@ function KBItemsTab({ selectedId, setSelectedId, t, selectedItem }: any) {
               </div>
 
               {selectedItem.versionNote && (
-                <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4">
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-2xl p-4">
                   <div className="flex items-center gap-2 mb-2 text-amber-600">
                     <Tag size={14} />
                     <p className="text-[10px] font-black uppercase tracking-widest">{t("version_note")}</p>
@@ -232,7 +232,7 @@ function KBItemsTab({ selectedId, setSelectedId, t, selectedItem }: any) {
                 <p className="text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("admin_actions")}</p>
                 <textarea
                   placeholder={t("aikb_sub.internal_note_placeholder")}
-                  className="w-full p-4 bg-main border border-border rounded-2xl text-xs outline-none focus:bg-surface focus:border-primary transition-all min-h-[100px] text-txt-primary placeholder:text-txt-muted"
+                  className="w-full p-4 bg-main border border-border rounded-ds-2xl text-xs outline-none focus:bg-surface focus:border-primary transition-all min-h-[100px] text-txt-primary placeholder:text-txt-muted"
                 />
                 <div className="grid grid-cols-3 gap-3">
                   <ActionButton icon={<Edit3 size={14} />} label={t("btn_edit_content")} color="indigo" />
@@ -243,7 +243,7 @@ function KBItemsTab({ selectedId, setSelectedId, t, selectedItem }: any) {
             </div>
           </div>
         ) : (
-          <div className="bg-surface border border-border rounded-3xl p-12 text-center transition-colors">
+          <div className="bg-surface border border-border rounded-ds-3xl p-12 text-center transition-colors">
             <Database size={48} className="mx-auto text-txt-muted/10 mb-4" />
             <p className="text-sm font-bold text-txt-muted">{t("aikb_sub.select_to_view")}</p>
           </div>
@@ -258,7 +258,7 @@ function ReviewTab({ t }: any) {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
       {/* Left Column - Version History */}
-      <div className="xl:col-span-8 bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-6">
+      <div className="xl:col-span-8 bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-6">
         <div className="flex items-center gap-2 mb-2">
           <History size={18} className="text-primary" />
           <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">
@@ -270,10 +270,10 @@ function ReviewTab({ t }: any) {
         <div className="space-y-4 relative before:absolute before:left-5 before:top-4 before:bottom-4 before:w-px before:bg-border">
           {aikbMockData.versions.map((v, i) => (
             <div key={i} className="flex gap-6 group relative">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center border-4 border-surface z-10 flex-shrink-0 transition-colors ${v.isServing ? 'bg-primary text-white' : 'bg-main text-txt-muted'}`}>
+              <div className={`w-10 h-10 rounded-ds-xl flex items-center justify-center border-4 border-surface z-10 flex-shrink-0 transition-colors ${v.isServing ? 'bg-primary text-white' : 'bg-main text-txt-muted'}`}>
                 <Edit3 size={16} />
               </div>
-              <div className="flex-1 bg-main/30 border border-border rounded-2xl p-4 group-hover:bg-main transition-colors">
+              <div className="flex-1 bg-main/30 border border-border rounded-ds-2xl p-4 group-hover:bg-main transition-colors">
                 <div className="flex items-center gap-3 mb-2">
                   <span className="text-sm font-black text-txt-primary">{v.v}</span>
                   <StatusBadge status={v.status} />
@@ -290,8 +290,8 @@ function ReviewTab({ t }: any) {
                   <div className="text-primary font-black uppercase tracking-widest">{v.stats}</div>
                 </div>
                 {/* <div className="flex gap-2 mt-4">
-                  <button className="px-4 py-1.5 bg-surface border border-border rounded-lg text-[10px] font-black hover:bg-main transition-all">Xem chi tiết</button>
-                  {i > 0 && <button className="px-4 py-1.5 bg-surface border border-border rounded-lg text-[10px] font-black hover:bg-main transition-all flex items-center gap-1">
+                  <button className="px-4 py-1.5 bg-surface border border-border rounded-ds-lg text-[10px] font-black hover:bg-main transition-all">Xem chi tiết</button>
+                  {i > 0 && <button className="px-4 py-1.5 bg-surface border border-border rounded-ds-lg text-[10px] font-black hover:bg-main transition-all flex items-center gap-1">
                     <RotateCcw size={10} /> Rollback
                   </button>}
                 </div> */}
@@ -302,7 +302,7 @@ function ReviewTab({ t }: any) {
       </div>
 
       {/* Right Column - Diff Comparison */}
-      <div className="xl:col-span-4 bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-6 sticky top-[104px]">
+      <div className="xl:col-span-4 bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-6 sticky top-[104px]">
         <div className="flex items-center gap-2 mb-2">
           <ArrowLeftRight size={18} className="text-indigo-500" />
           <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">So sánh thay đổi (v3 vs v2)</h3>
@@ -311,20 +311,20 @@ function ReviewTab({ t }: any) {
         <div className="space-y-4">
           <div className="space-y-1.5">
             <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest">Cũ</p>
-            <div className="p-4 bg-rose-500/5 border border-rose-500/10 rounded-2xl text-xs text-rose-700/80 font-medium leading-relaxed italic line-through decoration-rose-500/30">
+            <div className="p-4 bg-rose-500/5 border border-rose-500/10 rounded-ds-2xl text-xs text-rose-700/80 font-medium leading-relaxed italic line-through decoration-rose-500/30">
               {aikbMockData.comparison.old}
             </div>
           </div>
 
           <div className="space-y-1.5">
             <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Mới</p>
-            <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl text-xs text-emerald-700 font-bold leading-relaxed italic">
+            <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-ds-2xl text-xs text-emerald-700 font-bold leading-relaxed italic">
               {aikbMockData.comparison.new}
             </div>
           </div>
         </div>
 
-        <div className="p-4 bg-main border border-border rounded-2xl flex gap-3">
+        <div className="p-4 bg-main border border-border rounded-ds-2xl flex gap-3">
           <Info size={16} className="text-txt-muted flex-shrink-0" />
           <p className="text-[10px] text-txt-muted font-medium leading-relaxed italic">
             {aikbMockData.comparison.stats}
@@ -342,7 +342,7 @@ function QualityTab({ t }: any) {
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Most Used Topics */}
-        <div className="lg:col-span-7 bg-surface border border-border rounded-3xl p-6 shadow-sm">
+        <div className="lg:col-span-7 bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-8">
             <TrendingUp size={18} className="text-primary" />
             <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">Topic được dùng nhiều nhất</h3>
@@ -355,14 +355,14 @@ function QualityTab({ t }: any) {
         </div>
 
         {/* High Fallback Topics */}
-        <div className="lg:col-span-5 bg-surface border border-border rounded-3xl p-6 shadow-sm">
+        <div className="lg:col-span-5 bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-8">
             <AlertTriangle size={18} className="text-amber-500" />
             <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">Topic dùng nhiều fallback</h3>
           </div>
           <div className="space-y-3">
             {data.highFallback.map((item, i) => (
-              <div key={i} className="flex items-center justify-between p-4 bg-main rounded-2xl border border-border group hover:bg-main/80 cursor-pointer transition-all">
+              <div key={i} className="flex items-center justify-between p-4 bg-main rounded-ds-2xl border border-border group hover:bg-main/80 cursor-pointer transition-all">
                 <span className="text-xs font-bold text-txt-primary">{item.topic}</span>
                 <span className="px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 border border-rose-500/20 text-[9px] font-black">{item.count} fallback</span>
               </div>
@@ -373,7 +373,7 @@ function QualityTab({ t }: any) {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Low Confidence Table */}
-        <div className="lg:col-span-8 bg-surface border border-border rounded-3xl overflow-hidden shadow-sm h-fit">
+        <div className="lg:col-span-8 bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm h-fit">
           <div className="p-6 border-b border-border flex items-center gap-2">
             <ShieldCheck size={18} className="text-rose-500" />
             <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">Topic confidence thấp</h3>
@@ -412,7 +412,7 @@ function QualityTab({ t }: any) {
         </div>
 
         {/* Recently Updated Poor Performance */}
-        <div className="lg:col-span-4 bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-6">
+        <div className="lg:col-span-4 bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-6">
           <div className="flex items-center gap-2 mb-2">
             <BarChart2 size={18} className="text-txt-muted" />
             <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">Mới cập nhật nhưng tín hiệu kém</h3>
@@ -469,9 +469,9 @@ function StatsCard({ icon, label, value, sub, color }: any) {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm transition-colors">
+    <div className="bg-surface border border-border rounded-ds-2xl p-5 shadow-sm transition-colors">
       <div className="flex items-center gap-3 mb-3">
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${colors[color]}`}>
+        <div className={`w-9 h-9 rounded-ds-xl flex items-center justify-center ${colors[color]}`}>
           {icon}
         </div>
         <span className="text-[10px] font-bold text-txt-muted uppercase tracking-widest">{label}</span>
@@ -486,7 +486,7 @@ function TabButton({ active, onClick, icon, label }: any) {
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-6 py-2 text-xs font-bold rounded-xl transition-all ${active ? "bg-main text-primary shadow-sm border border-border" : "text-txt-muted hover:text-txt-secondary"
+      className={`flex items-center gap-2 px-6 py-2 text-xs font-bold rounded-ds-xl transition-all ${active ? "bg-main text-primary shadow-sm border border-border" : "text-txt-muted hover:text-txt-secondary"
         }`}
     >
       {icon}
@@ -521,7 +521,7 @@ function StatusBadge({ status }: { status: string }) {
 function DetailRow({ icon, label, value }: any) {
   return (
     <div className="flex items-start gap-4">
-      <div className="w-8 h-8 rounded-lg bg-main border border-border flex items-center justify-center text-txt-muted flex-shrink-0">
+      <div className="w-8 h-8 rounded-ds-lg bg-main border border-border flex items-center justify-center text-txt-muted flex-shrink-0">
         {icon}
       </div>
       <div className="min-w-0">
@@ -540,7 +540,7 @@ function ActionButton({ icon, label, color }: any) {
   };
 
   return (
-    <button className={`flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border transition-all ${colors[color]}`}>
+    <button className={`flex flex-col items-center justify-center gap-2 p-3 rounded-ds-2xl border transition-all ${colors[color]}`}>
       {icon}
       <span className="text-[8px] font-black uppercase tracking-wider">{label}</span>
     </button>

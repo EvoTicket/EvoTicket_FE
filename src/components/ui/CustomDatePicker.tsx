@@ -65,7 +65,7 @@ export function CustomDatePicker({ selectedDate, onChange, width, height }: Cust
       {({ close }) => (
         <>
           <PopoverButton
-            className={`w-full h-${height} p-3 	bg-bg-surface border border-border-default rounded-lg text-text-primary flex items-center justify-between cursor-pointer hover:border-primary transition-colors focus:outline-none focus:ring-1 focus:ring-primary text-left`}
+            className={`w-full h-${height} p-3 	bg-bg-surface border border-border-default rounded-ds-lg text-text-primary flex items-center justify-between cursor-pointer hover:border-primary transition-colors focus:outline-none focus:ring-1 focus:ring-primary text-left`}
           >
             <span className={selectedDate ? "text-text-primary" : "text-text-muted"}>
               {selectedDate
@@ -81,13 +81,13 @@ export function CustomDatePicker({ selectedDate, onChange, width, height }: Cust
 
           <PopoverPanel
             transition
-            className={`absolute z-50 mt-2 inset-x-0 bg-bg-surface/95 backdrop-blur-xl border border-border-default rounded-xl shadow-2xl p-5 transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0 lg:bottom-auto bottom-full lg:mb-0 mb-2 origin-top`}
+            className={`absolute z-50 mt-2 inset-x-0 bg-bg-surface/95 backdrop-blur-xl border border-border-default rounded-ds-xl shadow-2xl p-5 transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0 lg:bottom-auto bottom-full lg:mb-0 mb-2 origin-top`}
           >
             <div className="flex justify-between items-center mb-5">
               <button
                 type="button"
                 onClick={prevMonth}
-                className="p-1.5 hover:bg-secondary rounded-lg text-text-muted hover:text-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="p-1.5 hover:bg-secondary rounded-ds-lg text-text-muted hover:text-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
                 <ChevronLeft size={18} />
               </button>
@@ -97,7 +97,7 @@ export function CustomDatePicker({ selectedDate, onChange, width, height }: Cust
               <button
                 type="button"
                 onClick={nextMonth}
-                className="p-1.5 hover:bg-secondary rounded-lg text-text-muted hover:text-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="p-1.5 hover:bg-secondary rounded-ds-lg text-text-muted hover:text-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
                 <ChevronRight size={18} />
               </button>

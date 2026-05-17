@@ -58,7 +58,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
 
                 {/* Block: Lịch diễn đã chọn / Chọn lịch diễn */}
                 {hasSeatMap ? (
-                    <div className="bg-card-bg-default border border-border-default rounded-xl p-6">
+                    <div className="bg-card-bg-default border border-border-default rounded-ds-xl p-6">
                         <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 border-b border-border-subtle">{t("select_showtime")}</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {event.showtimes?.map((st: any) => {
@@ -68,7 +68,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                                     <div
                                         key={st.showtimeId}
                                         onClick={() => !isSoldOut && setSelectedShowtimeId(st.showtimeId)}
-                                        className={`p-4 rounded-xl border cursor-pointer transition-colors relative ${isSelected ? 'border-button-primary-bg-default bg-bg-subtle/30' : 'border-border-default hover:border-border-strong'} ${isSoldOut ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        className={`p-4 rounded-ds-xl border cursor-pointer transition-colors relative ${isSelected ? 'border-primary bg-bg-subtle/30' : 'border-border-default hover:border-border-strong'} ${isSoldOut ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         <div className="font-bold text-text-primary mb-1">{formatShowtimeDate(st.startDatetime)}</div>
                                         <div className="text-sm text-text-secondary">{formatTime(st.startDatetime)}</div>
@@ -82,7 +82,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                         <p className="text-xs text-text-muted mt-4">{t("select_showtime_warning")}</p>
                     </div>
                 ) : (
-                    <div className="bg-card-bg-default border border-button-primary-bg-default/20 rounded-xl p-6">
+                    <div className="bg-card-bg-default border border-primary/20 rounded-ds-xl p-6">
                         <div className="flex justify-between items-center mb-4 pb-2 ">
                             <h3 className="text-lg font-bold text-text-primary">{t("selected_showtime")}</h3>
                             <span
@@ -121,7 +121,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                 )}
 
                 {/* Block: Chọn vé / Sơ đồ ghế */}
-                <div className="bg-card-bg-default border border-border-default rounded-xl p-6">
+                <div className="bg-card-bg-default border border-border-default rounded-ds-xl p-6">
                     <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 border-b border-border-subtle">{t("step_1")}</h3>
 
                     {hasSeatMap ? (
@@ -134,7 +134,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                             </div>
 
                             {/* MOCK SEAT MAP TRAPEZOID SHAPE */}
-                            <div className="w-full max-w-lg aspect-[4/3] bg-bg-surface border border-border-strong rounded-xl flex items-center justify-center p-8 flex-col gap-6 relative overflow-hidden">
+                            <div className="w-full max-w-lg aspect-[4/3] bg-bg-surface border border-border-strong rounded-ds-xl flex items-center justify-center p-8 flex-col gap-6 relative overflow-hidden">
                                 {/* Stage */}
                                 <div className="w-full h-12 bg-border-subtle border border-border-strong rounded shadow flex items-center justify-center text-text-muted font-bold tracking-widest text-sm mb-4">{t("stage")}</div>
                                 {/* Tiers */}
@@ -167,7 +167,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                                 const maxPurchase = ticket.maxPurchase > 0 ? Math.min(ticket.maxPurchase, ticket.quantityAvailable || Infinity) : (ticket.quantityAvailable || Infinity);
 
                                 return (
-                                    <div key={ticket.ticketTypeId} className="border border-border-default rounded-xl p-4 bg-bg-surface">
+                                    <div key={ticket.ticketTypeId} className="border border-border-default rounded-ds-xl p-4 bg-bg-surface">
                                         <div className="flex justify-between items-start mb-2">
                                             <div>
                                                 <h4 className={`font-semibold text-body-large ${isSoldOut ? 'text-text-muted' : 'text-ticket-card-text-title'}`}>{ticket.typeName}</h4>
@@ -219,7 +219,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                 </div>
 
                 {/* Block: Lưu ý khi chọn vé */}
-                <div className="bg-bg-surface border border-border-default rounded-xl p-6">
+                <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6">
                     <h3 className="font-bold text-text-primary mb-3">{t("booking_notes_title")}</h3>
                     <ul className="list-disc pl-5 space-y-2 text-sm text-text-secondary marker:text-text-muted">
                         <li>{t("booking_note_1")}</li>
@@ -232,7 +232,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
 
             {/* RIGHT COLUMN: ĐƠN HÀNG */}
             <div className="lg:col-span-4 lg:sticky lg:top-24 h-fit z-10">
-                <div className="bg-payment-summary-bg-default border border-border-default rounded-xl overflow-hidden shadow-xl">
+                <div className="bg-payment-summary-bg-default border border-border-default rounded-ds-xl overflow-hidden shadow-xl">
                     <div className="p-6 flex flex-col gap-button-gap-lg">
                         <div className="text-body-large font-bold text-payment-summary-text-title">{t("your_order")}</div>
 

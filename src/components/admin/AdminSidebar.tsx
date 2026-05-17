@@ -46,7 +46,7 @@ export function AdminSidebar() {
         <aside className="w-[280px] bg-surface border-r border-border min-h-screen flex flex-col fixed h-full z-20 transition-colors duration-300">
             {/* Logo Section */}
             <div className="p-6 flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
+                <div className="w-10 h-10 bg-primary rounded-ds-lg flex items-center justify-center shadow-lg shadow-primary/20">
                     <span className="text-white font-bold text-xl">ET</span>
                 </div>
                 <div>
@@ -63,7 +63,7 @@ export function AdminSidebar() {
                         <Link
                             key={item.id}
                             href={`/${locale}${item.href}`}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${active
+                            className={`flex items-center gap-3 px-4 py-3 rounded-ds-xl text-sm font-medium transition-all duration-200 group ${active
                                     ? "bg-primary text-white shadow-md shadow-primary/20"
                                     : "text-txt-secondary hover:bg-main hover:text-txt-primary"
                                 }`}
@@ -78,7 +78,7 @@ export function AdminSidebar() {
 
             {/* Profile Section at Bottom */}
             <div className="p-4 border-t border-border">
-                <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-main transition-colors cursor-pointer group">
+                <div className="flex items-center gap-3 p-2 rounded-ds-xl hover:bg-main transition-colors cursor-pointer group">
                     <div className="w-10 h-10 rounded-full bg-main border border-border flex items-center justify-center overflow-hidden">
                         <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/20"></div>
                     </div>

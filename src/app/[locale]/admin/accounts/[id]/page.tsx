@@ -219,17 +219,17 @@ export default function AccountDetailPage() {
             <span className="text-primary/40 font-medium lowercase">{account.id}</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-surface border border-border flex items-center justify-center text-primary shadow-sm">
+            <div className="w-12 h-12 rounded-ds-2xl bg-surface border border-border flex items-center justify-center text-primary shadow-sm">
               <Building2 size={24} />
             </div>
             <div>
               <p className="text-[10px] font-black text-txt-muted uppercase tracking-tighter">ADM-03</p>
               <h1 className="text-2xl font-black text-txt-primary tracking-tight">{account.name}</h1>
               <div className="flex items-center gap-2 mt-1">
-                <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold border border-primary/10">
+                <span className="px-2 py-0.5 rounded-ds-md bg-primary/10 text-primary text-[10px] font-bold border border-primary/10">
                   {t("type_organizer")}
                 </span>
-                <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 text-[10px] font-bold border border-amber-500/10">
+                <span className="px-2 py-0.5 rounded-ds-md bg-amber-500/10 text-amber-600 text-[10px] font-bold border border-amber-500/10">
                   {t("status_pending_approval")}
                 </span>
                 <span className="text-[10px] font-medium text-txt-muted">
@@ -285,7 +285,7 @@ export default function AccountDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           {/* Tabs Navigation */}
-          <div className="bg-surface border border-border rounded-3xl overflow-hidden shadow-sm">
+          <div className="bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm">
             <div className="flex border-b border-border px-6">
               <TabButton active={activeTab === "profile"} onClick={() => setActiveTab("profile")} label="Hồ sơ" icon={<User size={16} />} />
               <TabButton active={activeTab === "activity"} onClick={() => setActiveTab("activity")} label="Hoạt động" icon={<ActivityIcon size={16} />} />
@@ -310,14 +310,14 @@ export default function AccountDetailPage() {
                     <h4 className="text-sm font-bold text-txt-primary mb-4 flex items-center gap-2">
                       Hồ sơ tài liệu đã nộp
                     </h4>
-                    <div className="bg-main/30 rounded-2xl border border-border overflow-hidden">
+                    <div className="bg-main/30 rounded-ds-2xl border border-border overflow-hidden">
                       <table className="w-full text-left border-collapse">
                         <tbody className="divide-y divide-border">
                           {account.documents.map((doc, idx) => (
                             <tr key={idx} className="hover:bg-main/50 transition-colors">
                               <td className="px-6 py-4">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-lg bg-surface border border-border flex items-center justify-center text-txt-muted">
+                                  <div className="w-8 h-8 rounded-ds-lg bg-surface border border-border flex items-center justify-center text-txt-muted">
                                     <FileText size={16} />
                                   </div>
                                   <span className="text-xs font-bold text-txt-primary">{doc.name}</span>
@@ -327,7 +327,7 @@ export default function AccountDetailPage() {
                                 <StatusBadge status={doc.status} />
                               </td>
                               <td className="px-6 py-4 text-right">
-                                <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-surface text-[10px] font-bold text-txt-primary hover:bg-main transition-all">
+                                <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-lg border border-border bg-surface text-[10px] font-bold text-txt-primary hover:bg-main transition-all">
                                   <ExternalLink size={12} />
                                   Xem
                                 </button>
@@ -342,9 +342,9 @@ export default function AccountDetailPage() {
                   {/* Payout Account */}
                   <div>
                     <h4 className="text-sm font-bold text-txt-primary mb-4">Tài khoản thanh toán</h4>
-                    <div className="p-4 bg-surface border border-border rounded-2xl flex items-center justify-between">
+                    <div className="p-4 bg-surface border border-border rounded-ds-2xl flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-ds-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
                           <CreditCard size={20} />
                         </div>
                         <div>
@@ -356,14 +356,14 @@ export default function AccountDetailPage() {
                           </p>
                         </div>
                       </div>
-                      <span className="px-2 py-1 rounded-md bg-amber-500/5 text-amber-600 text-[8px] font-black border border-amber-500/10">
+                      <span className="px-2 py-1 rounded-ds-md bg-amber-500/5 text-amber-600 text-[8px] font-black border border-amber-500/10">
                         {account.payoutAccount.status.toUpperCase()}
                       </span>
                     </div>
                   </div>
 
                   {/* Internal Warning */}
-                  <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl">
+                  <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-ds-2xl">
                     <div className="flex gap-3">
                       <AlertTriangle size={18} className="text-amber-600 shrink-0" />
                       <div>
@@ -390,7 +390,7 @@ export default function AccountDetailPage() {
               )}
 
               {activeTab === "history" && (
-                <div className="overflow-hidden border border-border rounded-2xl">
+                <div className="overflow-hidden border border-border rounded-ds-2xl">
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-main/50 border-b border-border">
@@ -419,13 +419,13 @@ export default function AccountDetailPage() {
           </div>
 
           {/* Operation Context Section */}
-          <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm">
+          <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-sm font-bold text-txt-primary">Bối cảnh nền tảng liên quan</h3>
                 <p className="text-[10px] text-txt-muted uppercase font-medium mt-0.5 tracking-tight">Tổng hợp dữ liệu vận hành của tổ chức này</p>
               </div>
-              <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 text-[10px] font-bold border border-amber-500/10 uppercase">
+              <span className="px-2 py-0.5 rounded-ds-md bg-amber-500/10 text-amber-600 text-[10px] font-bold border border-amber-500/10 uppercase">
                 Pending Review
               </span>
             </div>
@@ -471,7 +471,7 @@ export default function AccountDetailPage() {
 
         {/* Sidebar Controls */}
         <div className="space-y-6">
-          <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm sticky top-6">
+          <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm sticky top-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-sm font-black text-txt-primary uppercase tracking-tight">Bảng điều khiển admin</h3>
               <ShieldAlert size={18} className="text-txt-muted" />
@@ -480,7 +480,7 @@ export default function AccountDetailPage() {
             <div className="space-y-6">
               <div>
                 <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">Trạng thái nền tảng</p>
-                <div className="p-2 bg-amber-500/5 border border-amber-500/20 rounded-xl text-center">
+                <div className="p-2 bg-amber-500/5 border border-amber-500/20 rounded-ds-xl text-center">
                   <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Pending Approval</span>
                 </div>
               </div>
@@ -496,17 +496,17 @@ export default function AccountDetailPage() {
                 <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">Ghi chú nội bộ</p>
                 <textarea 
                   placeholder="Nhập ghi chú cho quản trị viên khác..."
-                  className="w-full h-32 p-4 bg-main border border-border rounded-2xl text-xs text-txt-primary placeholder:text-txt-muted focus:border-primary outline-none transition-all resize-none"
+                  className="w-full h-32 p-4 bg-main border border-border rounded-ds-2xl text-xs text-txt-primary placeholder:text-txt-muted focus:border-primary outline-none transition-all resize-none"
                   defaultValue={account.adminContext.internalNote}
                 />
-                <button className="w-full mt-3 py-2.5 bg-surface border border-border rounded-xl text-[10px] font-bold text-txt-primary hover:bg-main transition-all">
+                <button className="w-full mt-3 py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-bold text-txt-primary hover:bg-main transition-all">
                   Lưu ghi chú
                 </button>
               </div>
 
               <div className="pt-4 border-t border-border space-y-4">
                 {account.adminContext.lastAction && (
-                  <div className="p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl">
+                  <div className="p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-ds-2xl">
                     <div className="flex items-center gap-2 mb-1">
                       <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                       <p className="text-[10px] font-bold text-indigo-600">Hành động admin gần nhất</p>
@@ -541,7 +541,7 @@ function ActionButton({ icon, label, color = "default", variant = "outline" }: a
   };
 
   return (
-    <button className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-bold border transition-all shadow-sm ${colors[color]}`}>
+    <button className={`flex items-center gap-2 px-4 py-2 rounded-ds-xl text-[11px] font-bold border transition-all shadow-sm ${colors[color]}`}>
       {icon}
       <span>{label}</span>
     </button>
@@ -556,10 +556,10 @@ function QuickStatCard({ label, value, subValue, icon, color }: any) {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-3xl p-5 shadow-sm">
+    <div className="bg-surface border border-border rounded-ds-3xl p-5 shadow-sm">
       <div className="flex items-start justify-between mb-3">
         <p className="text-[10px] font-bold text-txt-muted uppercase tracking-tight">{label}</p>
-        <div className={`p-2 rounded-xl ${colorStyles[color] || colorStyles.indigo}`}>
+        <div className={`p-2 rounded-ds-xl ${colorStyles[color] || colorStyles.indigo}`}>
           {icon}
         </div>
       </div>
@@ -605,7 +605,7 @@ function StatusBadge({ status }: { status: string }) {
   };
 
   return (
-    <div className={`inline-flex items-center px-2 py-0.5 rounded-md text-[8px] font-black border uppercase ${styles[status]}`}>
+    <div className={`inline-flex items-center px-2 py-0.5 rounded-ds-md text-[8px] font-black border uppercase ${styles[status]}`}>
       {status}
     </div>
   );
@@ -620,7 +620,7 @@ function MiniStat({ label, value, color }: any) {
   };
 
   return (
-    <div className={`p-3 rounded-2xl border ${styles[color]}`}>
+    <div className={`p-3 rounded-ds-2xl border ${styles[color]}`}>
       <p className="text-[8px] font-bold text-txt-muted uppercase mb-1">{label}</p>
       <p className="text-lg font-black text-txt-primary leading-none">{value}</p>
     </div>
@@ -629,9 +629,9 @@ function MiniStat({ label, value, color }: any) {
 
 function EventRow({ name, id, date, status, isFlagged }: any) {
   return (
-    <div className="flex items-center justify-between p-3 bg-main/20 rounded-2xl hover:bg-main/40 transition-colors">
+    <div className="flex items-center justify-between p-3 bg-main/20 rounded-ds-2xl hover:bg-main/40 transition-colors">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-surface border border-border flex items-center justify-center text-txt-muted">
+        <div className="w-8 h-8 rounded-ds-lg bg-surface border border-border flex items-center justify-center text-txt-muted">
           <Calendar size={16} />
         </div>
         <div>
@@ -646,7 +646,7 @@ function EventRow({ name, id, date, status, isFlagged }: any) {
           <p className="text-[10px] text-txt-muted">{id} · {date}</p>
         </div>
       </div>
-      <span className={`px-2 py-0.5 rounded-md text-[8px] font-black border uppercase ${
+      <span className={`px-2 py-0.5 rounded-ds-md text-[8px] font-black border uppercase ${
         status === "Đã duyệt" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/10" :
         status === "Đang chờ duyệt" ? "bg-amber-500/10 text-amber-600 border-amber-500/10" :
         "bg-surface text-txt-muted border-border"
@@ -664,7 +664,7 @@ function LogEntry({ user, time, content }: any) {
         <p className="text-[10px] font-bold text-txt-primary">@{user}</p>
         <p className="text-[10px] text-txt-muted">{time}</p>
       </div>
-      <p className="text-xs text-txt-secondary leading-relaxed p-3 bg-main/30 rounded-2xl">
+      <p className="text-xs text-txt-secondary leading-relaxed p-3 bg-main/30 rounded-ds-2xl">
         {content}
       </p>
     </div>
@@ -688,7 +688,7 @@ function AdminActionButton({ color, label, icon }: any) {
   };
 
   return (
-    <button className={`w-full py-3 px-4 rounded-2xl flex items-center justify-between text-xs font-bold transition-all ${styles[color]}`}>
+    <button className={`w-full py-3 px-4 rounded-ds-2xl flex items-center justify-between text-xs font-bold transition-all ${styles[color]}`}>
       <span>{label}</span>
       {icon}
     </button>
@@ -735,7 +735,7 @@ function ProcessingActionBadge({ action, type }: { action: string, type: string 
   };
 
   return (
-    <div className={`inline-flex px-2 py-1 rounded-lg border text-[10px] font-bold ${styles[type]}`}>
+    <div className={`inline-flex px-2 py-1 rounded-ds-lg border text-[10px] font-bold ${styles[type]}`}>
       {action}
     </div>
   );

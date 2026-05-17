@@ -115,7 +115,7 @@ export default function AdminRolesPage() {
           <h1 className="text-3xl font-extrabold text-txt-primary tracking-tight">{t("roles_title")}</h1>
           <p className="text-sm text-txt-secondary mt-1">{t("roles_subtitle")}</p>
         </div>
-        <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all">
+        <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-ds-xl font-bold shadow-lg shadow-primary/20 transition-all">
           <Plus size={18} />
           <span>{t("btn_create_role")}</span>
         </button>
@@ -130,7 +130,7 @@ export default function AdminRolesPage() {
       </div>
 
       {/* Tabs Control */}
-      <div className="flex items-center bg-surface border border-border rounded-2xl p-1 w-fit shadow-sm">
+      <div className="flex items-center bg-surface border border-border rounded-ds-2xl p-1 w-fit shadow-sm">
         <TabButton active={activeTab === "roles"} onClick={() => setActiveTab("roles")} icon={<Shield size={14} />} label={t("tab_roles")} />
         <TabButton active={activeTab === "internal_members"} onClick={() => setActiveTab("internal_members")} icon={<Users size={14} />} label={t("tab_internal_members")} />
         <TabButton active={activeTab === "sensitive_access"} onClick={() => setActiveTab("sensitive_access")} icon={<Lock size={14} />} label={t("tab_sensitive_access")} />
@@ -143,12 +143,12 @@ export default function AdminRolesPage() {
             <div
               key={role.id}
               onClick={() => setSelectedRoleId(role.id)}
-              className={`p-5 rounded-3xl border transition-all cursor-pointer group flex items-start gap-4 ${selectedRoleId === role.id
+              className={`p-5 rounded-ds-3xl border transition-all cursor-pointer group flex items-start gap-4 ${selectedRoleId === role.id
                   ? "bg-surface border-primary shadow-lg shadow-primary/5"
                   : "bg-surface/50 border-border hover:border-txt-muted/30 hover:bg-surface"
                 }`}
             >
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all ${selectedRoleId === role.id ? "bg-primary text-white" : "bg-main text-txt-muted group-hover:bg-main/80"
+              <div className={`w-12 h-12 rounded-ds-2xl flex items-center justify-center flex-shrink-0 transition-all ${selectedRoleId === role.id ? "bg-primary text-white" : "bg-main text-txt-muted group-hover:bg-main/80"
                 }`}>
                 {role.icon}
               </div>
@@ -172,7 +172,7 @@ export default function AdminRolesPage() {
         </div>
 
         {/* Right Column - Permission Matrix */}
-        <div className="xl:col-span-7 bg-surface border border-border rounded-3xl shadow-sm overflow-hidden sticky top-[104px] transition-colors duration-300">
+        <div className="xl:col-span-7 bg-surface border border-border rounded-ds-3xl shadow-sm overflow-hidden sticky top-[104px] transition-colors duration-300">
           <div className="p-6 border-b border-border flex items-center justify-between bg-main/30">
             <div className="flex items-center gap-3">
               <Shield size={18} className="text-primary" />
@@ -183,14 +183,14 @@ export default function AdminRolesPage() {
                 <History size={14} />
                 {t("btn_summary")}
               </button>
-              <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-1.5 rounded-lg font-bold text-[10px] shadow-sm transition-all">
+              <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-1.5 rounded-ds-lg font-bold text-[10px] shadow-sm transition-all">
                 {t("common.save_changes")}
               </button>
             </div>
           </div>
 
           <div className="p-6 space-y-4 max-h-[calc(100vh-320px)] overflow-y-auto custom-scrollbar">
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex gap-3 mb-6">
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-2xl p-4 flex gap-3 mb-6">
               <Info size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-amber-600/80 font-medium leading-relaxed italic">
                 {selectedRole && t(`common.roles_sub.${(selectedRole as any).descKey}`)}
@@ -200,13 +200,13 @@ export default function AdminRolesPage() {
             {permissions.map((perm) => (
               <div
                 key={perm.id}
-                className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${perm.sensitive
+                className={`flex items-center justify-between p-4 rounded-ds-2xl border transition-all ${perm.sensitive
                     ? "border-orange-500/20 bg-orange-500/5"
                     : "border-border bg-surface"
                   }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${perm.sensitive ? "bg-orange-500/10 text-orange-600" : "bg-main text-txt-muted"
+                  <div className={`w-9 h-9 rounded-ds-xl flex items-center justify-center flex-shrink-0 ${perm.sensitive ? "bg-orange-500/10 text-orange-600" : "bg-main text-txt-muted"
                     }`}>
                     {perm.icon}
                   </div>
@@ -216,7 +216,7 @@ export default function AdminRolesPage() {
                   </div>
                 </div>
 
-                <div className="flex bg-main rounded-lg p-1 border border-border">
+                <div className="flex bg-main rounded-ds-lg p-1 border border-border">
                   <PermOption label={t("perm_none")} active={false} />
                   <PermOption label={t("perm_view")} active={perm.id === 'p1' || perm.id === 'p5'} />
                   <PermOption label={t("perm_manage")} active={!(perm.id === 'p1' || perm.id === 'p5')} />
@@ -240,9 +240,9 @@ function StatsCard({ icon, label, value, sub, color }: any) {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm transition-colors">
+    <div className="bg-surface border border-border rounded-ds-2xl p-5 shadow-sm transition-colors">
       <div className="flex items-center gap-3 mb-3">
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${colors[color]}`}>
+        <div className={`w-9 h-9 rounded-ds-xl flex items-center justify-center ${colors[color]}`}>
           {icon}
         </div>
         <span className="text-[10px] font-bold text-txt-muted uppercase tracking-widest">{label}</span>
@@ -257,7 +257,7 @@ function TabButton({ active, onClick, icon, label }: any) {
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-6 py-2 text-xs font-bold rounded-xl transition-all ${active ? "bg-main text-primary shadow-sm border border-border" : "text-txt-muted hover:text-txt-secondary"
+      className={`flex items-center gap-2 px-6 py-2 text-xs font-bold rounded-ds-xl transition-all ${active ? "bg-main text-primary shadow-sm border border-border" : "text-txt-muted hover:text-txt-secondary"
         }`}
     >
       {icon}
@@ -268,7 +268,7 @@ function TabButton({ active, onClick, icon, label }: any) {
 
 function PermOption({ label, active }: { label: string, active: boolean }) {
   return (
-    <button className={`px-4 py-1.5 rounded-md text-[9px] font-black uppercase transition-all ${active
+    <button className={`px-4 py-1.5 rounded-ds-md text-[9px] font-black uppercase transition-all ${active
         ? "bg-surface text-txt-primary shadow-sm"
         : "text-txt-muted hover:text-txt-secondary"
       }`}>

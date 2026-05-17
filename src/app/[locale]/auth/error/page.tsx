@@ -40,7 +40,7 @@ export default function AuthErrorPage() {
       </div>
       
       {/* Auth Card */}
-      <div className="z-10 w-full max-w-[420px] bg-[#1e1b38]/60 backdrop-blur-xl border border-white/5 rounded-2xl p-8 shadow-2xl relative mt-[-10vh]">
+      <div className="z-10 w-full max-w-[420px] bg-[#1e1b38]/60 backdrop-blur-xl border border-white/5 rounded-ds-2xl p-8 shadow-2xl relative mt-[-10vh]">
         
         <div className="text-center mb-6">
           <h1 className="text-[24px] font-bold text-white mb-3 leading-snug px-4">
@@ -63,14 +63,14 @@ export default function AuthErrorPage() {
         <div className="space-y-3">
           <button
             onClick={handleRetry}
-            className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-xl transition-all active:scale-[0.98] text-[14px] shadow-lg shadow-primary/20"
+            className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-ds-xl transition-all active:scale-[0.98] text-[14px] shadow-lg shadow-primary/20"
           >
             {errorType === "session-expired" ? "Đăng nhập lại" : "Thử lại"}
           </button>
           
           <button
             onClick={() => router.push(errorType === "session-expired" ? `/${locale}` : `/${locale}/auth/login`)}
-            className="w-full bg-[#25233c] hover:bg-[#2d2a45] border border-white/5 text-gray-300 font-medium py-3 rounded-xl transition-colors text-[14px]"
+            className="w-full bg-[#25233c] hover:bg-[#2d2a45] border border-white/5 text-gray-300 font-medium py-3 rounded-ds-xl transition-colors text-[14px]"
           >
             {errorType === "google" 
               ? "Đăng nhập bằng email" 
@@ -81,7 +81,7 @@ export default function AuthErrorPage() {
 
           {errorType !== "session-expired" && (
             <button
-              className="w-full bg-transparent border border-white/10 hover:bg-white/5 text-gray-400 font-medium py-3 rounded-xl transition-colors text-[14px]"
+              className="w-full bg-transparent border border-white/10 hover:bg-white/5 text-gray-400 font-medium py-3 rounded-ds-xl transition-colors text-[14px]"
             >
               Liên hệ hỗ trợ
             </button>
@@ -101,7 +101,7 @@ export default function AuthErrorPage() {
               </div>
             </div>
 
-            <button className="w-full bg-[#25233c] hover:bg-[#2d2a45] border border-white/5 text-gray-300 font-medium py-2.5 rounded-xl flex items-center justify-center gap-3 transition-colors text-[13px]">
+            <button className="w-full bg-[#25233c] hover:bg-[#2d2a45] border border-white/5 text-gray-300 font-medium py-2.5 rounded-ds-xl flex items-center justify-center gap-3 transition-colors text-[13px]">
               <GoogleIcon />
               Đăng nhập bằng Google
             </button>

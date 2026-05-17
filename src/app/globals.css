@@ -1,120 +1,76 @@
 @import "tailwindcss";
 @config "../../tailwind.config.js";
-@import "./figma-tokens.css";
+@import "../../design-tokens/generated/tokens.css";
 
-/* 1. Định nghĩa biến màu (Logic đổi màu thủ công - bạn có thể tắt đi nếu figma-tokens.css đã lo hết) */
-@layer theme {
-  :root {
-    /* --- LIGHT MODE --- */
-    --bg-main: #FFFFFF;
-    --bg-secondary: #F5F3FB;
-    --bg-surface: #FCFCFF;
-    --border-color: #E0D8F5;
+/* Compatibility Layer cho component/page cũ */
+:root {
+  /* Background */
+  --bg-main: var(--ev-color-bg-page);
+  --bg-secondary: var(--ev-color-bg-subtle);
+  --bg-surface: var(--ev-color-bg-surface);
 
-    --color-primary: #5F4A9D;
-    --color-primary-hover: #8C84CC;
-    --color-accent: #DFA92A;
+  /* Border */
+  --border-color: var(--ev-color-border-default);
 
-    /* --- BRAND PREMIUM COLORS --- */
-    --brand-gold-light: #FDE599;
-    --brand-gold-main: #D5A02B;
-    --brand-gold-dark: #996509;
-    --brand-gold-deep: #4D3A11;
-    --brand-glow-purple: #E4ADF2;
-    --brand-secondary: #a50064;
+  /* Brand */
+  --color-primary: var(--ev-color-action-brand-bg-default);
+  --color-primary-hover: var(--ev-color-action-brand-bg-hover);
+  --color-accent: var(--ev-color-action-accent-bg-default);
 
-    --text-primary: #1F1229;
-    --text-secondary: #5F4A9D;
-    --text-muted: #A8A3C3;
+  /* Text */
+  --text-primary: var(--ev-color-text-primary);
+  --text-secondary: var(--ev-color-text-secondary);
+  --text-muted: var(--ev-color-text-muted);
 
-    --status-success: #32B67A;
-    --status-warning: #F6C445;
-    --status-error: #E2303D;
-  }
-
-  /* Khi class "dark" xuất hiện (do next-themes thêm vào), đổi giá trị biến */
-  :root.dark {
-    /* --- DARK MODE --- */
-    --bg-main: #1F1229;
-    --bg-secondary: #191369;
-    --bg-surface: #2A1F3D;
-    /* Dùng màu cơ bản vì CSS var không chỉnh opacity trực tiếp được */
-    --border-color: #5F4A9D;
-
-    /* Primary giữ nguyên hoặc đổi nhẹ nếu cần */
-    --color-primary: #5F4A9D;
-    --color-primary-hover: #8C84CC;
-    --color-accent: #DFA92A;
-
-    /* --- BRAND PREMIUM COLORS (Dark adjustments if needed, keeping gold for premium feel) --- */
-    --brand-gold-light: #FDE599;
-    --brand-gold-main: #D5A02B;
-    --brand-gold-dark: #996509;
-    --brand-gold-deep: #4D3A11;
-    --brand-glow-purple: #E4ADF2;
-    --brand-secondary: #a50064;
-
-    --text-primary: #F2F1F7;
-    --text-secondary: #B3ACD8;
-    --text-muted: #7C75A7;
-
-    --status-success: #5FF59A;
-    --status-warning: #FFC857;
-    --status-error: #FF5E5B;
-  }
+  /* Status */
+  --status-success: var(--ev-color-feedback-success-icon);
+  --status-warning: var(--ev-color-feedback-warning-icon);
+  --status-error: var(--ev-color-feedback-error-icon);
 }
 
-/* 2. Map biến vào Tailwind Utilities bằng @theme */
+/* Legacy Tailwind utility aliases */
 @theme {
-  /* Background colors (sử dụng: bg-main, bg-surface...) */
-  --color-main: var(--bg-main);
-  --color-secondary: var(--bg-secondary);
-  --color-surface: var(--bg-surface);
+  /* Background */
+  --color-main: var(--ev-color-bg-page);
+  --color-secondary: var(--ev-color-bg-subtle);
+  --color-surface: var(--ev-color-bg-surface);
 
-  /* Border colors (sử dụng: border-border) */
-  --color-border: var(--border-color);
+  /* Border */
+  --color-border: var(--ev-color-border-default);
 
-  /* Brand colors (sử dụng: text-primary, bg-primary...) */
-  --color-primary: var(--color-primary);
-  --color-primary-hover: var(--color-primary-hover);
-  --color-accent: var(--color-accent);
+  /* Brand */
+  --color-primary: var(--ev-color-action-brand-bg-default);
+  --color-primary-hover: var(--ev-color-action-brand-bg-hover);
+  --color-accent: var(--ev-color-action-accent-bg-default);
 
-  /* Text colors override (sử dụng: text-txt-primary...) 
-     Lưu ý: Tôi thêm tiền tố 'txt-' để tránh trùng tên với color-primary ở trên
-  */
-  --color-txt-primary: var(--text-primary);
-  --color-txt-secondary: var(--text-secondary);
-  --color-txt-muted: var(--text-muted);
+  /* Text */
+  --color-txt-primary: var(--ev-color-text-primary);
+  --color-txt-secondary: var(--ev-color-text-secondary);
+  --color-txt-muted: var(--ev-color-text-muted);
 
-  /* Status colors */
-  --color-success: var(--status-success);
-  --color-warning: var(--status-warning);
-  --color-error: var(--status-error);
-
-  /* Brand Premium */
-  --color-brand-gold-light: var(--brand-gold-light);
-  --color-brand-gold-main: var(--brand-gold-main);
-  --color-brand-gold-dark: var(--brand-gold-dark);
-  --color-brand-gold-deep: var(--brand-gold-deep);
-  --color-brand-glow-purple: var(--brand-glow-purple);
-  --color-brand-secondary: var(--brand-secondary);
+  /* Status */
+  --color-success: var(--ev-color-feedback-success-icon);
+  --color-warning: var(--ev-color-feedback-warning-icon);
+  --color-error: var(--ev-color-feedback-error-icon);
 }
 
-/* 3. Base styles */
 @layer base {
+  * {
+    @apply border-border;
+  }
+
   body {
-    /* Áp dụng màu mặc định */
-    @apply bg-main text-txt-primary border-border;
+    @apply bg-main text-txt-primary;
   }
 }
 
-/* 4. Custom Animations */
+/* Animations giữ nguyên */
 @layer utilities {
   .animate-quang-chai {
     animation: quang-chai 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     transform-origin: top center;
   }
-  
+
   .animate-thu-chai {
     animation: thu-chai 0.3s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
     transform-origin: top center;
@@ -168,7 +124,7 @@
   }
 }
 
-/* 5. Swiper Custom Styles */
+/* Swiper Custom Styles */
 .suggested-events-swiper .swiper-button-next,
 .suggested-events-swiper .swiper-button-prev {
   @apply bg-bg-surface border border-border-default w-10 h-10 rounded-full shadow-md text-text-primary transition-all duration-300;

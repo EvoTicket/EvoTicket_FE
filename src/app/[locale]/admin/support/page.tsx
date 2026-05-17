@@ -45,14 +45,14 @@ export default function AdminSupportPage() {
           <h1 className="text-3xl font-extrabold text-txt-primary tracking-tight">{t("support_title")}</h1>
           <p className="text-sm text-txt-secondary mt-1">{t("support_subtitle")}</p>
         </div>
-        <button className="flex items-center gap-2 bg-surface hover:bg-main text-txt-primary px-5 py-2.5 rounded-xl font-bold border border-border shadow-sm transition-all">
+        <button className="flex items-center gap-2 bg-surface hover:bg-main text-txt-primary px-5 py-2.5 rounded-ds-xl font-bold border border-border shadow-sm transition-all">
           <Download size={18} />
           <span>{t("export_results")}</span>
         </button>
       </div>
 
       {/* Quick Lookup Bar */}
-      <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-4 transition-colors duration-300">
+      <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-4 transition-colors duration-300">
         <div className="flex items-center gap-2 text-xs font-bold text-txt-muted uppercase tracking-wider">
           <Zap size={14} className="text-amber-500" />
           {t("quick_search_label")}
@@ -63,10 +63,10 @@ export default function AdminSupportPage() {
             <input
               type="text"
               placeholder={t("quick_search_placeholder")}
-              className="w-full pl-12 pr-4 py-3.5 bg-main border border-border rounded-2xl text-sm focus:bg-surface focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all text-txt-primary placeholder:text-txt-muted"
+              className="w-full pl-12 pr-4 py-3.5 bg-main border border-border rounded-ds-2xl text-sm focus:bg-surface focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all text-txt-primary placeholder:text-txt-muted"
             />
           </div>
-          <button className="bg-primary hover:bg-primary-hover text-white px-8 py-3.5 rounded-2xl font-bold shadow-lg shadow-primary/20 transition-all flex items-center gap-2">
+          <button className="bg-primary hover:bg-primary-hover text-white px-8 py-3.5 rounded-ds-2xl font-bold shadow-lg shadow-primary/20 transition-all flex items-center gap-2">
             <Search size={18} />
             {t("btn_search")}
           </button>
@@ -75,7 +75,7 @@ export default function AdminSupportPage() {
           <span className="text-[10px] font-bold text-txt-muted uppercase">{t("recent_searches")}:</span>
           <div className="flex gap-2">
             {["ORD-220411", "TIX-998120", "anh.nh@gmail.com", "+84 909 442 118", "Anh Trai Say Hi"].map((tag) => (
-              <span key={tag} className="px-2.5 py-1 bg-main text-txt-muted text-[10px] font-bold rounded-lg border border-border cursor-pointer hover:bg-main/80 transition-colors">
+              <span key={tag} className="px-2.5 py-1 bg-main text-txt-muted text-[10px] font-bold rounded-ds-lg border border-border cursor-pointer hover:bg-main/80 transition-colors">
                 {tag}
               </span>
             ))}
@@ -106,7 +106,7 @@ export default function AdminSupportPage() {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         {/* Left Column - Tabs & Table */}
         <div className="xl:col-span-9 space-y-6">
-          <div className="bg-surface border border-border rounded-3xl shadow-sm overflow-hidden transition-colors duration-300">
+          <div className="bg-surface border border-border rounded-ds-3xl shadow-sm overflow-hidden transition-colors duration-300">
             <div className="flex items-center border-b border-border px-6">
               <TabItem
                 active={activeTab === "transactions"}
@@ -236,7 +236,7 @@ export default function AdminSupportPage() {
                         {row.updatedAt}
                       </td>
                       <td className="px-6 py-4">
-                        <Link href={`/${locale}/admin/support/${row.id}`} className="px-3 py-1.5 bg-surface border border-border rounded-lg text-[10px] font-bold text-txt-primary hover:bg-main transition-all shadow-sm flex items-center gap-1 w-fit">
+                        <Link href={`/${locale}/admin/support/${row.id}`} className="px-3 py-1.5 bg-surface border border-border rounded-ds-lg text-[10px] font-bold text-txt-primary hover:bg-main transition-all shadow-sm flex items-center gap-1 w-fit">
                           {t("support_sub.view_detail")}
                         </Link>
                       </td>
@@ -273,7 +273,7 @@ export default function AdminSupportPage() {
                         {row.activity}
                       </td>
                       <td className="px-6 py-4">
-                        <Link href={`/${locale}/admin/support/${row.id}`} className="px-3 py-1.5 bg-surface border border-border rounded-lg text-[10px] font-bold text-txt-primary hover:bg-main transition-all shadow-sm flex items-center gap-1 w-fit">
+                        <Link href={`/${locale}/admin/support/${row.id}`} className="px-3 py-1.5 bg-surface border border-border rounded-ds-lg text-[10px] font-bold text-txt-primary hover:bg-main transition-all shadow-sm flex items-center gap-1 w-fit">
                           {t("support_sub.view_detail")}
                         </Link>
                       </td>
@@ -313,7 +313,7 @@ export default function AdminSupportPage() {
                         {row.updatedAt}
                       </td>
                       <td className="px-6 py-4">
-                        <Link href={`/${locale}/admin/support/${row.id}`} className="px-3 py-1.5 bg-surface border border-border rounded-lg text-[10px] font-bold text-txt-primary hover:bg-main transition-all shadow-sm flex items-center gap-1 w-fit">
+                        <Link href={`/${locale}/admin/support/${row.id}`} className="px-3 py-1.5 bg-surface border border-border rounded-ds-lg text-[10px] font-bold text-txt-primary hover:bg-main transition-all shadow-sm flex items-center gap-1 w-fit">
                           {t("support_sub.view_detail")}
                         </Link>
                       </td>
@@ -345,7 +345,7 @@ export default function AdminSupportPage() {
         {/* Right Column - Sidebar */}
         <div className="xl:col-span-3 space-y-6">
           {/* Search Tips */}
-          <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm transition-colors duration-300">
+          <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm transition-colors duration-300">
             <div className="flex items-center gap-2 mb-6">
               <HelpCircle size={18} className="text-amber-500" />
               <h3 className="text-sm font-bold text-txt-primary">{t("search_tips")}</h3>
@@ -379,7 +379,7 @@ export default function AdminSupportPage() {
           </div>
 
           {/* Common Anomalies */}
-          <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm transition-colors duration-300">
+          <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm transition-colors duration-300">
             <div className="flex items-center gap-2 mb-6">
               <AlertCircle size={18} className="text-rose-500" />
               <h3 className="text-sm font-bold text-txt-primary">{t("support_sub.tip_anomaly_title")}</h3>
@@ -420,9 +420,9 @@ function StatsCard({ icon, label, value, color }: any) {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm transition-colors">
+    <div className="bg-surface border border-border rounded-ds-2xl p-5 shadow-sm transition-colors">
       <div className="flex items-center gap-4">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${colors[color]}`}>
+        <div className={`w-10 h-10 rounded-ds-xl flex items-center justify-center ${colors[color]}`}>
           {icon}
         </div>
         <div>
@@ -450,7 +450,7 @@ function TabItem({ active, onClick, label, icon }: any) {
 
 function FilterSelect({ label, value }: any) {
   return (
-    <div className="flex items-center gap-2 px-3 py-2 bg-surface border border-border rounded-xl shadow-sm cursor-pointer hover:bg-main transition-colors text-[10px]">
+    <div className="flex items-center gap-2 px-3 py-2 bg-surface border border-border rounded-ds-xl shadow-sm cursor-pointer hover:bg-main transition-colors text-[10px]">
       <span className="font-medium text-txt-muted">{label}:</span>
       <span className="font-bold text-txt-primary">{value}</span>
       <ChevronDownIcon size={12} className="text-txt-muted" />
@@ -468,7 +468,7 @@ function PaymentBadge({ status }: { status: string }) {
   };
 
   return (
-    <div className={`inline-flex items-center px-2 py-0.5 rounded-lg border text-[8px] font-black ${styles[status] || styles["Cancelled"]}`}>
+    <div className={`inline-flex items-center px-2 py-0.5 rounded-ds-lg border text-[8px] font-black ${styles[status] || styles["Cancelled"]}`}>
       {status.toUpperCase()}
     </div>
   );
@@ -483,7 +483,7 @@ function MintBadge({ status }: { status: string }) {
   };
 
   return (
-    <div className={`inline-flex items-center text-center leading-tight px-2 py-0.5 rounded-lg border text-[8px] font-black max-w-[60px] ${styles[status] || styles["Not started"]}`}>
+    <div className={`inline-flex items-center text-center leading-tight px-2 py-0.5 rounded-ds-lg border text-[8px] font-black max-w-[60px] ${styles[status] || styles["Not started"]}`}>
       {status.toUpperCase()}
     </div>
   );
@@ -499,7 +499,7 @@ function AccessBadge({ status }: { status: string }) {
   };
 
   return (
-    <div className={`inline-flex items-center px-2 py-0.5 rounded-lg border text-[8px] font-black ${styles[status] || "bg-main"}`}>
+    <div className={`inline-flex items-center px-2 py-0.5 rounded-ds-lg border text-[8px] font-black ${styles[status] || "bg-main"}`}>
       {status.toUpperCase()}
     </div>
   );
@@ -514,7 +514,7 @@ function CheckInBadge({ status }: { status: string }) {
   };
 
   return (
-    <div className={`inline-flex items-center px-2 py-0.5 rounded-lg border text-[8px] font-black ${styles[status] || "bg-main"}`}>
+    <div className={`inline-flex items-center px-2 py-0.5 rounded-ds-lg border text-[8px] font-black ${styles[status] || "bg-main"}`}>
       {status}
     </div>
   );
@@ -528,7 +528,7 @@ function PriorityBadge({ level }: { level: string }) {
   };
 
   return (
-    <div className={`inline-flex items-center px-2 py-0.5 rounded-lg border text-[8px] font-black ${styles[level] || "bg-main"}`}>
+    <div className={`inline-flex items-center px-2 py-0.5 rounded-ds-lg border text-[8px] font-black ${styles[level] || "bg-main"}`}>
       {level}
     </div>
   );
@@ -544,7 +544,7 @@ function CaseStatusBadge({ status }: { status: string }) {
   };
 
   return (
-    <div className={`inline-flex items-center px-2 py-0.5 rounded-lg border text-[8px] font-black ${styles[status] || "bg-main"}`}>
+    <div className={`inline-flex items-center px-2 py-0.5 rounded-ds-lg border text-[8px] font-black ${styles[status] || "bg-main"}`}>
       {status.toUpperCase()}
     </div>
   );
@@ -552,8 +552,8 @@ function CaseStatusBadge({ status }: { status: string }) {
 
 function TipItem({ icon, title, desc, bg }: any) {
   return (
-    <div className={`flex gap-3 p-4 rounded-2xl ${bg} border border-border`}>
-      <div className="w-8 h-8 rounded-lg bg-surface shadow-sm flex items-center justify-center flex-shrink-0">
+    <div className={`flex gap-3 p-4 rounded-ds-2xl ${bg} border border-border`}>
+      <div className="w-8 h-8 rounded-ds-lg bg-surface shadow-sm flex items-center justify-center flex-shrink-0">
         {icon}
       </div>
       <div className="min-w-0">
@@ -572,7 +572,7 @@ function AnomalyCard({ title, desc, type }: any) {
   };
 
   return (
-    <div className={`p-4 rounded-2xl border ${colors[type]}`}>
+    <div className={`p-4 rounded-ds-2xl border ${colors[type]}`}>
       <h4 className="text-[11px] font-black mb-1">{title}</h4>
       <p className="text-[10px] opacity-80 leading-relaxed">{desc}</p>
     </div>
@@ -584,7 +584,7 @@ function PaginationButton({ active, label, icon, disabled, onClick }: any) {
     <button
       disabled={disabled}
       onClick={onClick}
-      className={`w-7 h-7 flex items-center justify-center rounded-lg text-[10px] font-bold transition-all ${active
+      className={`w-7 h-7 flex items-center justify-center rounded-ds-lg text-[10px] font-bold transition-all ${active
         ? "bg-primary text-white shadow-md shadow-primary/20"
         : disabled
           ? "text-txt-muted/30 cursor-not-allowed"

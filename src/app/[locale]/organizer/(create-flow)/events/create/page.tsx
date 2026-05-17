@@ -1,0 +1,1 @@
+export { default } from "@/src/features/organizer/components/create-event/CreateEventWizard";

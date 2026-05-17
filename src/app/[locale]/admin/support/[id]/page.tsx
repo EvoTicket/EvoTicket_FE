@@ -75,7 +75,7 @@ export default function SupportDetailPage() {
                <ActionButton icon={<Flag size={14} />} label="Gắn cờ" />
                <ActionButton icon={<Share2 size={14} />} label="Chuyển xử lý" />
                <ActionButton icon={<Copy size={14} />} label="Sao chép ID" />
-               <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-600/20">
+               <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-ds-xl text-xs font-bold transition-all shadow-lg shadow-indigo-600/20">
                   <ExternalLink size={14} />
                   <span>Xem account liên quan</span>
                </button>
@@ -89,14 +89,14 @@ export default function SupportDetailPage() {
                   {data.type === "transaction" ? "Giao dịch" : data.type === "ticket" ? "Vé" : "Case"} #{id || data.id}
                </h1>
                <div className="flex items-center gap-2">
-                  <span className={`px-2.5 py-0.5 border rounded-lg text-[10px] font-black uppercase tracking-tighter ${displayStatus === "Success" || displayStatus === "Active"
+                  <span className={`px-2.5 py-0.5 border rounded-ds-lg text-[10px] font-black uppercase tracking-tighter ${displayStatus === "Success" || displayStatus === "Active"
                      ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                      : "bg-amber-500/10 text-amber-600 border-amber-500/20"
                      }`}>
                      {displayStatus}
                   </span>
                   {data.type === "case" && (
-                     <span className="px-2.5 py-0.5 bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 rounded-lg text-[10px] font-black uppercase tracking-tighter">
+                     <span className="px-2.5 py-0.5 bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 rounded-ds-lg text-[10px] font-black uppercase tracking-tighter">
                         Priority {(data as any).priority}
                      </span>
                   )}
@@ -110,7 +110,7 @@ export default function SupportDetailPage() {
          {/* Quick Stats Grid */}
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {data.stats.map((stat, idx) => (
-               <div key={idx} className="bg-surface border border-border rounded-2xl p-4 flex flex-col gap-1 transition-all hover:border-primary/30">
+               <div key={idx} className="bg-surface border border-border rounded-ds-2xl p-4 flex flex-col gap-1 transition-all hover:border-primary/30">
                   <span className="text-[10px] font-bold text-txt-muted uppercase tracking-wider">{stat.label}</span>
                   <div className="flex items-center gap-2">
                      <div className={`w-2 h-2 rounded-full ${stat.color === 'amber' ? 'bg-amber-500' : stat.color === 'rose' ? 'bg-rose-500' : stat.color === 'indigo' ? 'bg-indigo-500' : 'bg-txt-muted'}`} />
@@ -125,7 +125,7 @@ export default function SupportDetailPage() {
          <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
             {/* Left Column */}
             <div className="xl:col-span-8 space-y-6">
-               <div className="bg-surface border border-border rounded-3xl overflow-hidden shadow-sm">
+               <div className="bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm">
                   {/* Tabs Header */}
                   <div className="flex items-center border-b border-border px-6">
                      <DetailTab active={activeTab === "overview"} onClick={() => setActiveTab("overview")} label="Tổng quan" />
@@ -166,7 +166,7 @@ export default function SupportDetailPage() {
                                     <div className="pt-4 border-t border-border/50">
                                        <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">Chi tiết sản phẩm</p>
                                        {(data as any).items.map((item: any, i: number) => (
-                                          <div key={i} className="flex justify-between items-center bg-main/30 p-3 rounded-xl">
+                                          <div key={i} className="flex justify-between items-center bg-main/30 p-3 rounded-ds-xl">
                                              <span className="text-[11px] font-bold text-txt-primary">{item.name} x {item.qty}</span>
                                              <span className="text-[11px] font-black text-primary">{item.total}</span>
                                           </div>
@@ -193,7 +193,7 @@ export default function SupportDetailPage() {
                            )}
 
                            {data.type === "case" && (
-                              <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl flex gap-3">
+                              <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-ds-2xl flex gap-3">
                                  <div className="mt-0.5 text-amber-500">
                                     <AlertCircle size={18} />
                                  </div>
@@ -251,7 +251,7 @@ export default function SupportDetailPage() {
             {/* Right Column - Sidebar */}
             <div className="xl:col-span-4 space-y-6">
                {/* Related Links Widget */}
-               <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-4 transition-colors duration-300">
+               <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-4 transition-colors duration-300">
                   <h3 className="text-[10px] font-black text-txt-muted uppercase tracking-widest">Liên kết liên quan</h3>
                   <div className="space-y-3">
                      <SidebarLink icon={<User size={14} />} label="Tài khoản" value={(data as any).user.email} />
@@ -262,11 +262,11 @@ export default function SupportDetailPage() {
                </div>
 
                {/* Recent Notes Widget */}
-               <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-4 transition-colors duration-300">
+               <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-4 transition-colors duration-300">
                   <h3 className="text-[10px] font-black text-txt-muted uppercase tracking-widest">Ghi chú hỗ trợ gần đây</h3>
                   <div className="space-y-4">
                      {data.notes.map((note, idx) => (
-                        <div key={idx} className="p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl space-y-2">
+                        <div key={idx} className="p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-ds-2xl space-y-2">
                            <div className="flex items-center justify-between">
                               <span className="text-[10px] font-bold text-indigo-600">{note.author}</span>
                               <span className="text-[9px] text-txt-muted opacity-60">{note.time}</span>
@@ -278,14 +278,14 @@ export default function SupportDetailPage() {
                </div>
 
                {/* Support Actions Widget */}
-               <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm space-y-4 transition-colors duration-300">
+               <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-4 transition-colors duration-300">
                   <h3 className="text-[10px] font-black text-txt-muted uppercase tracking-widest">Hành động hỗ trợ</h3>
                   <div className="space-y-2">
                      <SidebarAction label="Thêm ghi chú nội bộ" />
                      <SidebarAction label="Eskalate case" />
                      <SidebarAction label="Chờ cho đội tài chính" />
                      <SidebarAction label="Chờ cho đội blockchain" />
-                     <button className="w-full flex items-center justify-center py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[11px] font-bold transition-all shadow-md shadow-indigo-600/10">
+                     <button className="w-full flex items-center justify-center py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-ds-xl text-[11px] font-bold transition-all shadow-md shadow-indigo-600/10">
                         Mở account liên quan
                      </button>
                   </div>
@@ -298,7 +298,7 @@ export default function SupportDetailPage() {
 
 function ActionButton({ icon, label }: any) {
    return (
-      <button className="flex items-center gap-2 px-3 py-2 bg-surface hover:bg-main text-txt-primary border border-border rounded-xl text-[11px] font-bold transition-all shadow-sm">
+      <button className="flex items-center gap-2 px-3 py-2 bg-surface hover:bg-main text-txt-primary border border-border rounded-ds-xl text-[11px] font-bold transition-all shadow-sm">
          {icon}
          <span>{label}</span>
       </button>
@@ -329,8 +329,8 @@ function InfoRow({ label, value }: any) {
 
 function RelatedCard({ icon, label, value }: any) {
    return (
-      <div className="p-4 bg-surface border border-border rounded-2xl flex items-center gap-4 transition-all hover:shadow-md hover:border-primary/20 cursor-pointer">
-         <div className="w-10 h-10 bg-main rounded-xl flex items-center justify-center text-txt-muted">
+      <div className="p-4 bg-surface border border-border rounded-ds-2xl flex items-center gap-4 transition-all hover:shadow-md hover:border-primary/20 cursor-pointer">
+         <div className="w-10 h-10 bg-main rounded-ds-xl flex items-center justify-center text-txt-muted">
             {icon}
          </div>
          <div className="flex-1 min-w-0">
@@ -344,15 +344,15 @@ function RelatedCard({ icon, label, value }: any) {
 
 function SidebarLink({ icon, label, value }: any) {
    return (
-      <div className="flex items-center gap-3 p-2 hover:bg-main rounded-xl transition-all cursor-pointer group">
-         <div className="w-8 h-8 bg-surface border border-border rounded-lg flex items-center justify-center text-txt-muted group-hover:text-primary transition-colors">
+      <div className="flex items-center gap-3 p-2 hover:bg-main rounded-ds-xl transition-all cursor-pointer group">
+         <div className="w-8 h-8 bg-surface border border-border rounded-ds-lg flex items-center justify-center text-txt-muted group-hover:text-primary transition-colors">
             {icon}
          </div>
          <div className="flex-1 min-w-0">
             <p className="text-[9px] font-bold text-txt-muted uppercase tracking-tighter">{label}</p>
             <p className="text-[10px] font-black text-txt-primary truncate">{value}</p>
          </div>
-         <button className="text-[9px] font-black text-primary px-2 py-1 bg-primary/5 rounded-md opacity-0 group-hover:opacity-100 transition-all">
+         <button className="text-[9px] font-black text-primary px-2 py-1 bg-primary/5 rounded-ds-md opacity-0 group-hover:opacity-100 transition-all">
             Xem
          </button>
       </div>
@@ -361,7 +361,7 @@ function SidebarLink({ icon, label, value }: any) {
 
 function SidebarAction({ label }: any) {
    return (
-      <button className="w-full text-left px-4 py-2.5 bg-surface border border-border rounded-xl text-[11px] font-bold text-txt-secondary hover:bg-main hover:text-txt-primary transition-all shadow-sm">
+      <button className="w-full text-left px-4 py-2.5 bg-surface border border-border rounded-ds-xl text-[11px] font-bold text-txt-secondary hover:bg-main hover:text-txt-primary transition-all shadow-sm">
          {label}
       </button>
    );

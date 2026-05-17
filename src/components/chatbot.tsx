@@ -175,7 +175,7 @@ export function ChatBot() {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="fixed bottom-24 right-6 z-50 w-[450px] h-[600px] bg-bg-page border border-border-default rounded-lg shadow-2xl flex flex-col">
+                <div className="fixed bottom-24 right-6 z-50 w-[450px] h-[600px] bg-bg-page border border-border-default rounded-ds-lg shadow-2xl flex flex-col">
                     {/* Header */}
                     <div className="bg-button-primary-bg-defaultext-button-primary-text-default p-4 rounded-t-lg flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -207,7 +207,7 @@ export function ChatBot() {
                                     className={`flex ${msg.senderType === "USER" ? "justify-end" : "justify-start"}`}
                                 >
                                     <div
-                                        className={`max-w-[75%] rounded-lg p-3 ${msg.senderType === "USER"
+                                        className={`max-w-[75%] rounded-ds-lg p-3 ${msg.senderType === "USER"
                                             ? "bg-button-primary-bg-defaultext-button-primary-text-default"
                                             : "bg-secondary text-text-primary"
                                             }`}
@@ -323,7 +323,7 @@ export function ChatBot() {
 
                         {isLoading && (
                             <div className="flex justify-start">
-                                <div className="max-w-[75%] rounded-lg p-3 bg-secondary text-text-primary">
+                                <div className="max-w-[75%] rounded-ds-lg p-3 bg-secondary text-text-primary">
                                     <div className="flex items-center gap-2">
                                         <Loader2 className="animate-spin" size={16} />
                                         <span className="text-sm">{t("status_responding")}</span>
@@ -368,7 +368,7 @@ export function ChatBot() {
                             />
                             <button
                                 onClick={() => fileInputRef.current?.click()}
-                                className="p-2 hover:bg-secondary rounded-lg transition-colors text-text-secondary"
+                                className="p-2 hover:bg-secondary rounded-ds-lg transition-colors text-text-secondary"
                                 disabled={isLoading}
                             >
                                 <Paperclip size={20} />
@@ -379,13 +379,13 @@ export function ChatBot() {
                                 onChange={(e) => setInputMessage(e.target.value)}
                                 onKeyPress={handleKeyPress}
                                 placeholder={t("input_placeholder")}
-                                className="flex-1 px-3 py-2 border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-primary 	bg-bg-surface text-text-primary"
+                                className="flex-1 px-3 py-2 border border-border-default rounded-ds-lg focus:outline-none focus:ring-2 focus:ring-primary 	bg-bg-surface text-text-primary"
                                 disabled={isLoading}
                             />
                             <button
                                 onClick={handleSendMessage}
                                 disabled={!inputMessage.trim() && selectedFiles.length === 0}
-                                className="bg-button-primary-bg-defaul hover:bg-button-primary-bg-defaul-hovertext-button-primary-text-default px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="bg-button-primary-bg-defaul hover:bg-button-primary-bg-defaul-hovertext-button-primary-text-default px-4 py-2 rounded-ds-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
                                 <Send size={20} />
                             </button>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Search, Bell, Ticket, Plus, ChevronDown, Moon, Sun, User, LogOut, LogInIcon, Subscript, UserPlus, Users } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import api from "../lib/axios";
@@ -20,17 +20,6 @@ import { toast } from "react-toastify";
 import { useAppSelector, useAppDispatch } from "@/src/store/hooks";
 import { setUser, logout as logoutAction } from "@/src/store/slices/authSlice";
 
-// Định nghĩa kiểu dữ liệu User
-interface UserProfile {
-  id: number;
-  email: string;
-  firstName: string;
-  lastName: string;
-  avatarUrl: string;
-  phoneNumber: string;
-  roles: string[];
-}
-
 export function Header() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -44,15 +33,7 @@ export function Header() {
   // Get auth state from Redux
   const { user, token, refreshToken, isOrganization } = useAppSelector((state) => state.auth);
 
-  // Cần thiết để tránh lỗi Hydration mismatch khi icon Mặt trăng/Mặt trời khác nhau giữa server/client
-  useEffect(() => {
-    setMounted(true);
-    if (token && !user) {
-      fetchUserProfile();
-    }
-  }, [token]);
-
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     try {
       // Token auto-injected by axios interceptor
       const response = await api.get("/iam-service/api/users/me");
@@ -63,12 +44,23 @@ export function Header() {
       console.error("Failed to fetch user profile", error);
       // Axios interceptor will handle 401 and auto-logout
     }
-  };
+  }, [dispatch]);
+
+  // Cần thiết để tránh lỗi Hydration mismatch khi icon Mặt trăng/Mặt trời khác nhau giữa server/client
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setMounted(true));
+
+    if (token && !user) {
+      void fetchUserProfile();
+    }
+
+    return () => cancelAnimationFrame(frame);
+  }, [fetchUserProfile, token, user]);
 
   const handleLogout = async () => {
     if (refreshToken) {
       try {
-        await api.post("/iam-service/api/auth/logout", { refreshToken }, { skipAuth: true } as any);
+        await api.post("/iam-service/api/auth/logout", { refreshToken }, { skipAuth: true });
       } catch (error) {
         console.error("Logout API failed", error);
       }
@@ -79,10 +71,9 @@ export function Header() {
   };
 
   const handleCreateEvent = () => {
-    console.log(token);
     if (!token) {
       toast.error(t("login_required_to_create_event"));
-      router.push(`/${locale}/auth/login?callbackUrl=/${locale}/organizer/center`);
+      router.replace(`/${locale}/auth/login?callbackUrl=/${locale}/organizer/center`);
       return;
     }
 
@@ -147,7 +138,7 @@ export function Header() {
           {/* Nút Tạo sự kiện (Primary Button) */}
           <button
             onClick={handleCreateEvent}
-            className="group relative overflow-hidden hidden lg:flex items-center gap-2 bg-button-primary-bg-default text-button-primary-text-default px-4 py-2.5 rounded-lg font-medium transition-colors shadow-sm cursor-pointer "
+            className="group relative overflow-hidden hidden lg:flex items-center gap-2 bg-button-primary-bg-default text-button-primary-text-default px-4 py-2.5 rounded-ds-lg font-medium transition-colors shadow-sm cursor-pointer "
           >
             <span className="absolute inset-0 w-full h-full bg-button-accent-bg-hover origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 z-0"></span>
             <div className="relative z-10 bg-white/20 p-0.5 rounded border border-white/30">
@@ -230,7 +221,7 @@ export function Header() {
               </button>
               {/* <button
                 onClick={() => router.push(`/${locale}/auth/register?callbackUrl=${encodeURIComponent(pathname)}`)}
-                className="flex items-center gap-2 border border-border-default rounded-lg px-4 py-2 hover:border-primary cursor-pointer transition-colors text-sm font-medium"
+                className="flex items-center gap-2 border border-border-default rounded-ds-lg px-4 py-2 hover:border-primary cursor-pointer transition-colors text-sm font-medium"
               >
                 <UserPlus size={16} className="text-text-secondary" />
                 <span>{t('register', { defaultMessage: 'Đăng ký' })}</span>

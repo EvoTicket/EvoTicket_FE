@@ -377,7 +377,7 @@ export default function PaymentPage() {
                     <div className="lg:col-span-8 flex flex-col gap-6">
 
                         {/* Block: Thông tin liên hệ */}
-                        <div className="bg-card-bg-default border border-border-default rounded-xl p-6">
+                        <div className="bg-card-bg-default border border-border-default rounded-ds-xl p-6">
                             <h3 className="font-bold text-text-primary mb-4">{tp('contact_info_title')}</h3>
                             <div className="space-y-4">
                                 <div>
@@ -390,7 +390,7 @@ export default function PaymentPage() {
                                             setFullName(e.target.value);
                                             if (errors.fullName) setErrors({ ...errors, fullName: "" });
                                         }}
-                                        className={`w-full bg-bg-surface border ${errors.fullName ? 'border-feedback-error-text' : 'border-border-default'} rounded-lg px-4 py-2.5 text-text-primary outline-none focus:border-button-primary-bg-default transition-colors`}
+                                        className={`w-full bg-bg-surface border ${errors.fullName ? 'border-feedback-error-text' : 'border-border-default'} rounded-ds-lg px-4 py-2.5 text-text-primary outline-none focus:border-primary transition-colors`}
                                     />
                                     {errors.fullName && <p className="text-xs text-feedback-error-text mt-1">{errors.fullName}</p>}
                                 </div>
@@ -404,7 +404,7 @@ export default function PaymentPage() {
                                             setPhone(e.target.value);
                                             if (errors.phone) setErrors({ ...errors, phone: "" });
                                         }}
-                                        className={`w-full bg-bg-surface border ${errors.phone ? 'border-feedback-error-text' : 'border-border-default'} rounded-lg px-4 py-2.5 text-text-primary outline-none focus:border-button-primary-bg-default transition-colors`}
+                                        className={`w-full bg-bg-surface border ${errors.phone ? 'border-feedback-error-text' : 'border-border-default'} rounded-ds-lg px-4 py-2.5 text-text-primary outline-none focus:border-primary transition-colors`}
                                     />
                                     {errors.phone && <p className="text-xs text-feedback-error-text mt-1">{errors.phone}</p>}
                                 </div>
@@ -418,20 +418,20 @@ export default function PaymentPage() {
                                             setEmail(e.target.value);
                                             if (errors.email) setErrors({ ...errors, email: "" });
                                         }}
-                                        className={`w-full bg-bg-surface border ${errors.email ? 'border-feedback-error-text' : 'border-border-default'} rounded-lg px-4 py-2.5 text-text-primary outline-none focus:border-button-primary-bg-default transition-colors`}
+                                        className={`w-full bg-bg-surface border ${errors.email ? 'border-feedback-error-text' : 'border-border-default'} rounded-ds-lg px-4 py-2.5 text-text-primary outline-none focus:border-primary transition-colors`}
                                     />
                                     {errors.email && <p className="text-xs text-feedback-error-text mt-1">{errors.email}</p>}
                                     <p className="text-xs text-text-muted mt-2">{tp('email_note')}</p>
                                 </div>
 
-                                <div className="bg-bg-inverse text-text-inverse border border-border-strong rounded-lg p-3 text-sm">
+                                <div className="bg-[#19274e] border border-[#253f7f] rounded-ds-lg p-3 text-sm text-[#87a5f8]">
                                     {tp('wallet_note')}
                                 </div>
                             </div>
                         </div>
 
                         {/* Block: Mã giảm giá */}
-                        <div className="bg-card-bg-default border border-border-default rounded-xl p-6">
+                        <div className="bg-card-bg-default border border-border-default rounded-ds-xl p-6">
                             <h3 className="font-bold text-text-primary mb-4">{tp('discount_title')}</h3>
                             <div className="flex gap-3 mb-2">
                                 <input
@@ -439,12 +439,12 @@ export default function PaymentPage() {
                                     placeholder={tp('discount_placeholder')}
                                     value={discountCode}
                                     onChange={(e) => setDiscountCode(e.target.value)}
-                                    className="flex-1 bg-bg-surface border border-border-default rounded-lg px-4 py-2.5 text-text-primary outline-none focus:border-button-primary-bg-default transition-colors placeholder:text-text-muted"
+                                    className="flex-1 bg-bg-surface border border-border-default rounded-ds-lg px-4 py-2.5 text-text-primary outline-none focus:border-primary transition-colors placeholder:text-text-muted"
                                 />
                                 <button
                                     onClick={handleApplyVoucher}
                                     disabled={isApplyingVoucher}
-                                    className={`bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center min-w-[100px] ${isApplyingVoucher ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                    className={`bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-ds-lg font-medium transition-colors flex items-center justify-center min-w-[100px] ${isApplyingVoucher ? 'opacity-70 cursor-not-allowed' : ''}`}
                                 >
                                     {isApplyingVoucher ? <span className="w-5 h-5 border-2 border-white/30 border-t-button-primary-text-default rounded-full animate-spin"></span> : tp('apply_button')}
                                 </button>
@@ -458,18 +458,18 @@ export default function PaymentPage() {
                                     })}
                                 </p>
                             )}
-                            <div className="bg-bg-inverse text-text-inverse border border-border-strong rounded-lg p-3 text-sm">
+                            <div className="bg-[#19274e] border border-[#253f7f] rounded-ds-lg p-3 text-sm text-[#87a5f8]">
                                 {tp('discount_note')}
                             </div>
                         </div>
 
                         {/* Block: Phương thức thanh toán */}
-                        <div className="bg-card-bg-default border border-border-default rounded-xl p-6">
+                        <div className="bg-card-bg-default border border-border-default rounded-ds-xl p-6">
                             <h3 className="font-bold text-text-primary mb-4">{tb('payment_method')}</h3>
                             <p className="text-sm text-text-secondary mb-4">{tb('payment_method_note')}</p>
 
                             <div className="space-y-3 mb-6">
-                                <label className="flex items-center gap-3 p-3 border border-button-primary-bg-default bg-button-primary-bg-default/5 rounded-lg cursor-pointer transition-colors shadow-sm">
+                                <label className="flex items-center gap-3 p-3 border border-primary bg-primary/5 rounded-ds-lg cursor-pointer transition-colors shadow-sm">
                                     <input
                                         type="radio"
                                         name="payment"
@@ -487,7 +487,7 @@ export default function PaymentPage() {
                                     </div>
                                 </label>
 
-                                <label className="flex items-center gap-3 p-3 border border-border-default hover:border-button-primary-bg-default rounded-lg cursor-pointer bg-bg-surface transition-colors">
+                                <label className="flex items-center gap-3 p-3 border border-border-default hover:border-primary rounded-ds-lg cursor-pointer bg-bg-surface transition-colors">
                                     <input
                                         type="radio"
                                         name="payment"
@@ -507,7 +507,7 @@ export default function PaymentPage() {
 
                                 <div className="pt-2 pb-1 text-[10px] font-bold text-text-muted uppercase tracking-widest">{tp('other_methods')}</div>
 
-                                <label className="flex items-center gap-3 p-3 border border-border-default rounded-lg bg-bg-subtle/50 opacity-40 cursor-not-allowed grayscale pointer-events-none">
+                                <label className="flex items-center gap-3 p-3 border border-border-default rounded-ds-lg bg-bg-subtle/50 opacity-40 cursor-not-allowed grayscale pointer-events-none">
                                     <input
                                         type="radio"
                                         name="payment"
@@ -521,7 +521,7 @@ export default function PaymentPage() {
                                     <span className="text-sm font-medium text-text-muted">{tp('vnpay_label')}</span>
                                 </label>
 
-                                <label className="flex items-center gap-3 p-3 border border-border-default rounded-lg bg-bg-subtle/50 opacity-40 cursor-not-allowed grayscale pointer-events-none">
+                                <label className="flex items-center gap-3 p-3 border border-border-default rounded-ds-lg bg-bg-subtle/50 opacity-40 cursor-not-allowed grayscale pointer-events-none">
                                     <input
                                         type="radio"
                                         name="payment"
@@ -535,7 +535,7 @@ export default function PaymentPage() {
                                     <span className="text-sm font-medium text-text-muted">{tp('momo_label')}</span>
                                 </label>
 
-                                <label className="flex items-center gap-3 p-3 border border-border-default rounded-lg bg-bg-subtle/50 opacity-40 cursor-not-allowed grayscale pointer-events-none">
+                                <label className="flex items-center gap-3 p-3 border border-border-default rounded-ds-lg bg-bg-subtle/50 opacity-40 cursor-not-allowed grayscale pointer-events-none">
                                     <input
                                         type="radio"
                                         name="payment"
@@ -550,13 +550,13 @@ export default function PaymentPage() {
                                 </label>
                             </div>
 
-                            <div className="bg-bg-inverse text-text-inverse border border-border-strong rounded-lg p-3 text-sm">
+                            <div className="bg-[#19274e] border border-[#253f7f] rounded-ds-lg p-3 text-sm text-[#87a5f8]">
                                 {tp('payment_note')}
                             </div>
                         </div>
 
                         {/* Block: Lưu ý trước khi thanh toán */}
-                        <div className="bg-bg-surface border border-border-default rounded-xl p-6">
+                        <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6">
                             <h3 className="font-bold text-text-primary mb-3">{tp('before_payment_title')}</h3>
                             <ul className="list-disc pl-5 space-y-2 text-sm text-text-secondary marker:text-text-muted">
                                 <li>{tp('before_note_1')}</li>
@@ -567,7 +567,7 @@ export default function PaymentPage() {
                         </div>
 
                         {/* Block: Lưu ý sau khi thanh toán */}
-                        <div className="bg-bg-surface border border-border-default rounded-xl p-6">
+                        <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6">
                             <h3 className="font-bold text-text-primary mb-3">{tp('after_payment_title')}</h3>
                             <ul className="list-disc pl-5 space-y-2 text-sm text-text-secondary marker:text-text-muted">
                                 <li>{tp('after_note_1')}</li>
@@ -578,7 +578,7 @@ export default function PaymentPage() {
                         </div>
 
                         {/* Block: Xác nhận giao dịch */}
-                        <div className="bg-card-bg-default border border-border-default rounded-xl p-6">
+                        <div className="bg-card-bg-default border border-border-default rounded-ds-xl p-6">
                             <h3 className="font-bold text-text-primary mb-4">{tp('confirmation_title')}</h3>
                             <div className="space-y-3">
                                 <label className="flex items-start gap-3 cursor-pointer group">
@@ -615,7 +615,7 @@ export default function PaymentPage() {
 
                     {/* RIGHT COLUMN: ĐƠN HÀNG */}
                     <div className="lg:col-span-4 lg:sticky lg:top-24 h-fit z-10">
-                        <div className="bg-payment-summary-bg-default border border-border-default rounded-xl overflow-hidden shadow-xl">
+                        <div className="bg-payment-summary-bg-default border border-border-default rounded-ds-xl overflow-hidden shadow-xl">
                             <div className="p-6">
                                 <h2 className="text-xl font-bold text-text-primary mb-6">{tb('your_order')}</h2>
 
