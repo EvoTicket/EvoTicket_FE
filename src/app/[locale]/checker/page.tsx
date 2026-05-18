@@ -215,8 +215,15 @@ export default function CheckerPage() {
         // Configuration optimized for speed and screen area (entire frame)
         const facingMode = inputMode === "phone" ? "environment" : "user";
         const scanConfig = {
-          fps: 10,
-          disableFlip: false,
+          fps: 20,
+          disableFlip: true,
+          qrbox: (width: number, height: number) => {
+            const size = Math.min(width, height) * 0.7;
+            return {
+              width: size,
+              height: size
+            };
+          },
           useBarCodeDetectorIfSupported: true,
           experimentalFeatures: {
             useBarCodeDetectorIfSupported: true
@@ -236,6 +243,20 @@ export default function CheckerPage() {
               (decodedText) => handleVerify(decodedText),
               () => { }
             );
+
+            // Log diagnostic info to help debug camera resolution and capabilities
+            try {
+              console.log("=== SCANNER DIAGNOSTICS ===");
+              if (typeof (html5QrCode as any).getRunningTrackSettings === "function") {
+                console.log("Active Settings:", (html5QrCode as any).getRunningTrackSettings());
+              }
+              if (typeof (html5QrCode as any).getRunningTrackCapabilities === "function") {
+                console.log("Capabilities:", (html5QrCode as any).getRunningTrackCapabilities());
+              }
+              console.log("==========================");
+            } catch (e) {
+              console.warn("Diagnostics logging not fully supported:", e);
+            }
           } catch (err: any) {
             console.error("Camera start failed:", err);
             if (isMounted) {
@@ -469,8 +490,8 @@ export default function CheckerPage() {
                 disabled={isLoggingIn}
                 className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-2xl transition-all active:scale-[0.98] text-[15px] shadow-lg shadow-emerald-500/20 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer uppercase tracking-wider"
               >
-                {isLoggingIn 
-                  ? (locale === "vi" ? "ĐANG XÁC THỰC..." : "AUTHENTICATING...") 
+                {isLoggingIn
+                  ? (locale === "vi" ? "ĐANG XÁC THỰC..." : "AUTHENTICATING...")
                   : (locale === "vi" ? "ĐĂNG NHẬP KIỂM SOÁT" : "LOG IN TO CHECKER")}
               </button>
             </div>
