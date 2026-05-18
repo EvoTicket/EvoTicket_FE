@@ -217,6 +217,10 @@ export default function CheckerPage() {
         const scanConfig = {
           fps: 10,
           disableFlip: false,
+          useBarCodeDetectorIfSupported: true,
+          experimentalFeatures: {
+            useBarCodeDetectorIfSupported: true
+          },
           videoConstraints: {
             facingMode,
             width: { min: 640, ideal: 1920, max: 3840 },
