@@ -74,13 +74,13 @@ export default function ResaleDetailPage() {
         window.open(`https://amoy.polygonscan.com/nft/${contractAddress}/${tokenIdNum}`, "_blank");
     };
 
-    const handleReserveResaleTicket = async (listingId: string) => {
+    const handleReserveResaleTicket = async (listingCode: string) => {
         try {
-            const response = await api.post(`/order-service/api/v1/resale/listings/${listingId}/reserve`);
+            const response = await api.post(`/order-service/api/v1/resale/listings/${listingCode}/reserve`);
             if (response.data && response.data.data) {
                 toast.success(t('bought_resale_ticket_successfully'));
                 sessionStorage.setItem('listing_to_buy', JSON.stringify(response.data.data.resaleSessionId));
-                router.push(`/${locale}/user/tickets`);
+                router.push(`/${locale}/user/resale/${listingCode}/checkout`);
             }
         } catch (error: any) {
             console.error("Failed to buy resale ticket:", error);
@@ -392,7 +392,7 @@ export default function ResaleDetailPage() {
                         </div>
 
                         <div className="space-y-3">
-                            <div onClick={() => handleReserveResaleTicket(listingData.listingId)} className="block">
+                            <div onClick={() => handleReserveResaleTicket(listingData.listingCode)} className="block">
                                 <button className="w-full py-3 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default rounded-lg text-[13px] font-bold transition-all duration-200 shadow-md active:scale-[0.98]">
                                     {t('buy_resale_ticket')}
                                 </button>

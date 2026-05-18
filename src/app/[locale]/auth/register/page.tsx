@@ -1,14 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Eye, EyeOff, ChevronRight } from "lucide-react";
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import api from "@/src/lib/axios";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/src/store/hooks";
 import { setAppLoading, selectAppLoading } from "@/src/store/slices/appSlice";
+import { CustomDatePicker } from "@/src/components/ui/CustomDatePicker";
+import { isValidEmail, isValidPhone, isValidFullName } from "@/src/lib/validations";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -16,6 +20,7 @@ export default function RegisterPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl');
   const dispatch = useAppDispatch();
+  const t = useTranslations('Auth');
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -25,13 +30,64 @@ export default function RegisterPage() {
   const [phone, setPhone] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const [dateOfBirth, setDateOfBirth] = useState<Date | null>(new Date("2000-01-01"));
+  const [gender, setGender] = useState("MALE");
+  const [userAddress, setUserAddress] = useState("");
+  const [provinceCode, setProvinceCode] = useState<number>(0);
+  const [wardCode, setWardCode] = useState<number>(0);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const [provinces, setProvinces] = useState<any[]>([]);
+  const [wards, setWards] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        const response = await api.get("/iam-service/api/locations/provinces", { skipAuth: true } as any);
+        if (response.data && Array.isArray(response.data)) {
+          setProvinces(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch provinces:", error);
+      }
+    };
+    fetchProvinces();
+  }, []);
+
+  useEffect(() => {
+    const fetchWards = async () => {
+      if (!provinceCode) {
+        setWards([]);
+        setWardCode(0);
+        return;
+      }
+      try {
+        const response = await api.get(`/iam-service/api/locations/wards?provinceCode=${provinceCode}`, { skipAuth: true } as any);
+        if (response.data && Array.isArray(response.data)) {
+          setWards(response.data);
+          if (response.data.length > 0) {
+            setWardCode(response.data[0].code);
+          } else {
+            setWardCode(0);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch wards:", error);
+      }
+    };
+    fetchWards();
+  }, [provinceCode]);
+
   const loading = useAppSelector(selectAppLoading);
 
-  const [passwordStrength, setPasswordStrength] = useState(0); 
+  const [passwordStrength, setPasswordStrength] = useState(0);
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setPassword(val);
+    if (errors.password) {
+      setErrors(prev => ({ ...prev, password: "" }));
+    }
 
     let strength = 0;
     if (val.length >= 1) strength++;
@@ -41,11 +97,11 @@ export default function RegisterPage() {
     setPasswordStrength(strength);
   };
 
-  const strengthBarColor = ['bg-[#25233c]', 'bg-red-500', 'bg-yellow-500', 'bg-[#7a5af8]', 'bg-green-500'];
-  const strengthText = [
-    'Tối thiểu 8 ký tự.',
-    'Chứa chữ hoa và chữ thường.',
-    'Chứa số và ký tự đặc biệt.'
+  const strengthBarColor = ['bg-secondary', 'bg-red-500', 'bg-yellow-500', 'bg-primary', 'bg-green-500'];
+  const strengthTextKeys = [
+    'password_requirement_length',
+    'password_requirement_case',
+    'password_requirement_special'
   ];
 
   const checkRequirement = (index: number) => {
@@ -60,23 +116,96 @@ export default function RegisterPage() {
   const renderStrengthIndicator = (index: number) => {
     const isCompleted = checkRequirement(index);
     return (
-      <li key={index} className="flex items-center gap-2 text-[11px] text-gray-500 mb-1.5">
-        <div className={`w-3 h-3 flex items-center justify-center rounded-ds-sm ${isCompleted ? 'bg-[#25233c] text-primary' : 'bg-[#25233c] border border-white/5'}`}>
+      <li key={index} className="flex items-center gap-2 text-[11px] text-txt-secondary mb-1.5 animate-pulse-subtle">
+        <div className={`w-3 h-3 flex items-center justify-center rounded-ds-sm ${isCompleted ? 'bg-secondary text-primary' : 'bg-secondary border border-border'}`}>
           {isCompleted && (
-             <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-               <polyline points="20 6 9 17 4 12"></polyline>
-             </svg>
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
           )}
         </div>
-        <span className={`${isCompleted ? 'text-gray-300' : 'text-gray-500'}`}>{strengthText[index]}</span>
+        <span className={`${isCompleted ? 'text-txt-primary font-medium' : 'text-txt-muted'}`}>{t(strengthTextKeys[index])}</span>
       </li>
     );
   };
 
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    // 1. Name
+    if (!name.trim()) {
+      newErrors.name = t('validation_name_required');
+    } else if (!isValidFullName(name)) {
+      newErrors.name = t('validation_name_invalid');
+    }
+
+    // 2. Email
+    if (!email.trim()) {
+      newErrors.email = t('validation_email_required');
+    } else if (!isValidEmail(email)) {
+      newErrors.email = t('validation_email_invalid');
+    }
+
+    // 3. Phone
+    if (!phone.trim()) {
+      newErrors.phone = t('validation_phone_required');
+    } else if (!isValidPhone(phone)) {
+      newErrors.phone = t('validation_phone_invalid');
+    }
+
+    // 4. Date of Birth
+    if (!dateOfBirth) {
+      newErrors.dateOfBirth = t('validation_dob_required');
+    } else {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (dateOfBirth >= today) {
+        newErrors.dateOfBirth = t('validation_dob_invalid');
+      }
+    }
+
+    // 5. Gender
+    if (!gender) {
+      newErrors.gender = t('validation_gender_required');
+    }
+
+    // 6. Province
+    if (!provinceCode) {
+      newErrors.province = t('validation_province_required');
+    }
+
+    // 7. Ward
+    if (!wardCode) {
+      newErrors.ward = t('validation_ward_required');
+    }
+
+    // 8. Address
+    if (!userAddress.trim()) {
+      newErrors.address = t('validation_address_required');
+    }
+
+    // 9. Password
+    if (!password) {
+      newErrors.password = t('validation_password_required');
+    } else if (password.length < 8) {
+      newErrors.password = t('validation_password_min_length');
+    }
+
+    // 10. Confirm Password
+    if (!confirmPassword) {
+      newErrors.confirmPassword = t('validation_confirm_password_required');
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = t('password_mismatch_error');
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      toast.error("Mật khẩu xác nhận không khớp.");
+
+    if (!validateForm()) {
       return;
     }
     dispatch(setAppLoading(true));
@@ -99,18 +228,18 @@ export default function RegisterPage() {
           firstName: firstNameValue,
           lastName: lastNameValue,
           phoneNumber: phone,
-          dateOfBirth: "2006-03-16",
-          gender: "MALE",
-          userAddress: "string",
-          provinceCode: 1,
-          wardCode: 4
+          dateOfBirth: dateOfBirth ? dateOfBirth.toISOString().split('T')[0] : "2000-01-01",
+          gender,
+          userAddress,
+          provinceCode,
+          wardCode
         },
         { skipAuth: true } as any
       );
 
       const data = response.data;
       if (data.status === 201) {
-        toast.success(data.message || "Đăng ký thành công!");
+        toast.success(data.message || t('register_success'));
         const loginPath = `/${locale}/auth/login${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`;
         router.push(loginPath);
       }
@@ -118,7 +247,7 @@ export default function RegisterPage() {
       if (axios.isAxiosError(error) && error.response) {
         toast.error(error.response.data.message || "Đăng ký thất bại");
       } else {
-        toast.error("Có lỗi xảy ra, vui lòng thử lại sau.");
+        toast.error(t('login_error'));
       }
       console.error("Register error:", error);
     } finally {
@@ -127,127 +256,335 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#14141f] relative overflow-hidden font-sans py-8">
+    <div className="min-h-screen w-full flex items-center justify-center bg-main text-txt-primary relative overflow-hidden font-sans">
       {/* Abstract Background Elements */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none fixed">
         <div className="absolute top-[-10%] right-[-10%] w-[70vw] h-[70vw] md:w-[50vw] md:h-[50vw] rounded-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/30 via-primary/5 to-transparent blur-[80px]"></div>
-        <svg className="absolute w-full h-full opacity-30" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <path d="M 65,-10 C 35,40 85,75 10,110" stroke="white" strokeWidth="0.1" fill="none" className="opacity-50" />
-          <path d="M 80,-10 C 50,40 100,75 25,110" stroke="white" strokeWidth="0.05" fill="none" className="opacity-30" />
+        <svg className="absolute w-full h-full opacity-20 dark:opacity-30" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <path d="M 65,-10 C 35,40 85,75 10,110" stroke="currentColor" strokeWidth="0.1" fill="none" className="text-txt-muted opacity-50" />
+          <path d="M 80,-10 C 50,40 100,75 25,110" stroke="currentColor" strokeWidth="0.05" fill="none" className="text-txt-muted opacity-30" />
         </svg>
       </div>
-      
+
       {/* Auth Card */}
-      <div className="z-10 w-full max-w-[420px] bg-[#1e1b38]/60 backdrop-blur-xl border border-white/5 rounded-ds-2xl p-8 shadow-2xl mx-4 my-8 max-h-[90vh] overflow-y-auto custom-scrollbar">
-        
+      <div className="z-10 w-full max-w-[420px] bg-surface border border-border rounded-ds-2xl p-8 shadow-2xl mx-4 my-8 max-h-[90vh] overflow-y-auto custom-scrollbar">
+
         <div className="text-center mb-8">
-          <h1 className="text-[26px] font-bold text-white mb-2">Tạo tài khoản mới</h1>
-          <p className="text-[13px] text-gray-400">
-            Khám phá hàng ngàn sự kiện và sở hữu vé NFT ngay hôm nay.
+          <h1 className="text-[26px] font-bold text-txt-primary mb-2">{t('register_title')}</h1>
+          <p className="text-[13px] text-txt-secondary">
+            {t('register_subtitle')}
           </p>
         </div>
 
-        <form className="space-y-4" onSubmit={handleRegister}>
+        <form className="space-y-4" onSubmit={handleRegister} noValidate>
 
           {/* Input Họ và Tên */}
           <div>
-            <label className="block text-[12px] font-medium text-gray-400 mb-1.5">Họ và tên</label>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{t('name_label')}</label>
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (errors.name) setErrors(prev => ({ ...prev, name: "" }));
+              }}
               placeholder="Nguyễn Văn A"
-              className="w-full px-4 py-2.5 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500"
-              required
+              className={`w-full px-4 py-2.5 bg-secondary text-txt-primary border rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-[13px] placeholder-txt-muted ${errors.name ? 'border-red-500' : 'border-border'}`}
             />
+            {errors.name && (
+              <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.name}</p>
+            )}
           </div>
 
           {/* Input Email */}
           <div>
-            <label className="block text-[12px] font-medium text-gray-400 mb-1.5">Email</label>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{t('email_label')}</label>
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errors.email) setErrors(prev => ({ ...prev, email: "" }));
+              }}
               placeholder="abc@gmail.com"
-              className="w-full px-4 py-2.5 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500 mb-1.5"
-              required
+              className={`w-full px-4 py-2.5 bg-secondary text-txt-primary border rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-[13px] placeholder-txt-muted mb-1.5 ${errors.email ? 'border-red-500' : 'border-border'}`}
             />
-            <p className="text-[10.5px] text-gray-500 leading-tight">
-              EvoTicket sử dụng email để tạo ví lưu ký, và sẽ không tiết lộ cho bên thứ ba.
-            </p>
+            {errors.email && (
+              <p className="text-[11px] text-red-500 mt-0.5 mb-1.5 pl-1 select-none animate-fadeIn">{errors.email}</p>
+            )}
+            {/* <p className="text-[10.5px] text-txt-muted leading-tight">
+              {t('email_privacy_note')}
+            </p> */}
           </div>
 
           {/* Input Số điện thoại */}
           <div>
-            <label className="block text-[12px] font-medium text-gray-400 mb-1.5">Số điện thoại</label>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{t('phone_label')}</label>
             <input
               type="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              maxLength={10}
+              onChange={(e) => {
+                setPhone(e.target.value);
+                if (errors.phone) setErrors(prev => ({ ...prev, phone: "" }));
+              }}
               placeholder="0988 xxx xxx"
-              className="w-full px-4 py-2.5 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500"
-              required
+              className={`w-full px-4 py-2.5 bg-secondary text-txt-primary border rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-[13px] placeholder-txt-muted ${errors.phone ? 'border-red-500' : 'border-border'}`}
             />
+            {errors.phone && (
+              <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.phone}</p>
+            )}
+          </div>
+
+          {/* Ngày sinh */}
+          <div>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{locale === "vi" ? "Ngày sinh" : "Date of Birth"}</label>
+            <div className={`relative w-full rounded-ds-lg border ${errors.dateOfBirth ? 'border-red-500' : 'border-transparent'}`}>
+              <CustomDatePicker
+                selectedDate={dateOfBirth}
+                onChange={(date) => {
+                  setDateOfBirth(date);
+                  if (errors.dateOfBirth) setErrors(prev => ({ ...prev, dateOfBirth: "" }));
+                }}
+                height="10"
+              />
+            </div>
+            {errors.dateOfBirth && (
+              <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.dateOfBirth}</p>
+            )}
+          </div>
+
+          {/* Giới tính */}
+          <div>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{locale === "vi" ? "Giới tính" : "Gender"}</label>
+            <Listbox
+              value={gender}
+              onChange={(val) => {
+                setGender(val);
+                if (errors.gender) setErrors(prev => ({ ...prev, gender: "" }));
+              }}
+            >
+              <div className="relative w-full">
+                <ListboxButton className={`w-full flex items-center justify-between px-4 py-2.5 bg-secondary text-txt-primary border rounded-ds-xl text-left text-[13px] outline-none cursor-pointer focus:border-primary transition-all ${errors.gender ? 'border-red-500' : 'border-border'}`}>
+                  <span className="truncate">
+                    {(() => {
+                      if (gender === "MALE") return locale === "vi" ? "Nam" : "Male";
+                      if (gender === "FEMALE") return locale === "vi" ? "Nữ" : "Female";
+                      return locale === "vi" ? "Khác" : "Other";
+                    })()}
+                  </span>
+                  <ChevronRight size={14} className="text-txt-muted transform rotate-90" />
+                </ListboxButton>
+                <ListboxOptions
+                  anchor="bottom"
+                  modal={false}
+                  className="z-50 w-[var(--button-width)] [--anchor-gap:4px] overflow-y-auto bg-surface border border-border rounded-ds-xl shadow-xl text-txt-primary mt-1 text-[13px]"
+                >
+                  <ListboxOption
+                    value="MALE"
+                    className="group flex items-center px-4 py-2.5 cursor-pointer hover:bg-secondary rounded-ds-md transition-colors font-medium"
+                  >
+                    {locale === "vi" ? "Nam" : "Male"}
+                  </ListboxOption>
+                  <ListboxOption
+                    value="FEMALE"
+                    className="group flex items-center px-4 py-2.5 cursor-pointer hover:bg-secondary rounded-ds-md transition-colors font-medium"
+                  >
+                    {locale === "vi" ? "Nữ" : "Female"}
+                  </ListboxOption>
+                  <ListboxOption
+                    value="OTHER"
+                    className="group flex items-center px-4 py-2.5 cursor-pointer hover:bg-secondary rounded-ds-md transition-colors font-medium"
+                  >
+                    {locale === "vi" ? "Khác" : "Other"}
+                  </ListboxOption>
+                </ListboxOptions>
+              </div>
+            </Listbox>
+            {errors.gender && (
+              <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.gender}</p>
+            )}
+          </div>
+
+          {/* Tỉnh/Thành phố */}
+          <div>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{locale === "vi" ? "Tỉnh/Thành phố" : "Province"}</label>
+            <Listbox
+              value={provinceCode}
+              onChange={(val) => {
+                setProvinceCode(Number(val));
+                if (errors.province) setErrors(prev => ({ ...prev, province: "" }));
+              }}
+            >
+              <div className="relative w-full">
+                <ListboxButton className={`w-full flex items-center justify-between px-4 py-2.5 bg-secondary text-txt-primary border rounded-ds-xl text-left text-[13px] outline-none cursor-pointer focus:border-primary transition-all ${errors.province ? 'border-red-500' : 'border-border'}`}>
+                  <span className="truncate">
+                    {(() => {
+                      const prov = provinces.find((p) => p.code === provinceCode);
+                      return prov ? prov.name : (locale === "vi" ? "Chọn Tỉnh/TP" : "Select Province");
+                    })()}
+                  </span>
+                  <ChevronRight size={14} className="text-txt-muted transform rotate-90" />
+                </ListboxButton>
+                <ListboxOptions
+                  anchor="bottom"
+                  modal={false}
+                  className="z-50 w-[var(--button-width)] [--anchor-gap:4px] !max-h-60 overflow-y-auto bg-surface border border-border rounded-ds-xl shadow-xl text-txt-primary mt-1 text-[13px]"
+                >
+                  <ListboxOption
+                    value={0}
+                    className="group flex items-center px-4 py-2.5 cursor-pointer hover:bg-secondary rounded-ds-md transition-colors font-medium text-txt-muted"
+                  >
+                    -- {locale === "vi" ? "Chọn Tỉnh/TP" : "Select Province"} --
+                  </ListboxOption>
+                  {provinces.map((prov) => (
+                    <ListboxOption
+                      key={prov.code}
+                      value={prov.code}
+                      className="group flex items-center px-4 py-2.5 cursor-pointer hover:bg-secondary rounded-ds-md transition-colors font-medium"
+                    >
+                      {prov.name}
+                    </ListboxOption>
+                  ))}
+                </ListboxOptions>
+              </div>
+            </Listbox>
+            {errors.province && (
+              <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.province}</p>
+            )}
+          </div>
+
+          {/* Phường/Xã */}
+          <div>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{locale === "vi" ? "Phường/Xã" : "Ward"}</label>
+            <Listbox
+              value={wardCode}
+              onChange={(val) => {
+                setWardCode(Number(val));
+                if (errors.ward) setErrors(prev => ({ ...prev, ward: "" }));
+              }}
+              disabled={!provinceCode || wards.length === 0}
+            >
+              <div className="relative w-full">
+                <ListboxButton className={`w-full flex items-center justify-between px-4 py-2.5 bg-secondary text-txt-primary border rounded-ds-xl text-left text-[13px] outline-none cursor-pointer focus:border-primary transition-all ${errors.ward ? 'border-red-500' : 'border-border'} ${(!provinceCode || wards.length === 0) ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                  <span className="truncate">
+                    {(() => {
+                      const ward = wards.find((w) => w.code === wardCode);
+                      return ward ? ward.name : (locale === "vi" ? "Chọn Phường/Xã" : "Select Ward");
+                    })()}
+                  </span>
+                  <ChevronRight size={14} className="text-txt-muted transform rotate-90" />
+                </ListboxButton>
+                <ListboxOptions
+                  anchor="bottom"
+                  modal={false}
+                  className="z-50 w-[var(--button-width)] [--anchor-gap:4px] !max-h-60 overflow-y-auto bg-surface border border-border rounded-ds-xl shadow-xl text-txt-primary mt-1 text-[13px]"
+                >
+                  <ListboxOption
+                    value={0}
+                    className="group flex items-center px-4 py-2.5 cursor-pointer hover:bg-secondary rounded-ds-md transition-colors font-medium text-txt-muted"
+                  >
+                    -- {locale === "vi" ? "Chọn Phường/Xã" : "Select Ward"} --
+                  </ListboxOption>
+                  {wards.map((ward) => (
+                    <ListboxOption
+                      key={ward.code}
+                      value={ward.code}
+                      className="group flex items-center px-4 py-2.5 cursor-pointer hover:bg-secondary rounded-ds-md transition-colors font-medium"
+                    >
+                      {ward.name}
+                    </ListboxOption>
+                  ))}
+                </ListboxOptions>
+              </div>
+            </Listbox>
+            {errors.ward && (
+              <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.ward}</p>
+            )}
+          </div>
+
+          {/* Địa chỉ */}
+          <div>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{locale === "vi" ? "Địa chỉ" : "Address"}</label>
+            <input
+              type="text"
+              value={userAddress}
+              onChange={(e) => {
+                setUserAddress(e.target.value);
+                if (errors.address) setErrors(prev => ({ ...prev, address: "" }));
+              }}
+              placeholder={locale === "vi" ? "Số nhà, tên đường..." : "123 Street..."}
+              className={`w-full px-4 py-2.5 bg-secondary text-txt-primary border rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-[13px] placeholder-txt-muted ${errors.address ? 'border-red-500' : 'border-border'}`}
+            />
+            {errors.address && (
+              <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.address}</p>
+            )}
           </div>
 
           {/* Input Mật khẩu */}
           <div className="pt-1">
-            <label className="block text-[12px] font-medium text-gray-400 mb-1.5">Mật khẩu</label>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{t('password_label')}</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••"
                 value={password}
                 onChange={handlePasswordChange}
-                className="w-full px-4 py-2.5 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500 pr-10"
-                required
+                className={`w-full px-4 py-2.5 bg-secondary text-txt-primary border rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-[13px] placeholder-txt-muted pr-10 ${errors.password ? 'border-red-500' : 'border-border'}`}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-txt-muted hover:text-txt-primary"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
+            {errors.password && (
+              <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.password}</p>
+            )}
 
             {/* Thanh độ mạnh mật khẩu */}
             <div className="flex justify-between mt-2 mb-3 space-x-1">
               <div className={`h-1 flex-1 rounded-full ${strengthBarColor[Math.min(strengthBarColor.length - 1, passwordStrength)]}`} style={{ width: `${(passwordStrength / (strengthBarColor.length - 1)) * 100}%` }}></div>
-              <div className={`h-1 flex-1 rounded-full ${passwordStrength >= 2 ? strengthBarColor[Math.min(strengthBarColor.length - 1, passwordStrength)] : 'bg-white/10'}`}></div>
-              <div className={`h-1 flex-1 rounded-full ${passwordStrength >= 3 ? strengthBarColor[Math.min(strengthBarColor.length - 1, passwordStrength)] : 'bg-white/10'}`}></div>
-              <div className={`h-1 flex-1 rounded-full ${passwordStrength >= 4 ? strengthBarColor[Math.min(strengthBarColor.length - 1, passwordStrength)] : 'bg-white/10'}`}></div>
+              <div className={`h-1 flex-1 rounded-full ${passwordStrength >= 2 ? strengthBarColor[Math.min(strengthBarColor.length - 1, passwordStrength)] : 'bg-secondary'}`}></div>
+              <div className={`h-1 flex-1 rounded-full ${passwordStrength >= 3 ? strengthBarColor[Math.min(strengthBarColor.length - 1, passwordStrength)] : 'bg-secondary'}`}></div>
+              <div className={`h-1 flex-1 rounded-full ${passwordStrength >= 4 ? strengthBarColor[Math.min(strengthBarColor.length - 1, passwordStrength)] : 'bg-secondary'}`}></div>
             </div>
 
             {/* Yêu cầu mật khẩu */}
             <ul className="list-none m-0 p-0">
-              {strengthText.map((_, index) => renderStrengthIndicator(index))}
+              {strengthTextKeys.map((_, index) => renderStrengthIndicator(index))}
             </ul>
           </div>
 
           {/* Input Xác nhận Mật khẩu */}
           <div className="pt-2">
-            <label className="block text-[12px] font-medium text-gray-400 mb-1.5">Xác nhận mật khẩu</label>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{t('confirm_password_label')}</label>
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="••••••"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-2.5 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[13px] placeholder-gray-500 pr-10"
-                required
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: "" }));
+                }}
+                className={`w-full px-4 py-2.5 bg-secondary text-txt-primary border rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-[13px] placeholder-txt-muted pr-10 ${errors.confirmPassword ? 'border-red-500' : 'border-border'}`}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-txt-muted hover:text-txt-primary"
                 tabIndex={-1}
               >
                 {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
+            {errors.confirmPassword && (
+              <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.confirmPassword}</p>
+            )}
           </div>
 
           {/* Nút Tạo tài khoản */}
@@ -255,9 +592,19 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-ds-xl transition-all active:scale-[0.98] text-[14px] shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-ds-xl transition-all active:scale-[0.98] text-[14px] shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
             >
-              {loading ? "Đang xử lý..." : "Tạo tài khoản"}
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>{t('processing')}</span>
+                </>
+              ) : (
+                t('register_button')
+              )}
             </button>
           </div>
         </form>
@@ -265,47 +612,42 @@ export default function RegisterPage() {
         {/* Divider */}
         <div className="relative my-7">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/10"></div>
+            <div className="w-full border-t border-border"></div>
           </div>
           <div className="relative flex justify-center text-[10px]">
-            <span className="px-3 bg-[#1e1b38] text-gray-500 uppercase tracking-wider">
-              Hoặc tiếp tục với
+            <span className="px-3 bg-surface text-txt-muted uppercase tracking-wider">
+              {t('or_continue_with', { defaultMessage: "Hoặc tiếp tục với" })}
             </span>
           </div>
         </div>
 
         {/* Nút Google */}
-        <button className="w-full bg-[#25233c] hover:bg-[#2d2a45] border border-white/5 text-gray-300 font-medium py-2.5 rounded-ds-xl flex items-center justify-center gap-3 transition-colors text-[13px]">
+        <button className="w-full bg-secondary hover:bg-main border border-border text-txt-primary font-medium py-2.5 rounded-ds-xl flex items-center justify-center gap-3 transition-all text-[13px] cursor-pointer">
           <GoogleIcon />
-          Đăng ký bằng Google
+          {t('register_with_google')}
         </button>
 
         {/* Footer */}
-        <div className="text-center mt-8 text-[12px] text-gray-500">
-          Bạn đã có tài khoản?{" "}
-          <Link 
-            href={`/${locale}/auth/login${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`} 
-            className="text-gray-300 hover:text-white underline decoration-white/30 underline-offset-4 transition-colors"
+        <div className="text-center mt-8 text-[12px] text-txt-secondary font-sans">
+          {t('already_have_account')}{" "}
+          <Link
+            href={`/${locale}/auth/login${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`}
+            className="text-txt-secondary hover:text-txt-primary underline decoration-border underline-offset-4 transition-all font-semibold"
           >
-            Đăng nhập
+            {t('login_button')}
           </Link>
         </div>
       </div>
-      
-      {/* Custom CSS for hidden scrollbar */}
-      <style dangerouslySetInnerHTML={{__html: `
+
+      {/* Custom CSS to hide scrollbar while keeping scroll functionality */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
+          display: none;
         }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.2);
+        .custom-scrollbar {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
         }
       `}} />
     </div>

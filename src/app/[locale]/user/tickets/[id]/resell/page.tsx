@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronRight, Loader2, AlertCircle } from "lucide-react";
+import { ChevronRight, Loader2, AlertCircle, CreditCard, User, Check, X } from "lucide-react";
 import { toast } from "react-toastify";
 import { useTranslations } from "next-intl";
 import api from "@/src/lib/axios";
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 
 interface TicketDetail {
     ticketAssetId: number;
@@ -49,21 +50,92 @@ export default function ResellTicketPage() {
     const [desiredPrice, setDesiredPrice] = useState("");
     const router = useRouter();
 
+    // Bank Account Setup States
+    const [bankList, setBankList] = useState<any[]>([]);
+    const [isBankSetupOpen, setIsBankSetupOpen] = useState(false);
+    const [bankCode, setBankCode] = useState("");
+    const [bankAccountNumber, setBankAccountNumber] = useState("");
+    const [bankAccountName, setBankAccountName] = useState("");
+    const [isSavingBank, setIsSavingBank] = useState(false);
+    const [isFetchingBankOwner, setIsFetchingBankOwner] = useState(false);
+
     useEffect(() => {
-        const fetchTicket = async () => {
+        if (!bankCode || !bankAccountNumber || bankAccountNumber.length < 6) {
+            setBankAccountName("");
+            return;
+        }
+
+        const fetchBankOwner = async () => {
+            setIsFetchingBankOwner(true);
+            try {
+                const response = await api.get(
+                    `/inventory-service/api/banks/owner-name?bankCode=${bankCode}&bankAccountNumber=${bankAccountNumber}`
+                );
+                let ownerName = "";
+                if (response.data) {
+                    if (typeof response.data === "string") {
+                        ownerName = response.data;
+                    } else if (response.data.ownerName) {
+                        ownerName = response.data.ownerName;
+                    } else if (response.data.data) {
+                        if (typeof response.data.data === "string") {
+                            ownerName = response.data.data;
+                        } else if (response.data.data.ownerName) {
+                            ownerName = response.data.data.ownerName;
+                        }
+                    }
+                }
+
+                if (ownerName) {
+                    setBankAccountName(ownerName.toUpperCase());
+                } else {
+                    setBankAccountName("");
+                }
+            } catch (error: any) {
+                console.error("Failed to fetch bank owner name:", error);
+                if (error.response && error.response.status === 404) {
+                    toast.error(locale === "vi" 
+                        ? "Không tìm thấy thông tin tài khoản ngân hàng này" 
+                        : "Bank account details not found");
+                }
+                setBankAccountName("");
+            } finally {
+                setIsFetchingBankOwner(false);
+            }
+        };
+
+        const timer = setTimeout(() => {
+            fetchBankOwner();
+        }, 3000); // 3 seconds debounce
+
+        return () => clearTimeout(timer);
+    }, [bankCode, bankAccountNumber, locale]);
+
+    useEffect(() => {
+        const fetchTicketAndBanks = async () => {
             try {
                 setLoading(true);
-                const response = await api.get(`/order-service/api/v1/tickets/${id}`);
-                const result = response.data;
+                const [ticketRes, bankRes] = await Promise.allSettled([
+                    api.get(`/order-service/api/v1/tickets/${id}`),
+                    api.get("/inventory-service/api/banks")
+                ]);
 
-                if (result.status === 200 && result.data) {
-                    setTicket(result.data);
-
-                    if (!result.data.canResell) {
-                        setError(result.data.resaleBlockedReason || t("not_allowed"));
+                if (ticketRes.status === "fulfilled" && ticketRes.value.data) {
+                    const result = ticketRes.value.data;
+                    if (result.status === 200 && result.data) {
+                        setTicket(result.data);
+                        if (!result.data.canResell) {
+                            setError(result.data.resaleBlockedReason || t("not_allowed"));
+                        }
+                    } else {
+                        setError(result.message || t("loading_error_default"));
                     }
                 } else {
-                    setError(result.message || t("loading_error_default"));
+                    setError(t("loading_error_default"));
+                }
+
+                if (bankRes.status === "fulfilled" && bankRes.value.data && bankRes.value.data.data) {
+                    setBankList(bankRes.value.data.data);
                 }
             } catch (err: any) {
                 const message = err.response?.data?.message || t("submit_error");
@@ -75,7 +147,7 @@ export default function ResellTicketPage() {
         };
 
         if (id) {
-            fetchTicket();
+            fetchTicketAndBanks();
         }
     }, [id, t]);
 
@@ -92,15 +164,63 @@ export default function ResellTicketPage() {
             if (response.data.status === 201 || response.data.status === 0) {
                 toast.success(t("resell_success"));
                 router.push(`/${locale}/user/tickets`);
+            } else if (response.data.status === 400 || response.data.status === 403) {
+                toast.warning(response.data.message || (locale === "vi" ? "Vui lòng liên kết tài khoản ngân hàng để tiếp tục" : "Please link a bank account to continue"));
+                setIsBankSetupOpen(true);
             } else {
                 toast.error(response.data.message || t("resell_failed"));
             }
         } catch (err: any) {
+            const status = err.response?.status || err.response?.data?.status;
             const message = err.response?.data?.message || t("submit_error");
-            toast.error(message);
+            
+            if (status === 400 || status === 403 || message.includes("ngân hàng") || message.includes("bank")) {
+                toast.warning(message || (locale === "vi" ? "Vui lòng liên kết tài khoản ngân hàng để tiếp tục" : "Please link a bank account to continue"));
+                setIsBankSetupOpen(true);
+            } else {
+                toast.error(message);
+            }
             console.error("Resale submit error:", err);
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleBankSubmit = async () => {
+        if (!bankCode) {
+            toast.error(locale === "vi" ? "Vui lòng chọn ngân hàng" : "Please select a bank");
+            return;
+        }
+        if (!bankAccountNumber) {
+            toast.error(locale === "vi" ? "Vui lòng nhập số tài khoản" : "Please enter account number");
+            return;
+        }
+        if (!bankAccountName) {
+            toast.error(locale === "vi" ? "Vui lòng nhập tên tài khoản" : "Please enter account owner name");
+            return;
+        }
+
+        try {
+            setIsSavingBank(true);
+            const response = await api.put("/iam-service/api/users/me/bank", {
+                bankCode,
+                bankAccountNumber,
+                bankAccountName
+            });
+
+            if (response.status === 200 || response.status === 204 || response.data?.status === 200) {
+                toast.success(locale === "vi" ? "Liên kết tài khoản ngân hàng thành công!" : "Linked bank account successfully!");
+                setIsBankSetupOpen(false);
+                // Immediately call resale submission for a frictionless UX!
+                void handleResellSubmit();
+            } else {
+                toast.error(response.data?.message || (locale === "vi" ? "Không thể liên kết ngân hàng" : "Failed to link bank"));
+            }
+        } catch (err: any) {
+            const message = err.response?.data?.message || (locale === "vi" ? "Có lỗi xảy ra" : "An error occurred");
+            toast.error(message);
+        } finally {
+            setIsSavingBank(false);
         }
     };
 
@@ -408,6 +528,161 @@ export default function ResellTicketPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Bank Setup Modal Overlay */}
+            {isBankSetupOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn">
+                    <div className="bg-bg-surface border border-border-default rounded-[2rem] max-w-lg w-full p-8 relative shadow-2xl mx-4 text-left">
+                        <button
+                            onClick={() => setIsBankSetupOpen(false)}
+                            className="absolute top-6 right-6 p-2 rounded-full hover:bg-bg-subtle text-text-secondary transition-all cursor-pointer"
+                        >
+                            <X size={20} />
+                        </button>
+
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 bg-button-primary-bg-default/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-button-primary-bg-default/20">
+                                <CreditCard size={28} className="text-button-primary-bg-default" />
+                            </div>
+                            <h3 className="text-2xl font-black text-text-primary tracking-tight">
+                                {locale === "vi" ? "Cài Đặt Tài Khoản Nhận Tiền" : "Payout Account Setup"}
+                            </h3>
+                            <p className="text-sm text-text-secondary mt-2 max-w-sm mx-auto leading-relaxed">
+                                {locale === "vi"
+                                    ? "Bạn cần liên kết tài khoản ngân hàng để nhận tiền thanh toán khi vé được mua lại."
+                                    : "You must link a bank account to receive payout funds when your ticket is resold."}
+                            </p>
+                        </div>
+
+                        <div className="space-y-6">
+                            {/* Bank list using Listbox */}
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">
+                                    {locale === "vi" ? "NGÂN HÀNG" : "BANK NAME"}
+                                </label>
+                                <Listbox value={bankCode} onChange={setBankCode}>
+                                    <div className="relative w-full">
+                                        <ListboxButton className="w-full flex items-center justify-between p-4 rounded-xl border bg-bg-surface border-border-strong text-left text-sm font-bold text-text-primary outline-none cursor-pointer focus:border-button-primary-bg-default transition-all shadow-sm">
+                                            <div className="flex items-center gap-4">
+                                                <CreditCard size={18} className="text-button-primary-bg-default" />
+                                                <span className="truncate">
+                                                    {(() => {
+                                                        const bank = bankList.find((b) => b.code === bankCode);
+                                                        return bank ? `${bank.shortName || bank.name} (${bank.code})` : (locale === "vi" ? "-- Chọn ngân hàng --" : "-- Select Bank --");
+                                                    })()}
+                                                </span>
+                                            </div>
+                                            <ChevronRight size={16} className="text-text-muted transform rotate-90" />
+                                        </ListboxButton>
+                                        <ListboxOptions
+                                            anchor="bottom"
+                                            modal={false}
+                                            className="z-[60] w-[var(--button-width)] [--anchor-gap:4px] !max-h-56 overflow-y-auto bg-bg-surface border border-border-default rounded-xl shadow-2xl text-text-primary mt-1"
+                                        >
+                                            <ListboxOption
+                                                value=""
+                                                className="group flex items-center px-4 py-3 cursor-pointer hover:bg-bg-subtle transition-colors text-sm font-medium"
+                                            >
+                                                <span>{locale === "vi" ? "-- Chọn ngân hàng --" : "-- Select Bank --"}</span>
+                                            </ListboxOption>
+                                            {bankList.map((bank: any) => (
+                                                <ListboxOption
+                                                    key={bank.id}
+                                                    value={bank.code}
+                                                    className="group flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-bg-subtle transition-colors text-sm font-medium border-b border-border-default/20 last:border-0"
+                                                >
+                                                    <div className="flex items-center gap-3 truncate">
+                                                        {bank.logo && (
+                                                            <img
+                                                                src={bank.logo}
+                                                                alt={bank.shortName}
+                                                                className="w-6 h-6 object-contain rounded bg-white border p-0.5 border-border/20 shrink-0"
+                                                            />
+                                                        )}
+                                                        <span className="truncate">{bank.shortName || bank.name} ({bank.code})</span>
+                                                    </div>
+                                                    {bankCode === bank.code && (
+                                                        <Check size={16} className="text-button-primary-bg-default shrink-0" />
+                                                    )}
+                                                </ListboxOption>
+                                            ))}
+                                        </ListboxOptions>
+                                    </div>
+                                </Listbox>
+                            </div>
+
+                            {/* Account number */}
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">
+                                    {locale === "vi" ? "SỐ TÀI KHOẢN" : "ACCOUNT NUMBER"}
+                                </label>
+                                <div className="flex items-center gap-4 p-4 rounded-xl border bg-bg-surface border-border-strong focus-within:border-button-primary-bg-default transition-all shadow-sm">
+                                    <CreditCard size={18} className="text-button-primary-bg-default" />
+                                    <input
+                                        type="text"
+                                        className="bg-transparent border-none outline-none text-sm font-bold text-text-primary w-full"
+                                        placeholder={locale === "vi" ? "Nhập số tài khoản" : "Enter account number"}
+                                        value={bankAccountNumber}
+                                        onChange={(e) => setBankAccountNumber(e.target.value.replace(/\D/g, ""))}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Account Name */}
+                             <div className="space-y-2">
+                                 <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">
+                                     {locale === "vi" ? "TÊN CHỦ TÀI KHOẢN (KHÔNG DẤU)" : "ACCOUNT HOLDER NAME (NO ACCENTS)"}
+                                 </label>
+                                 <div className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${isFetchingBankOwner ? 'bg-bg-subtle/40 border-border-default/50' : 'bg-bg-subtle/10 border-border-default/30'}`}>
+                                     {isFetchingBankOwner ? (
+                                         <svg className="animate-spin h-[18px] w-[18px] text-button-primary-bg-default" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                         </svg>
+                                     ) : (
+                                         <User size={18} className="text-button-primary-bg-default" />
+                                     )}
+                                     <input
+                                         type="text"
+                                         readOnly
+                                         className="bg-transparent border-none outline-none text-sm font-bold text-text-primary w-full uppercase cursor-not-allowed select-none placeholder-text-muted"
+                                         placeholder={isFetchingBankOwner ? (locale === "vi" ? "ĐANG TRUY VẤN TÊN CHỦ TÀI KHOẢN..." : "QUERYING OWNER NAME...") : (locale === "vi" ? "TỰ ĐỘNG XÁC THỰC TÊN CHỦ TÀI KHOẢN" : "AUTOMATICALLY RETRIEVED")}
+                                         value={bankAccountName}
+                                     />
+                                 </div>
+                                 <p className="text-[10px] text-text-muted ml-1">
+                                     {locale === "vi" 
+                                         ? "* Tên chủ tài khoản được tự động xác thực dựa trên số tài khoản và ngân hàng đã chọn." 
+                                         : "* Account owner name is automatically validated based on the selected bank and account number."}
+                                 </p>
+                             </div>
+                        </div>
+
+                        <div className="mt-8 flex gap-4">
+                            <button
+                                onClick={() => setIsBankSetupOpen(false)}
+                                className="flex-1 py-3 bg-bg-subtle text-text-secondary border border-border-default rounded-xl text-sm font-bold transition-all cursor-pointer"
+                            >
+                                {locale === "vi" ? "Hủy" : "Cancel"}
+                            </button>
+                            <button
+                                onClick={handleBankSubmit}
+                                disabled={isSavingBank}
+                                className="flex-1 py-3 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default rounded-xl text-sm font-bold transition-all shadow-lg shadow-button-primary-bg-default/20 flex items-center justify-center gap-2 cursor-pointer"
+                            >
+                                {isSavingBank ? (
+                                    <>
+                                        <Loader2 size={16} className="animate-spin" />
+                                        {locale === "vi" ? "Đang lưu..." : "Saving..."}
+                                    </>
+                                ) : (
+                                    locale === "vi" ? "Liên kết ngay" : "Link Account"
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

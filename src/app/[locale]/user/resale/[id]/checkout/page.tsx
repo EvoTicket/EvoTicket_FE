@@ -16,7 +16,7 @@ export default function ResaleCheckoutPage() {
     const router = useRouter();
     const sentinelRef = React.useRef<HTMLDivElement>(null);
     const locale = params?.locale || "vi";
-    const listingId = params?.id || "LST-20260614-0061";
+    const listingId = params?.id || "";
     const t = useTranslations("ResaleCheckout");
 
     // Timer logic 
@@ -77,12 +77,10 @@ export default function ResaleCheckoutPage() {
     const [understoodOwnership, setUnderstoodOwnership] = useState(false);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
 
-    const [discountCode, setDiscountCode] = useState("");
-    const [isApplyingVoucher, setIsApplyingVoucher] = useState(false);
-    const [appliedDiscount, setAppliedDiscount] = useState(0);
-    const [appliedVoucherCode, setAppliedVoucherCode] = useState<string | null>(null);
+    const [isCreatingOrder, setIsCreatingOrder] = useState(false);
     const [bookingSessionId, setBookingSessionId] = useState<any>(null);
     const [isTimeoutModalOpen, setIsTimeoutModalOpen] = useState(false);
+    const appliedDiscount = 0;
 
     useEffect(() => {
         const bookingSessionIdData = sessionStorage.getItem('listing_to_buy');
@@ -100,12 +98,15 @@ export default function ResaleCheckoutPage() {
 
     useEffect(() => {
         const fetchListingDetail = async () => {
-            if (!listingId) return;
+            if (!bookingSessionId) return;
             setIsLoading(true);
             try {
-                const response = await api.get(`/order-service/api/v1/resale/listings/${listingId}`);
+                const response = await api.get(`/order-service/api/v1/resale/session/${bookingSessionId}`);
                 if (response.data && response.data.data) {
                     setListingData(response.data.data);
+                    if (typeof response.data.data.remainingSeconds === 'number') {
+                        setTimeLeft(response.data.data.remainingSeconds);
+                    }
                 }
             } catch (error) {
                 console.error("Failed to fetch listing detail:", error);
@@ -115,7 +116,7 @@ export default function ResaleCheckoutPage() {
         };
 
         fetchListingDetail();
-    }, [listingId]);
+    }, [listingId, bookingSessionId]);
 
     // Format date
     const formatDateStr = (dateString: string) => {
@@ -159,40 +160,52 @@ export default function ResaleCheckoutPage() {
         return Object.keys(newErrors).length === 0;
     };
 
-    // Pricing
-    const basePrice = 1950000;
-    const totalPayment = basePrice - appliedDiscount;
+    // Price normalization helper (2200.00 means 2200 VNĐ)
+    const normalizePrice = (amount: number | undefined | null) => {
+        if (!amount) return 0;
+        return amount;
+    };
+
+    // Pricing (Fees are borne by the seller, so they are not added to the buyer's ticket price)
+    const resalePrice = normalizePrice(listingData?.listingPrice || 1950000);
+    const subtotal = resalePrice;
+    const totalPayment = Math.max(0, subtotal - appliedDiscount);
 
     const formatVND = (amount: number) => {
         return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
     };
 
-    const handleApplyVoucher = async () => {
-        if (!discountCode.trim()) {
-            toast.error(t('error_voucher_required') || "Vui lòng nhập mã giảm giá");
+    const handlePurchaseResaleTicket = async () => {
+        if (!validateForm()) {
+            toast.error(t('error_check_contact') || "Vui lòng kiểm tra lại thông tin liên hệ");
             return;
         }
 
-        setIsApplyingVoucher(true);
+        setIsCreatingOrder(true);
         try {
-            const response = await api.post(`/order-service/api/v1/vouchers/apply-voucher`, {
-                voucherCode: discountCode.toUpperCase(),
-                sessionId: bookingSessionId
+            const response = await api.post(`/order-service/api/v1/resale/listings/checkout`, {
+                paymentMethod: paymentMethod.toUpperCase(),
+                fullName,
+                email,
+                phoneNumber: phone,
+                resaleSessionId: bookingSessionId
             });
 
             if (response.data && response.data.data) {
-                const { discountAmount, voucherCode } = response.data.data;
-                setAppliedDiscount(discountAmount);
-                setAppliedVoucherCode(voucherCode);
-                toast.success(t('voucher_applied_success') || "Áp dụng mã giảm giá thành công");
-            } else {
-                toast.error(response.data?.message || "Mã giảm giá không hợp lệ");
+                const data = response.data.data;
+                if (data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                } else if (data.orderCode) {
+                    router.push(`/${locale}/user/resale/${listingId}/status?status=SUCCESS&orderCode=${data.orderCode}`);
+                } else {
+                    router.push(`/${locale}/user/resale/${listingId}/status?state=success`);
+                }
             }
         } catch (error: any) {
-            console.error("Failed to apply voucher", error);
-            toast.error(error.response?.data?.message || "Lỗi khi áp dụng mã giảm giá");
+            console.error("Failed to purchase resale ticket:", error);
+            toast.error(error.response?.data?.message || t('payment_error') || "Lỗi khi xử lý thanh toán vé bán lại");
         } finally {
-            setIsApplyingVoucher(false);
+            setIsCreatingOrder(false);
         }
     };
 
@@ -314,42 +327,7 @@ export default function ResaleCheckoutPage() {
                         </div>
                     </div>
 
-                    {/* Mã giảm giá */}
-                    <div className="border border-border-default rounded-xl p-6 shadow-sm bg-bg-surface">
-                        <h3 className="text-[16px] font-bold text-text-primary mb-4">{t('discount_title')}</h3>
-                        <div className="flex gap-3 mb-2">
-                            <div className="relative flex-1">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted">
-                                    <Tag size={16} />
-                                </div>
-                                <input
-                                    type="text"
-                                    value={discountCode}
-                                    onChange={(e) => setDiscountCode(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-bg-surface border border-border-default rounded-lg text-[13px] text-text-primary focus:outline-none focus:border-button-primary-bg-default focus:ring-1 focus:ring-button-primary-bg-default placeholder-text-muted transition-colors"
-                                    placeholder={t('discount_placeholder')}
-                                />
-                            </div>
-                            <button
-                                onClick={handleApplyVoucher}
-                                disabled={isApplyingVoucher}
-                                className={`bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-6 py-2.5 rounded-lg text-[13px] font-semibold transition-colors shrink-0 flex items-center justify-center min-w-[100px] ${isApplyingVoucher ? 'opacity-70 cursor-not-allowed' : ''}`}
-                            >
-                                {isApplyingVoucher ? <Loader2 size={16} className="animate-spin" /> : t('apply_button')}
-                            </button>
-                        </div>
-                        {appliedDiscount > 0 && appliedVoucherCode && (
-                            <p className="text-[12px] text-button-primary-bg-default font-medium mt-2">
-                                {t('applied_discount', {
-                                    amount: formatVND(appliedDiscount)
-                                })}
-                            </p>
-                        )}
 
-                        <div className="mt-5 bg-bg-subtle p-3 rounded-lg border border-border-default text-[12px] text-text-secondary leading-relaxed">
-                            {t('discount_note')}
-                        </div>
-                    </div>
 
                     {/* Phương thức thanh toán */}
                     <div className="border border-border-default rounded-xl p-6 shadow-sm bg-bg-surface">
@@ -546,34 +524,30 @@ export default function ResaleCheckoutPage() {
                                 <CheckCircle2 size={12} /> {t('badge_official_resale')}
                             </div> */}
                             <h4 className="font-bold text-[14px] text-text-primary mb-2">{listingData?.eventName}</h4>
-                            <p className="text-[12px] text-text-secondary mb-1">{formatDateStr(listingData?.eventStartTime)}</p>
-                            <p className="text-[12px] text-text-secondary">{listingData?.venueName}</p>
+                            <p className="text-[12px] text-text-secondary mb-1">{formatDateStr(listingData?.time)}</p>
+                            <p className="text-[12px] text-text-secondary">{listingData?.venue}</p>
                         </div>
 
                         <div className="border-t border-border-default border-dashed my-4"></div>
 
                         <div className="flex justify-between">
                             <span className="text-text-secondary">{t('ticket_type_label')}</span>
-                            <span className="font-bold text-text-primary">{listingData?.ticketTypeName}</span>
+                            <span className="font-bold text-text-primary">{listingData?.ticketTypeName || "Standard"}</span>
                         </div>
-                        <div className="flex justify-between">
-                            <span className="text-text-secondary">{t('seat_label')}</span>
-                            <span className="font-bold text-text-primary">{listingData?.seat || "-"}</span>
-                        </div>
+                        {listingData?.seat && (
+                            <div className="flex justify-between">
+                                <span className="text-text-secondary">{t('seat_label')}</span>
+                                <span className="font-bold text-text-primary">{listingData?.seat}</span>
+                            </div>
+                        )}
 
                         <div className="border-t border-border-default border-dashed my-4"></div>
 
                         <div className="space-y-3.5 text-[13px] mb-5">
                             <div className="flex justify-between">
                                 <span className="text-text-secondary">{t('resale_price_label')}</span>
-                                <span className="font-bold text-text-primary">{formatVND(listingData?.listingPrice || basePrice)}</span>
+                                <span className="font-bold text-text-primary">{formatVND(resalePrice)}</span>
                             </div>
-                            {appliedDiscount > 0 && (
-                                <div className="flex justify-between text-button-primary-bg-default">
-                                    <span className="font-medium">{t('discount_label')}</span>
-                                    <span className="font-bold">- {formatVND(appliedDiscount)}</span>
-                                </div>
-                            )}
                         </div>
 
                         <div className="flex justify-between items-center mb-6 pt-5 border-t border-border-default">
@@ -603,21 +577,22 @@ export default function ResaleCheckoutPage() {
 
                         <div className="space-y-3">
                             <button
-                                onClick={() => {
-                                    if (!validateForm()) {
-                                        toast.error(t('error_check_contact'));
-                                        return;
-                                    }
-                                    router.push(`/${locale}/user/resale/${listingId}/status?state=success`);
-                                }}
+                                onClick={handlePurchaseResaleTicket}
                                 className={`w-full py-3 rounded-lg text-[13px] font-bold transition-all duration-200 shadow-sm
-                                ${confirmedInfo && understoodOwnership && agreedToTerms
+                                ${confirmedInfo && understoodOwnership && agreedToTerms && !isCreatingOrder
                                         ? 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default active:scale-[0.98]'
                                         : 'bg-button-secondary-bg-default text-text-muted cursor-not-allowed border border-border-default'
                                     }`}
-                                disabled={!(confirmedInfo && understoodOwnership && agreedToTerms)}
+                                disabled={!(confirmedInfo && understoodOwnership && agreedToTerms) || isCreatingOrder}
                             >
-                                {t('continue_payment')}
+                                {isCreatingOrder ? (
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Loader2 size={16} className="animate-spin" />
+                                        {t('processing') || "Đang xử lý..."}
+                                    </div>
+                                ) : (
+                                    t('continue_payment')
+                                )}
                             </button>
                             <button
                                 onClick={() => router.back()}

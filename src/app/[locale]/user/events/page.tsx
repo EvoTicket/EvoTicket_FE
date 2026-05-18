@@ -63,7 +63,14 @@ export default function EventsPage() {
     // Pagination & Sort
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(9);
-    const [sortBy, setSortBy] = useState(sortByList[0]);
+    const [sortBy, setSortBy] = useState(() => {
+        const sortParam = searchParams?.get("sort");
+        if (sortParam && sortByList) {
+            const found = sortByList.find(s => s.id === sortParam);
+            if (found) return found;
+        }
+        return sortByList[0];
+    });
 
     const [suggestedEvents, setSuggestedEvents] = useState<EventItem[]>([]);
     const [loadingSuggested, setLoadingSuggested] = useState(false);
@@ -125,12 +132,23 @@ export default function EventsPage() {
                 sortDirection: "DESC",
                 includeExpired: false,
             };
-            const response = await api.get("/api/events/recommended?limit=3", { params, skipAuth: true } as any);
+            const response = await api.get("/inventory-service/api/events/recommended?limit=3", { params, skipAuth: true } as any);
             if (response.data && response.data.data) {
-                setSuggestedEvents(response.data.data.content);
+                setSuggestedEvents(response.data.data.content || response.data.data);
             }
         } catch (error) {
-            console.error("Failed to fetch suggested events", error);
+            console.warn("Recommended events path failed, trying trending fallback:", error);
+            try {
+                const response = await api.get("/inventory-service/api/events/trending", {
+                    params: { limit: 4 },
+                    skipAuth: true
+                } as any);
+                if (response.data && response.data.data) {
+                    setSuggestedEvents(response.data.data.content || response.data.data);
+                }
+            } catch (fallbackError) {
+                console.error("Failed to fetch fallback suggested events", fallbackError);
+            }
         } finally {
             setLoadingSuggested(false);
         }

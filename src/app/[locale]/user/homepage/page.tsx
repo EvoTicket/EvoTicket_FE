@@ -501,7 +501,7 @@ export default function HomePage() {
         <section className="max-w-[90%] mx-auto px-4 mt-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-text-primary">{t("upcoming_events")}</h2>
-            <Link href={`/${locale}/user/events`} className="text-button-primary-bg-default hover:text-button-primary-bg-hover text-sm font-medium flex items-center gap-1 transition-colors">
+            <Link href={`/${locale}/user/events?sort=NEWEST`} className="text-button-primary-bg-default hover:text-button-primary-bg-hover text-sm font-medium flex items-center gap-1 transition-colors">
               {t("view_all")} <ChevronRight size={16} />
             </Link>
           </div>
@@ -577,7 +577,7 @@ export default function HomePage() {
         <section className="max-w-[90%] mx-auto px-4 mt-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-text-primary">{t("live_stage_events")}</h2>
-            <Link href={`/${locale}/user/events`} className="text-button-primary-bg-default hover:text-button-primary-bg-hover text-sm font-medium flex items-center gap-1 transition-colors">
+            <Link href={`/${locale}/user/events?genres=LIVESTAGE`} className="text-button-primary-bg-default hover:text-button-primary-bg-hover text-sm font-medium flex items-center gap-1 transition-colors">
               {t("view_all")} <ChevronRight size={16} />
             </Link>
           </div>
@@ -653,7 +653,7 @@ export default function HomePage() {
         <section className="max-w-[90%] mx-auto px-4 mt-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-text-primary">{t("stage_art_events")}</h2>
-            <Link href={`/${locale}/user/events`} className="text-button-primary-bg-default hover:text-button-primary-bg-hover text-sm font-medium flex items-center gap-1 transition-colors">
+            <Link href={`/${locale}/user/events?genres=STAGE_ART`} className="text-button-primary-bg-default hover:text-button-primary-bg-hover text-sm font-medium flex items-center gap-1 transition-colors">
               {t("view_all")} <ChevronRight size={16} />
             </Link>
           </div>
@@ -729,7 +729,7 @@ export default function HomePage() {
         <section className="max-w-[90%] mx-auto px-4 mt-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-text-primary">{t("workshop_events")}</h2>
-            <Link href={`/${locale}/user/events`} className="text-button-primary-bg-default hover:text-button-primary-bg-hover text-sm font-medium flex items-center gap-1 transition-colors">
+            <Link href={`/${locale}/user/events?genres=WORKSHOP`} className="text-button-primary-bg-default hover:text-button-primary-bg-hover text-sm font-medium flex items-center gap-1 transition-colors">
               {t("view_all")} <ChevronRight size={16} />
             </Link>
           </div>

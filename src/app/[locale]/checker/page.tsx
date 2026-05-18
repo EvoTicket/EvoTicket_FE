@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Html5Qrcode } from "html5-qrcode";
 import { toast } from "react-toastify";
+import api from "@/src/lib/axios";
 
 type InputMode = "phone" | "laptop" | "scanner";
 
@@ -192,32 +193,63 @@ export default function CheckerPage() {
     setScanStatus("verifying");
     setTicketCode(code);
 
-    setTimeout(() => {
-      const isValid = code.startsWith("EVT") || code.startsWith("TCK") || code.length > 8;
-      const now = new Date().toLocaleTimeString();
+    try {
+      const response = await api.post("/checkin-service/api/v1/checker/scan", {
+        qrToken: code,
+      });
 
-      if (isValid) {
-        setScanStatus("success");
-        setLastResult({
-          code,
-          time: now,
-          status: "VALID",
-          message: locale === "vi" ? "Vé hợp lệ. Chào mừng quý khách!" : "Valid ticket. Welcome!"
-        });
-        toast.success(locale === "vi" ? "Vé hợp lệ!" : "Valid ticket!");
-        setTimeout(() => setScanStatus("idle"), 3000);
-      } else {
-        setScanStatus("invalid");
-        setLastResult({
-          code,
-          time: now,
-          status: "INVALID",
-          message: locale === "vi" ? "Mã vé không tồn tại hoặc không đúng định dạng." : "Ticket code does not exist or invalid format."
-        });
-        toast.error(locale === "vi" ? "Vé không hợp lệ!" : "Invalid ticket!");
-        setTimeout(() => setScanStatus("idle"), 3000);
-      }
-    }, 800);
+      const now = new Date().toLocaleTimeString(locale as string, {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
+      const resData = response.data;
+      const successMessage = resData?.message || (locale === "vi" ? "Vé hợp lệ. Chào mừng quý khách!" : "Valid ticket. Welcome!");
+
+      setScanStatus("success");
+      setLastResult({
+        code,
+        time: now,
+        status: "VALID",
+        message: successMessage,
+      });
+
+      toast.success(locale === "vi" ? "Vé hợp lệ!" : "Valid ticket!");
+      setTimeout(() => setScanStatus("idle"), 3000);
+    } catch (error: any) {
+      console.error("Verification error:", error);
+      const now = new Date().toLocaleTimeString(locale as string, {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        (locale === "vi" ? "Lỗi hệ thống khi xác minh vé." : "System error verifying ticket.");
+
+      const responseStatus =
+        error.response?.data?.status ||
+        (errorMessage.toLowerCase().includes("used") ||
+        errorMessage.toLowerCase().includes("sử dụng") ||
+        errorMessage.toLowerCase().includes("already")
+          ? "USED"
+          : "INVALID");
+
+      setScanStatus("invalid");
+      setLastResult({
+        code,
+        time: now,
+        status: responseStatus as "INVALID" | "USED",
+        message: errorMessage,
+      });
+
+      toast.error(errorMessage);
+      setTimeout(() => setScanStatus("idle"), 3000);
+    }
   };
 
   const toggleFlashlight = async () => {
@@ -529,7 +561,7 @@ export default function CheckerPage() {
 
           {/* STATUS CARD */}
           <div className={`rounded-2xl p-4 flex flex-col gap-2 relative overflow-hidden border transition-all duration-300 ${lastResult?.status === "VALID" ? "bg-emerald-50 border-emerald-200" :
-            lastResult?.status === "INVALID" ? "bg-red-50 border-red-200" :
+            lastResult?.status === "INVALID" || lastResult?.status === "USED" ? "bg-red-50 border-red-200" :
               "bg-gray-50 border-gray-200"
             }`}>
             <div className="flex justify-between items-center">
@@ -552,7 +584,13 @@ export default function CheckerPage() {
                     {lastResult.message}
                   </span>
                 </div>
-                <span className={`text-xs font-bold px-2 py-1 rounded ${lastResult.status === "VALID" ? "bg-emerald-200 text-emerald-800" : "bg-red-200 text-red-800"}`}>
+                <span className={`text-xs font-bold px-2 py-1 rounded ${
+                  lastResult.status === "VALID"
+                    ? "bg-emerald-200 text-emerald-800"
+                    : lastResult.status === "USED"
+                    ? "bg-amber-200 text-amber-800"
+                    : "bg-red-200 text-red-800"
+                }`}>
                   {lastResult.status}
                 </span>
               </div>

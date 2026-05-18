@@ -92,25 +92,25 @@ export default function LoginPage() {
   });
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#14141f] relative overflow-hidden font-sans">
+    <div className="min-h-screen w-full flex items-center justify-center bg-main text-txt-primary relative overflow-hidden font-sans">
       {/* Abstract Background Elements */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         {/* Glow effect matching the image */}
         <div className="absolute top-[-10%] right-[-10%] w-[70vw] h-[70vw] md:w-[50vw] md:h-[50vw] rounded-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/30 via-primary/5 to-transparent blur-[80px]"></div>
-        
+
         {/* Sweeping curve lines matching the image */}
-        <svg className="absolute w-full h-full opacity-30" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <path d="M 65,-10 C 35,40 85,75 10,110" stroke="white" strokeWidth="0.1" fill="none" className="opacity-50" />
-          <path d="M 80,-10 C 50,40 100,75 25,110" stroke="white" strokeWidth="0.05" fill="none" className="opacity-30" />
+        <svg className="absolute w-full h-full opacity-20 dark:opacity-30" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <path d="M 65,-10 C 35,40 85,75 10,110" stroke="currentColor" strokeWidth="0.1" fill="none" className="text-txt-muted opacity-50" />
+          <path d="M 80,-10 C 50,40 100,75 25,110" stroke="currentColor" strokeWidth="0.05" fill="none" className="text-txt-muted opacity-30" />
         </svg>
       </div>
-      
+
       {/* Auth Card */}
-      <div className="z-10 w-full max-w-[420px] bg-[#1e1b38]/60 backdrop-blur-xl border border-white/5 rounded-ds-2xl p-8 shadow-2xl mx-4">
-        
+      <div className="z-10 w-full max-w-[420px] bg-surface border border-border rounded-ds-2xl p-8 shadow-2xl mx-4">
+
         <div className="text-center mb-8">
-          <h1 className="text-[28px] font-bold text-white mb-2">{t('login_title')}</h1>
-          <p className="text-[13px] text-gray-400">
+          <h1 className="text-[28px] font-bold text-txt-primary mb-2">{t('login_title')}</h1>
+          <p className="text-[13px] text-txt-secondary">
             {t('login_subtitle', { defaultMessage: "Nhập email để truy cập ví vé của bạn" })}
           </p>
         </div>
@@ -118,14 +118,14 @@ export default function LoginPage() {
         <form className="space-y-5" onSubmit={handleLogin}>
           {/* Input Email / Name */}
           <div>
-            <label className="block text-[12px] font-medium text-gray-400 mb-2">
-              Họ và tên
+            <label className="block text-[12px] font-medium text-txt-secondary mb-2">
+              {t('email_label')}
             </label>
             <input
-              type="text"
-              placeholder="Nguyễn Văn A"
-              className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[14px] placeholder-gray-500"
-              value={email} // Using email state but placeholder is from design
+              type="email"
+              placeholder="abc@gmail.com"
+              className="w-full px-4 py-3 bg-secondary text-txt-primary border border-border rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-[14px] placeholder-txt-muted"
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
@@ -133,22 +133,14 @@ export default function LoginPage() {
 
           {/* Input Password */}
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="block text-[12px] font-medium text-gray-400">
-                Mật khẩu
-              </label>
-              <Link
-                href={`/${locale}/auth/forgot-password`}
-                className="text-[12px] text-gray-400 hover:text-white transition-colors"
-              >
-                Quên mật khẩu?
-              </Link>
-            </div>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-2">
+              {t('password_label')}
+            </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••"
-                className="w-full px-4 py-3 bg-[#25233c] text-gray-200 border border-white/5 rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors text-[14px] placeholder-gray-500 pr-12"
+                className="w-full px-4 py-3 bg-secondary text-txt-primary border border-border rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-[14px] placeholder-txt-muted pr-12"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -156,18 +148,26 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-txt-muted hover:text-txt-primary transition-colors"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
+            </div>
+            <div className="flex justify-end mt-2">
+              <Link
+                href={`/${locale}/auth/forgot-password`}
+                className="text-[12px] text-txt-secondary hover:text-txt-primary transition-colors"
+              >
+                {t('forgot_password')}
+              </Link>
             </div>
           </div>
 
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-ds-xl transition-all active:scale-[0.98] text-[15px] shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-ds-xl transition-all active:scale-[0.98] text-[15px] shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
               disabled={loading}
             >
               {loading ? t('processing', { defaultMessage: "Đang xử lý..." }) : t('login_button')}
@@ -178,10 +178,10 @@ export default function LoginPage() {
         {/* Divider */}
         <div className="relative my-7">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/10"></div>
+            <div className="w-full border-t border-border"></div>
           </div>
           <div className="relative flex justify-center text-[11px]">
-            <span className="px-3 bg-[#1e1b38] text-gray-500 uppercase tracking-wider">
+            <span className="px-3 bg-surface text-txt-muted uppercase tracking-wider">
               {t('or_continue_with', { defaultMessage: "Hoặc tiếp tục với" })}
             </span>
           </div>
@@ -192,17 +192,17 @@ export default function LoginPage() {
           type="button"
           onClick={() => loginWithGoogle()}
           disabled={loading}
-          className="w-full bg-[#25233c] hover:bg-[#2d2a45] border border-white/5 text-gray-300 font-medium py-3 rounded-ds-xl flex items-center justify-center gap-3 transition-colors text-[14px] disabled:opacity-70 disabled:cursor-not-allowed"
+          className="w-full bg-secondary hover:bg-main border border-border text-txt-primary font-medium py-3 rounded-ds-xl flex items-center justify-center gap-3 transition-all text-[14px] disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
         >
           <GoogleIcon />
-          Đăng nhập bằng Google
+          {t('continue_with_google')}
         </button>
 
         {/* Footer */}
-        <div className="text-center mt-8 text-[13px] text-gray-500">
-          Bạn chưa có tài khoản?{" "}
-          <Link href={`/${locale}/auth/register`} className="text-gray-300 hover:text-white underline decoration-white/30 underline-offset-4 transition-colors">
-            Đăng ký
+        <div className="text-center mt-8 text-[13px] text-txt-secondary">
+          {t('no_account')}{" "}
+          <Link href={`/${locale}/auth/register`} className="text-txt-secondary hover:text-txt-primary underline decoration-border underline-offset-4 transition-all font-medium">
+            {t('register_link')}
           </Link>
         </div>
       </div>
