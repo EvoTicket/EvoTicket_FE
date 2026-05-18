@@ -188,7 +188,8 @@ export default function ResaleCheckoutPage() {
                 fullName,
                 email,
                 phoneNumber: phone,
-                resaleSessionId: bookingSessionId
+                resaleSessionId: bookingSessionId,
+                locale: locale
             });
 
             if (response.data && response.data.data) {

@@ -554,7 +554,7 @@ export default function MyTicketsPage() {
                                                         <QRCodeSVG
                                                             value={qrData.qrToken}
                                                             size={224}
-                                                            level="H"
+                                                            level="M"
                                                             includeMargin={false}
                                                         />
                                                         {qrTimer === 0 && (

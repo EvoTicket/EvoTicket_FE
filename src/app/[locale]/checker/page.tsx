@@ -1,14 +1,44 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Search, Wifi, Clock, RefreshCw, Zap, Pause, Keyboard, CloudOff, CheckCircle2, XCircle, AlertCircle, Play } from "lucide-react";
+import { Search, Wifi, Clock, RefreshCw, Zap, Pause, Keyboard, CloudOff, CheckCircle2, XCircle, AlertCircle, Play, FlipHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Html5Qrcode } from "html5-qrcode";
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import { toast } from "react-toastify";
 import api from "@/src/lib/axios";
 
 type InputMode = "phone" | "laptop" | "scanner";
+
+const extractQrToken = (scannedText: string): string => {
+  if (!scannedText) return "";
+  const trimmed = scannedText.trim();
+
+  // 1. If it's a URL, extract search parameters
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    try {
+      const url = new URL(trimmed);
+      const token = url.searchParams.get("qrToken") || url.searchParams.get("token") || url.searchParams.get("code");
+      if (token) return token;
+    } catch (e) {
+      console.error("Failed to parse scanned text as URL:", e);
+    }
+  }
+
+  // 2. If it's a JSON string, parse it
+  if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      const token = parsed.qrToken || parsed.token || parsed.code;
+      if (token) return token;
+    } catch (e) {
+      console.error("Failed to parse scanned text as JSON:", e);
+    }
+  }
+
+  // 3. Otherwise return the raw string
+  return trimmed;
+};
 
 export default function CheckerPage() {
   const [isConfigured, setIsConfigured] = useState(false);
@@ -43,6 +73,12 @@ export default function CheckerPage() {
   const availableGates = ["Gate A", "Gate B", "Gate C", "VIP Entrance"];
 
   const [inputMode, setInputMode] = useState<InputMode>("laptop");
+  const [isMirrored, setIsMirrored] = useState(inputMode === "laptop");
+
+  // Keep mirror state synced with inputMode on change
+  useEffect(() => {
+    setIsMirrored(inputMode === "laptop");
+  }, [inputMode]);
 
   // Real-time network status
   useEffect(() => {
@@ -102,19 +138,37 @@ export default function CheckerPage() {
         const container = document.getElementById("camera-container");
         if (!container) return;
 
-        html5QrCode = new Html5Qrcode("camera-container");
+        // Initialize Html5Qrcode with config to only support QR_CODE format
+        html5QrCode = new Html5Qrcode("camera-container", {
+          formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
+          verbose: false
+        });
         scannerRef.current = html5QrCode;
 
+        // Configuration with responsive dynamic qrbox centering
+        const facingMode = inputMode === "phone" ? "environment" : "user";
         const scanConfig = {
           fps: 15,
-          qrbox: { width: 250, height: 250 },
+          qrbox: (width: number, height: number) => {
+            const minEdge = Math.min(width, height);
+            const qrboxSize = Math.floor(minEdge * 0.7);
+            return {
+              width: qrboxSize,
+              height: qrboxSize
+            };
+          },
           aspectRatio: 1.0,
-          rememberLastUsedCamera: true
+          rememberLastUsedCamera: true,
+          disableFlip: false,
+          videoConstraints: {
+            facingMode,
+            width: { min: 640, ideal: 1280, max: 1920 },
+            height: { min: 480, ideal: 720, max: 1080 }
+          }
         };
 
         if (isScanning) {
           try {
-            const facingMode = inputMode === "phone" ? "environment" : "user";
             await html5QrCode.start(
               { facingMode },
               scanConfig,
@@ -190,12 +244,21 @@ export default function CheckerPage() {
   const handleVerify = async (code: string) => {
     if (scanStatus === "verifying") return;
 
+    const qrToken = extractQrToken(code);
+    console.log("Scanned raw content:", code);
+    console.log("Extracted QR Token:", qrToken);
+
+    if (!qrToken) {
+      toast.error(locale === "vi" ? "Không tìm thấy token trong mã QR!" : "No token found in QR code!");
+      return;
+    }
+
     setScanStatus("verifying");
-    setTicketCode(code);
+    setTicketCode(qrToken);
 
     try {
       const response = await api.post("/checkin-service/api/v1/checker/scan", {
-        qrToken: code,
+        qrToken: qrToken,
       });
 
       const now = new Date().toLocaleTimeString(locale as string, {
@@ -209,7 +272,7 @@ export default function CheckerPage() {
 
       setScanStatus("success");
       setLastResult({
-        code,
+        code: qrToken,
         time: now,
         status: "VALID",
         message: successMessage,
@@ -241,7 +304,7 @@ export default function CheckerPage() {
 
       setScanStatus("invalid");
       setLastResult({
-        code,
+        code: qrToken,
         time: now,
         status: responseStatus as "INVALID" | "USED",
         message: errorMessage,
@@ -437,6 +500,7 @@ export default function CheckerPage() {
               position: absolute !important;
               top: 0 !important;
               left: 0 !important;
+              ${isMirrored ? "transform: scaleX(-1) !important;" : ""}
             }
             #camera-container img {
               display: none !important;
@@ -527,6 +591,15 @@ export default function CheckerPage() {
             )}
 
             <div className="absolute top-4 right-4 flex flex-col gap-3 z-40">
+              {inputMode !== "scanner" && (
+                <button
+                  onClick={() => setIsMirrored(!isMirrored)}
+                  className={`p-2.5 rounded-full backdrop-blur-sm border transition-all ${isMirrored ? 'bg-emerald-500 text-white border-emerald-600' : 'bg-black/50 text-white border-white/10 hover:bg-black/70'}`}
+                  title={locale === "vi" ? "Lật camera" : "Mirror camera"}
+                >
+                  <FlipHorizontal className="w-5 h-5" />
+                </button>
+              )}
               <button
                 onClick={toggleFlashlight}
                 className={`p-2.5 rounded-full backdrop-blur-sm border transition-all ${flashlightOn ? 'bg-amber-400 text-black border-amber-500' : 'bg-black/50 text-white border-white/10 hover:bg-black/70'}`}
@@ -610,7 +683,7 @@ export default function CheckerPage() {
                 onChange={(e) => setTicketCode(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleVerify(ticketCode)}
                 placeholder="TCK-01928..."
-                className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 uppercase"
+                className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
               <button
                 onClick={() => handleVerify(ticketCode)}
