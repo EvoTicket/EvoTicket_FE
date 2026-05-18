@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Search, Wifi, Clock, RefreshCw, Zap, Pause, Keyboard, CloudOff, CheckCircle2, XCircle, AlertCircle, Play, FlipHorizontal } from "lucide-react";
+import { Search, Wifi, Clock, RefreshCw, Zap, Pause, Keyboard, CloudOff, CheckCircle2, XCircle, AlertCircle, Play, FlipHorizontal, Eye, EyeOff, LogOut, User } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import { toast } from "react-toastify";
 import api from "@/src/lib/axios";
+import { useAppDispatch, useAppSelector } from "@/src/store/hooks";
+import { setCredentials, logout, selectAuth } from "@/src/store/slices/authSlice";
 
 type InputMode = "phone" | "laptop" | "scanner";
 
@@ -41,6 +43,10 @@ const extractQrToken = (scannedText: string): string => {
 };
 
 export default function CheckerPage() {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const { isAuthenticated, user } = useAppSelector(selectAuth);
+
   const [isConfigured, setIsConfigured] = useState(false);
   const [config, setConfig] = useState({ eventId: "", eventName: "", gate: "" });
 
@@ -48,6 +54,42 @@ export default function CheckerPage() {
   const [isScanning, setIsScanning] = useState(true);
   const [scanStatus, setScanStatus] = useState<"idle" | "verifying" | "success" | "error" | "invalid">("idle");
   const [cameraError, setCameraError] = useState<string | null>(null);
+
+  // Checker Login States
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  // Reset configuration on logout
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setIsConfigured(false);
+      setConfig({ eventId: "", eventName: "", gate: "" });
+    }
+  }, [isAuthenticated]);
+
+  const handleCheckerLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoggingIn(true);
+    try {
+      const response = await api.post(
+        "/iam-service/api/auth/login",
+        { email, password },
+        { skipAuth: true } as any
+      );
+      const data = response.data;
+      if (data.status === 200) {
+        dispatch(setCredentials({ token: data.data.token, refreshToken: data.data.refreshToken, user: data.data.user }));
+        toast.success(locale === "vi" ? "Đăng nhập tài khoản kiểm soát viên thành công!" : "Checker account logged in successfully!");
+      }
+    } catch (err: any) {
+      const msg = err.response?.data?.message || (locale === "vi" ? "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!" : "Login failed. Please check your credentials!");
+      toast.error(msg);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
 
   const [lastResult, setLastResult] = useState<{
     code: string;
@@ -75,10 +117,38 @@ export default function CheckerPage() {
   const [inputMode, setInputMode] = useState<InputMode>("laptop");
   const [isMirrored, setIsMirrored] = useState(inputMode === "laptop");
 
+  // Automatically detect mobile device on mount to set default inputMode to "phone"
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        setInputMode("phone");
+      }
+    }
+  }, []);
+
   // Keep mirror state synced with inputMode on change
   useEffect(() => {
     setIsMirrored(inputMode === "laptop");
   }, [inputMode]);
+
+  const [currentHintIndex, setCurrentHintIndex] = useState(0);
+
+  const scanHints = [
+    locale === "vi" ? "Hướng mã QR vào tâm khung hình" : "Point QR code at the center of the frame",
+    locale === "vi" ? "Giữ yên camera để tự động bắt nét" : "Hold camera still to focus automatically",
+    locale === "vi" ? "Đưa mã QR lại gần hơn nếu quá mờ" : "Move QR code closer if it is too blurry",
+    locale === "vi" ? "Tránh ánh sáng phản chiếu trực tiếp" : "Avoid direct light reflection or glare",
+    locale === "vi" ? "Đảm bảo mã QR hiển thị trọn vẹn" : "Make sure the entire QR code is visible"
+  ];
+
+  useEffect(() => {
+    if (!isScanning) return;
+    const interval = setInterval(() => {
+      setCurrentHintIndex((prev) => (prev + 1) % scanHints.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [isScanning, scanHints.length]);
 
   // Real-time network status
   useEffect(() => {
@@ -138,32 +208,19 @@ export default function CheckerPage() {
         const container = document.getElementById("camera-container");
         if (!container) return;
 
-        // Initialize Html5Qrcode with config to only support QR_CODE format
-        html5QrCode = new Html5Qrcode("camera-container", {
-          formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
-          verbose: false
-        });
+        // Initialize Html5Qrcode using standard verbose flag to prevent errors
+        html5QrCode = new Html5Qrcode("camera-container", false);
         scannerRef.current = html5QrCode;
 
-        // Configuration with responsive dynamic qrbox centering
+        // Configuration optimized for speed and screen area (entire frame)
         const facingMode = inputMode === "phone" ? "environment" : "user";
         const scanConfig = {
-          fps: 15,
-          qrbox: (width: number, height: number) => {
-            const minEdge = Math.min(width, height);
-            const qrboxSize = Math.floor(minEdge * 0.7);
-            return {
-              width: qrboxSize,
-              height: qrboxSize
-            };
-          },
-          aspectRatio: 1.0,
-          rememberLastUsedCamera: true,
+          fps: 10,
           disableFlip: false,
           videoConstraints: {
             facingMode,
-            width: { min: 640, ideal: 1280, max: 1920 },
-            height: { min: 480, ideal: 720, max: 1080 }
+            width: { min: 640, ideal: 1920, max: 3840 },
+            height: { min: 480, ideal: 1080, max: 2160 }
           }
         };
 
@@ -297,8 +354,8 @@ export default function CheckerPage() {
       const responseStatus =
         error.response?.data?.status ||
         (errorMessage.toLowerCase().includes("used") ||
-        errorMessage.toLowerCase().includes("sử dụng") ||
-        errorMessage.toLowerCase().includes("already")
+          errorMessage.toLowerCase().includes("sử dụng") ||
+          errorMessage.toLowerCase().includes("already")
           ? "USED"
           : "INVALID");
 
@@ -340,9 +397,109 @@ export default function CheckerPage() {
     setIsScanning(!isScanning);
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#0F0F1A] flex items-center justify-center p-6 relative overflow-hidden font-sans">
+        {/* Neon Glow Effects */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] right-[-10%] w-[70vw] h-[70vw] rounded-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/20 via-emerald-500/5 to-transparent blur-[80px]"></div>
+          <div className="absolute bottom-[-10%] left-[-10%] w-[70vw] h-[70vw] rounded-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/10 via-emerald-500/0 to-transparent blur-[80px]"></div>
+        </div>
+
+        {/* Login Card */}
+        <div className="z-10 w-full max-w-[420px] bg-[#161624]/85 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-[0_0_50px_-12px_rgba(16,185,129,0.3)] animate-in fade-in zoom-in duration-500">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 relative group overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-emerald-400 shadow-[0_0_8px_2px_rgba(52,211,153,0.6)] animate-scanner-laser"></div>
+              <User className="w-8 h-8 text-emerald-400" />
+            </div>
+            <h1 className="text-[26px] font-black text-white tracking-tighter mb-1.5 uppercase">EVOTICKET CHECKER</h1>
+            <p className="text-[12px] text-emerald-400 font-bold tracking-wider uppercase">
+              {locale === "vi" ? "HỆ THỐNG KIỂM SOÁT VÉ SỰ KIỆN" : "EVENT TICKET CHECK-IN SYSTEM"}
+            </p>
+          </div>
+
+          <form className="space-y-5" onSubmit={handleCheckerLogin}>
+            <div>
+              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
+                {locale === "vi" ? "Email Tài khoản" : "Account Email"}
+              </label>
+              <input
+                type="email"
+                placeholder="checker@evoticket.com"
+                className="w-full px-4 py-3.5 bg-[#1F1F30] text-white border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-[14px] placeholder-gray-500 font-medium"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
+                {locale === "vi" ? "Mật khẩu" : "Password"}
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3.5 bg-[#1F1F30] text-white border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-[14px] placeholder-gray-500 font-medium pr-12"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={isLoggingIn}
+                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-2xl transition-all active:scale-[0.98] text-[15px] shadow-lg shadow-emerald-500/20 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer uppercase tracking-wider"
+              >
+                {isLoggingIn 
+                  ? (locale === "vi" ? "ĐANG XÁC THỰC..." : "AUTHENTICATING...") 
+                  : (locale === "vi" ? "ĐĂNG NHẬP KIỂM SOÁT" : "LOG IN TO CHECKER")}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   if (!isConfigured) {
     return (
-      <div className="min-h-screen bg-[#0F0F1A] flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#0F0F1A] flex items-center justify-center p-6 relative">
+        {/* Floating User Badge at top right */}
+        <div className="absolute top-6 right-6 flex items-center gap-3 bg-[#161624]/60 backdrop-blur border border-white/10 px-4 py-2 rounded-2xl z-50">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-sm">
+            {user?.firstName ? user.firstName[0].toUpperCase() : "C"}
+          </div>
+          <div className="hidden sm:flex flex-col">
+            <span className="text-xs font-bold text-white leading-none mb-0.5">{user?.firstName ? `${user.firstName} ${user.lastName || ""}` : (locale === "vi" ? "Kiểm soát viên" : "Checker")}</span>
+            <span className="text-[9px] font-medium text-gray-400 leading-none">{user?.email || "online"}</span>
+          </div>
+          <button
+            onClick={() => {
+              dispatch(logout());
+              toast.info(locale === "vi" ? "Đã đăng xuất tài khoản kiểm soát viên" : "Checker account logged out");
+            }}
+            className="ml-2 text-gray-400 hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-white/5 cursor-pointer"
+            title={locale === "vi" ? "Đăng xuất" : "Log out"}
+          >
+            <LogOut className="w-4.5 h-4.5" />
+          </button>
+        </div>
+
         <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-500">
           <div className="p-8">
             <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6">
@@ -457,15 +614,28 @@ export default function CheckerPage() {
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <button
-                onClick={() => setIsConfigured(false)}
-                className="bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition-colors"
-              >
-                <RefreshCw className="w-4 h-4 text-gray-600" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsConfigured(false)}
+                  className="bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition-colors"
+                  title={locale === "vi" ? "Cấu hình lại" : "Reconfigure"}
+                >
+                  <RefreshCw className="w-4 h-4 text-gray-600" />
+                </button>
+                <button
+                  onClick={() => {
+                    dispatch(logout());
+                    toast.info(locale === "vi" ? "Đã đăng xuất tài khoản kiểm soát viên" : "Checker account logged out");
+                  }}
+                  className="bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors"
+                  title={locale === "vi" ? "Đăng xuất" : "Log out"}
+                >
+                  <LogOut className="w-4 h-4 text-red-600" />
+                </button>
+              </div>
               <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                Online
+                {user?.firstName ? `${user.firstName} (Online)` : "Online"}
               </span>
             </div>
           </div>
@@ -615,13 +785,24 @@ export default function CheckerPage() {
             </div>
 
             {isScanning && scanStatus === "idle" && !cameraError && (
-              <div className="relative w-[70%] aspect-square z-10 border-2 border-transparent">
-                <div className="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] border-emerald-400 rounded-tl-xl"></div>
-                <div className="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] border-emerald-400 rounded-tr-xl"></div>
-                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-[3px] border-l-[3px] border-emerald-400 rounded-bl-xl"></div>
-                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[3px] border-r-[3px] border-emerald-400 rounded-br-xl"></div>
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-emerald-400 shadow-[0_0_8px_2px_rgba(52,211,153,0.6)] animate-scanner-laser"></div>
-              </div>
+              <>
+                <div className="relative w-[70%] aspect-square z-10 border-2 border-transparent">
+                  <div className="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] border-emerald-400 rounded-tl-xl"></div>
+                  <div className="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] border-emerald-400 rounded-tr-xl"></div>
+                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-[3px] border-l-[3px] border-emerald-400 rounded-bl-xl"></div>
+                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[3px] border-r-[3px] border-emerald-400 rounded-br-xl"></div>
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-emerald-400 shadow-[0_0_8px_2px_rgba(52,211,153,0.6)] animate-scanner-laser"></div>
+                </div>
+
+                <div className="absolute bottom-6 left-4 right-4 z-20 flex justify-center animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="bg-black/65 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 flex items-center gap-2 max-w-[90%] text-center shadow-lg shadow-black/45">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+                    <span className="text-[11px] font-bold text-gray-200 tracking-wide transition-all duration-300">
+                      {scanHints[currentHintIndex]}
+                    </span>
+                  </div>
+                </div>
+              </>
             )}
 
             <div className="absolute bottom-8 left-0 right-0 text-center z-20 px-4">
@@ -657,13 +838,12 @@ export default function CheckerPage() {
                     {lastResult.message}
                   </span>
                 </div>
-                <span className={`text-xs font-bold px-2 py-1 rounded ${
-                  lastResult.status === "VALID"
-                    ? "bg-emerald-200 text-emerald-800"
-                    : lastResult.status === "USED"
+                <span className={`text-xs font-bold px-2 py-1 rounded ${lastResult.status === "VALID"
+                  ? "bg-emerald-200 text-emerald-800"
+                  : lastResult.status === "USED"
                     ? "bg-amber-200 text-amber-800"
                     : "bg-red-200 text-red-800"
-                }`}>
+                  }`}>
                   {lastResult.status}
                 </span>
               </div>
