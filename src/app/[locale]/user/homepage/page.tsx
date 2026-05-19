@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Calendar, MapPin, ChevronRight, Search, TrendingUp, Filter, CheckIcon, Loader2 } from "lucide-react";
+import { Calendar, MapPin, ChevronRight, Search, TrendingUp, Filter, CheckIcon, Loader2, Crown } from "lucide-react";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { Footer } from "@/src/components/footer";
 import api from "@/src/lib/axios";
@@ -96,7 +96,7 @@ export default function HomePage() {
         // Fetch 4 latest events
         const response = await api.get("/inventory-service/api/events/trending", {
           params: {
-            limit: 5
+            limit: 10
           },
           skipAuth: true
         } as any);
@@ -409,10 +409,10 @@ export default function HomePage() {
             {t("trending_events")} <TrendingUp className="text-button-primary-bg-default" />
           </h2>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
             {/* Cột trái: Danh sách (Table) */}
-            <div className="lg:col-span-2 overflow-x-auto">
+            <div className="lg:col-span-3 overflow-x-auto">
               <table className="w-full min-w-[600px]">
                 <thead>
                   <tr className="text-text-muted text-sm border-b border-border-default">
@@ -467,10 +467,10 @@ export default function HomePage() {
             </div>
 
             {/* Cột phải: Poster Top 1 */}
-            <div className="lg:col-span-1 relative flex flex-col items-center justify-center pt-8">
+            <div className="lg:col-span-2 relative flex flex-col items-center justify-center pt-8">
               <div className="absolute top-0 w-full text-center z-10 flex flex-col items-center">
                 <span className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-text-primary to-text-secondary tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" style={{ textShadow: '0px 0px 20px rgba(255,255,255,0.3)' }}>
-                  T<span className="relative inline-block w-8 h-8 mx-1 -translate-y-1 rounded-full border-2 border-brand-gold-main"><svg className="stroke-brand-gold-main absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M12 2v20M2 12h20M12 5l7 7-7 7-7-7 7-7z" /></svg></span>P 1
+                  T<span className="relative inline-block w-9 h-9 mx-1.5 -translate-y-1"><Crown className="text-[#FFD700] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-9 h-9 drop-shadow-[0_0_8px_rgba(255,215,0,0.8)]" strokeWidth={2.5} /></span>P 1
                 </span>
               </div>
               <div onClick={() => handleOpenEvent(top1TrendingEvents?.id)} className="relative w-full aspect-square md:aspect-[4/5] rounded-[2rem] overflow-hidden border-2 border-border-strong shadow-xl group cursor-pointer mt-4">
