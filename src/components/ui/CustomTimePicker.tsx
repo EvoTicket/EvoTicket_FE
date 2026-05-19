@@ -8,10 +8,11 @@ interface CustomTimePickerProps {
     selectedTime: string; // Format "HH:mm"
     onChange: (time: string) => void;
     width?: string;
+    height?: string;
     placeholder?: string;
 }
 
-export function CustomTimePicker({ selectedTime, onChange, width = "100%", placeholder = "00:00" }: CustomTimePickerProps) {
+export function CustomTimePicker({ selectedTime, onChange, width = "100%", height = "[50px]", placeholder = "00:00" }: CustomTimePickerProps) {
     const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, "0"));
     const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0"));
 
@@ -56,6 +57,7 @@ export function CustomTimePicker({ selectedTime, onChange, width = "100%", place
         <Popover className="relative" style={{ width }}>
             <PopoverButton 
                 onClick={onOpen}
+                style={{ height: height === "[50px]" ? "50px" : height }}
                 className="w-full flex items-center justify-between bg-bg-surface border border-border-default rounded-ds-lg p-2.5 outline-none hover:border-primary/50 focus:border-primary/50 focus:bg-bg-surface transition-all text-sm font-medium shadow-sm group cursor-pointer"
             >
                 <div className="flex items-center gap-2">

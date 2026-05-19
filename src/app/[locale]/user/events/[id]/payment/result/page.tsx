@@ -449,17 +449,27 @@ function PaymentResultContent() {
                                 </div>
                                 <span className="text-sm font-bold text-text-primary whitespace-nowrap">{tb('step_2')}</span>
                             </div>
-                            <div className={`h-[1px] flex-1 mx-4 opacity-50 ${(status === 'SUCCESS' || status === 'CANCELLED') ? 'bg-feedback-success-border' : 'bg-feedback-error-border'}`}></div>
+                            <div className={`h-[1px] flex-1 mx-4 opacity-50 ${status === 'SUCCESS' ? 'bg-feedback-success-border' : 'bg-feedback-error-border'}`}></div>
                             {/* Step 3 - Status based */}
                             <div className="flex items-center gap-2 flex-shrink-0">
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                                    (status === 'SUCCESS' || status === 'CANCELLED')
+                                    status === 'SUCCESS'
                                         ? 'bg-feedback-success-bg border border-feedback-success-border text-feedback-success-text'
                                         : 'bg-feedback-error-bg border border-feedback-error-border text-feedback-error-text'
                                 }`}>
-                                    {(status === 'SUCCESS' || status === 'CANCELLED') ? <Check size={16} /> : <X size={16} />}
+                                    {status === 'SUCCESS' ? <Check size={16} /> : <X size={16} />}
                                 </div>
-                                <span className="text-sm font-bold text-text-primary whitespace-nowrap">{tb('step_3')}</span>
+                                <span className="text-sm font-bold text-text-primary whitespace-nowrap">
+                                    {status === 'SUCCESS' 
+                                        ? tb('step_3') 
+                                        : status === 'CANCELLED' 
+                                            ? tb('step_3_cancelled') 
+                                            : status === 'EXPIRED' 
+                                                ? tb('step_3_expired') 
+                                                : status === 'PENDING'
+                                                    ? tb('step_3')
+                                                    : tb('step_3_failed')}
+                                </span>
                             </div>
                         </div>
 

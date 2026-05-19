@@ -274,6 +274,9 @@
     "step_1": "Chọn vé",
     "step_2": "Thanh toán",
     "step_3": "Hoàn tất",
+    "step_3_cancelled": "Đã hủy",
+    "step_3_failed": "Thất bại",
+    "step_3_expired": "Hết hạn",
     "time_remaining": "Thời gian giữ vé còn lại:",
     "select_showtime": "Chọn lịch diễn",
     "select_showtime_warning": "Vui lòng chọn một lịch diễn trước khi chọn ghế.",
@@ -503,7 +506,10 @@
     "time_label": "Thời gian:",
     "venue_label": "Địa điểm:",
     "address_label": "Địa chỉ:",
-    "ticket_type_label": "Loại vé:"
+    "ticket_type_label": "Loại vé:",
+    "location_map": "Bản đồ địa điểm",
+    "map_instruction": "Vị trí trên bản đồ chỉ mang tính chất tham khảo. Vui lòng sử dụng liên kết Google Maps để xem vị trí chính xác.",
+    "open_in_google_maps": "Mở trên Google Maps"
   },
   "Resale": {
     "page_title": "Chợ vé bán lại",

@@ -405,14 +405,14 @@ export default function HomePage() {
 
         {/* === TRENDING EVENTS (Mocked) === */}
         <section className="max-w-[90%] mx-auto px-4">
-          <h2 className="text-2xl font-bold text-text-primary mb-6 flex items-center gap-2">
-            {t("trending_events")} <TrendingUp className="text-button-primary-bg-default" />
-          </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
             {/* Cột trái: Danh sách (Table) */}
             <div className="lg:col-span-3 overflow-x-auto">
+              <h2 className="text-2xl font-bold text-text-primary mb-6 flex items-center gap-2">
+                {t("trending_events")} <TrendingUp className="text-button-primary-bg-default" />
+              </h2>
               <table className="w-full min-w-[600px]">
                 <thead>
                   <tr className="text-text-muted text-sm border-b border-border-default">
@@ -468,7 +468,7 @@ export default function HomePage() {
 
             {/* Cột phải: Poster Top 1 */}
             <div className="lg:col-span-2 relative flex flex-col items-center justify-center pt-8">
-              <div className="absolute top-0 w-full text-center z-10 flex flex-col items-center">
+              <div className="absolute top-0 w-full text-center z-10 flex flex-col items-center pb-6">
                 <span className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-text-primary to-text-secondary tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" style={{ textShadow: '0px 0px 20px rgba(255,255,255,0.3)' }}>
                   T<span className="relative inline-block w-9 h-9 mx-1.5 -translate-y-1"><Crown className="text-[#FFD700] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-9 h-9 drop-shadow-[0_0_8px_rgba(255,215,0,0.8)]" strokeWidth={2.5} /></span>P 1
                 </span>

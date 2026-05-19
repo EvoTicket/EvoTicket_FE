@@ -274,6 +274,9 @@
     "step_1": "Select ticket",
     "step_2": "Payment",
     "step_3": "Complete",
+    "step_3_cancelled": "Cancelled",
+    "step_3_failed": "Failed",
+    "step_3_expired": "Expired",
     "time_remaining": "Time remaining:",
     "select_showtime": "Select showtime",
     "select_showtime_warning": "Please select a showtime before choosing seats.",
@@ -503,7 +506,10 @@
     "no_seat_map_label": "General admission (no seat map)",
     "venue_label": "Venue:",
     "address_label": "Address:",
-    "ticket_type_label": "Ticket Type"
+    "ticket_type_label": "Ticket Type",
+    "location_map": "Location Map",
+    "map_instruction": "The map location is for reference only. Please use the Google Maps link to see the exact location.",
+    "open_in_google_maps": "Open in Google Maps"
   },
   "Resale": {
     "page_title": "Resale Marketplace",

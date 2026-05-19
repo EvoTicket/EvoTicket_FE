@@ -22,6 +22,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { useAppSelector } from "@/src/store/hooks";
 import { selectIsAuthenticated } from "@/src/store/slices/authSlice";
+import { CATEGORIES } from "@/src/constants/eventFilters";
 
 // Dynamic import for Map to avoid SSR issues
 const Map = dynamic(() => import("@/src/components/Map"), {
@@ -39,6 +40,7 @@ export default function EventDetailPage() {
     const router = useRouter();
     const tb = useTranslations("Booking");
     const te = useTranslations("EventDetail");
+    const tEvents = useTranslations("Events");
 
     const [event, setEvent] = useState<EventDetail | null>(null);
     const [suggestedEvents, setSuggestedEvents] = useState<any[]>([]);
@@ -257,7 +259,7 @@ export default function EventDetailPage() {
                             <div className="flex items-center justify-end gap-3 mb-4 w-full">
                                 <span className="text-sm text-text-secondary font-medium">{te('event_category_label')}</span>
                                 <div className="inline-block bg-badge-neutral-bg text-badge-neutral-text rounded-full border-2 border-badge-neutral-border px-4 py-1.5 text-sm font-semibold shadow-sm">
-                                    {event.category}
+                                    {CATEGORIES.find(c => c.id === event.category) ? tEvents(CATEGORIES.find(c => c.id === event.category)!.translationKey as any) : event.category}
                                 </div>
                             </div>
                             <div className="relative aspect-[4/3] rounded-ds-2xl overflow-hidden shadow-xl bg-bg-surface border border-border-default">
