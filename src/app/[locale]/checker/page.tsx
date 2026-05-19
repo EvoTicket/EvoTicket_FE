@@ -1,16 +1,27 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Search, Wifi, Clock, RefreshCw, Zap, Pause, Keyboard, CloudOff, CheckCircle2, XCircle, AlertCircle, Play, FlipHorizontal, Eye, EyeOff, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
+import QrScanner from "qr-scanner";
 import { toast } from "react-toastify";
 import api from "@/src/lib/axios";
 import { useAppDispatch, useAppSelector } from "@/src/store/hooks";
 import { setCredentials, logout, selectAuth } from "@/src/store/slices/authSlice";
 
 type InputMode = "phone" | "laptop" | "scanner";
+
+interface AxiosErrorResponse {
+  response?: {
+    data?: {
+      message?: string;
+      error?: string;
+      status?: string;
+    };
+  };
+  message?: string;
+}
 
 const extractQrToken = (scannedText: string): string => {
   if (!scannedText) return "";
@@ -48,7 +59,7 @@ export default function CheckerPage() {
   const { isAuthenticated, user } = useAppSelector(selectAuth);
 
   const [isConfigured, setIsConfigured] = useState(false);
-  const [config, setConfig] = useState({ eventId: "", eventName: "", gate: "" });
+  const [config, setConfig] = useState({ eventId: "", eventName: "", showtimeId: "", showtimeName: "", gate: "" });
 
   const [ticketCode, setTicketCode] = useState("");
   const [isScanning, setIsScanning] = useState(true);
@@ -65,7 +76,7 @@ export default function CheckerPage() {
   useEffect(() => {
     if (!isAuthenticated) {
       setIsConfigured(false);
-      setConfig({ eventId: "", eventName: "", gate: "" });
+      setConfig({ eventId: "", eventName: "", showtimeId: "", showtimeName: "", gate: "" });
     }
   }, [isAuthenticated]);
 
@@ -100,16 +111,38 @@ export default function CheckerPage() {
 
   const params = useParams();
   const locale = params?.locale || "vi";
-  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const scannerRef = useRef<QrScanner | null>(null);
   const [flashlightOn, setFlashlightOn] = useState(false);
+  const [activeCameraId, setActiveCameraId] = useState("");
   const [networkStatus, setNetworkStatus] = useState<{ online: boolean; strength: string; color: string }>({ online: true, strength: "...", color: "text-gray-400" });
   const [currentTime, setCurrentTime] = useState("");
 
   // Mock Data
   const availableEvents = [
-    { id: "EVT-001", name: "Anh Trai Say Hi Concert" },
-    { id: "EVT-002", name: "Ráp Việt Season 4 Final" },
-    { id: "EVT-003", name: "Sky Tour 2026 - Sơn Tùng MTP" }
+    {
+      id: "EVT-001",
+      name: "Anh Trai Say Hi Concert",
+      showtimes: [
+        { id: "ST-001", name: "Đêm diễn 1 - 20:00 19/05/2026" },
+        { id: "ST-002", name: "Đêm diễn 2 - 20:00 20/05/2026" }
+      ]
+    },
+    {
+      id: "EVT-002",
+      name: "Ráp Việt Season 4 Final",
+      showtimes: [
+        { id: "ST-003", name: "Chung kết Thương Hiệu - 19:30 24/05/2026" }
+      ]
+    },
+    {
+      id: "EVT-003",
+      name: "Sky Tour 2026 - Sơn Tùng MTP",
+      showtimes: [
+        { id: "ST-004", name: "Hà Nội - 19:00 30/05/2026" },
+        { id: "ST-005", name: "Đà Nẵng - 19:00 31/05/2026" }
+      ]
+    }
   ];
 
   const availableGates = ["Gate A", "Gate B", "Gate C", "VIP Entrance"];
@@ -190,141 +223,8 @@ export default function CheckerPage() {
     return () => clearInterval(interval);
   }, [locale]);
 
-  // Initialize Camera Scanner (Only when configured, skip for external scanner mode)
-  useEffect(() => {
-    if (!isConfigured) return;
-    if (inputMode === "scanner") return; // External scanner uses keyboard emulation only
-
-    let html5QrCode: Html5Qrcode | null = null;
-    let isMounted = true;
-
-    const startScanner = async () => {
-      try {
-        setCameraError(null);
-        // 1. Wait a bit for DOM to be ready
-        await new Promise(resolve => setTimeout(resolve, 300));
-        if (!isMounted) return;
-
-        const container = document.getElementById("camera-container");
-        if (!container) return;
-
-        // Initialize Html5Qrcode using standard verbose flag to prevent errors
-        html5QrCode = new Html5Qrcode("camera-container", false);
-        scannerRef.current = html5QrCode;
-
-        // Configuration optimized for speed and screen area (entire frame)
-        const facingMode = inputMode === "phone" ? "environment" : "user";
-        const scanConfig = {
-          fps: 20,
-          disableFlip: true,
-          qrbox: (width: number, height: number) => {
-            const size = Math.min(width, height) * 0.7;
-            return {
-              width: size,
-              height: size
-            };
-          },
-          useBarCodeDetectorIfSupported: true,
-          experimentalFeatures: {
-            useBarCodeDetectorIfSupported: true
-          },
-          videoConstraints: {
-            facingMode,
-            width: { min: 640, ideal: 1920, max: 3840 },
-            height: { min: 480, ideal: 1080, max: 2160 }
-          }
-        };
-
-        if (isScanning) {
-          try {
-            await html5QrCode.start(
-              { facingMode },
-              scanConfig,
-              (decodedText) => handleVerify(decodedText),
-              () => { }
-            );
-
-            // Log diagnostic info to help debug camera resolution and capabilities
-            try {
-              console.log("=== SCANNER DIAGNOSTICS ===");
-              if (typeof (html5QrCode as any).getRunningTrackSettings === "function") {
-                console.log("Active Settings:", (html5QrCode as any).getRunningTrackSettings());
-              }
-              if (typeof (html5QrCode as any).getRunningTrackCapabilities === "function") {
-                console.log("Capabilities:", (html5QrCode as any).getRunningTrackCapabilities());
-              }
-              console.log("==========================");
-            } catch (e) {
-              console.warn("Diagnostics logging not fully supported:", e);
-            }
-          } catch (err: any) {
-            console.error("Camera start failed:", err);
-            if (isMounted) {
-              setCameraError(err.message || "Could not start camera");
-            }
-          }
-        }
-      } catch (err: any) {
-        console.error("Scanner initialization failed:", err);
-        if (isMounted) {
-          setCameraError(err.message || "Unknown error");
-        }
-      }
-    };
-
-    startScanner();
-
-    return () => {
-      isMounted = false;
-      const stopScanner = async () => {
-        if (html5QrCode && html5QrCode.isScanning) {
-          try {
-            await html5QrCode.stop();
-          } catch (e) {
-            console.error("Error stopping scanner during cleanup", e);
-          }
-        }
-      };
-      stopScanner();
-    };
-  }, [isConfigured, isScanning, locale, inputMode]);
-
-  // Handle External Scanner (Keyboard Emulation)
-  useEffect(() => {
-    let buffer = "";
-    let lastKeyTime = Date.now();
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === "INPUT" && target.id !== "manual-ticket-input") {
-        return;
-      }
-
-      const currentTime = Date.now();
-      if (currentTime - lastKeyTime > 100) {
-        buffer = "";
-      }
-
-      if (e.key === "Enter") {
-        if (buffer.length > 2) {
-          handleVerify(buffer);
-          buffer = "";
-          e.preventDefault();
-        }
-      } else if (e.key.length === 1) {
-        buffer += e.key;
-        setTicketCode(buffer); // Show scanned code in real-time
-      }
-
-      lastKeyTime = currentTime;
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  const handleVerify = async (code: string) => {
-    if (scanStatus === "verifying") return;
+  const handleVerify = useCallback(async (code: string) => {
+    if (scanStatus !== "idle") return;
 
     const qrToken = extractQrToken(code);
     console.log("Scanned raw content:", code);
@@ -339,8 +239,15 @@ export default function CheckerPage() {
     setTicketCode(qrToken);
 
     try {
+      const parsedEventId = isNaN(Number(config.eventId)) ? config.eventId : Number(config.eventId);
+      const parsedShowtimeId = isNaN(Number(config.showtimeId)) ? config.showtimeId : Number(config.showtimeId);
+
       const response = await api.post("/checkin-service/api/v1/checker/scan", {
-        qrToken: qrToken,
+        QRtoken: qrToken,
+        showtimeID: parsedShowtimeId,
+        eventID: parsedEventId,
+        deviceId: activeCameraId || "no-camera-active",
+        gate: config.gate,
       });
 
       const now = new Date().toLocaleTimeString(locale as string, {
@@ -362,7 +269,7 @@ export default function CheckerPage() {
 
       toast.success(locale === "vi" ? "Vé hợp lệ!" : "Valid ticket!");
       setTimeout(() => setScanStatus("idle"), 3000);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Verification error:", error);
       const now = new Date().toLocaleTimeString(locale as string, {
         hour: "2-digit",
@@ -370,14 +277,15 @@ export default function CheckerPage() {
         second: "2-digit",
       });
 
+      const err = error as AxiosErrorResponse;
       const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message ||
         (locale === "vi" ? "Lỗi hệ thống khi xác minh vé." : "System error verifying ticket.");
 
       const responseStatus =
-        error.response?.data?.status ||
+        err.response?.data?.status ||
         (errorMessage.toLowerCase().includes("used") ||
           errorMessage.toLowerCase().includes("sử dụng") ||
           errorMessage.toLowerCase().includes("already")
@@ -395,18 +303,134 @@ export default function CheckerPage() {
       toast.error(errorMessage);
       setTimeout(() => setScanStatus("idle"), 3000);
     }
-  };
+  }, [scanStatus, locale, config, activeCameraId, setScanStatus, setTicketCode, setLastResult]);
+
+  const handleVerifyRef = useRef(handleVerify);
+  useEffect(() => {
+    handleVerifyRef.current = handleVerify;
+  }, [handleVerify]);
+
+  // Initialize Camera Scanner (Only when configured, skip for external scanner mode)
+  useEffect(() => {
+    if (!isConfigured) return;
+    if (inputMode === "scanner") return; // External scanner uses keyboard emulation only
+
+    let qrScanner: QrScanner | null = null;
+    let isMounted = true;
+
+    const startScanner = async () => {
+      try {
+        setCameraError(null);
+        // Wait a bit for DOM to be ready
+        await new Promise(resolve => setTimeout(resolve, 300));
+        if (!isMounted) return;
+
+        const videoElem = videoRef.current;
+        if (!videoElem) return;
+
+        const facingMode = inputMode === "phone" ? "environment" : "user";
+
+        qrScanner = new QrScanner(
+          videoElem,
+          (result) => {
+            const decodedText = typeof result === "object" ? result.data : result;
+            handleVerifyRef.current(decodedText);
+          },
+          {
+            onDecodeError: () => {}, // Quiet on normal decode errors
+            preferredCamera: facingMode,
+            highlightScanRegion: true,
+            highlightCodeOutline: true,
+            maxScansPerSecond: 20
+          }
+        );
+        scannerRef.current = qrScanner;
+
+        if (isScanning) {
+          try {
+            await qrScanner.start();
+            // Get active camera device ID from active stream track settings
+            const stream = videoElem.srcObject as MediaStream | null;
+            const track = stream?.getVideoTracks()?.[0];
+            const activeId = track?.getSettings()?.deviceId || track?.label || "unknown-camera";
+            setActiveCameraId(activeId);
+          } catch (err) {
+            console.error("Camera start failed:", err);
+            if (isMounted) {
+              const errMsg = err instanceof Error ? err.message : String(err);
+              setCameraError(errMsg || (locale === "vi" ? "Không thể khởi động camera" : "Could not start camera"));
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Scanner initialization failed:", err);
+        if (isMounted) {
+          const errMsg = err instanceof Error ? err.message : String(err);
+          setCameraError(errMsg || "Unknown error");
+        }
+      }
+    };
+
+    startScanner();
+
+    return () => {
+      isMounted = false;
+      if (qrScanner) {
+        try {
+          qrScanner.destroy();
+        } catch (e) {
+          console.error("Error destroying qr-scanner during cleanup", e);
+        }
+      }
+      scannerRef.current = null;
+      setFlashlightOn(false); // Reset flashlight state
+      setActiveCameraId(""); // Reset active camera ID
+    };
+  }, [isConfigured, isScanning, locale, inputMode]);
+
+  // Handle External Scanner (Keyboard Emulation)
+  useEffect(() => {
+    let buffer = "";
+    let lastKeyTime = Date.now();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" && target.id !== "manual-ticket-input") {
+        return;
+      }
+
+      const currentTime = Date.now();
+      if (currentTime - lastKeyTime > 100) {
+        buffer = "";
+      }
+
+      if (e.key === "Enter") {
+        if (buffer.length > 2) {
+          handleVerifyRef.current(buffer);
+          buffer = "";
+          e.preventDefault();
+        }
+      } else if (e.key.length === 1) {
+        buffer += e.key;
+        setTicketCode(buffer); // Show scanned code in real-time
+      }
+
+      lastKeyTime = currentTime;
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+
 
   const toggleFlashlight = async () => {
-    if (scannerRef.current && scannerRef.current.isScanning) {
+    const scanner = scannerRef.current;
+    if (scanner) {
       try {
-        const scanner = scannerRef.current as any;
-        const capabilities = scanner.getRunningTrackCapabilities();
-
-        if (capabilities && capabilities.torch) {
-          await scanner.applyVideoConstraints({
-            advanced: [{ torch: !flashlightOn }]
-          });
+        const hasFlash = await scanner.hasFlash();
+        if (hasFlash) {
+          await scanner.toggleFlash();
           setFlashlightOn(!flashlightOn);
         } else {
           toast.info(locale === "vi" ? "Thiết bị không hỗ trợ đèn flash" : "Device does not support flashlight");
@@ -542,7 +566,13 @@ export default function CheckerPage() {
                     value={config.eventId}
                     onChange={(e) => {
                       const event = availableEvents.find(ev => ev.id === e.target.value);
-                      setConfig({ ...config, eventId: e.target.value, eventName: event?.name || "" });
+                      setConfig({
+                        eventId: e.target.value,
+                        eventName: event?.name || "",
+                        showtimeId: "",
+                        showtimeName: "",
+                        gate: config.gate
+                      });
                     }}
                   >
                     <option value="" disabled>Chọn sự kiện...</option>
@@ -552,6 +582,30 @@ export default function CheckerPage() {
                   </select>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-emerald-500 transition-colors">
                     <Search className="w-4 h-4" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Suất diễn</label>
+                <div className="relative group">
+                  <select
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 font-bold focus:ring-2 focus:ring-emerald-500 outline-none appearance-none cursor-pointer transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                    value={config.showtimeId}
+                    disabled={!config.eventId}
+                    onChange={(e) => {
+                      const event = availableEvents.find(ev => ev.id === config.eventId);
+                      const showtime = event?.showtimes.find(st => st.id === e.target.value);
+                      setConfig({ ...config, showtimeId: e.target.value, showtimeName: showtime?.name || "" });
+                    }}
+                  >
+                    <option value="" disabled>{config.eventId ? "Chọn suất diễn..." : "Chọn sự kiện trước..."}</option>
+                    {config.eventId && availableEvents.find(ev => ev.id === config.eventId)?.showtimes.map(st => (
+                      <option key={st.id} value={st.id}>{st.name}</option>
+                    ))}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-emerald-500 transition-colors">
+                    <Clock className="w-4 h-4" />
                   </div>
                 </div>
               </div>
@@ -607,7 +661,7 @@ export default function CheckerPage() {
 
               <button
                 onClick={() => {
-                  if (config.eventId && config.gate) {
+                  if (config.eventId && config.showtimeId && config.gate) {
                     setIsConfigured(true);
                   } else {
                     toast.warning("Vui lòng chọn đầy đủ thông tin");
@@ -633,9 +687,16 @@ export default function CheckerPage() {
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1 mr-4">
               <h1 className="text-xl font-bold text-gray-900 leading-tight">{config.eventName}</h1>
-              <div className="flex items-center text-gray-900 font-bold mt-1">
-                <Search className="w-4 h-4 mr-1 text-emerald-600" />
-                <span className="text-base text-emerald-800">{config.gate}</span>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-gray-900 font-bold">
+                <div className="flex items-center">
+                  <Search className="w-4 h-4 mr-1 text-emerald-600" />
+                  <span className="text-base text-emerald-800">{config.gate}</span>
+                </div>
+                <div className="w-px h-3.5 bg-gray-200 hidden sm:block"></div>
+                <div className="flex items-center">
+                  <Clock className="w-3.5 h-3.5 mr-1 text-amber-500" />
+                  <span className="text-xs text-gray-500 font-medium">{config.showtimeName}</span>
+                </div>
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
@@ -686,32 +747,6 @@ export default function CheckerPage() {
         {/* MAIN CONTENT */}
         <div className="flex-1 p-4 pb-20 flex flex-col gap-4 overflow-y-auto">
 
-          {/* html5-qrcode internal style overrides */}
-          <style>{`
-            #camera-container video {
-              width: 100% !important;
-              height: 100% !important;
-              object-fit: cover !important;
-              position: absolute !important;
-              top: 0 !important;
-              left: 0 !important;
-              ${isMirrored ? "transform: scaleX(-1) !important;" : ""}
-            }
-            #camera-container img {
-              display: none !important;
-            }
-            #camera-container > div {
-              width: 100% !important;
-              height: 100% !important;
-              border: none !important;
-            }
-            #camera-container #camera-container__dashboard_section,
-            #camera-container #camera-container__dashboard_section_csr,
-            #camera-container #camera-container__header_message {
-              display: none !important;
-            }
-          `}</style>
-
           {/* SCANNER CONTAINER */}
           <div className="relative bg-[#151515] rounded-3xl aspect-[3/4] w-full overflow-hidden flex flex-col items-center justify-center shadow-lg group">
             {inputMode === "scanner" ? (
@@ -729,7 +764,14 @@ export default function CheckerPage() {
                 </div>
               </div>
             ) : (
-              <div id="camera-container" className="!absolute inset-0 z-0"></div>
+              <video
+                ref={videoRef}
+                className={`absolute inset-0 w-full h-full object-cover z-0 ${
+                  isMirrored ? "scale-x-[-1]" : ""
+                }`}
+                playsInline
+                muted
+              />
             )}
 
             {!isScanning && !cameraError && (
