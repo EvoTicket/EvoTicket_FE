@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Clock, ChevronDown } from "lucide-react";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 
@@ -34,12 +34,20 @@ export function CustomTimePicker({ selectedTime, onChange, width = "100%", place
     const onOpen = () => {
         setTimeout(() => {
             if (hourRef.current) {
-                const active = hourRef.current.querySelector('[data-active="true"]');
-                if (active) active.scrollIntoView({ block: "center", behavior: "smooth" });
+                const container = hourRef.current;
+                const activeBtn = container.querySelector('[data-active="true"]') as HTMLElement;
+                if (activeBtn) {
+                    const targetScrollTop = activeBtn.offsetTop - (container.clientHeight / 2) + (activeBtn.clientHeight / 2);
+                    container.scrollTo({ top: targetScrollTop, behavior: "auto" });
+                }
             }
             if (minuteRef.current) {
-                const active = minuteRef.current.querySelector('[data-active="true"]');
-                if (active) active.scrollIntoView({ block: "center", behavior: "smooth" });
+                const container = minuteRef.current;
+                const activeBtn = container.querySelector('[data-active="true"]') as HTMLElement;
+                if (activeBtn) {
+                    const targetScrollTop = activeBtn.offsetTop - (container.clientHeight / 2) + (activeBtn.clientHeight / 2);
+                    container.scrollTo({ top: targetScrollTop, behavior: "auto" });
+                }
             }
         }, 50);
     };
@@ -48,32 +56,37 @@ export function CustomTimePicker({ selectedTime, onChange, width = "100%", place
         <Popover className="relative" style={{ width }}>
             <PopoverButton 
                 onClick={onOpen}
-                className="w-full flex items-center justify-between bg-secondary/30 border-2 border-border/30 rounded-ds-2xl px-5 py-4 outline-none focus:border-primary/50 focus:bg-surface transition-all text-sm font-bold shadow-sm group"
+                className="w-full flex items-center justify-between bg-bg-surface border border-border-default rounded-ds-lg p-2.5 outline-none hover:border-primary/50 focus:border-primary/50 focus:bg-bg-surface transition-all text-sm font-medium shadow-sm group cursor-pointer"
             >
-                <div className="flex items-center gap-3">
-                    <Clock size={18} className="text-txt-muted group-hover:text-primary transition-colors" />
-                    <span className={selectedTime ? "text-txt-primary" : "text-txt-muted"}>
+                <div className="flex items-center gap-2">
+                    <Clock size={16} className="text-text-muted group-hover:text-primary transition-colors" />
+                    <span className={selectedTime ? "text-text-primary font-medium" : "text-text-muted"}>
                         {selectedTime || placeholder}
                     </span>
                 </div>
-                <ChevronDown size={16} className="text-txt-muted" />
+                <ChevronDown size={14} className="text-text-muted" />
             </PopoverButton>
 
-            <PopoverPanel className="absolute z-[100] mt-3 inset-x-0 bg-surface/90 border border-border/50 rounded-ds-3xl shadow-2xl p-5 backdrop-blur-3xl animate-in fade-in zoom-in duration-200 origin-top">
-                <div className="grid grid-cols-2 gap-4 h-[320px]">
+            <PopoverPanel 
+                anchor="bottom start"
+                transition
+                className="z-[100] w-60 [--anchor-gap:6px] bg-bg-surface border border-border-default rounded-ds-lg shadow-xl p-4 backdrop-blur-xl focus:outline-none transition duration-150 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
+            >
+                <div className="grid grid-cols-2 gap-3 h-[240px]">
                     {/* Hour Column */}
-                    <div className="space-y-3 flex flex-col h-full overflow-hidden">
-                        <label className="text-[10px] font-black text-txt-muted uppercase tracking-[0.2em] text-center">Giờ</label>
-                        <div ref={hourRef} className="flex-1 overflow-y-auto scrollbar-hide space-y-1 scroll-smooth">
+                    <div className="space-y-2 flex flex-col h-full overflow-hidden">
+                        <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider text-center border-b border-border-default pb-1">Giờ</label>
+                        <div ref={hourRef} className="flex-1 overflow-y-auto scrollbar-hide space-y-0.5 scroll-smooth pr-1">
                             {hours.map((h) => (
                                 <button
                                     key={h}
+                                    type="button"
                                     data-active={currentHour === h}
                                     onClick={() => handleSelectHour(h)}
-                                    className={`w-full py-2.5 rounded-ds-xl text-sm font-black transition-all ${
+                                    className={`w-full py-1.5 rounded-ds-md text-xs font-semibold transition-all ${
                                         currentHour === h 
-                                        ? "bg-primary text-white shadow-lg scale-105" 
-                                        : "text-txt-muted hover:bg-secondary/50 hover:text-txt-primary"
+                                        ? "bg-action-brand-bg-default text-action-brand-text-default shadow-sm font-bold" 
+                                        : "text-text-secondary hover:bg-bg-subtle hover:text-text-primary"
                                     }`}
                                 >
                                     {h}
@@ -83,18 +96,19 @@ export function CustomTimePicker({ selectedTime, onChange, width = "100%", place
                     </div>
 
                     {/* Minute Column */}
-                    <div className="space-y-3 flex flex-col h-full overflow-hidden">
-                        <label className="text-[10px] font-black text-txt-muted uppercase tracking-[0.2em] text-center">Phút</label>
-                        <div ref={minuteRef} className="flex-1 overflow-y-auto scrollbar-hide space-y-1 scroll-smooth">
+                    <div className="space-y-2 flex flex-col h-full overflow-hidden">
+                        <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider text-center border-b border-border-default pb-1">Phút</label>
+                        <div ref={minuteRef} className="flex-1 overflow-y-auto scrollbar-hide space-y-0.5 scroll-smooth pr-1">
                             {minutes.map((m) => (
                                 <button
                                     key={m}
+                                    type="button"
                                     data-active={currentMinute === m}
                                     onClick={() => handleSelectMinute(m)}
-                                    className={`w-full py-2.5 rounded-ds-xl text-sm font-black transition-all ${
+                                    className={`w-full py-1.5 rounded-ds-md text-xs font-semibold transition-all ${
                                         currentMinute === m 
-                                        ? "bg-primary text-white shadow-lg scale-105" 
-                                        : "text-txt-muted hover:bg-secondary/50 hover:text-txt-primary"
+                                        ? "bg-action-brand-bg-default text-action-brand-text-default shadow-sm font-bold" 
+                                        : "text-text-secondary hover:bg-bg-subtle hover:text-text-primary"
                                     }`}
                                 >
                                     {m}
@@ -104,8 +118,8 @@ export function CustomTimePicker({ selectedTime, onChange, width = "100%", place
                     </div>
                 </div>
 
-                <div className="mt-5 pt-3 border-t border-border/10 flex justify-center">
-                    <p className="text-[9px] font-black text-txt-muted uppercase tracking-[0.3em]">Select Time</p>
+                <div className="mt-3 pt-2 border-t border-border-default flex justify-center">
+                    <p className="text-[9px] font-bold text-text-muted uppercase tracking-wider">Chọn thời gian</p>
                 </div>
             </PopoverPanel>
 

@@ -138,16 +138,16 @@ function RightPanelChecklist({
     items: ChecklistItem[];
 }) {
     return (
-        <div className="bg-bg-surface border border-border-default rounded-ds-xl p-5 shadow-sm sticky top-24">
+        <div className="bg-bg-surface border border-border-default rounded-ds-xl p-5 shadow-sm sticky top-45">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-text-primary">Tiến độ bước hiện tại</h3>
                 <span className="font-bold text-action-brand-text-default">{draftProgress}%</span>
             </div>
-            
+
             <div className="w-full bg-bg-subtle h-2 rounded-full mb-6 overflow-hidden">
-                <div 
-                    className="bg-action-brand-bg-default h-full transition-all duration-500 ease-out" 
-                    style={{ width: `${draftProgress}%` }} 
+                <div
+                    className="bg-action-brand-bg-default h-full transition-all duration-500 ease-out"
+                    style={{ width: `${draftProgress}%` }}
                 />
             </div>
 
@@ -155,9 +155,9 @@ function RightPanelChecklist({
                 <h4 className="text-sm font-bold text-text-primary mb-2">Thông tin tối thiểu</h4>
                 {items.map((item) => (
                     <div key={item.label} className="flex items-center gap-2 text-sm">
-                        <CheckCircle2 
-                            size={16} 
-                            className={item.checked ? "text-feedback-success-text shrink-0" : "text-border-strong shrink-0"} 
+                        <CheckCircle2
+                            size={16}
+                            className={item.checked ? "text-feedback-success-text shrink-0" : "text-border-strong shrink-0"}
                         />
                         <span className={item.checked ? "text-text-primary" : "text-text-muted"}>
                             {item.label}

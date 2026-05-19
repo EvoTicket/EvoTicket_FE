@@ -1,6 +1,7 @@
 import React from "react";
 import dynamic from "next/dynamic";
-import { AlertTriangle, Image as ImageIcon, MapPin, AlignLeft, Building2 } from "lucide-react";
+import { AlertTriangle, Image as ImageIcon, MapPin, AlignLeft, Building2, ChevronDown, Check } from "lucide-react";
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { CreateEventState, getEventCategoryLabel } from "./useCreateEventWizard";
 import type { StepErrors } from "./createEventValidation";
 import type { EventCategory, ProvinceResponse, WardResponse } from "@/src/features/organizer/types/api";
@@ -310,50 +311,106 @@ export function CreateEventStep1BasicInfo({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div data-field="provinceCode">
                             <label className="block text-sm font-medium mb-1">Tỉnh / Thành phố <span className="text-feedback-error-text">*</span></label>
-                            <select
+                            <Listbox
                                 value={formData.provinceCode}
-                                onChange={(e) => {
-                                    const provinceCode = Number(e.target.value);
-                                    const provinceName = provinces.find((province) => province.code === provinceCode)?.name ?? "";
-                                    onProvinceChange(provinceCode, provinceName);
+                                onChange={(code: number) => {
+                                    const provinceName = provinces.find((province) => province.code === code)?.name ?? "";
+                                    onProvinceChange(code, provinceName);
                                 }}
-                                className={fieldClass("provinceCode")}
                                 disabled={provinceState.loading || Boolean(provinceState.error) || provinces.length === 0}
                             >
-                                <option value={0}>
-                                    {provinceState.loading ? "Đang tải tỉnh/thành..." : "Chọn tỉnh/thành"}
-                                </option>
-                                {provinces.map((p) => (
-                                    <option key={p.code} value={p.code}>{p.name}</option>
-                                ))}
-                            </select>
+                                <div className="relative">
+                                    <ListboxButton
+                                        className={`${fieldClass("provinceCode")} flex items-center justify-between text-left cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed`}
+                                    >
+                                        <span>
+                                            {formData.provinceCode > 0
+                                                ? formData.provinceName
+                                                : provinceState.loading
+                                                ? "Đang tải tỉnh/thành..."
+                                                : "Chọn tỉnh/thành"}
+                                        </span>
+                                        <ChevronDown size={16} className="text-text-secondary shrink-0 ml-2" />
+                                    </ListboxButton>
+                                    <ListboxOptions
+                                        anchor="bottom start"
+                                        modal={false}
+                                        className="z-50 w-[var(--button-width)] [--anchor-gap:4px] !max-h-60 overflow-y-auto bg-bg-surface border border-border-default rounded-ds-lg shadow-lg text-text-primary focus:outline-none py-1 mt-1"
+                                    >
+                                        <ListboxOption
+                                            value={0}
+                                            className="group flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-bg-subtle transition-colors text-sm text-text-muted"
+                                        >
+                                            <span className="group-data-[selected]:font-semibold">Chọn tỉnh/thành</span>
+                                            <Check className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-action-brand-text-default shrink-0 ml-2" />
+                                        </ListboxOption>
+                                        {provinces.map((p) => (
+                                            <ListboxOption
+                                                key={p.code}
+                                                value={p.code}
+                                                className="group flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-bg-subtle transition-colors text-sm"
+                                            >
+                                                <span className="group-data-[selected]:font-semibold">{p.name}</span>
+                                                <Check className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-action-brand-text-default shrink-0 ml-2" />
+                                            </ListboxOption>
+                                        ))}
+                                    </ListboxOptions>
+                                </div>
+                            </Listbox>
                             {provinceState.error && renderDictionaryMessage(provinceState.error, onRetryProvinces)}
                             {!provinceState.loading && !provinceState.error && provinces.length === 0 && renderDictionaryMessage("Chưa có tỉnh/thành khả dụng.", onRetryProvinces)}
                             {renderError("provinceCode")}
                         </div>
                         <div data-field="wardCode">
                             <label className="block text-sm font-medium mb-1">Quận / Huyện <span className="text-feedback-error-text">*</span></label>
-                            <select
+                            <Listbox
                                 value={formData.wardCode}
-                                onChange={(e) => {
-                                    const wardCode = Number(e.target.value);
-                                    const wardName = wards.find((ward) => ward.code === wardCode)?.name ?? "";
-                                    onWardChange(wardCode, wardName);
+                                onChange={(code: number) => {
+                                    const wardName = wards.find((ward) => ward.code === code)?.name ?? "";
+                                    onWardChange(code, wardName);
                                 }}
-                                className={fieldClass("wardCode")}
                                 disabled={!formData.provinceCode || wardState.loading || Boolean(wardState.error) || wards.length === 0}
                             >
-                                <option value={0}>
-                                    {!formData.provinceCode
-                                        ? "Chọn tỉnh/thành trước"
-                                        : wardState.loading
-                                            ? "Đang tải quận/huyện..."
-                                            : "Chọn quận/huyện"}
-                                </option>
-                                {wards.map((w) => (
-                                    <option key={w.code} value={w.code}>{w.name}</option>
-                                ))}
-                            </select>
+                                <div className="relative">
+                                    <ListboxButton
+                                        className={`${fieldClass("wardCode")} flex items-center justify-between text-left cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed`}
+                                    >
+                                        <span>
+                                            {formData.wardCode > 0
+                                                ? formData.wardName
+                                                : !formData.provinceCode
+                                                ? "Chọn tỉnh/thành trước"
+                                                : wardState.loading
+                                                ? "Đang tải quận/huyện..."
+                                                : "Chọn quận/huyện"}
+                                        </span>
+                                        <ChevronDown size={16} className="text-text-secondary shrink-0 ml-2" />
+                                    </ListboxButton>
+                                    <ListboxOptions
+                                        anchor="bottom start"
+                                        modal={false}
+                                        className="z-50 w-[var(--button-width)] [--anchor-gap:4px] !max-h-60 overflow-y-auto bg-bg-surface border border-border-default rounded-ds-lg shadow-lg text-text-primary focus:outline-none py-1 mt-1"
+                                    >
+                                        <ListboxOption
+                                            value={0}
+                                            className="group flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-bg-subtle transition-colors text-sm text-text-muted"
+                                        >
+                                            <span className="group-data-[selected]:font-semibold">Chọn quận/huyện</span>
+                                            <Check className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-action-brand-text-default shrink-0 ml-2" />
+                                        </ListboxOption>
+                                        {wards.map((w) => (
+                                            <ListboxOption
+                                                key={w.code}
+                                                value={w.code}
+                                                className="group flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-bg-subtle transition-colors text-sm"
+                                            >
+                                                <span className="group-data-[selected]:font-semibold">{w.name}</span>
+                                                <Check className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-action-brand-text-default shrink-0 ml-2" />
+                                            </ListboxOption>
+                                        ))}
+                                    </ListboxOptions>
+                                </div>
+                            </Listbox>
                             {formData.provinceCode > 0 && wardState.error && renderDictionaryMessage(wardState.error, onRetryWards)}
                             {formData.provinceCode > 0 && !wardState.loading && !wardState.error && wards.length === 0 && renderDictionaryMessage("Chưa có quận/huyện cho tỉnh/thành đã chọn.", onRetryWards)}
                             {renderError("wardCode")}

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { AlertCircle, Calendar, Edit3, Plus, Ticket, Trash2 } from "lucide-react";
 import { CreateEventState, ShowtimeInput, TicketTypeInput } from "./useCreateEventWizard";
 import { getStep2Warnings, validateStep2, type StepErrors } from "./createEventValidation";
+import { CustomDatePicker } from "@/src/components/ui/CustomDatePicker";
+import { CustomTimePicker } from "@/src/components/ui/CustomTimePicker";
 
 interface Props {
     formData: CreateEventState;
@@ -27,8 +29,45 @@ function formatDate(value: string) {
     return new Date(value).toLocaleDateString("vi-VN");
 }
 
+function parseDatetimeLocal(value: string): { date: Date | null; time: string } {
+    if (!value) return { date: null, time: "" };
+    const parts = value.split(/[T ]/);
+    const datePart = parts[0];
+    const timePart = parts[1] ? parts[1].substring(0, 5) : "00:00";
+    
+    if (!datePart) return { date: null, time: "" };
+    const date = new Date(datePart);
+    return { date: isNaN(date.getTime()) ? null : date, time: timePart };
+}
+
+function combineDateTime(date: Date | null, time: string): string {
+    if (!date) return "";
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    const timeStr = time || "00:00";
+    return `${yyyy}-${mm}-${dd}T${timeStr}`;
+}
+
+const formatShowtimeRange = (start: string, end: string) => {
+    if (!start && !end) return "Chưa đặt thời gian";
+    const formatItem = (val: string) => {
+        if (!val) return "??";
+        const date = new Date(val);
+        if (isNaN(date.getTime())) return "??";
+        
+        const hh = String(date.getHours()).padStart(2, "0");
+        const mm = String(date.getMinutes()).padStart(2, "0");
+        const dd = String(date.getDate()).padStart(2, "0");
+        const mMonth = String(date.getMonth() + 1).padStart(2, "0");
+        return `${hh}:${mm} ${dd}/${mMonth}`;
+    };
+    return `${formatItem(start)} - ${formatItem(end)}`;
+};
+
 export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }: Props) {
     const [selectedShowtimeId, setSelectedShowtimeId] = useState<string>(formData.showtimes[0]?.id || "");
+    const [editingShowtimeId, setEditingShowtimeId] = useState<string | null>(null);
     const [isEditingTicket, setIsEditingTicket] = useState(false);
     const [editingTicketId, setEditingTicketId] = useState<string | null>(null);
     const [ticketDraft, setTicketDraft] = useState<Partial<TicketTypeInput>>(initialTicketForm);
@@ -64,6 +103,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
         };
         updateField("showtimes", [...formData.showtimes, newShowtime]);
         setSelectedShowtimeId(newId);
+        setEditingShowtimeId(newId);
     };
 
     const handleRemoveShowtime = (id: string) => {
@@ -220,82 +260,174 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                     </div>
 
                     <div className="space-y-3">
-                        {formData.showtimes.map((showtime) => (
-                            <div
-                                key={showtime.id}
-                                onClick={() => setSelectedShowtimeId(showtime.id)}
-                                className={`p-4 rounded-ds-xl border transition-all cursor-pointer relative ${
-                                    selectedShowtimeId === showtime.id
-                                        ? "border-action-brand-bg-default bg-action-brand-bg-default/5 shadow-sm"
-                                        : "border-border-default bg-bg-surface hover:border-border-strong"
-                                }`}
-                            >
-                                {formData.showtimes.length > 1 && (
-                                    <button
-                                        type="button"
-                                        onClick={(event) => {
-                                            event.stopPropagation();
-                                            handleRemoveShowtime(showtime.id);
-                                        }}
-                                        className="absolute top-2 right-2 text-text-muted hover:text-feedback-error-text p-1"
-                                        aria-label="Xóa suất diễn"
+                        {formData.showtimes.map((showtime) => {
+                            const isSelected = selectedShowtimeId === showtime.id;
+                            const isEditing = editingShowtimeId === showtime.id || Object.keys(errors).some((key) => key.startsWith(`showtime-${showtime.id}-`));
+                            const ticketCount = formData.ticketTypes.filter((ticket) => ticket.showtimeId === showtime.id).length;
+                            const hasError = Object.keys(errors).some((key) => key.startsWith(`showtime-${showtime.id}-`));
+
+                            if (isEditing) {
+                                return (
+                                    <div
+                                        key={showtime.id}
+                                        onClick={() => setSelectedShowtimeId(showtime.id)}
+                                        className={`p-4 rounded-ds-xl border transition-all cursor-pointer relative ${
+                                            isSelected
+                                                ? "border-action-brand-bg-default bg-action-brand-bg-default/5 shadow-sm"
+                                                : "border-border-default bg-bg-surface hover:border-border-strong"
+                                        } ${hasError ? "border-feedback-error-border bg-feedback-error-bg/5" : ""}`}
                                     >
-                                        <Trash2 size={14} />
-                                    </button>
-                                )}
-
-                                <input
-                                    type="text"
-                                    value={showtime.name}
-                                    onChange={(event) => handleUpdateShowtime(showtime.id, "name", event.target.value)}
-                                    className="w-[85%] bg-transparent border-b border-transparent focus:border-border-strong outline-none font-bold text-text-primary mb-2 px-1 py-0.5 -ml-1 text-sm"
-                                    placeholder="Tên suất diễn"
-                                    onClick={(event) => event.stopPropagation()}
-                                />
-
-                                <div className="space-y-2 mt-2">
-                                    <div>
-                                        <div className="flex items-center gap-2 text-xs text-text-secondary">
-                                            <Calendar size={14} className="shrink-0" />
-                                            <input
-                                                type="datetime-local"
-                                                value={showtime.startDatetime}
-                                                onChange={(event) => handleUpdateShowtime(showtime.id, "startDatetime", event.target.value)}
-                                                onClick={(event) => event.stopPropagation()}
-                                                data-field={`showtime-${showtime.id}-startDatetime`}
-                                                className={`bg-bg-surface border rounded px-1.5 py-1 w-full ${
-                                                    errors[`showtime-${showtime.id}-startDatetime`] ? "border-feedback-error-border" : "border-border-default"
-                                                }`}
-                                            />
+                                        <div className="flex items-center justify-between mb-3 border-b border-border-default pb-2">
+                                            <span className="text-xs font-bold text-action-brand-text-default uppercase">Đang chỉnh sửa</span>
+                                            {formData.showtimes.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        handleRemoveShowtime(showtime.id);
+                                                    }}
+                                                    className="text-text-muted hover:text-feedback-error-text p-1 cursor-pointer"
+                                                    aria-label="Xóa suất diễn"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            )}
                                         </div>
-                                        {renderError(`showtime-${showtime.id}-startDatetime`)}
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-2 text-xs text-text-secondary">
-                                            <span className="w-[14px] flex justify-center shrink-0">-</span>
-                                            <input
-                                                type="datetime-local"
-                                                value={showtime.endDatetime}
-                                                onChange={(event) => handleUpdateShowtime(showtime.id, "endDatetime", event.target.value)}
-                                                onClick={(event) => event.stopPropagation()}
-                                                data-field={`showtime-${showtime.id}-endDatetime`}
-                                                className={`bg-bg-surface border rounded px-1.5 py-1 w-full ${
-                                                    errors[`showtime-${showtime.id}-endDatetime`] ? "border-feedback-error-border" : "border-border-default"
-                                                }`}
-                                            />
+
+                                        <input
+                                            type="text"
+                                            value={showtime.name}
+                                            onChange={(event) => handleUpdateShowtime(showtime.id, "name", event.target.value)}
+                                            className="w-full bg-bg-surface border border-border-default focus:border-border-strong outline-none font-bold text-text-primary mb-3 px-2 py-1 rounded-ds-md text-sm"
+                                            placeholder="Tên suất diễn"
+                                            onClick={(event) => event.stopPropagation()}
+                                        />
+
+                                        <div className="space-y-3 mt-2" onClick={(event) => event.stopPropagation()}>
+                                            <div>
+                                                <label className="block text-[11px] font-bold text-text-secondary mb-1">Thời gian bắt đầu</label>
+                                                <div className="flex gap-2">
+                                                    <div className="flex-1">
+                                                        <CustomDatePicker
+                                                            selectedDate={parseDatetimeLocal(showtime.startDatetime).date}
+                                                            onChange={(date) => {
+                                                                const time = parseDatetimeLocal(showtime.startDatetime).time || "00:00";
+                                                                const combined = combineDateTime(date, time);
+                                                                handleUpdateShowtime(showtime.id, "startDatetime", combined);
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="w-24">
+                                                        <CustomTimePicker
+                                                            selectedTime={parseDatetimeLocal(showtime.startDatetime).time}
+                                                            onChange={(time) => {
+                                                                const date = parseDatetimeLocal(showtime.startDatetime).date;
+                                                                const combined = combineDateTime(date, time);
+                                                                handleUpdateShowtime(showtime.id, "startDatetime", combined);
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                {renderError(`showtime-${showtime.id}-startDatetime`)}
+                                            </div>
+                                            <div>
+                                                <label className="block text-[11px] font-bold text-text-secondary mb-1">Thời gian kết thúc</label>
+                                                <div className="flex gap-2">
+                                                    <div className="flex-1">
+                                                        <CustomDatePicker
+                                                            selectedDate={parseDatetimeLocal(showtime.endDatetime).date}
+                                                            onChange={(date) => {
+                                                                const time = parseDatetimeLocal(showtime.endDatetime).time || "00:00";
+                                                                const combined = combineDateTime(date, time);
+                                                                handleUpdateShowtime(showtime.id, "endDatetime", combined);
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="w-24">
+                                                        <CustomTimePicker
+                                                            selectedTime={parseDatetimeLocal(showtime.endDatetime).time}
+                                                            onChange={(time) => {
+                                                                const date = parseDatetimeLocal(showtime.endDatetime).date;
+                                                                const combined = combineDateTime(date, time);
+                                                                handleUpdateShowtime(showtime.id, "endDatetime", combined);
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                {renderError(`showtime-${showtime.id}-endDatetime`)}
+                                            </div>
                                         </div>
-                                        {renderError(`showtime-${showtime.id}-endDatetime`)}
+
+                                        <button
+                                            type="button"
+                                            onClick={(event) => {
+                                                event.stopPropagation();
+                                                setEditingShowtimeId(null);
+                                            }}
+                                            className="w-full mt-3 py-1.5 bg-action-brand-bg-default hover:bg-action-brand-bg-hover text-action-brand-text-default rounded-ds-lg text-xs font-bold transition-colors text-center cursor-pointer"
+                                        >
+                                            Hoàn tất
+                                        </button>
                                     </div>
-                                    <div className="pt-2 mt-2 border-t border-border-default border-dashed flex items-center justify-between">
-                                        <span className="text-xs text-text-muted">Số loại vé:</span>
-                                        <span className="text-xs font-bold text-text-primary">
-                                            {formData.ticketTypes.filter((ticket) => ticket.showtimeId === showtime.id).length}
-                                        </span>
+                                );
+                            }
+
+                            return (
+                                <div
+                                    key={showtime.id}
+                                    onClick={() => setSelectedShowtimeId(showtime.id)}
+                                    className={`p-4 rounded-ds-xl border transition-all cursor-pointer relative group flex flex-col justify-between ${
+                                        isSelected
+                                            ? "border-action-brand-bg-default bg-action-brand-bg-default/5 shadow-sm"
+                                            : "border-border-default bg-bg-surface hover:border-border-strong hover:shadow-xs"
+                                    }`}
+                                >
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex-1 min-w-0 pr-8">
+                                            <h4 className="font-bold text-sm text-text-primary truncate">{showtime.name || "Chưa đặt tên"}</h4>
+                                            <p className="text-xs text-text-secondary mt-1.5 leading-relaxed font-medium flex items-center gap-1">
+                                                <Calendar size={13} className="text-text-muted shrink-0" />
+                                                <span>{formatShowtimeRange(showtime.startDatetime, showtime.endDatetime)}</span>
+                                            </p>
+                                        </div>
+
+                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute top-3 right-3 bg-bg-surface rounded-full p-0.5 shadow-sm border border-border-default">
+                                            <button
+                                                type="button"
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    setEditingShowtimeId(showtime.id);
+                                                    setSelectedShowtimeId(showtime.id);
+                                                }}
+                                                className="p-1 text-text-muted hover:text-action-brand-text-default rounded-full hover:bg-bg-subtle transition-colors cursor-pointer"
+                                                title="Sửa suất diễn"
+                                            >
+                                                <Edit3 size={13} />
+                                            </button>
+                                            {formData.showtimes.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        handleRemoveShowtime(showtime.id);
+                                                    }}
+                                                    className="p-1 text-text-muted hover:text-feedback-error-text rounded-full hover:bg-feedback-error-bg/10 transition-colors cursor-pointer"
+                                                    title="Xóa suất diễn"
+                                                >
+                                                    <Trash2 size={13} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-2 mt-3 border-t border-border-default border-dashed flex items-center justify-between">
+                                        <span className="text-[11px] text-text-muted">Vé: <span className="font-bold text-text-secondary">{ticketCount} loại</span></span>
+                                        {isSelected && <span className="text-[10px] font-bold text-action-brand-text-default uppercase bg-action-brand-bg-default/10 px-1.5 py-0.5 rounded-sm">Đang xem vé</span>}
                                     </div>
                                     {renderError(`showtime-${showtime.id}-tickets`)}
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -412,24 +544,54 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 pt-4 border-t border-border-default">
                                 <div>
                                     <label className="block text-xs font-medium mb-1 text-text-secondary">Thời gian bắt đầu bán *</label>
-                                    <input
-                                        type="datetime-local"
-                                        value={ticketDraft.saleStartDate}
-                                        onChange={(event) => setTicketDraft({ ...ticketDraft, saleStartDate: event.target.value })}
-                                        data-field={getTicketFieldKey("saleStartDate")}
-                                        className={fieldClass(getTicketFieldKey("saleStartDate"))}
-                                    />
+                                    <div className="flex gap-2">
+                                        <div className="flex-1">
+                                            <CustomDatePicker
+                                                selectedDate={parseDatetimeLocal(ticketDraft.saleStartDate || "").date}
+                                                onChange={(date) => {
+                                                    const time = parseDatetimeLocal(ticketDraft.saleStartDate || "").time || "00:00";
+                                                    const combined = combineDateTime(date, time);
+                                                    setTicketDraft({ ...ticketDraft, saleStartDate: combined });
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="w-24">
+                                            <CustomTimePicker
+                                                selectedTime={parseDatetimeLocal(ticketDraft.saleStartDate || "").time}
+                                                onChange={(time) => {
+                                                    const date = parseDatetimeLocal(ticketDraft.saleStartDate || "").date;
+                                                    const combined = combineDateTime(date, time);
+                                                    setTicketDraft({ ...ticketDraft, saleStartDate: combined });
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
                                     {renderError(getTicketFieldKey("saleStartDate"))}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium mb-1 text-text-secondary">Thời gian kết thúc bán *</label>
-                                    <input
-                                        type="datetime-local"
-                                        value={ticketDraft.saleEndDate}
-                                        onChange={(event) => setTicketDraft({ ...ticketDraft, saleEndDate: event.target.value })}
-                                        data-field={getTicketFieldKey("saleEndDate")}
-                                        className={fieldClass(getTicketFieldKey("saleEndDate"))}
-                                    />
+                                    <div className="flex gap-2">
+                                        <div className="flex-1">
+                                            <CustomDatePicker
+                                                selectedDate={parseDatetimeLocal(ticketDraft.saleEndDate || "").date}
+                                                onChange={(date) => {
+                                                    const time = parseDatetimeLocal(ticketDraft.saleEndDate || "").time || "00:00";
+                                                    const combined = combineDateTime(date, time);
+                                                    setTicketDraft({ ...ticketDraft, saleEndDate: combined });
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="w-24">
+                                            <CustomTimePicker
+                                                selectedTime={parseDatetimeLocal(ticketDraft.saleEndDate || "").time}
+                                                onChange={(time) => {
+                                                    const date = parseDatetimeLocal(ticketDraft.saleEndDate || "").date;
+                                                    const combined = combineDateTime(date, time);
+                                                    setTicketDraft({ ...ticketDraft, saleEndDate: combined });
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
                                     {renderError(getTicketFieldKey("saleEndDate"))}
                                 </div>
                             </div>

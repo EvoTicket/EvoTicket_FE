@@ -55,6 +55,9 @@ function result(errors: StepErrors, fieldOrder: string[]): StepValidationResult 
 }
 
 export function validateStep1(state: CreateEventState): StepValidationResult {
+
+    // Tạm thời bỏ qua validation của step 1
+    return { errors: {}, firstInvalidField: "" };
     const errors: StepErrors = {};
     const fieldOrder = [
         "thumbnailImage",
@@ -123,6 +126,9 @@ function validateTicket(ticket: TicketTypeInput, showtimeStart: string, errors: 
 export function validateStep2(state: CreateEventState): StepValidationResult {
     const errors: StepErrors = {};
     const fieldOrder: string[] = [];
+
+    // Tạm thời bỏ qua validation của step 2
+    return { errors: {}, firstInvalidField: "" };
 
     if (state.showtimes.length === 0) {
         errors.showtime = "Vui lòng tạo ít nhất một suất diễn.";

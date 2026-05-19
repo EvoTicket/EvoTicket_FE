@@ -18,14 +18,14 @@ interface Props {
     isSubmitting?: boolean;
 }
 
-export function CreateEventWizardShell({ 
-    step, title, description, children, rightPanel, 
-    onBack, onNext, onSubmit, onSaveDraft, isSubmitting 
+export function CreateEventWizardShell({
+    step, title, description, children, rightPanel,
+    onBack, onNext, onSubmit, onSaveDraft, isSubmitting
 }: Props) {
     const { locale } = useParams();
-    
+
     return (
-        <div className="dark flex min-h-screen flex-col bg-bg-page pb-20"> 
+        <div className="dark flex min-h-screen flex-col bg-bg-page">
             {/* Header */}
             <div className="bg-bg-surface border-b border-border-default sticky top-0 z-30 pt-4 px-4 sm:px-6">
                 <div className="max-w-[1860px] mx-auto flex items-center justify-between mb-4">
@@ -41,7 +41,7 @@ export function CreateEventWizardShell({
                     <div className="flex items-center gap-4">
                         <span className="hidden sm:inline-block text-xs text-text-muted px-2 py-1 bg-bg-elevated rounded-full border border-border-default">Nháp</span>
                         <span className="hidden md:inline-block text-xs text-text-muted">Tự động lưu • cập nhật 1 phút trước</span>
-                        <button 
+                        <button
                             type="button"
                             onClick={onSaveDraft}
                             className="flex items-center gap-2 px-3 py-1.5 border border-border-default rounded-ds-md text-sm hover:bg-bg-subtle text-text-secondary"
@@ -49,7 +49,7 @@ export function CreateEventWizardShell({
                             <Save size={14} />
                             <span className="hidden sm:inline">Lưu nháp</span>
                         </button>
-                        <Link 
+                        <Link
                             href={`/${locale}/organizer/center`}
                             className="p-1 text-text-muted hover:text-text-primary rounded-ds-md hover:bg-bg-subtle transition-colors"
                         >
@@ -57,7 +57,7 @@ export function CreateEventWizardShell({
                         </Link>
                     </div>
                 </div>
-                
+
                 <div className="max-w-[1860px] mx-auto">
                     <CreateEventWizardStepper currentStep={step} />
                 </div>
@@ -87,11 +87,11 @@ export function CreateEventWizardShell({
 
             {/* Footer */}
             <div className="mt-auto">
-                <CreateEventFooterActions 
-                    currentStep={step} 
-                    totalSteps={5} 
-                    onBack={onBack} 
-                    onNext={onNext} 
+                <CreateEventFooterActions
+                    currentStep={step}
+                    totalSteps={5}
+                    onBack={onBack}
+                    onNext={onNext}
                     onSubmit={onSubmit}
                     onSaveDraft={onSaveDraft}
                     isSubmitting={isSubmitting}

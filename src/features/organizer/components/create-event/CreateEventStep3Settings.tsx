@@ -23,10 +23,9 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
     const mergedErrors = { ...errors, ...localGateErrors };
 
     const fieldClass = (field: string) =>
-        `w-full p-2.5 border rounded-ds-lg bg-field-bg-default focus:ring-1 focus:ring-focus-ring outline-none ${
-            mergedErrors[field]
-                ? "border-feedback-error-border focus:border-feedback-error-border"
-                : "border-border-default focus:border-field-border-focus"
+        `w-full p-2.5 border rounded-ds-lg bg-field-bg-default focus:ring-1 focus:ring-focus-ring outline-none ${mergedErrors[field]
+            ? "border-feedback-error-border focus:border-feedback-error-border"
+            : "border-border-default focus:border-field-border-focus"
         }`;
 
     const renderError = (field: string) => (
@@ -90,7 +89,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
 
     return (
         <div className="space-y-6">
-            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
+            {/* <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <Globe className="text-text-secondary" size={20} />
                     <h3 className="text-lg font-bold text-text-primary">Công bố sự kiện</h3>
@@ -139,7 +138,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
@@ -231,7 +230,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                 </div>
             </div>
 
-            <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4" data-field="gate" tabIndex={-1}>
+            {/* <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4" data-field="gate" tabIndex={-1}>
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                         <Map className="text-text-secondary" size={20} />
@@ -344,7 +343,7 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                 <div className="rounded-ds-lg border border-feedback-info-border bg-feedback-info-bg p-3 text-sm text-feedback-info-text">
                     Checker sẽ được phân công theo event và gate sau khi sự kiện được tạo. Check-in hỗ trợ online hoặc offline có đồng bộ lại.
                 </div>
-            </div>
+            </div> */}
 
             <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">

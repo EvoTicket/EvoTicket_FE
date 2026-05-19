@@ -61,7 +61,7 @@ export function CustomDatePicker({ selectedDate, onChange, width, height }: Cust
   const dayNames = [t('day_sun'), t('day_mon'), t('day_tue'), t('day_wed'), t('day_thu'), t('day_fri'), t('day_sat')];
 
   return (
-    <Popover className="relative w-full">
+    <Popover className="relative" style={{ width: width || "100%" }}>
       {({ close }) => (
         <>
           <PopoverButton
@@ -80,8 +80,9 @@ export function CustomDatePicker({ selectedDate, onChange, width, height }: Cust
           </PopoverButton>
 
           <PopoverPanel
+            anchor="bottom start"
             transition
-            className={`absolute z-50 mt-2 inset-x-0 bg-bg-surface/95 backdrop-blur-xl border border-border-default rounded-ds-xl shadow-2xl p-5 transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0 lg:bottom-auto bottom-full lg:mb-0 mb-2 origin-top`}
+            className="z-50 w-80 [--anchor-gap:6px] bg-bg-surface/95 backdrop-blur-xl border border-border-default rounded-ds-xl shadow-2xl p-5 transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0 focus:outline-none"
           >
             <div className="flex justify-between items-center mb-5">
               <button
@@ -125,9 +126,9 @@ export function CustomDatePicker({ selectedDate, onChange, width, height }: Cust
                   }}
                   className={`w-8 h-8 flex items-center justify-center rounded-full text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50
                     ${isSelected(day)
-                      ? "bg-button-primary-bg-defaultext-button-primary-text-default font-bold shadow-md shadow-primary/30 scale-105"
+                      ? "bg-button-primary-bg-default text-button-primary-text-default font-bold shadow-md shadow-primary/30 scale-105"
                       : isToday(day)
-                        ? "text-primary font-bold border border-primary/30 bg-button-primary-bg-defaul/10"
+                        ? "text-primary font-bold border border-primary/30 bg-button-primary-bg-default/10"
                         : "text-text-primary hover:bg-secondary hover:text-primary"
                     }
                   `}
