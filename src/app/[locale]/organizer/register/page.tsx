@@ -846,15 +846,16 @@ export default function RegisterOrganizerPage() {
                             <button
                                 type="button"
                                 onClick={() => router.back()}
-                                className="flex-1 px-6 py-3 border border-border-default text-text-primary rounded-ds-lg font-medium hover:bg-secondary transition-colors"
+                                className="flex-1 px-6 py-3 bg-secondary hover:bg-secondary/80 border border-border-default text-text-primary rounded-ds-lg font-semibold transition-all"
                             >
                                 Hủy
                             </button>
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="flex-1 px-6 py-3 bg-button-primary-bg-defaul hover:bg-button-primary-bg-defaul-hovertext-button-primary-text-default rounded-ds-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-ds-lg font-semibold transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
+                                {isLoading && <Loader2 className="h-5 w-5 animate-spin" />}
                                 {isLoading ? "Đang xử lý..." : "Đăng ký"}
                             </button>
                         </div>
