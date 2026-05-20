@@ -157,7 +157,7 @@ function formatDateTime(value: Nullable<string>): string {
 
 /**
  * Inventory backend có 2 trục:
- * - approvalStatus: PENDING / ACCEPTED / REJECTED
+ * - approvalStatus: PENDING_REVIEW / PUBLISHED / REJECTED
  * - status: UPCOMING / ON_SALE / SALE_CLOSED / ON_GOING / COMPLETED / CANCELLED
  *
  * OrgEventStatus hiện tại của FE là model cũ, nên mapper cần ép về các status FE đang hiểu.
@@ -179,7 +179,7 @@ function normalizeEventStatus(
     return "REJECTED";
   }
 
-  if (normalizedApprovalStatus === "PENDING") {
+  if (normalizedApprovalStatus === "PENDING_REVIEW") {
     return "PENDING_REVIEW";
   }
 
@@ -222,7 +222,7 @@ function normalizeEventStatus(
       return "COMPLETED";
 
     default:
-      return normalizedApprovalStatus === "ACCEPTED" ? "APPROVED" : "DRAFT";
+      return normalizedApprovalStatus === "PUBLISHED" ? "APPROVED" : "DRAFT";
   }
 }
 
@@ -237,7 +237,7 @@ function getOrganizerDisplayStatus(params: {
   const status = params.status?.toUpperCase();
   const approvalStatus = params.approvalStatus?.toUpperCase();
 
-  if (approvalStatus === "PENDING") {
+  if (approvalStatus === "PENDING_REVIEW") {
     return {
       key: "PENDING",
       label: "Chờ duyệt",

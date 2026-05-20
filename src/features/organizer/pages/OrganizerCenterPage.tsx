@@ -115,11 +115,11 @@ type OrganizerCenterTab = {
 
 const STATUS_TABS: OrganizerCenterTab[] = [
   { key: "all", label: "Tất cả" },
-  { key: "pending", label: "Chờ duyệt", approvalStatuses: ["PENDING"] },
-  { key: "upcoming", label: "Sắp diễn ra", approvalStatuses: ["ACCEPTED"], eventStatuses: ["UPCOMING", "SALE_CLOSED"] },
-  { key: "onsale", label: "Đang mở bán", approvalStatuses: ["ACCEPTED"], eventStatuses: ["ON_SALE"] },
-  { key: "ongoing", label: "Đang diễn ra", approvalStatuses: ["ACCEPTED"], eventStatuses: ["ON_GOING"] },
-  { key: "ended", label: "Đã kết thúc", approvalStatuses: ["ACCEPTED"], eventStatuses: ["COMPLETED"] },
+  { key: "pending", label: "Chờ duyệt", approvalStatuses: ["PENDING_REVIEW"] },
+  { key: "upcoming", label: "Sắp diễn ra", approvalStatuses: ["PUBLISHED"], eventStatuses: ["UPCOMING", "SALE_CLOSED"] },
+  { key: "onsale", label: "Đang mở bán", approvalStatuses: ["PUBLISHED"], eventStatuses: ["ON_SALE"] },
+  { key: "ongoing", label: "Đang diễn ra", approvalStatuses: ["PUBLISHED"], eventStatuses: ["ON_GOING"] },
+  { key: "ended", label: "Đã kết thúc", approvalStatuses: ["PUBLISHED"], eventStatuses: ["COMPLETED"] },
   { key: "rejected", label: "Bị từ chối", approvalStatuses: ["REJECTED"] },
   { key: "cancelled", label: "Đã hủy", eventStatuses: ["CANCELLED"] },
 ];
