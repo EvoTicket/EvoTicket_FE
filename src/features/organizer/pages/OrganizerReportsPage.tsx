@@ -519,7 +519,9 @@ export default function ReportsPage() {
                 </PieChart>
               </ResponsiveContainer>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-[var(--color-text-primary)]">
-                <span className="text-[22px] font-semibold">71%</span>
+                <span className="text-[22px] font-semibold">
+                  {Math.round(dashboard?.avgOccupancyRate || 0)}%
+                </span>
                 <span className="text-[11px] text-[var(--color-text-muted)]">
                   TB toàn org
                 </span>
