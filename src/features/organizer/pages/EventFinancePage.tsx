@@ -5,28 +5,31 @@ import {
 import { EventSectionPanel } from "@/src/features/organizer/components/event-detail/EventSectionPanel";
 import { FinanceSummaryCard } from "@/src/features/organizer/components/event-detail/FinanceSummaryCard";
 import { OrganizerDataTable } from "@/src/features/organizer/components/common/OrganizerDataTable";
+import { useTranslations } from "next-intl";
 
 export default function EventFinancePage() {
+  const t = useTranslations("Organizer.EventDetail.Finance");
+
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <FinanceSummaryCard label="Gross revenue" value="5.38B đ" helper="Bao gồm phí dịch vụ người mua" />
-        <FinanceSummaryCard label="Platform fee" value="269M đ" helper="5% trên doanh thu vé" />
-        <FinanceSummaryCard label="Next payout" value="2.071B đ" helper="Dự kiến T+7 sau sự kiện" />
+        <FinanceSummaryCard label={t("gross_revenue")} value="5.38B đ" helper={t("gross_helper")} />
+        <FinanceSummaryCard label={t("platform_fee")} value="269M đ" helper={t("platform_helper")} />
+        <FinanceSummaryCard label={t("next_payout")} value="2.071B đ" helper={t("next_payout_helper")} />
       </div>
-      <EventSectionPanel title="Finance & Settlement" subtitle="Batch đối soát, phí nền tảng và payout">
+      <EventSectionPanel title={t("title")} subtitle={t("subtitle")}>
         <OrganizerDataTable
           state={EVENT_DETAIL_STATE.finance}
           rows={FINANCE_ROWS}
           columns={[
-            { key: "batch", label: "Batch" },
-            { key: "period", label: "Kỳ" },
-            { key: "gross", label: "Gross", align: "right" },
-            { key: "fee", label: "Fee", align: "right" },
-            { key: "payout", label: "Payout", align: "right" },
-            { key: "status", label: "Trạng thái" },
+            { key: "batch", label: t("col_batch") },
+            { key: "period", label: t("col_period") },
+            { key: "gross", label: t("col_gross"), align: "right" },
+            { key: "fee", label: t("col_fee"), align: "right" },
+            { key: "payout", label: t("col_payout"), align: "right" },
+            { key: "status", label: t("col_status") },
           ]}
-          emptyMessage="Chưa có batch settlement nào."
+          emptyMessage={t("empty")}
         />
       </EventSectionPanel>
     </div>

@@ -6,8 +6,11 @@ import {
 import { EventKpiGrid } from "@/src/features/organizer/components/event-detail/EventKpiGrid";
 import { EventSectionPanel } from "@/src/features/organizer/components/event-detail/EventSectionPanel";
 import { OrganizerStatusBadge } from "@/src/features/organizer/components/common/OrganizerStatusBadge";
+import { useTranslations } from "next-intl";
 
 export default function EventOverviewPage() {
+  const t = useTranslations("Organizer.EventDetail.Overview");
+
   return (
     <div className="flex flex-col gap-6">
       <EventKpiGrid metrics={OVERVIEW_METRICS} />
@@ -17,7 +20,7 @@ export default function EventOverviewPage() {
           <EventSectionPanel
             key={snapshot.title}
             title={snapshot.title}
-            subtitle="Tình trạng vận hành hiện tại"
+            subtitle={t("current_status")}
           >
             <div className="flex flex-col gap-3">
               {snapshot.rows.map(([label, value]) => (
@@ -35,7 +38,7 @@ export default function EventOverviewPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.8fr)]">
-        <EventSectionPanel title="Hoạt động gần đây" subtitle="Luồng sự kiện vận hành theo thời gian thực">
+        <EventSectionPanel title={t("recent_activity")} subtitle={t("recent_activity_desc")}>
           <div className="flex flex-col divide-y divide-border-subtle">
             {RECENT_ACTIVITY.map((item) => (
               <div key={item.event} className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
@@ -52,7 +55,7 @@ export default function EventOverviewPage() {
           </div>
         </EventSectionPanel>
 
-        <EventSectionPanel title="Truy cập nhanh" subtitle="Chuyển sang các màn hình vận hành khác">
+        <EventSectionPanel title={t("quick_access")} subtitle={t("quick_access_desc")}>
           <div className="grid gap-2">
             {[
               "Event Analytics",

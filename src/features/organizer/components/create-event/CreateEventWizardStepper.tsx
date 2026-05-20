@@ -1,17 +1,16 @@
 import { Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface StepItem {
     id: number;
-    title: string;
-    description?: string;
 }
 
 const steps: StepItem[] = [
-    { id: 1, title: "Thông tin sự kiện" },
-    { id: 2, title: "Suất diễn & Loại vé" },
-    { id: 3, title: "Cài đặt" },
-    { id: 4, title: "Hồ sơ thanh toán áp dụng" },
-    { id: 5, title: "Review & Submit" }
+    { id: 1 },
+    { id: 2 },
+    { id: 3 },
+    { id: 4 },
+    { id: 5 }
 ];
 
 interface Props {
@@ -20,6 +19,8 @@ interface Props {
 }
 
 export function CreateEventWizardStepper({ currentStep, onStepClick }: Props) {
+    const t = useTranslations("CreateEvent.Wizard");
+
     return (
         <div className="flex items-center gap-2 overflow-x-auto pb-4">
             {steps.map((step, idx) => {
@@ -49,8 +50,12 @@ export function CreateEventWizardStepper({ currentStep, onStepClick }: Props) {
                                 {isCompleted ? <Check size={14} /> : step.id}
                             </div>
                             <div className="flex flex-col text-left">
-                                <span className="text-[10px] uppercase font-semibold text-text-muted">Bước {step.id}</span>
-                                <span className="text-sm font-medium whitespace-nowrap">{step.title}</span>
+                                <span className="text-[10px] uppercase font-semibold text-text-muted">
+                                    {t("step_label", { number: step.id })}
+                                </span>
+                                <span className="text-sm font-medium whitespace-nowrap">
+                                    {t(`step${step.id}_name`)}
+                                </span>
                             </div>
                         </button>
                         {idx < steps.length - 1 && (
@@ -62,3 +67,4 @@ export function CreateEventWizardStepper({ currentStep, onStepClick }: Props) {
         </div>
     );
 }
+

@@ -4,22 +4,25 @@ import {
 } from "@/src/features/organizer/fixtures/eventDetail";
 import { EventSectionPanel } from "@/src/features/organizer/components/event-detail/EventSectionPanel";
 import { OrganizerDataTable } from "@/src/features/organizer/components/common/OrganizerDataTable";
+import { useTranslations } from "next-intl";
 
 export default function EventVouchersPage() {
+  const t = useTranslations("Organizer.EventDetail.Vouchers");
+
   return (
     <div className="flex flex-col gap-6">
-      <EventSectionPanel title="Voucher & Promotion" subtitle="Chiến dịch mã giảm giá và giới hạn sử dụng">
+      <EventSectionPanel title={t("title")} subtitle={t("subtitle")}>
         <OrganizerDataTable
           state={EVENT_DETAIL_STATE.vouchers}
           rows={VOUCHERS}
           columns={[
-            { key: "code", label: "Code" },
-            { key: "campaign", label: "Campaign" },
-            { key: "discount", label: "Discount" },
-            { key: "used", label: "Used", align: "right" },
-            { key: "status", label: "Trạng thái" },
+            { key: "code", label: t("col_code") },
+            { key: "campaign", label: t("col_campaign") },
+            { key: "discount", label: t("col_discount") },
+            { key: "used", label: t("col_used"), align: "right" },
+            { key: "status", label: t("col_status") },
           ]}
-          emptyMessage="Chưa có voucher nào cho sự kiện này."
+          emptyMessage={t("empty")}
         />
       </EventSectionPanel>
     </div>

@@ -523,7 +523,7 @@ export function CreateEventStep1BasicInfo({
                             ECS
                         </div>
                         <button type="button" className="text-xs text-text-secondary hover:text-text-primary w-full text-center mt-2">
-                            Đổi logo
+                            {t("organizer.change_logo")}
                         </button>
                     </div>
                     

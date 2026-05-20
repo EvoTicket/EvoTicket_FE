@@ -11,6 +11,7 @@ import { OrganizerHeader } from "./OrganizerHeader";
 import { OrganizerSidebar } from "./OrganizerSidebar";
 import { Home, PencilLine, RefreshCw } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
+import { useTranslations } from "next-intl";
 
 type OrganizerWorkspaceLayoutProps = {
   children: ReactNode;
@@ -49,6 +50,7 @@ export function OrganizerWorkspaceLayout({
     useAppSelector((state) => state.auth);
   const [organization, setOrganization] = useState<OrganizationProfileResponse | null>(null);
   const [organizationState, setOrganizationState] = useState<OrganizationLoadState>("idle");
+  const t = useTranslations("Organizer.Layout");
 
   const locale = typeof params.locale === "string" ? params.locale : "vi";
 
@@ -140,7 +142,7 @@ export function OrganizerWorkspaceLayout({
   if (!token || !isAuthenticated || !hasOrganizerAccess) {
     return (
       <div className="flex h-screen items-center justify-center bg-bg-page text-sm text-text-muted">
-        Đang kiểm tra quyền truy cập...
+        {t("checkingAccess")}
       </div>
     );
   }
@@ -148,7 +150,7 @@ export function OrganizerWorkspaceLayout({
   if (organizationState === "idle" || organizationState === "loading") {
     return (
       <div className="flex h-screen items-center justify-center bg-bg-page text-sm text-text-muted">
-        Đang tải hồ sơ tổ chức...
+        {t("loadingProfile")}
       </div>
     );
   }
@@ -158,16 +160,15 @@ export function OrganizerWorkspaceLayout({
       <div className="flex h-screen items-center justify-center bg-bg-page px-6 text-text-primary">
         <div className="max-w-xl rounded-ds-lg border border-feedback-warning-border bg-bg-surface p-6 text-center">
           <h1 className="text-xl font-semibold">
-            Hồ sơ tổ chức đang chờ duyệt
+            {t("pendingTitle")}
           </h1>
 
           <p className="mt-2 text-sm text-text-muted">
-            Tổ chức{" "}
+            {t("pendingDesc1")}{" "}
             {organization?.organizationName
               ? `"${organization.organizationName}"`
-              : "của bạn"}{" "}
-            đã được gửi và đang chờ đội ngũ EvoTicket xác minh. Dashboard và danh
-            sách sự kiện sẽ mở sau khi hồ sơ được duyệt.
+              : t("pendingDesc2")}{" "}
+            {t("pendingDesc3")}
           </p>
 
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
@@ -178,7 +179,7 @@ export function OrganizerWorkspaceLayout({
               leftIcon={<RefreshCw />}
               onClick={handleRetry}
             >
-              Kiểm tra lại trạng thái
+              {t("checkStatus")}
             </Button>
 
             <Button
@@ -188,7 +189,7 @@ export function OrganizerWorkspaceLayout({
               leftIcon={<Home />}
               onClick={handleGoHome}
             >
-              Về trang chủ
+              {t("backToHome")}
             </Button>
           </div>
         </div>
@@ -200,11 +201,11 @@ export function OrganizerWorkspaceLayout({
     return (
       <div className="flex h-screen items-center justify-center bg-bg-page px-6 text-text-primary">
         <div className="max-w-xl rounded-ds-lg border border-feedback-error-border bg-bg-surface p-6 text-center">
-          <h1 className="text-xl font-semibold">Hồ sơ tổ chức bị từ chối</h1>
+          <h1 className="text-xl font-semibold">{t("rejectedTitle")}</h1>
 
           <p className="mt-2 text-sm text-text-muted">
             {organization?.rejectionReason ||
-              "Vui lòng kiểm tra lại thông tin tổ chức và cập nhật hồ sơ để được xét duyệt lại."}
+              t("rejectedDefaultReason")}
           </p>
 
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
@@ -215,7 +216,7 @@ export function OrganizerWorkspaceLayout({
               leftIcon={<PencilLine />}
               onClick={handleGoResubmit}
             >
-              Cập nhật hồ sơ
+              {t("updateProfile")}
             </Button>
 
             <Button
@@ -225,7 +226,7 @@ export function OrganizerWorkspaceLayout({
               leftIcon={<Home />}
               onClick={handleGoHome}
             >
-              Về trang chủ
+              {t("backToHome")}
             </Button>
           </div>
         </div>
@@ -238,13 +239,13 @@ export function OrganizerWorkspaceLayout({
       <div className="flex h-screen items-center justify-center bg-bg-page px-6 text-text-primary">
         <div className="max-w-xl rounded-ds-lg border border-border-default bg-bg-surface p-6 text-center">
           <h1 className="text-xl font-semibold">
-            Không thể xác minh hồ sơ tổ chức
+            {t("errorTitle")}
           </h1>
 
           <p className="mt-2 text-sm text-text-muted">
             {organizationState === "not-found"
-              ? "Tài khoản của bạn chưa có hồ sơ tổ chức hợp lệ. Vui lòng đăng ký thông tin tổ chức trước khi sử dụng Organizer Center."
-              : "Vui lòng thử lại sau. Dashboard và danh sách sự kiện chưa được tải để tránh dùng sai trạng thái tổ chức."}
+              ? t("notFoundDesc")
+              : t("errorDesc")}
           </p>
 
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
@@ -256,7 +257,7 @@ export function OrganizerWorkspaceLayout({
                 leftIcon={<PencilLine />}
                 onClick={handleGoRegister}
               >
-                Đăng ký tổ chức
+                {t("registerOrg")}
               </Button>
             ) : (
               <Button
@@ -266,7 +267,7 @@ export function OrganizerWorkspaceLayout({
                 leftIcon={<RefreshCw />}
                 onClick={handleRetry}
               >
-                Thử lại
+                {t("retry")}
               </Button>
             )}
 
@@ -277,7 +278,7 @@ export function OrganizerWorkspaceLayout({
               leftIcon={<Home />}
               onClick={handleGoHome}
             >
-              Về trang chủ
+              {t("backToHome")}
             </Button>
           </div>
         </div>

@@ -4,12 +4,14 @@ import { Plus, Search, Bell, ChevronDown, Sun, Moon, User, LogOut, Home } from "
 import Link from "next/link";
 import Image from "next/image";
 import { useParams, useRouter, usePathname } from "next/navigation";
+import { CreateEventButton } from "@/src/features/organizer/components/common/CreateEventButton";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "@/src/store/hooks";
 import { logout as logoutAction } from "@/src/store/slices/authSlice";
 import { toast } from "react-toastify";
 import api from "@/src/lib/axios";
+import { useTranslations } from "next-intl";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -26,6 +28,7 @@ export function OrganizerHeader() {
     const dispatch = useAppDispatch();
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
+    const t = useTranslations("Organizer.Layout");
 
     // Get auth state from Redux
     const { user, refreshToken } = useAppSelector((state) => state.auth);
@@ -44,7 +47,7 @@ export function OrganizerHeader() {
             }
         }
         dispatch(logoutAction());
-        toast.info(locale === "vi" ? "Đăng xuất thành công" : "Logged out successfully");
+        toast.info(t("logoutSuccess"));
         router.push(`/${locale}/user/homepage`);
     };
 
@@ -86,7 +89,7 @@ export function OrganizerHeader() {
                     </div>
                     <input 
                         type="text" 
-                        placeholder={locale === "vi" ? "Tìm nhanh sự kiện, đơn hàng..." : "Quick search events, orders..."} 
+                        placeholder={t("quickSearch")} 
                         className="block w-full pl-10 pr-4 py-2 bg-bg-surface border border-border-default rounded-full text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-1 focus:ring-focus-ring focus:border-field-border-focus transition-colors"
                     />
                 </div>
@@ -98,15 +101,15 @@ export function OrganizerHeader() {
                 <Link 
                     href={`/${locale}/user/homepage`} 
                     className="p-2 rounded-full hover:bg-bg-surface border border-border-default transition-colors text-text-secondary cursor-pointer"
-                    title={locale === "vi" ? "Quay lại Trang chủ User" : "Back to User Portal"}
+                    title={t("backToHomeUser")}
                 >
                     <Home size={20} />
                 </Link>
 
-                <Link href={`/${locale}/organizer/events/create`} className="flex items-center gap-2 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2 rounded-ds-lg font-medium transition-colors shadow-sm text-sm">
+                <CreateEventButton className="flex items-center gap-2 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2 rounded-ds-lg font-medium transition-colors shadow-sm text-sm">
                     <Plus size={16} />
-                    {locale === "vi" ? "Tạo sự kiện" : "Create Event"}
-                </Link>
+                    {t("createEvent")}
+                </CreateEventButton>
                 
                 <button className="p-2 rounded-full hover:bg-bg-surface border border-border-default transition-colors text-text-secondary relative cursor-pointer">
                     <Bell size={20} />
@@ -126,7 +129,7 @@ export function OrganizerHeader() {
                 <button
                     onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                     className="p-2.5 rounded-full bg-button-secondary-bg-default text-text-secondary hover:bg-border-default border border-border-default transition-colors cursor-pointer shrink-0"
-                    title="Chuyển đổi giao diện"
+                    title={t("switchTheme")}
                 >
                     {mounted ? (
                         theme === "dark" ? (
@@ -163,7 +166,7 @@ export function OrganizerHeader() {
                                         <span>{getFullName()}</span>
                                         <ChevronDown size={14} className="text-text-muted shrink-0 animate-bounce-slow" />
                                     </div>
-                                    <div className="text-xs text-text-muted select-none">{locale === "vi" ? "Quản trị viên" : "Organizer Admin"}</div>
+                                    <div className="text-xs text-text-muted select-none">{t("adminRole")}</div>
                                 </div>
                             </div>
                         </DropdownMenuTrigger>
@@ -179,16 +182,16 @@ export function OrganizerHeader() {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => router.push(`/${locale}/user/profile`)} className="cursor-pointer">
                                 <User className="mr-2 h-4 w-4" />
-                                <span>{locale === "vi" ? "Hồ sơ cá nhân" : "Personal Profile"}</span>
+                                <span>{t("personalProfile")}</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => router.push(`/${locale}/user/homepage`)} className="cursor-pointer">
                                 <Home className="mr-2 h-4 w-4" />
-                                <span>{locale === "vi" ? "Về trang chủ User" : "Back to User Portal"}</span>
+                                <span>{t("backToHomeUser")}</span>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={handleLogout} className="text-feedback-error-text hover:text-feedback-error-text hover:bg-feedback-error-bg/10 cursor-pointer">
                                 <LogOut className="mr-2 h-4 w-4" />
-                                <span>{locale === "vi" ? "Đăng xuất" : "Logout"}</span>
+                                <span>{t("logout")}</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

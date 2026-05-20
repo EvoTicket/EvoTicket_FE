@@ -68,7 +68,7 @@ export function CreateEventWizardShell({
             {/* Main Content Area */}
             <div className="max-w-[1860px] mx-auto w-full px-4 sm:px-6 py-8 flex-1">
                 <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-text-primary">{title} <span className="text-text-muted text-sm font-normal bg-bg-elevated px-2 py-1 rounded-full ml-2 border border-border-default">Step {step} / 5</span></h2>
+                    <h2 className="text-2xl font-bold text-text-primary">{title} <span className="text-text-muted text-sm font-normal bg-bg-elevated px-2 py-1 rounded-full ml-2 border border-border-default">{tWizard("step_progress_indicator", { current: step, total: 5 })}</span></h2>
                     <p className="text-text-secondary mt-1">{description}</p>
                 </div>
 

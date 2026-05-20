@@ -20,8 +20,10 @@ import {
     User,
 } from "lucide-react";
 import { EVENT_NAV_ITEMS } from "@/src/features/organizer/constants/organizerRoutes";
+import { useTranslations } from "next-intl";
 
 export function OrganizerSidebar() {
+    const t = useTranslations("Organizer.Sidebar");
     const params = useParams();
     const pathname = usePathname();
     const pathSegments = pathname.split("/").filter(Boolean);
@@ -80,11 +82,11 @@ export function OrganizerSidebar() {
                                 className="mb-5 flex items-center gap-3 rounded-ds-lg border border-navbar-sidebar-border px-4 py-3 text-sm font-medium text-navbar-sidebar-text-default transition-colors hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active"
                             >
                                 <ArrowLeft size={18} />
-                                <span>Sự kiện của tôi</span>
+                                <span>{t("myEvents")}</span>
                             </Link>
 
                             <div className="text-xs font-bold text-navbar-sidebar-text-default mb-4 px-4 uppercase tracking-wider">
-                                Event workspace
+                                {t("eventWorkspace")}
                             </div>
                             <nav className="space-y-1">
                                 {EVENT_NAV_ITEMS.map((item) => {
@@ -109,7 +111,7 @@ export function OrganizerSidebar() {
                                                         : "text-navbar-sidebar-icon-default"
                                                 }
                                             />
-                                            <span>{item.label}</span>
+                                            <span>{t(`events.${item.key}`)}</span>
                                         </Link>
                                     );
                                 })}
@@ -118,7 +120,7 @@ export function OrganizerSidebar() {
                     ) : (
                         <>
                             <div className="text-xs font-bold text-navbar-sidebar-text-default mb-4 px-4 uppercase tracking-wider">
-                                Workspace
+                                {t("workspace")}
                             </div>
                             <nav className="space-y-1">
                                 <Link
@@ -129,7 +131,7 @@ export function OrganizerSidebar() {
                                         }`}
                                 >
                                     <Calendar size={15} />
-                                    <span>Sự kiện của tôi</span>
+                                    <span>{t("myEvents")}</span>
                                 </Link>
                                 <Link
                                     href={`/${locale}/organizer/reports`}
@@ -139,7 +141,7 @@ export function OrganizerSidebar() {
                                         }`}
                                 >
                                     <BarChart2 size={20} />
-                                    <span>Quản lý báo cáo</span>
+                                    <span>{t("manageReports")}</span>
                                 </Link>
                                 <Link
                                     href={`/${locale}/organizer/terms`}
@@ -149,7 +151,7 @@ export function OrganizerSidebar() {
                                         }`}
                                 >
                                     <FileText size={20} />
-                                    <span>Điều khoản cho Ban tổ chức</span>
+                                    <span>{t("organizerTerms")}</span>
                                 </Link>
                                 <Link
                                     href={`/${locale}/organizer/account`}
@@ -159,7 +161,7 @@ export function OrganizerSidebar() {
                                         }`}
                                 >
                                     <User size={20} />
-                                    <span>Tài khoản</span>
+                                    <span>{t("account")}</span>
                                 </Link>
                             </nav>
                         </>
@@ -169,10 +171,10 @@ export function OrganizerSidebar() {
                 <div className="mt-auto p-6">
                     {/* Pro Organizer Banner */}
                     <div className="bg-navbar-sidebar-item-bg-hover border border-navbar-sidebar-border rounded-ds-xl p-4">
-                        <div className="text-xs font-bold text-action-brand-bg-default mb-1 uppercase">Pro Organizer</div>
-                        <div className="text-sm text-navbar-sidebar-text-active mb-3">Bạn đang dùng gói Growth</div>
+                        <div className="text-xs font-bold text-action-brand-bg-default mb-1 uppercase">{t("proOrganizer")}</div>
+                        <div className="text-sm text-navbar-sidebar-text-active mb-3">{t("growthPlan")}</div>
                         <button className="w-full py-2 bg-navbar-sidebar-item-bg-default border border-navbar-sidebar-border hover:bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active text-sm rounded-ds-lg transition-colors">
-                            Nâng cấp gói
+                            {t("upgradePlan")}
                         </button>
                     </div>
                 </div>

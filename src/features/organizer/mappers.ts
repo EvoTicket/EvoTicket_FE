@@ -183,6 +183,10 @@ function normalizeEventStatus(
     return "PENDING_REVIEW";
   }
 
+  if (normalizedApprovalStatus === "DRAFT") {
+    return "DRAFT";
+  }
+
   switch (normalizedStatus) {
     case "DRAFT":
       return "DRAFT";
@@ -250,6 +254,14 @@ function getOrganizerDisplayStatus(params: {
       key: "REJECTED",
       label: "Bị từ chối",
       tone: "error" as const,
+    };
+  }
+
+  if (approvalStatus === "DRAFT") {
+    return {
+      key: "DRAFT",
+      label: "Bản nháp",
+      tone: "neutral" as const,
     };
   }
 

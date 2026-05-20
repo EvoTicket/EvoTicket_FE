@@ -15,6 +15,7 @@ import {
   eventModeTone,
 } from "@/src/features/organizer/constants/organizerStatusMapping";
 import type { OrgFixtureEvent } from "@/src/features/organizer/types/organizer";
+import { useTranslations } from "next-intl";
 
 interface OrganizerEventCardProps {
   event: OrgFixtureEvent;
@@ -26,15 +27,16 @@ interface OrganizerEventCardProps {
 const EVENT_TABLE_GRID =
   "minmax(220px,2.2fr) minmax(160px,1.35fr) minmax(110px,0.75fr) minmax(120px,0.9fr) minmax(96px,0.7fr) 64px 112px";
 
-function ActionIcon({ label, children }: { label: string; children: React.ReactNode }) {
+function ActionIcon({ label, children, onClick, as: Component = "button", href }: { label: string; children: React.ReactNode; onClick?: () => void; as?: any; href?: string }) {
+  const props = Component === "a" ? { href } : { onClick, type: "button" };
   return (
-    <button
-      type="button"
+    <Component
       title={label}
       className="flex h-8 w-8 items-center justify-center rounded-ds-md border border-[var(--color-border-default)] bg-transparent text-[var(--color-icon-secondary)] transition-colors hover:bg-[var(--color-bg-elevated)]"
+      {...props}
     >
       {children}
-    </button>
+    </Component>
   );
 }
 
@@ -51,6 +53,7 @@ export function OrganizerEventCard({ event, basePath, isLast }: OrganizerEventCa
     event.displayStatusLabel ?? eventStatusLabel(event.eventStatus);
   const displayStatusTone =
     event.displayStatusTone ?? eventStatusTone(event.eventStatus);
+  const t = useTranslations("Organizer.EventCard");
 
   return (
     <div
@@ -64,7 +67,7 @@ export function OrganizerEventCard({ event, basePath, isLast }: OrganizerEventCa
     >
       {/* Event info */}
       <a
-        href={`${basePath}/${event.id}/overview`}
+        href={event.eventStatus === "DRAFT" ? `${basePath}/create?draftId=${event.id}` : `${basePath}/${event.id}/overview`}
         className="flex min-w-0 items-center gap-3 rounded-ds-md p-1 text-left transition-colors hover:bg-[var(--color-bg-elevated)]"
       >
         <div className="h-14 w-14 shrink-0 overflow-hidden rounded-ds-md border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)]">
@@ -132,7 +135,7 @@ export function OrganizerEventCard({ event, basePath, isLast }: OrganizerEventCa
               />
             </div>
             <span className="text-[11px] text-[var(--color-text-muted)]">
-              {percent}% đã bán
+              {t("soldPercent", { percent })}
             </span>
           </>
         )}
@@ -151,13 +154,23 @@ export function OrganizerEventCard({ event, basePath, isLast }: OrganizerEventCa
 
       {/* Actions */}
       <div className="flex items-center justify-end gap-1.5">
-        <ActionIcon label="Quản trị sự kiện"><Settings size={14} /></ActionIcon>
-        <ActionIcon label="Chỉnh sửa"><Edit3 size={14} /></ActionIcon>
+        <ActionIcon label={t("manageEvent")}><Settings size={14} /></ActionIcon>
+        
+        {event.eventStatus === "DRAFT" ? (
+          <ActionIcon as="a" href={`${basePath}/create?draftId=${event.id}`} label={t("editDraft")}>
+            <Edit3 size={14} />
+          </ActionIcon>
+        ) : (
+          <ActionIcon label={t("edit")}>
+            <Edit3 size={14} />
+          </ActionIcon>
+        )}
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              title="Thêm thao tác"
+              title={t("moreActions")}
               className="flex h-8 w-8 items-center justify-center rounded-ds-md border border-[var(--color-border-default)] bg-transparent text-[var(--color-icon-secondary)] transition-colors hover:bg-[var(--color-bg-elevated)]"
             >
               <MoreHorizontal size={14} />
@@ -169,15 +182,15 @@ export function OrganizerEventCard({ event, basePath, isLast }: OrganizerEventCa
           >
             <DropdownMenuItem className="cursor-pointer">
               <Eye size={14} />
-              Xem trang public
+              {t("viewPublic")}
             </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer">
               <Copy size={14} />
-              Nhân bản
+              {t("duplicate")}
             </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer text-[var(--color-feedback-error-text)]">
               <Archive size={14} />
-              Lưu trữ
+              {t("archive")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

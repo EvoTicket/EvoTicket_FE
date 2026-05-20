@@ -64,8 +64,18 @@
   }
 }
 
+/* Hide scrollbar while keeping scroll functionality */
+.scrollbar-none {
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE / Edge legacy */
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;                /* Chrome / Safari / newer Edge */
+}
+
 /* Animations giữ nguyên */
 @layer utilities {
+
   .animate-quang-chai {
     animation: quang-chai 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     transform-origin: top center;

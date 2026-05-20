@@ -42,6 +42,7 @@ import {
   formatNumber,
 } from "@/src/features/organizer/mappers";
 import type { OrganizerDashboardMetricsResponse } from "@/src/features/organizer/types/api";
+import { useTranslations } from "next-intl";
 
 /* ── Filter definitions ───────────────────────────────────── */
 
@@ -197,6 +198,7 @@ function FormatBtn({
 /* ── Main component ──────────────────────────────────────── */
 
 export default function ReportsPage() {
+  const t = useTranslations("Organizer.Reports");
   const [search, setSearch] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>(EMPTY_REPORT_FILTERS);
   const [dashboard, setDashboard] = useState<OrganizerDashboardMetricsResponse | null>(null);
@@ -223,11 +225,11 @@ export default function ReportsPage() {
     } catch (loadError) {
       console.error("Failed to load organizer dashboard", loadError);
       setDashboard(null);
-      setError("Không thể tải dữ liệu báo cáo. Vui lòng thử lại.");
+      setError(t("load_error"));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -245,13 +247,13 @@ export default function ReportsPage() {
   const resaleStats = useMemo(
     () => [
       // Backend dashboard does not expose active resale listing count yet.
-      { label: "Active resale listings", value: "—", tone: "info" as StatusTone },
+      { label: t("resale_stat_listings"), value: "—", tone: "info" as StatusTone },
       // Backend dashboard does not expose average resale price yet.
-      { label: "Average resale price", value: "—", tone: "brand" as StatusTone },
-      { label: "Completed trades", value: formatNumber(dashboard?.resaleVolume), tone: "success" as StatusTone },
-      { label: "Royalty fee total", value: formatMoney(dashboard?.royaltyFee), tone: "accent" as StatusTone },
+      { label: t("resale_stat_avg_price"), value: "—", tone: "brand" as StatusTone },
+      { label: t("resale_stat_trades"), value: formatNumber(dashboard?.resaleVolume), tone: "success" as StatusTone },
+      { label: t("resale_stat_royalty"), value: formatMoney(dashboard?.royaltyFee), tone: "accent" as StatusTone },
     ],
-    [dashboard?.resaleVolume, dashboard?.royaltyFee]
+    [dashboard?.resaleVolume, dashboard?.royaltyFee, t]
   );
   const hasData = hasDashboardData(dashboard);
 
@@ -296,7 +298,7 @@ export default function ReportsPage() {
           leftIcon={<RefreshCw />}
           onClick={loadDashboard}
         >
-          Thử lại
+          {t("retry")}
         </Button>
       </div>
     );
@@ -307,11 +309,10 @@ export default function ReportsPage() {
       {/* Header */}
       <div>
         <h1 className="m-0 text-2xl font-semibold text-[var(--color-text-primary)]">
-          Quản lý báo cáo
+          {t("title")}
         </h1>
         <p className="mt-1 text-[13px] text-[var(--color-text-muted)]">
-          Theo dõi doanh thu, hiệu quả bán vé và tình trạng check-in trên
-          toàn bộ sự kiện
+          {t("subtitle")}
         </p>
       </div>
 
@@ -319,12 +320,12 @@ export default function ReportsPage() {
       <div className="flex flex-wrap items-center gap-3 rounded-ds-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-3">
         <button className="flex items-center gap-2 rounded-ds-md border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] px-3 py-2 text-[13px] text-[var(--color-text-primary)]">
           <Calendar size={14} className="text-[var(--color-icon-muted)]" />
-          {REPORT_DAYS} ngày gần nhất
+          {t("last_days", { days: REPORT_DAYS })}
         </button>
         <OrganizerToolbar
           searchValue={search}
           onSearchChange={setSearch}
-          searchPlaceholder="Tìm sự kiện…"
+          searchPlaceholder={t("search_placeholder")}
           filters={REPORT_FILTER_OPTIONS}
           selectedFilters={selectedFilters}
           onFilterChange={handleFilterChange}
@@ -337,11 +338,11 @@ export default function ReportsPage() {
                 className="flex items-center gap-2 rounded-ds-md border border-[var(--color-border-default)] bg-transparent px-3 py-2 text-[13px] text-[var(--color-text-secondary)]"
               >
                 <RefreshCw size={13} />
-                Làm mới
+                {t("refresh")}
               </button>
               <button className="flex items-center gap-2 rounded-ds-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3 py-2 text-[13px] font-medium text-[var(--color-action-brand-text-default)]">
                 <Download size={13} />
-                Xuất dữ liệu
+                {t("export_data")}
               </button>
             </>
           }
@@ -363,7 +364,7 @@ export default function ReportsPage() {
 
       {!hasData && (
         <div className="rounded-ds-lg border border-dashed border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-5 py-4 text-sm text-[var(--color-text-muted)]">
-          Chưa có dữ liệu dashboard từ backend. Các bảng và biểu đồ đang ở trạng thái trống an toàn.
+          {t("no_data")}
         </div>
       )}
 
@@ -373,15 +374,15 @@ export default function ReportsPage() {
         <div className="col-span-2 flex flex-col gap-4">
           {/* Revenue chart */}
           <Panel
-            title="Doanh thu theo thời gian"
-            subtitle="So với 30 ngày gần nhất"
+            title={t("revenue_chart_title")}
+            subtitle={t("revenue_chart_subtitle")}
             right={
               <div className="flex items-center gap-2">
                 <OrganizerStatusBadge tone="success">
                   +12.4%
                 </OrganizerStatusBadge>
                 <span className="text-[11px] text-[var(--color-text-muted)]">
-                  VND · triệu
+                  {t("vnd_million")}
                 </span>
               </div>
             }
@@ -448,8 +449,8 @@ export default function ReportsPage() {
 
           {/* Ticket by event bar chart */}
           <Panel
-            title="Số vé bán theo sự kiện"
-            subtitle="Top 6 sự kiện trong kỳ"
+            title={t("ticket_chart_title")}
+            subtitle={t("ticket_chart_subtitle")}
           >
             <div style={{ width: "100%", height: 240 }}>
               <ResponsiveContainer>
@@ -500,7 +501,7 @@ export default function ReportsPage() {
         {/* Right 1/3 */}
         <div className="flex flex-col gap-4">
           {/* Occupancy donut */}
-          <Panel title="Tỷ lệ lấp đầy theo loại" subtitle="Occupancy rate %">
+          <Panel title={t("occupancy_chart_title")} subtitle={t("occupancy_chart_subtitle")}>
             <div style={{ width: "100%", height: 200, position: "relative" }}>
               <ResponsiveContainer>
                 <PieChart>
@@ -523,7 +524,7 @@ export default function ReportsPage() {
                   {Math.round(dashboard?.avgOccupancyRate || 0)}%
                 </span>
                 <span className="text-[11px] text-[var(--color-text-muted)]">
-                  TB toàn org
+                  {t("avg_org")}
                 </span>
               </div>
             </div>
@@ -550,8 +551,8 @@ export default function ReportsPage() {
 
           {/* Check-in status */}
           <Panel
-            title="Tình trạng check-in"
-            subtitle="Dữ liệu theo thời gian thực"
+            title={t("checkin_title")}
+            subtitle={t("checkin_subtitle")}
           >
             <div className="flex flex-col gap-3">
               {/* Checked */}
@@ -564,7 +565,7 @@ export default function ReportsPage() {
                     }}
                   />
                   <span className="text-[13px] text-[var(--color-text-secondary)]">
-                    Đã check-in
+                    {t("checked_in")}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -587,7 +588,7 @@ export default function ReportsPage() {
                     }}
                   />
                   <span className="text-[13px] text-[var(--color-text-secondary)]">
-                    Chưa check-in
+                    {t("not_checked_in")}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -613,11 +614,11 @@ export default function ReportsPage() {
 
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <MiniStat
-                  label="Tỷ lệ vào cổng"
+                  label={t("gate_rate")}
                   value={checkIn.gateRate}
                 />
                 <MiniStat
-                  label="Peak gate time"
+                  label={t("peak_time")}
                   value={checkIn.peakTime}
                 />
               </div>
@@ -628,10 +629,10 @@ export default function ReportsPage() {
 
       {/* Resale / blockchain */}
       <Panel
-        title="Thị trường bán lại"
-        subtitle="Giao dịch thứ cấp và royalty on-chain"
+        title={t("resale_title")}
+        subtitle={t("resale_subtitle")}
         right={
-          <OrganizerStatusBadge tone="accent">Blockchain</OrganizerStatusBadge>
+          <OrganizerStatusBadge tone="accent">{t("blockchain")}</OrganizerStatusBadge>
         }
       >
         <div className="grid grid-cols-4 gap-4">
@@ -650,8 +651,8 @@ export default function ReportsPage() {
       <div className="grid grid-cols-4 gap-4">
         <div className="col-span-3">
           <Panel
-            title="Hiệu suất chi tiết theo sự kiện"
-            subtitle="Tổng hợp các chỉ số chính"
+            title={t("performance_title")}
+            subtitle={t("performance_subtitle")}
           >
             <div className="overflow-hidden rounded-ds-md border border-[var(--color-border-subtle)]">
               {/* Header */}
@@ -663,15 +664,15 @@ export default function ReportsPage() {
                   background: "var(--color-bg-elevated)",
                 }}
               >
-                <span>Sự kiện</span>
-                <span>Loại</span>
-                <span>Vé đã bán</span>
-                <span>Lấp đầy</span>
-                <span>Doanh thu</span>
-                <span>Check-in</span>
-                <span>Resale</span>
-                <span>Royalty fee</span>
-                <span>Trạng thái</span>
+                <span>{t("col_event")}</span>
+                <span>{t("col_type")}</span>
+                <span>{t("col_sold")}</span>
+                <span>{t("col_fill")}</span>
+                <span>{t("col_revenue")}</span>
+                <span>{t("col_checkin")}</span>
+                <span>{t("col_resale")}</span>
+                <span>{t("col_royalty")}</span>
+                <span>{t("col_status")}</span>
               </div>
 
               {/* Rows */}
@@ -718,10 +719,10 @@ export default function ReportsPage() {
         </div>
 
         {/* Export panel */}
-        <Panel title="Xuất dữ liệu" subtitle="Chọn phạm vi và định dạng">
+        <Panel title={t("export_panel_title")} subtitle={t("export_panel_subtitle")}>
           <div className="flex flex-col gap-2">
             <span className="text-[11px] uppercase tracking-wide text-[var(--color-text-muted)]">
-              Định dạng
+              {t("format")}
             </span>
             <div className="flex gap-2">
               <FormatBtn
@@ -738,15 +739,15 @@ export default function ReportsPage() {
           </div>
           <div className="flex flex-col gap-2">
             <span className="text-[11px] uppercase tracking-wide text-[var(--color-text-muted)]">
-              Phạm vi
+              {t("scope")}
             </span>
             <div className="flex flex-col gap-1.5">
               {[
-                "Tổng hợp",
-                "Doanh thu",
-                "Check-in",
-                "Resale",
-                "Danh sách người mua",
+                t("scope_options.summary"),
+                t("scope_options.revenue"),
+                t("scope_options.checkin"),
+                t("scope_options.resale"),
+                t("scope_options.buyers"),
               ].map((label, i) => (
                 <label
                   key={label}
@@ -770,7 +771,7 @@ export default function ReportsPage() {
           </div>
           <button className="mt-2 flex items-center justify-center gap-2 rounded-ds-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3 py-2.5 text-[13px] font-medium text-[var(--color-action-brand-text-default)]">
             <FileDown size={14} />
-            Xuất file ngay
+            {t("export_now")}
           </button>
         </Panel>
       </div>
