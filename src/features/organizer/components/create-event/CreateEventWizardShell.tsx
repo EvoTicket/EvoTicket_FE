@@ -4,6 +4,7 @@ import { CreateEventFooterActions } from "./CreateEventFooterActions";
 import { Save, X } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface Props {
     step: number;
@@ -23,6 +24,8 @@ export function CreateEventWizardShell({
     onBack, onNext, onSubmit, onSaveDraft, isSubmitting
 }: Props) {
     const { locale } = useParams();
+    const t = useTranslations("CreateEvent.Shell");
+    const tWizard = useTranslations("CreateEvent.Wizard");
 
     return (
         <div className="dark flex min-h-screen flex-col bg-bg-page">
@@ -34,20 +37,19 @@ export function CreateEventWizardShell({
                             E
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold text-text-primary">Tạo sự kiện</h1>
+                            <h1 className="text-xl font-bold text-text-primary">EvoTicket</h1>
                             <p className="text-xs text-text-muted">Evo Culture Studio</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <span className="hidden sm:inline-block text-xs text-text-muted px-2 py-1 bg-bg-elevated rounded-full border border-border-default">Nháp</span>
-                        <span className="hidden md:inline-block text-xs text-text-muted">Tự động lưu • cập nhật 1 phút trước</span>
+                        <span className="hidden sm:inline-block text-xs text-text-muted px-2 py-1 bg-bg-elevated rounded-full border border-border-default">{t("not_saved")}</span>
                         <button
                             type="button"
                             onClick={onSaveDraft}
                             className="flex items-center gap-2 px-3 py-1.5 border border-border-default rounded-ds-md text-sm hover:bg-bg-subtle text-text-secondary"
                         >
                             <Save size={14} />
-                            <span className="hidden sm:inline">Lưu nháp</span>
+                            <span className="hidden sm:inline">{t("save_draft")}</span>
                         </button>
                         <Link
                             href={`/${locale}/organizer/center`}
@@ -66,8 +68,8 @@ export function CreateEventWizardShell({
             {/* Main Content Area */}
             <div className="max-w-[1860px] mx-auto w-full px-4 sm:px-6 py-8 flex-1">
                 <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-text-primary">Tạo sự kiện <span className="text-text-muted text-sm font-normal bg-bg-elevated px-2 py-1 rounded-full ml-2 border border-border-default">Bước {step} / 5</span></h2>
-                    <p className="text-text-secondary mt-1">{title} — {description}</p>
+                    <h2 className="text-2xl font-bold text-text-primary">{title} <span className="text-text-muted text-sm font-normal bg-bg-elevated px-2 py-1 rounded-full ml-2 border border-border-default">Step {step} / 5</span></h2>
+                    <p className="text-text-secondary mt-1">{description}</p>
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-8">

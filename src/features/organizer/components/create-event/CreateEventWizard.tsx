@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { categoryApi } from "@/src/features/organizer/api/categoryApi";
 import { locationApi } from "@/src/features/organizer/api/locationApi";
 import { organizerEventApi } from "@/src/features/organizer/api/organizerEventApi";
+import { organizationApi } from "@/src/features/organizer/api/organizationApi";
 import type {
     BaseResponse,
     CreateEventMultipartPayload,
@@ -24,6 +25,7 @@ import { CreateEventStep3Settings } from "./CreateEventStep3Settings";
 import { CreateEventStep4Settlement } from "./CreateEventStep4Settlement";
 import { CreateEventStep5Review } from "./CreateEventStep5Review";
 import { CheckCircle2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
     getStepProgress,
     validateCreateEvent,
@@ -90,7 +92,8 @@ function buildCreateEventPayload(state: ReturnType<typeof useCreateEventWizard>[
 
     const event: CreateEventRequest = {
         eventName: state.eventName.trim(),
-        introduction: state.shortDescription.trim(),
+        shortDescription: state.shortDescription.trim(),
+        introduction: state.tagline?.trim() || state.shortDescription.trim(),
         description: state.detailedDescription.trim(),
         venue: state.venue.trim(),
         wardCode: state.wardCode,
@@ -104,6 +107,19 @@ function buildCreateEventPayload(state: ReturnType<typeof useCreateEventWizard>[
         longitude: state.longitude,
         category: state.category,
         showtimes,
+        
+        checkInInstruction: state.checkinReminder?.trim(),
+        postPurchaseInstruction: state.postPurchaseNotes?.trim(),
+        entryGateInstruction: state.gateNotes?.trim(),
+        reconciliationNote: state.reconciliationNotes?.trim(),
+        
+        allowResale: state.allowResale,
+        allowMultipleTicketTypesPerOrder: state.allowMultipleTicketTypes,
+        allowDiscountCode: state.allowVouchers,
+        
+        contactEmail: state.organizerEmail?.trim(),
+        contactPhone: state.organizerPhone?.trim(),
+        bankInfoId: state.selectedProfileId ?? 0,
     };
 
     return {
@@ -133,14 +149,16 @@ function getCreateEventErrorMessage(error: unknown) {
 function RightPanelChecklist({
     draftProgress,
     items,
+    t
 }: {
     draftProgress: number;
     items: ChecklistItem[];
+    t: any;
 }) {
     return (
         <div className="bg-bg-surface border border-border-default rounded-ds-xl p-5 shadow-sm sticky top-45">
             <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-text-primary">Tiến độ bước hiện tại</h3>
+                <h3 className="font-bold text-text-primary">{t("progress_title")}</h3>
                 <span className="font-bold text-action-brand-text-default">{draftProgress}%</span>
             </div>
 
@@ -152,7 +170,7 @@ function RightPanelChecklist({
             </div>
 
             <div className="space-y-3">
-                <h4 className="text-sm font-bold text-text-primary mb-2">Thông tin tối thiểu</h4>
+                <h4 className="text-sm font-bold text-text-primary mb-2">{t("minimum_info")}</h4>
                 {items.map((item) => (
                     <div key={item.label} className="flex items-center gap-2 text-sm">
                         <CheckCircle2
@@ -170,6 +188,8 @@ function RightPanelChecklist({
 }
 
 export default function CreateEventPage() {
+    const t = useTranslations("CreateEvent.Wizard");
+    const tValidation = useTranslations("CreateEvent");
     const router = useRouter();
     const params = useParams();
     const wizard = useCreateEventWizard();
@@ -245,14 +265,31 @@ export default function CreateEventPage() {
         setWardState({ loading: false, error: null });
     }, []);
 
+    const loadOrganization = useCallback(async () => {
+        try {
+            const orgInfo = await organizationApi.getMe();
+            wizard.updateField("organizerName", orgInfo.organizationName || "");
+            wizard.updateField("organizerEmail", orgInfo.businessEmail || orgInfo.userEmail || "");
+            wizard.updateField("organizerPhone", orgInfo.businessPhone || "");
+            
+            if (orgInfo.bankInfos && orgInfo.bankInfos.length > 0) {
+                wizard.updateField("bankInfos", orgInfo.bankInfos);
+                wizard.updateField("selectedProfileId", orgInfo.bankInfos[0].id);
+            }
+        } catch (error) {
+            console.error("Failed to load organization info", error);
+        }
+    }, [wizard.updateField]);
+
     useEffect(() => {
         const timer = window.setTimeout(() => {
             void loadCategories();
             void loadProvinces();
+            void loadOrganization();
         }, 0);
 
         return () => window.clearTimeout(timer);
-    }, [loadCategories, loadProvinces]);
+    }, [loadCategories, loadProvinces, loadOrganization]);
 
     useEffect(() => {
         const timer = window.setTimeout(() => {
@@ -303,7 +340,7 @@ export default function CreateEventPage() {
 
         if (Object.keys(validation.errors).length > 0) {
             setStepErrors(prev => ({ ...prev, [currentStep]: validation.errors }));
-            toast.error("Vui lòng kiểm tra các trường bắt buộc hoặc chưa hợp lệ.");
+            toast.error(t("toast_invalid_fields"));
             scrollToField(validation.firstInvalidField);
             return;
         }
@@ -318,7 +355,7 @@ export default function CreateEventPage() {
         if (validation.firstInvalidStep) {
             setStepErrors(prev => ({ ...prev, ...validation.stepErrors }));
             wizard.setStep(validation.firstInvalidStep);
-            toast.error("Vui lòng hoàn tất tất cả các bước trước khi gửi duyệt.");
+            toast.error(t("toast_incomplete"));
             window.setTimeout(() => scrollToField(validation.firstInvalidField), 0);
             return;
         }
@@ -330,11 +367,11 @@ export default function CreateEventPage() {
             });
 
             if (!created) {
-                toast.error("Backend chưa xác nhận tạo sự kiện thành công. Vui lòng thử lại.");
+                toast.error(t("toast_backend_unconfirmed"));
                 return;
             }
 
-            toast.success("Tạo sự kiện thành công. Danh sách sự kiện đang được làm mới.");
+            toast.success(t("toast_success"));
             const locale = typeof params.locale === "string" ? params.locale : "vi";
             router.replace(`/${locale}/organizer/center?refresh=${Date.now()}`);
             router.refresh();
@@ -345,48 +382,48 @@ export default function CreateEventPage() {
     };
 
     const handleSaveDraft = () => {
-        toast.success("Đã lưu bản nháp thành công!");
+        toast.success(t("toast_draft_saved"));
     };
 
     const getChecklistItems = (): ChecklistItem[] => {
         if (wizard.step === 1) {
             return [
-                { label: "Poster & cover", checked: !!wizard.formData.thumbnailPreview && !!wizard.formData.bannerPreview },
-                { label: "Tên sự kiện", checked: !!wizard.formData.eventName },
-                { label: "Hình thức Offline", checked: wizard.formData.eventType === "OFFLINE" },
-                { label: "Thể loại", checked: !!wizard.formData.category },
-                { label: "Địa điểm", checked: !!wizard.formData.venue && wizard.formData.provinceCode !== 0 && wizard.formData.wardCode !== 0 && !!wizard.formData.address },
-                { label: "Mô tả", checked: !!wizard.formData.shortDescription && !!wizard.formData.detailedDescription },
-                { label: "Liên hệ BTC hợp lệ", checked: Object.keys(validateStep(1, wizard.formData).errors).filter(key => key === "organizerEmail" || key === "organizerPhone").length === 0 },
+                { label: t("checklist.poster_cover"), checked: !!wizard.formData.thumbnailPreview && !!wizard.formData.bannerPreview },
+                { label: t("checklist.event_name"), checked: !!wizard.formData.eventName },
+                { label: t("checklist.offline_format"), checked: wizard.formData.eventType === "OFFLINE" },
+                { label: t("checklist.category"), checked: !!wizard.formData.category },
+                { label: t("checklist.location"), checked: !!wizard.formData.venue && wizard.formData.provinceCode !== 0 && wizard.formData.wardCode !== 0 && !!wizard.formData.address },
+                { label: t("checklist.description"), checked: !!wizard.formData.shortDescription && !!wizard.formData.detailedDescription },
+                { label: t("checklist.organizer_contact"), checked: Object.keys(validateStep(1, wizard.formData).errors).filter(key => key === "organizerEmail" || key === "organizerPhone").length === 0 },
             ];
         }
         if (wizard.step === 2) {
             return [
-                { label: "Có suất diễn", checked: wizard.formData.showtimes.length > 0 },
-                { label: "Lịch suất diễn hợp lệ", checked: wizard.formData.showtimes.every(item => item.startDatetime && item.endDatetime && new Date(item.endDatetime) > new Date(item.startDatetime)) },
-                { label: "Mỗi suất diễn có vé", checked: wizard.formData.showtimes.every(item => wizard.formData.ticketTypes.some(ticket => ticket.showtimeId === item.id)) },
-                { label: "Loại vé hợp lệ", checked: Object.keys(validateStep(2, wizard.formData).errors).length === 0 },
+                { label: t("checklist.has_showtime"), checked: wizard.formData.showtimes.length > 0 },
+                { label: t("checklist.valid_showtime"), checked: wizard.formData.showtimes.every(item => item.startDatetime && item.endDatetime && new Date(item.endDatetime) > new Date(item.startDatetime)) },
+                { label: t("checklist.showtime_has_ticket"), checked: wizard.formData.showtimes.every(item => wizard.formData.ticketTypes.some(ticket => ticket.showtimeId === item.id)) },
+                { label: t("checklist.valid_tickets"), checked: Object.keys(validateStep(2, wizard.formData).errors).length === 0 },
             ];
         }
         if (wizard.step === 3) {
             return [
-                { label: "Slug hợp lệ nếu nhập", checked: Object.keys(validateStep(3, wizard.formData).errors).filter(key => key === "urlSlug").length === 0 },
-                { label: "Quy tắc bán vé", checked: true },
-                { label: "Chính sách resale", checked: true },
-                { label: "Cổng sẽ cấu hình sau", checked: true },
+                { label: t("checklist.valid_slug"), checked: Object.keys(validateStep(3, wizard.formData).errors).filter(key => key === "urlSlug").length === 0 },
+                { label: t("checklist.ticket_rules"), checked: true },
+                { label: t("checklist.resale_policy"), checked: true },
+                { label: t("checklist.gate_config"), checked: true },
             ];
         }
         if (wizard.step === 4) {
             return [
-                { label: "Hồ sơ đối soát sau duyệt", checked: true },
-                { label: "Ghi chú đối soát", checked: true },
+                { label: t("checklist.settlement_profile"), checked: true },
+                { label: t("checklist.settlement_notes"), checked: true },
             ];
         }
         return [
-            { label: "Thông tin sự kiện", checked: Object.keys(validateStep(1, wizard.formData).errors).length === 0 },
-            { label: "Suất diễn & vé", checked: Object.keys(validateStep(2, wizard.formData).errors).length === 0 },
-            { label: "Cài đặt", checked: Object.keys(validateStep(3, wizard.formData).errors).length === 0 },
-            { label: "Thanh toán", checked: Object.keys(validateStep(4, wizard.formData).errors).length === 0 },
+            { label: t("checklist.info_step"), checked: Object.keys(validateStep(1, wizard.formData).errors).length === 0 },
+            { label: t("checklist.showtime_step"), checked: Object.keys(validateStep(2, wizard.formData).errors).length === 0 },
+            { label: t("checklist.settings_step"), checked: Object.keys(validateStep(3, wizard.formData).errors).length === 0 },
+            { label: t("checklist.payment_step"), checked: Object.keys(validateStep(4, wizard.formData).errors).length === 0 },
         ];
     };
 
@@ -429,11 +466,11 @@ export default function CreateEventPage() {
 
     const getStepInfo = () => {
         switch (wizard.step) {
-            case 1: return { title: "Thông tin sự kiện", desc: "Nhập các thông tin cơ bản giúp khán giả hiểu về sự kiện của bạn." };
-            case 2: return { title: "Suất diễn & Loại vé", desc: "Cấu hình lịch diễn và các loại vé mở bán." };
-            case 3: return { title: "Cài đặt & Phân phối", desc: "Thiết lập quyền riêng tư, quy tắc mua vé và tính năng resale." };
-            case 4: return { title: "Hồ sơ đối soát", desc: "Chọn hồ sơ pháp lý và tài khoản nhận tiền thanh toán." };
-            case 5: return { title: "Kiểm tra trước khi gửi", desc: "Xác nhận lại toàn bộ thông tin trước khi gửi duyệt." };
+            case 1: return { title: t("step1_title"), desc: t("step1_desc") };
+            case 2: return { title: t("step2_title"), desc: t("step2_desc") };
+            case 3: return { title: t("step3_title"), desc: t("step3_desc") };
+            case 4: return { title: t("step4_title"), desc: t("step4_desc") };
+            case 5: return { title: t("step5_title"), desc: t("step5_desc") };
             default: return { title: "", desc: "" };
         }
     };
@@ -450,7 +487,7 @@ export default function CreateEventPage() {
             onSubmit={handleSubmit}
             onSaveDraft={handleSaveDraft}
             isSubmitting={wizard.isSubmitting}
-            rightPanel={<RightPanelChecklist draftProgress={currentStepProgress} items={checklistItems} />}
+            rightPanel={<RightPanelChecklist draftProgress={currentStepProgress} items={checklistItems} t={t} />}
         >
             {getStepContent()}
         </CreateEventWizardShell>

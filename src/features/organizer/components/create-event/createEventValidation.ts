@@ -57,7 +57,7 @@ function result(errors: StepErrors, fieldOrder: string[]): StepValidationResult 
 export function validateStep1(state: CreateEventState): StepValidationResult {
 
     // Tạm thời bỏ qua validation của step 1
-    return { errors: {}, firstInvalidField: "" };
+    // return { errors: {}, firstInvalidField: "" };
     const errors: StepErrors = {};
     const fieldOrder = [
         "thumbnailImage",
@@ -73,22 +73,22 @@ export function validateStep1(state: CreateEventState): StepValidationResult {
         "detailedDescription",
     ];
 
-    if (!state.thumbnailPreview) errors.thumbnailImage = "Vui lòng tải poster sự kiện.";
-    if (!state.bannerPreview) errors.bannerImage = "Vui lòng tải ảnh cover sự kiện.";
-    if (isBlank(state.eventName)) errors.eventName = "Vui lòng nhập tên sự kiện.";
-    if (state.eventType !== "OFFLINE") errors.eventType = "Hiện tại chỉ hỗ trợ sự kiện Offline.";
-    if (!state.category) errors.category = "Vui lòng chọn thể loại sự kiện.";
-    if (isBlank(state.venue)) errors.venue = "Vui lòng nhập tên địa điểm.";
-    if (!state.provinceCode) errors.provinceCode = "Vui lòng chọn tỉnh / thành phố.";
-    if (!state.wardCode) errors.wardCode = "Vui lòng chọn quận / huyện.";
-    if (isBlank(state.address)) errors.address = "Vui lòng nhập địa chỉ chi tiết.";
-    if (isBlank(state.shortDescription)) errors.shortDescription = "Vui lòng nhập tóm tắt ngắn.";
-    if (isBlank(state.detailedDescription)) errors.detailedDescription = "Vui lòng nhập mô tả chi tiết.";
+    if (!state.thumbnailPreview) errors.thumbnailImage = "Validation.poster_req";
+    if (!state.bannerPreview) errors.bannerImage = "Validation.cover_req";
+    if (isBlank(state.eventName)) errors.eventName = "Validation.event_name_req";
+    if (state.eventType !== "OFFLINE") errors.eventType = "Validation.only_offline_supported";
+    if (!state.category) errors.category = "Validation.category_req";
+    if (isBlank(state.venue)) errors.venue = "Validation.venue_req";
+    if (!state.provinceCode) errors.provinceCode = "Validation.province_req";
+    if (!state.wardCode) errors.wardCode = "Validation.ward_req";
+    if (isBlank(state.address)) errors.address = "Validation.address_req";
+    if (isBlank(state.shortDescription)) errors.shortDescription = "Validation.short_desc_req";
+    if (isBlank(state.detailedDescription)) errors.detailedDescription = "Validation.detail_desc_req";
     if (!isBlank(state.organizerEmail) && !isValidEmail(state.organizerEmail)) {
-        errors.organizerEmail = "Email hỗ trợ không hợp lệ.";
+        errors.organizerEmail = "Validation.invalid_email";
     }
     if (!isBlank(state.organizerPhone) && !isValidPhone(state.organizerPhone)) {
-        errors.organizerPhone = "Số điện thoại hỗ trợ không hợp lệ.";
+        errors.organizerPhone = "Validation.invalid_phone";
     }
 
     return result(errors, fieldOrder);
@@ -103,23 +103,23 @@ function validateTicket(ticket: TicketTypeInput, showtimeStart: string, errors: 
         fieldOrder.push(key);
     };
 
-    if (isBlank(ticket.typeName)) add("typeName", "Vui lòng nhập tên loại vé.");
+    if (isBlank(ticket.typeName)) add("typeName", "Validation.ticket_name_req");
     if (ticket.isFree || ticket.price <= 0) {
-        add("price", "Backend hiện yêu cầu giá vé lớn hơn 0. Vé miễn phí chưa được hỗ trợ.");
+        add("price", "Validation.ticket_price_min");
     }
-    if (ticket.quantityTotal <= 0) add("quantityTotal", "Số lượng vé phải lớn hơn 0.");
-    if (ticket.minPurchase < 1) add("minPurchase", "Mua tối thiểu phải từ 1 vé.");
-    if (ticket.maxPurchase < ticket.minPurchase) add("maxPurchase", "Mua tối đa phải lớn hơn hoặc bằng mua tối thiểu.");
-    if (ticket.maxPurchase > ticket.quantityTotal) add("maxPurchase", "Mua tối đa không được vượt quá số lượng vé.");
-    if (!ticket.saleStartDate) add("saleStartDate", "Vui lòng chọn thời gian bắt đầu bán.");
-    if (!ticket.saleEndDate) add("saleEndDate", "Vui lòng chọn thời gian kết thúc bán.");
+    if (ticket.quantityTotal <= 0) add("quantityTotal", "Validation.ticket_qty_min");
+    if (ticket.minPurchase < 1) add("minPurchase", "Validation.ticket_min_purchase");
+    if (ticket.maxPurchase < ticket.minPurchase) add("maxPurchase", "Validation.ticket_max_purchase");
+    if (ticket.maxPurchase > ticket.quantityTotal) add("maxPurchase", "Validation.ticket_max_purchase_qty");
+    if (!ticket.saleStartDate) add("saleStartDate", "Validation.ticket_sale_time_req");
+    if (!ticket.saleEndDate) add("saleEndDate", "Validation.ticket_sale_time_req");
 
     if (ticket.saleStartDate && ticket.saleEndDate && !isAfter(ticket.saleEndDate, ticket.saleStartDate)) {
-        add("saleEndDate", "Thời gian kết thúc bán phải sau thời gian bắt đầu bán.");
+        add("saleEndDate", "Validation.ticket_sale_time_invalid");
     }
 
     if (ticket.saleEndDate && showtimeStart && !isOnOrBefore(ticket.saleEndDate, showtimeStart)) {
-        add("saleEndDate", "Thời gian kết thúc bán phải trước hoặc bằng thời gian bắt đầu suất diễn.");
+        add("saleEndDate", "Validation.ticket_sale_before_show");
     }
 }
 
@@ -128,10 +128,10 @@ export function validateStep2(state: CreateEventState): StepValidationResult {
     const fieldOrder: string[] = [];
 
     // Tạm thời bỏ qua validation của step 2
-    return { errors: {}, firstInvalidField: "" };
+    // return { errors: {}, firstInvalidField: "" };
 
     if (state.showtimes.length === 0) {
-        errors.showtime = "Vui lòng tạo ít nhất một suất diễn.";
+        errors.showtime = "Validation.min_showtime";
         fieldOrder.push("showtime");
     }
 
@@ -141,21 +141,21 @@ export function validateStep2(state: CreateEventState): StepValidationResult {
         const ticketGroupKey = `showtime-${showtime.id}-tickets`;
 
         if (!showtime.startDatetime) {
-            errors[startKey] = "Vui lòng chọn thời gian bắt đầu suất diễn.";
+            errors[startKey] = "Validation.showtime_time_req";
             fieldOrder.push(startKey);
         }
         if (!showtime.endDatetime) {
-            errors[endKey] = "Vui lòng chọn thời gian kết thúc suất diễn.";
+            errors[endKey] = "Validation.showtime_time_req";
             fieldOrder.push(endKey);
         }
         if (showtime.startDatetime && showtime.endDatetime && !isAfter(showtime.endDatetime, showtime.startDatetime)) {
-            errors[endKey] = "Thời gian kết thúc suất diễn phải sau thời gian bắt đầu.";
+            errors[endKey] = "Validation.showtime_time_invalid";
             fieldOrder.push(endKey);
         }
 
         const tickets = state.ticketTypes.filter((ticket) => ticket.showtimeId === showtime.id);
         if (tickets.length === 0) {
-            errors[ticketGroupKey] = "Mỗi suất diễn cần ít nhất một loại vé.";
+            errors[ticketGroupKey] = "Validation.min_ticket";
             fieldOrder.push(ticketGroupKey);
         }
         tickets.forEach((ticket) => validateTicket(ticket, showtime.startDatetime, errors, fieldOrder));
@@ -192,26 +192,20 @@ export function validateStep3(state: CreateEventState): StepValidationResult {
     // ── URL slug ────────────────────────────────────────────────────────
     const slug = state.urlSlug.trim();
     if (slug.length > 0 && SLUG_HAS_DIACRITICS.test(slug)) {
-        errors.urlSlug =
-            "URL chỉ được gồm chữ thường không dấu, số và dấu gạch ngang; không dùng khoảng trắng, dấu cộng hoặc ký tự có dấu.";
+        errors.urlSlug = "Validation.slug_format";
     } else if (SLUG_HAS_UPPERCASE.test(slug)) {
-        errors.urlSlug =
-            "URL chỉ được gồm chữ thường không dấu, số và dấu gạch ngang; không dùng khoảng trắng, dấu cộng hoặc ký tự có dấu.";
+        errors.urlSlug = "Validation.slug_format";
     } else if (SLUG_HAS_WHITESPACE.test(slug)) {
-        errors.urlSlug =
-            "URL chỉ được gồm chữ thường không dấu, số và dấu gạch ngang; không dùng khoảng trắng, dấu cộng hoặc ký tự có dấu.";
+        errors.urlSlug = "Validation.slug_format";
     } else if (SLUG_HAS_PLUS.test(slug)) {
-        errors.urlSlug =
-            "URL chỉ được gồm chữ thường không dấu, số và dấu gạch ngang; không dùng khoảng trắng, dấu cộng hoặc ký tự có dấu.";
+        errors.urlSlug = "Validation.slug_format";
     } else if (slug.length > 0 && !EVENT_SLUG_REGEX.test(slug)) {
-        // Catches leading/trailing/consecutive hyphens and any other invalid chars
-        errors.urlSlug =
-            "URL chỉ được gồm chữ thường không dấu, số và dấu gạch ngang; không dùng khoảng trắng, dấu cộng hoặc ký tự có dấu.";
+        errors.urlSlug = "Validation.slug_format";
     }
 
     // ── Gate configuration ──────────────────────────────────────────────
-    if (state.totalGates < 0) errors.totalGates = "Số cổng không được âm.";
-    if (state.expectedCheckers < 0) errors.expectedCheckers = "Số checker dự kiến không được âm.";
+    if (state.totalGates < 0) errors.totalGates = "Validation.total_gates_min";
+    if (state.expectedCheckers < 0) errors.expectedCheckers = "Validation.expected_checkers_min";
 
     // Build a set of normalised gate codes for duplicate detection.
     const seenCodes = new Map<string, string>();   // normalised → first gate.id
@@ -219,14 +213,14 @@ export function validateStep3(state: CreateEventState): StepValidationResult {
     state.gates.forEach((gate) => {
         const rawCode = (gate.code ?? "").trim();
         if (rawCode.length > 0 && !GATE_CODE_REGEX.test(rawCode)) {
-            errors[`gate-${gate.id}-code`] = "Mã cổng chỉ dùng chữ in hoa, số và dấu gạch nối.";
+            errors[`gate-${gate.id}-code`] = "Validation.gate_code_format";
             fieldOrder.push(`gate-${gate.id}-code`);
         } else if (rawCode.length > 0) {
             // Duplicate check (case-insensitive, trim-insensitive)
             const normalised = rawCode.toUpperCase();
             const existing = seenCodes.get(normalised);
             if (existing && existing !== gate.id) {
-                errors[`gate-${gate.id}-code`] = "Mã cổng không được trùng nhau.";
+                errors[`gate-${gate.id}-code`] = "Validation.gate_code_duplicate";
                 fieldOrder.push(`gate-${gate.id}-code`);
             } else {
                 seenCodes.set(normalised, gate.id);
@@ -252,7 +246,7 @@ export function validateStep5(state: CreateEventState): StepValidationResult {
     validators.forEach((validator, index) => {
         const stepResult = validator(state);
         if (Object.keys(stepResult.errors).length > 0) {
-            errors.review = `Bước ${index + 1} chưa hoàn tất. Vui lòng quay lại kiểm tra.`;
+            errors.review = `Validation.step_incomplete_${index + 1}`;
         }
     });
 

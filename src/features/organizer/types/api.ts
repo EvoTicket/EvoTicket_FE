@@ -25,6 +25,15 @@ export interface AddressInfo {
   wardName?: string | null;
 }
 
+export interface BankInfoResponse {
+  id: number;
+  profileName?: string | null;
+  bankCode?: string | null;
+  bankName?: string | null;
+  bankAccountNumber?: string | null;
+  bankOwnerName?: string | null;
+}
+
 export interface OrganizationProfileResponse {
   id: number;
   userId: number;
@@ -45,6 +54,7 @@ export interface OrganizationProfileResponse {
   verifiedAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
+  bankInfos?: BankInfoResponse[] | null;
 }
 
 export interface OrganizerDashboardMetricsResponse {
@@ -272,6 +282,17 @@ export interface CreateEventRequest {
   checkers?: number;
   category: EventCategory;
   showtimes: CreateShowtimeRequest[];
+  shortDescription?: string;
+  checkInInstruction?: string;
+  allowResale?: boolean;
+  allowMultipleTicketTypesPerOrder?: boolean;
+  bankInfoId?: number;
+  postPurchaseInstruction?: string;
+  contactPhone?: string;
+  entryGateInstruction?: string;
+  reconciliationNote?: string;
+  allowDiscountCode?: boolean;
+  contactEmail?: string;
 }
 
 export interface UpdateShowtimeRequest {

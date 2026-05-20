@@ -1,5 +1,5 @@
-import { useState } from "react";
-import type { EventCategory as ApiEventCategory } from "@/src/features/organizer/types/api";
+import { useState, useCallback } from "react";
+import type { EventCategory as ApiEventCategory, BankInfoResponse } from "@/src/features/organizer/types/api";
 
 export type EventType = "OFFLINE";
 export type EventCategory = ApiEventCategory;
@@ -105,8 +105,9 @@ export interface CreateEventState {
     gateNotes: string;
 
     // Step 4: Settlement
-    selectedProfileId: string;
+    selectedProfileId: number | null;
     reconciliationNotes: string;
+    bankInfos: BankInfoResponse[];
 }
 
 const initialState: CreateEventState = {
@@ -163,8 +164,9 @@ const initialState: CreateEventState = {
     checkinReminder: "",
     gateNotes: "",
 
-    selectedProfileId: "prof-1",
+    selectedProfileId: null,
     reconciliationNotes: "",
+    bankInfos: [],
 };
 
 export function useCreateEventWizard() {
@@ -172,12 +174,12 @@ export function useCreateEventWizard() {
     const [formData, setFormData] = useState<CreateEventState>(initialState);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const updateField = <K extends keyof CreateEventState>(field: K, value: CreateEventState[K]) => {
+    const updateField = useCallback(<K extends keyof CreateEventState>(field: K, value: CreateEventState[K]) => {
         setFormData(prev => ({
             ...prev,
             [field]: field === "eventType" ? "OFFLINE" : value,
         }));
-    };
+    }, []);
 
     const nextStep = () => {
         if (step < 5) setStep(s => s + 1);

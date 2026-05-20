@@ -2,6 +2,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import { AlertTriangle, Image as ImageIcon, MapPin, AlignLeft, Building2, ChevronDown, Check } from "lucide-react";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
+import { useTranslations } from "next-intl";
 import { CreateEventState, getEventCategoryLabel } from "./useCreateEventWizard";
 import type { StepErrors } from "./createEventValidation";
 import type { EventCategory, ProvinceResponse, WardResponse } from "@/src/features/organizer/types/api";
@@ -57,9 +58,13 @@ export function CreateEventStep1BasicInfo({
     onWardChange,
     onRetryCategories,
     onRetryProvinces,
+    onRetryProvinces,
     onRetryWards,
 }: Props) {
-    const categoryMessage = categoryError ?? errors.category;
+    const t = useTranslations("CreateEvent.Step1");
+    const tValidation = useTranslations("CreateEvent.Validation");
+    
+    const categoryMessage = categoryError ?? (errors.category ? tValidation(errors.category.replace("Validation.", "")) : null);
 
     const fieldClass = (field: string) =>
         `w-full p-2.5 border rounded-ds-lg bg-field-bg-default focus:ring-1 focus:ring-focus-ring outline-none ${
@@ -70,7 +75,7 @@ export function CreateEventStep1BasicInfo({
 
     const renderError = (field: string) => (
         errors[field] ? (
-            <p className="mt-1.5 text-sm text-feedback-error-text">{errors[field]}</p>
+            <p className="mt-1.5 text-sm text-feedback-error-text">{tValidation(errors[field].replace("Validation.", ""))}</p>
         ) : null
     );
 
@@ -83,7 +88,7 @@ export function CreateEventStep1BasicInfo({
                     onClick={retry}
                     className="shrink-0 text-sm font-medium text-action-brand-text-default hover:underline"
                 >
-                    Thử lại
+                    {t("retry")}
                 </button>
             )}
         </div>
@@ -111,13 +116,13 @@ export function CreateEventStep1BasicInfo({
             <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <ImageIcon className="text-text-secondary" size={20} />
-                    <h3 className="text-lg font-bold text-text-primary">Hình ảnh sự kiện</h3>
+                    <h3 className="text-lg font-bold text-text-primary">{t("images.title")}</h3>
                 </div>
-                <p className="text-sm text-text-muted mb-4">Ảnh phải đúng chuẩn hiển thị để được duyệt.</p>
+                <p className="text-sm text-text-muted mb-4">{t("images.desc")}</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="col-span-1" data-field="thumbnailImage" tabIndex={-1}>
-                        <label className="block text-sm font-medium mb-2">Poster sự kiện <span className="text-feedback-error-text">*</span></label>
+                        <label className="block text-sm font-medium mb-2">{t("images.poster")} <span className="text-feedback-error-text">*</span></label>
                         <div className={`relative aspect-[3/4] border-2 border-dashed rounded-ds-lg hover:bg-bg-subtle transition-colors cursor-pointer text-center overflow-hidden flex flex-col items-center justify-center ${
                             errors.thumbnailImage ? "border-feedback-error-border" : "border-border-default"
                         }`}>
@@ -134,15 +139,15 @@ export function CreateEventStep1BasicInfo({
                                     <div className="w-10 h-10 bg-bg-elevated rounded-full flex items-center justify-center mx-auto mb-2 border border-border-default">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                                     </div>
-                                    <p className="text-sm font-medium">Kéo thả hoặc nhấn để tải lên</p>
-                                    <p className="text-xs mt-1 opacity-70">PNG / JPG - tối đa 8MB</p>
+                                    <p className="text-sm font-medium">{t("images.drag_drop")}</p>
+                                    <p className="text-xs mt-1 opacity-70">{t("images.limits")}</p>
                                 </div>
                             )}
                         </div>
                         {renderError("thumbnailImage")}
                     </div>
                     <div className="col-span-1 md:col-span-2" data-field="bannerImage" tabIndex={-1}>
-                        <label className="block text-sm font-medium mb-2">Ảnh nền / Cover <span className="text-feedback-error-text">*</span></label>
+                        <label className="block text-sm font-medium mb-2">{t("images.cover")} <span className="text-feedback-error-text">*</span></label>
                         <div className={`relative aspect-video border-2 border-dashed rounded-ds-lg hover:bg-bg-subtle transition-colors cursor-pointer text-center overflow-hidden flex flex-col items-center justify-center bg-bg-subtle ${
                             errors.bannerImage ? "border-feedback-error-border" : "border-border-default"
                         }`}>
@@ -159,19 +164,19 @@ export function CreateEventStep1BasicInfo({
                                     <div className="w-10 h-10 bg-bg-elevated rounded-full flex items-center justify-center mx-auto mb-2 border border-border-default">
                                         <ImageIcon size={20} />
                                     </div>
-                                    <p className="text-sm font-medium">cover-anh-trai-say-hi.jpg</p>
-                                    <p className="text-xs mt-1 opacity-70">1920 × 1080 - 842 KB</p>
+                                    <p className="text-sm font-medium">{t("images.drag_drop")}</p>
+                                    <p className="text-xs mt-1 opacity-70">{t("images.limits")}</p>
                                 </div>
                             )}
                         </div>
-                        <p className="text-xs text-text-muted mt-2">Tỷ lệ khuyến nghị 16:9, tối thiểu 1600 × 900 px</p>
+                        <p className="text-xs text-text-muted mt-2">{t("images.cover_hint")}</p>
                         {renderError("bannerImage")}
                     </div>
                 </div>
 
                 <div className="mt-4 p-3 bg-feedback-warning-bg border border-feedback-warning-border text-feedback-warning-text rounded-ds-lg flex items-start gap-2 text-sm">
                     <svg className="shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                    <span>Ảnh phải đúng chuẩn hiển thị để được duyệt. Tránh để text quan trọng ngoài vùng an toàn.</span>
+                    <span>{t("images.warning")}</span>
                 </div>
             </div>
 
@@ -179,42 +184,42 @@ export function CreateEventStep1BasicInfo({
             <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <AlignLeft className="text-text-secondary" size={20} />
-                    <h3 className="text-lg font-bold text-text-primary">Thông tin cơ bản</h3>
+                    <h3 className="text-lg font-bold text-text-primary">{t("basic_info.title")}</h3>
                 </div>
                 
                 <div className="space-y-4">
                     <div data-field="eventName">
                         <div className="flex justify-between items-center mb-1">
-                            <label className="block text-sm font-medium">Tên sự kiện <span className="text-feedback-error-text">*</span></label>
-                            <span className="text-xs text-text-muted">Tối đa 120 ký tự</span>
+                            <label className="block text-sm font-medium">{t("basic_info.event_name")} <span className="text-feedback-error-text">*</span></label>
+                            <span className="text-xs text-text-muted">{t("basic_info.event_name_hint")}</span>
                         </div>
                         <input
                             type="text"
                             value={formData.eventName}
                             onChange={(e) => updateField("eventName", e.target.value)}
                             className={fieldClass("eventName")}
-                            placeholder="Tên sự kiện..."
+                            placeholder={t("basic_info.event_name_placeholder")}
                         />
                         {renderError("eventName")}
                     </div>
                     
                     <div>
                         <div className="flex justify-between items-center mb-1">
-                            <label className="block text-sm font-medium">Tagline / Tiêu đề phụ ngắn</label>
-                            <span className="text-xs text-text-muted">Hiển thị phụ trên trang sự kiện</span>
+                            <label className="block text-sm font-medium">{t("basic_info.tagline")}</label>
+                            <span className="text-xs text-text-muted">{t("basic_info.tagline_hint")}</span>
                         </div>
                         <input
                             type="text"
                             value={formData.tagline}
                             onChange={(e) => updateField("tagline", e.target.value)}
                             className="w-full p-2.5 border border-border-default rounded-ds-lg bg-field-bg-default focus:border-field-border-focus focus:ring-1 focus:ring-focus-ring outline-none"
-                            placeholder="Tagline..."
+                            placeholder={t("basic_info.tagline_placeholder")}
                         />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div data-field="eventType" tabIndex={-1}>
-                            <label className="block text-sm font-medium mb-2">Hình thức sự kiện <span className="text-feedback-error-text">*</span></label>
+                            <label className="block text-sm font-medium mb-2">{t("basic_info.event_format")} <span className="text-feedback-error-text">*</span></label>
                             <div className={`flex p-1 bg-bg-subtle rounded-ds-lg border ${errors.eventType ? "border-feedback-error-border" : "border-border-default"}`}>
                                 {EVENT_TYPE_OPTIONS.map((type) => (
                                     <button
@@ -243,13 +248,13 @@ export function CreateEventStep1BasicInfo({
                         </div>
 
                         <div data-field="category" tabIndex={-1}>
-                            <label className="block text-sm font-medium mb-2">Thể loại sự kiện <span className="text-feedback-error-text">*</span></label>
+                            <label className="block text-sm font-medium mb-2">{t("basic_info.category")} <span className="text-feedback-error-text">*</span></label>
                             {categoryState.loading ? (
-                                renderDictionaryMessage("Đang tải thể loại sự kiện...")
+                                renderDictionaryMessage(t("basic_info.loading_category"))
                             ) : categoryState.error ? (
                                 renderDictionaryMessage(categoryState.error, onRetryCategories)
                             ) : categories.length === 0 ? (
-                                renderDictionaryMessage("Chưa có thể loại sự kiện khả dụng.", onRetryCategories)
+                                renderDictionaryMessage(t("basic_info.no_category"), onRetryCategories)
                             ) : (
                                 <div className="flex flex-wrap gap-2">
                                     {categories.map((category) => (
@@ -286,7 +291,7 @@ export function CreateEventStep1BasicInfo({
                 <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center gap-2">
                         <MapPin className="text-text-secondary" size={20} />
-                        <h3 className="text-lg font-bold text-text-primary">Địa điểm / nền tảng tổ chức</h3>
+                        <h3 className="text-lg font-bold text-text-primary">{t("location.title")}</h3>
                     </div>
                     {formData.eventType !== "OFFLINE" && (
                         <span className="px-2 py-1 bg-bg-elevated text-text-muted text-xs rounded-ds-md border border-border-default">
@@ -297,20 +302,20 @@ export function CreateEventStep1BasicInfo({
 
                 <div className="space-y-4">
                     <div data-field="venue">
-                        <label className="block text-sm font-medium mb-1">Tên địa điểm <span className="text-feedback-error-text">*</span></label>
+                        <label className="block text-sm font-medium mb-1">{t("location.venue")} <span className="text-feedback-error-text">*</span></label>
                         <input
                             type="text"
                             value={formData.venue}
                             onChange={(e) => updateField("venue", e.target.value)}
                             className={fieldClass("venue")}
-                            placeholder="Nhà thi đấu Phú Thọ..."
+                            placeholder={t("location.venue_placeholder")}
                         />
                         {renderError("venue")}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div data-field="provinceCode">
-                            <label className="block text-sm font-medium mb-1">Tỉnh / Thành phố <span className="text-feedback-error-text">*</span></label>
+                            <label className="block text-sm font-medium mb-1">{t("location.province")} <span className="text-feedback-error-text">*</span></label>
                             <Listbox
                                 value={formData.provinceCode}
                                 onChange={(code: number) => {
@@ -327,8 +332,8 @@ export function CreateEventStep1BasicInfo({
                                             {formData.provinceCode > 0
                                                 ? formData.provinceName
                                                 : provinceState.loading
-                                                ? "Đang tải tỉnh/thành..."
-                                                : "Chọn tỉnh/thành"}
+                                                ? t("location.loading_province")
+                                                : t("location.select_province")}
                                         </span>
                                         <ChevronDown size={16} className="text-text-secondary shrink-0 ml-2" />
                                     </ListboxButton>
@@ -341,7 +346,7 @@ export function CreateEventStep1BasicInfo({
                                             value={0}
                                             className="group flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-bg-subtle transition-colors text-sm text-text-muted"
                                         >
-                                            <span className="group-data-[selected]:font-semibold">Chọn tỉnh/thành</span>
+                                            <span className="group-data-[selected]:font-semibold">{t("location.select_province")}</span>
                                             <Check className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-action-brand-text-default shrink-0 ml-2" />
                                         </ListboxOption>
                                         {provinces.map((p) => (
@@ -358,11 +363,11 @@ export function CreateEventStep1BasicInfo({
                                 </div>
                             </Listbox>
                             {provinceState.error && renderDictionaryMessage(provinceState.error, onRetryProvinces)}
-                            {!provinceState.loading && !provinceState.error && provinces.length === 0 && renderDictionaryMessage("Chưa có tỉnh/thành khả dụng.", onRetryProvinces)}
+                            {!provinceState.loading && !provinceState.error && provinces.length === 0 && renderDictionaryMessage(t("location.no_province"), onRetryProvinces)}
                             {renderError("provinceCode")}
                         </div>
                         <div data-field="wardCode">
-                            <label className="block text-sm font-medium mb-1">Quận / Huyện <span className="text-feedback-error-text">*</span></label>
+                            <label className="block text-sm font-medium mb-1">{t("location.ward")} <span className="text-feedback-error-text">*</span></label>
                             <Listbox
                                 value={formData.wardCode}
                                 onChange={(code: number) => {
@@ -379,10 +384,10 @@ export function CreateEventStep1BasicInfo({
                                             {formData.wardCode > 0
                                                 ? formData.wardName
                                                 : !formData.provinceCode
-                                                ? "Chọn tỉnh/thành trước"
+                                                ? t("location.select_province_first")
                                                 : wardState.loading
-                                                ? "Đang tải quận/huyện..."
-                                                : "Chọn quận/huyện"}
+                                                ? t("location.loading_ward")
+                                                : t("location.select_ward")}
                                         </span>
                                         <ChevronDown size={16} className="text-text-secondary shrink-0 ml-2" />
                                     </ListboxButton>
@@ -395,7 +400,7 @@ export function CreateEventStep1BasicInfo({
                                             value={0}
                                             className="group flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-bg-subtle transition-colors text-sm text-text-muted"
                                         >
-                                            <span className="group-data-[selected]:font-semibold">Chọn quận/huyện</span>
+                                            <span className="group-data-[selected]:font-semibold">{t("location.select_ward")}</span>
                                             <Check className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-action-brand-text-default shrink-0 ml-2" />
                                         </ListboxOption>
                                         {wards.map((w) => (
@@ -412,25 +417,25 @@ export function CreateEventStep1BasicInfo({
                                 </div>
                             </Listbox>
                             {formData.provinceCode > 0 && wardState.error && renderDictionaryMessage(wardState.error, onRetryWards)}
-                            {formData.provinceCode > 0 && !wardState.loading && !wardState.error && wards.length === 0 && renderDictionaryMessage("Chưa có quận/huyện cho tỉnh/thành đã chọn.", onRetryWards)}
+                            {formData.provinceCode > 0 && !wardState.loading && !wardState.error && wards.length === 0 && renderDictionaryMessage(t("location.no_ward"), onRetryWards)}
                             {renderError("wardCode")}
                         </div>
                     </div>
 
                     <div data-field="address">
-                        <label className="block text-sm font-medium mb-1">Địa chỉ chi tiết <span className="text-feedback-error-text">*</span></label>
+                        <label className="block text-sm font-medium mb-1">{t("location.address")} <span className="text-feedback-error-text">*</span></label>
                         <input
                             type="text"
                             value={formData.address}
                             onChange={(e) => updateField("address", e.target.value)}
                             className={fieldClass("address")}
-                            placeholder="Số nhà, tên đường..."
+                            placeholder={t("location.address_placeholder")}
                         />
                         {renderError("address")}
                     </div>
 
                     <div className="mt-4">
-                        <label className="block text-sm font-medium mb-2">Ghim vị trí trên bản đồ</label>
+                        <label className="block text-sm font-medium mb-2">{t("location.map_pin")}</label>
                         <div className="h-[250px] w-full rounded-ds-xl overflow-hidden border border-border-default relative">
                             <MapPicker
                                 onLocationSelect={(lat, lng) => {
@@ -452,27 +457,27 @@ export function CreateEventStep1BasicInfo({
             <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <AlignLeft className="text-text-secondary" size={20} />
-                    <h3 className="text-lg font-bold text-text-primary">Mô tả sự kiện</h3>
+                    <h3 className="text-lg font-bold text-text-primary">{t("description.title")}</h3>
                 </div>
 
                 <div className="space-y-4">
                     <div data-field="shortDescription">
                         <div className="flex justify-between items-center mb-1">
-                            <label className="block text-sm font-medium">Tóm tắt ngắn <span className="text-feedback-error-text">*</span></label>
-                            <span className="text-xs text-text-muted">Tối đa 160 ký tự</span>
+                            <label className="block text-sm font-medium">{t("description.short_desc")} <span className="text-feedback-error-text">*</span></label>
+                            <span className="text-xs text-text-muted">{t("description.short_desc_hint")}</span>
                         </div>
                         <textarea
                             value={formData.shortDescription}
                             onChange={(e) => updateField("shortDescription", e.target.value)}
                             rows={2}
                             className={`${fieldClass("shortDescription")} resize-none`}
-                            placeholder="Mô tả ngắn gọn về sự kiện..."
+                            placeholder={t("description.short_desc_placeholder")}
                         />
                         {renderError("shortDescription")}
                     </div>
                     
                     <div data-field="detailedDescription">
-                        <label className="block text-sm font-medium mb-1">Mô tả chi tiết <span className="text-feedback-error-text">*</span></label>
+                        <label className="block text-sm font-medium mb-1">{t("description.detailed_desc")} <span className="text-feedback-error-text">*</span></label>
                         {/* Placeholder for Rich Text Editor */}
                         <div className={`border rounded-ds-lg overflow-hidden bg-field-bg-default focus-within:ring-1 focus-within:ring-focus-ring transition-shadow ${
                             errors.detailedDescription
@@ -492,7 +497,7 @@ export function CreateEventStep1BasicInfo({
                                 onChange={(e) => updateField("detailedDescription", e.target.value)}
                                 rows={8}
                                 className="w-full p-3 bg-transparent outline-none resize-y"
-                                placeholder="Nội dung chi tiết..."
+                                placeholder={t("description.detailed_desc_placeholder")}
                             />
                         </div>
                         {renderError("detailedDescription")}
@@ -500,7 +505,7 @@ export function CreateEventStep1BasicInfo({
 
                     <div className="rounded-ds-lg border border-feedback-warning-border bg-feedback-warning-bg p-3 text-sm text-feedback-warning-text flex items-start gap-2">
                         <AlertTriangle className="shrink-0 mt-0.5" size={16} />
-                        <span>Không đưa thông tin liên hệ trái quy định (SĐT, email, link bên ngoài) trong nội dung hiển thị công khai. Vi phạm có thể khiến sự kiện bị từ chối duyệt.</span>
+                        <span>{t("description.warning")}</span>
                     </div>
                 </div>
             </div>
@@ -509,9 +514,9 @@ export function CreateEventStep1BasicInfo({
             <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <Building2 className="text-text-secondary" size={20} />
-                    <h3 className="text-lg font-bold text-text-primary">Thông tin ban tổ chức</h3>
+                    <h3 className="text-lg font-bold text-text-primary">{t("organizer.title")}</h3>
                 </div>
-                <p className="text-sm text-text-muted mb-4">Thông tin này được kế thừa từ hồ sơ tổ chức và có thể chỉnh sửa riêng cho event.</p>
+                <p className="text-sm text-text-muted mb-4">{t("organizer.desc")}</p>
 
                 <div className="flex flex-col sm:flex-row gap-6">
                     <div className="shrink-0">
@@ -525,35 +530,35 @@ export function CreateEventStep1BasicInfo({
                     
                     <div className="flex-1 space-y-4">
                         <div data-field="organizerName">
-                            <label className="block text-sm font-medium mb-1">Tên ban tổ chức <span className="text-feedback-error-text">*</span></label>
+                            <label className="block text-sm font-medium mb-1">{t("organizer.name")} <span className="text-feedback-error-text">*</span></label>
                             <input
                                 type="text"
                                 value={formData.organizerName}
-                                onChange={(e) => updateField("organizerName", e.target.value)}
-                                className={fieldClass("organizerName")}
-                                placeholder="Tên đơn vị tổ chức..."
+                                disabled
+                                className={`${fieldClass("organizerName")} bg-bg-muted cursor-not-allowed text-text-secondary`}
+                                placeholder={t("organizer.name_placeholder")}
                             />
                             {renderError("organizerName")}
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div data-field="organizerEmail">
-                                <label className="block text-sm font-medium mb-1">Email hỗ trợ <span className="text-feedback-error-text">*</span></label>
+                                <label className="block text-sm font-medium mb-1">{t("organizer.email")} <span className="text-feedback-error-text">*</span></label>
                                 <input
                                     type="email"
                                     value={formData.organizerEmail}
-                                    onChange={(e) => updateField("organizerEmail", e.target.value)}
-                                    className={fieldClass("organizerEmail")}
+                                    disabled
+                                    className={`${fieldClass("organizerEmail")} bg-bg-muted cursor-not-allowed text-text-secondary`}
                                     placeholder="email@example.com"
                                 />
                                 {renderError("organizerEmail")}
                             </div>
                             <div data-field="organizerPhone">
-                                <label className="block text-sm font-medium mb-1">Số điện thoại hỗ trợ <span className="text-feedback-error-text">*</span></label>
+                                <label className="block text-sm font-medium mb-1">{t("organizer.phone")} <span className="text-feedback-error-text">*</span></label>
                                 <input
                                     type="text"
                                     value={formData.organizerPhone}
-                                    onChange={(e) => updateField("organizerPhone", e.target.value)}
-                                    className={fieldClass("organizerPhone")}
+                                    disabled
+                                    className={`${fieldClass("organizerPhone")} bg-bg-muted cursor-not-allowed text-text-secondary`}
                                     placeholder="1900 0000"
                                 />
                                 {renderError("organizerPhone")}
