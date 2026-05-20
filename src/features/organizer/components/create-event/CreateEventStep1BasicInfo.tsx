@@ -58,7 +58,6 @@ export function CreateEventStep1BasicInfo({
     onWardChange,
     onRetryCategories,
     onRetryProvinces,
-    onRetryProvinces,
     onRetryWards,
 }: Props) {
     const t = useTranslations("CreateEvent.Step1");
