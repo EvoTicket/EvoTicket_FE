@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import axios from "axios";
 import api from "@/src/lib/axios";
 import { toast } from "react-toastify";
-import { Building2, FileText, Phone, Mail, Globe, Upload, MapPin, ChevronDown, Check } from "lucide-react";
+import { Building2, FileText, Phone, Mail, Globe, Upload, MapPin, ChevronDown, Check, Loader2, Landmark, UserCheck } from "lucide-react";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { useAppSelector, useAppDispatch } from "@/src/store/hooks";
 import { updateToken } from "@/src/store/slices/authSlice";
@@ -39,6 +39,14 @@ interface Ward {
     codename: string;
     division_type: string;
     province_code: number | null;
+}
+
+interface Bank {
+    id: number;
+    name: string;
+    code: string;
+    shortName: string;
+    logo: string;
 }
 
 interface OrganizationRegisterResponse {
@@ -88,12 +96,23 @@ export default function RegisterOrganizerPage() {
         businessLicenseUrl: "",
     });
 
+    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [licenseFile, setLicenseFile] = useState<File | null>(null);
+
+    // Bank Account States
+    const [bankProfileName, setBankProfileName] = useState("");
+    const [banks, setBanks] = useState<Bank[]>([]);
+    const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
+    const [bankAccountNumber, setBankAccountNumber] = useState("");
+    const [bankOwnerName, setBankOwnerName] = useState("");
+    const [isLoadingBanks, setIsLoadingBanks] = useState(false);
+    const [isCheckingOwner, setIsCheckingOwner] = useState(false);
+
     const fetchProvinces = useCallback(async () => {
         setIsLoadingProvinces(true);
         try {
-            // Token auto-injected by axios interceptor
             const response = await api.get("/iam-service/api/locations/provinces");
-
             if (response.data && Array.isArray(response.data)) {
                 setProvinces(response.data);
             }
@@ -108,11 +127,9 @@ export default function RegisterOrganizerPage() {
     const fetchWards = useCallback(async (provinceCode: number) => {
         setIsLoadingWards(true);
         try {
-            // Token auto-injected by axios interceptor
             const response = await api.get(
                 `/iam-service/api/locations/wards?provinceCode=${provinceCode}`
             );
-
             if (response.data && Array.isArray(response.data)) {
                 setWards(response.data);
             }
@@ -124,14 +141,31 @@ export default function RegisterOrganizerPage() {
         }
     }, []);
 
-    // Fetch provinces on component mount
+    const fetchBanks = useCallback(async () => {
+        setIsLoadingBanks(true);
+        try {
+            const response = await api.get("/inventory-service/api/banks");
+            if (response.data?.data && Array.isArray(response.data.data)) {
+                setBanks(response.data.data);
+            } else if (response.data && Array.isArray(response.data)) {
+                setBanks(response.data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch banks", error);
+            toast.error("Không thể tải danh sách ngân hàng");
+        } finally {
+            setIsLoadingBanks(false);
+        }
+    }, []);
+
+    // Fetch provinces and banks on component mount
     useEffect(() => {
         const frame = requestAnimationFrame(() => {
             void fetchProvinces();
+            void fetchBanks();
         });
-
         return () => cancelAnimationFrame(frame);
-    }, [fetchProvinces]);
+    }, [fetchProvinces, fetchBanks]);
 
     // Fetch wards when province changes
     useEffect(() => {
@@ -139,10 +173,48 @@ export default function RegisterOrganizerPage() {
             const frame = requestAnimationFrame(() => {
                 void fetchWards(formData.provinceCode);
             });
-
             return () => cancelAnimationFrame(frame);
         }
     }, [fetchWards, formData.provinceCode]);
+
+    // Auto lookup bank account owner name
+    useEffect(() => {
+        if (selectedBank?.code && bankAccountNumber && bankAccountNumber.length >= 6) {
+            const controller = new AbortController();
+            const delayDebounceFn = setTimeout(async () => {
+                setIsCheckingOwner(true);
+                setBankOwnerName("");
+                try {
+                    const response = await api.get(
+                        `/inventory-service/api/banks/owner-name?bankCode=${selectedBank.code}&bankAccountNumber=${bankAccountNumber}`,
+                        { signal: controller.signal }
+                    );
+                    if (response.data?.data) {
+                        setBankOwnerName(response.data.data);
+                        toast.success("Xác thực tài khoản ngân hàng thành công!");
+                    } else if (typeof response.data === "string") {
+                        setBankOwnerName(response.data);
+                        toast.success("Xác thực tài khoản ngân hàng thành công!");
+                    }
+                } catch (error: any) {
+                    if (axios.isCancel(error)) return;
+                    console.error("Failed to lookup owner name", error);
+                    const errorMsg = error.response?.data?.message || "Không thể xác thực tài khoản ngân hàng";
+                    toast.error(errorMsg);
+                    setBankOwnerName("");
+                } finally {
+                    setIsCheckingOwner(false);
+                }
+            }, 800);
+
+            return () => {
+                clearTimeout(delayDebounceFn);
+                controller.abort();
+            };
+        } else {
+            setBankOwnerName("");
+        }
+    }, [selectedBank, bankAccountNumber]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -193,12 +265,77 @@ export default function RegisterOrganizerPage() {
             return;
         }
 
+        if (!licenseFile) {
+            toast.error("Vui lòng tải lên Giấy phép kinh doanh");
+            return;
+        }
+
+        if (!selectedBank) {
+            toast.error("Vui lòng chọn ngân hàng");
+            return;
+        }
+
+        if (!bankAccountNumber) {
+            toast.error("Vui lòng nhập số tài khoản ngân hàng");
+            return;
+        }
+
+        if (!bankOwnerName) {
+            toast.error("Tên chủ tài khoản ngân hàng chưa được xác thực");
+            return;
+        }
+
+        if (!bankProfileName) {
+            toast.error("Vui lòng nhập tên gợi nhớ tài khoản");
+            return;
+        }
+
         setIsLoading(true);
 
         try {
+            const orgPayload = {
+                organizationName: formData.organizationName,
+                legalName: formData.legalName,
+                taxCode: formData.taxCode,
+                description: formData.description,
+                businessAddress: formData.businessAddress,
+                wardCode: formData.wardCode,
+                provinceCode: formData.provinceCode,
+                businessPhone: formData.businessPhone,
+                businessEmail: formData.businessEmail,
+                website: formData.website,
+                bankInfos: [
+                    {
+                        profileName: bankProfileName,
+                        bankCode: selectedBank.code,
+                        bankName: selectedBank.shortName || selectedBank.name,
+                        bankAccountNumber: bankAccountNumber,
+                        bankOwnerName: bankOwnerName
+                    }
+                ]
+            };
+
+            const submitFormData = new FormData();
+            submitFormData.append(
+                "organization",
+                new Blob([JSON.stringify(orgPayload)], {
+                    type: "application/json",
+                })
+            );
+
+            if (logoFile) {
+                submitFormData.append("logoFile", logoFile);
+            }
+            if (licenseFile) {
+                submitFormData.append("licenseFile", licenseFile);
+            }
+
             const response = await api.post<OrganizationRegisterResponse>(
                 "/iam-service/api/organizations",
-                formData
+                submitFormData,
+                {
+                    headers: { "Content-Type": undefined }
+                }
             );
 
             if (response.status === 201 || response.data?.status === 201) {
@@ -214,7 +351,6 @@ export default function RegisterOrganizerPage() {
                 await persistor.flush();
 
                 toast.success("Đăng ký organizer thành công!");
-
                 router.replace(`/${locale}/organizer/center`);
             }
         } catch (error: unknown) {
@@ -255,6 +391,48 @@ export default function RegisterOrganizerPage() {
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Logo Upload */}
+                        <div className="bg-bg-subtle p-6 rounded-ds-lg border border-border-default mb-6">
+                            <label className="block text-sm font-medium text-text-primary mb-3">
+                                Logo tổ chức
+                            </label>
+                            <div className="flex items-center gap-6">
+                                <div className="relative w-20 h-20 rounded-full border-2 border-dashed border-border-default overflow-hidden flex items-center justify-center bg-bg-surface shrink-0">
+                                    {logoPreview ? (
+                                        <img src={logoPreview} alt="Logo Preview" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <Building2 className="h-10 w-10 text-text-muted" />
+                                    )}
+                                </div>
+                                <div className="flex-1">
+                                    <input
+                                        type="file"
+                                        id="logoFile"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0] || null;
+                                            if (file) {
+                                                setLogoFile(file);
+                                                setLogoPreview(URL.createObjectURL(file));
+                                            } else {
+                                                setLogoFile(null);
+                                                setLogoPreview(null);
+                                            }
+                                        }}
+                                    />
+                                    <label
+                                        htmlFor="logoFile"
+                                        className="inline-flex items-center px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary text-sm font-medium hover:bg-bg-subtle cursor-pointer transition-colors"
+                                    >
+                                        <Upload className="mr-2 h-4 w-4" />
+                                        Chọn ảnh logo
+                                    </label>
+                                    <p className="text-xs text-text-muted mt-2">Hỗ trợ JPG, PNG. Tối đa 5MB.</p>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Organization Name */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
@@ -499,20 +677,168 @@ export default function RegisterOrganizerPage() {
                             />
                         </div>
 
-                        {/* Business License URL */}
-                        <div>
+                        {/* Bank Account Info */}
+                        <div className="border-t border-border-default pt-8 mt-8">
+                            <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+                                <Landmark className="h-5 w-5 text-primary" />
+                                Thông tin tài khoản ngân hàng nhận tiền
+                            </h3>
+                            <p className="text-sm text-text-muted mb-6">
+                                Cung cấp thông tin tài khoản ngân hàng để nhận thanh toán doanh thu từ vé bán được.
+                            </p>
+
+                            <div className="space-y-6 bg-bg-subtle p-6 rounded-ds-lg border border-border-default mb-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Tên gợi nhớ */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-text-primary mb-2">
+                                            Tên gợi nhớ tài khoản *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={bankProfileName}
+                                            onChange={(e) => setBankProfileName(e.target.value)}
+                                            placeholder="VD: Tài khoản chính"
+                                            required
+                                            className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+
+                                    {/* Ngân hàng */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-text-primary mb-2">
+                                            Ngân hàng *
+                                        </label>
+                                        <Listbox
+                                            value={selectedBank}
+                                            onChange={setSelectedBank}
+                                            disabled={isLoadingBanks || banks.length === 0}
+                                        >
+                                            <div className="relative">
+                                                <ListboxButton
+                                                    className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary flex items-center justify-between text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-sm h-[42px]"
+                                                >
+                                                    <span className="flex items-center gap-2 truncate">
+                                                        {selectedBank ? (
+                                                            <>
+                                                                {selectedBank.logo && (
+                                                                    <img src={selectedBank.logo} alt="" className="h-5 w-auto object-contain max-w-[60px]" />
+                                                                )}
+                                                                <span>{selectedBank.shortName || selectedBank.name}</span>
+                                                            </>
+                                                        ) : isLoadingBanks ? (
+                                                            "Đang tải..."
+                                                        ) : (
+                                                            "-- Chọn ngân hàng --"
+                                                        )}
+                                                    </span>
+                                                    <ChevronDown size={16} className="text-text-secondary shrink-0 ml-2" />
+                                                </ListboxButton>
+                                                <ListboxOptions
+                                                    anchor="bottom start"
+                                                    modal={false}
+                                                    className="z-50 w-[var(--button-width)] [--anchor-gap:4px] !max-h-60 overflow-y-auto bg-bg-surface border border-border-default rounded-ds-lg shadow-lg text-text-primary focus:outline-none py-1 mt-1"
+                                                >
+                                                    {banks.map((bank) => (
+                                                        <ListboxOption
+                                                            key={bank.id}
+                                                            value={bank}
+                                                            className="group flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-bg-subtle transition-colors text-sm"
+                                                        >
+                                                            <span className="flex items-center gap-3 truncate">
+                                                                {bank.logo && (
+                                                                    <img src={bank.logo} alt="" className="h-5 w-auto object-contain max-w-[60px]" />
+                                                                )}
+                                                                <span className="group-data-[selected]:font-semibold">{bank.shortName} - {bank.name}</span>
+                                                            </span>
+                                                            <Check className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-action-brand-text-default shrink-0 ml-2" />
+                                                        </ListboxOption>
+                                                    ))}
+                                                </ListboxOptions>
+                                            </div>
+                                        </Listbox>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Số tài khoản */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-text-primary mb-2">
+                                            Số tài khoản *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={bankAccountNumber}
+                                            onChange={(e) => setBankAccountNumber(e.target.value.replace(/\D/g, ""))}
+                                            placeholder="Nhập số tài khoản"
+                                            required
+                                            className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+
+                                    {/* Tên chủ tài khoản */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-text-primary mb-2">
+                                            Tên chủ tài khoản *
+                                        </label>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                value={bankOwnerName}
+                                                readOnly
+                                                placeholder={isCheckingOwner ? "Đang xác thực..." : "Tự động hiển thị tên chủ tài khoản"}
+                                                required
+                                                className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-subtle text-text-primary focus:outline-none font-semibold uppercase disabled:opacity-75 h-[42px]"
+                                            />
+                                            {isCheckingOwner && (
+                                                <div className="absolute right-3 top-2.5 flex items-center gap-2">
+                                                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                                                </div>
+                                            )}
+                                            {!isCheckingOwner && bankOwnerName && (
+                                                <div className="absolute right-3 top-2.5">
+                                                    <UserCheck className="h-5 w-5 text-action-success-text-default" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Business License Upload */}
+                        <div className="mb-6">
                             <label className="block text-sm font-medium text-text-primary mb-2">
-                                <Upload className="inline mr-2 h-4 w-4" />
-                                URL Giấy phép kinh doanh
+                                <FileText className="inline mr-2 h-4 w-4" />
+                                Giấy phép kinh doanh *
                             </label>
-                            <input
-                                type="url"
-                                name="businessLicenseUrl"
-                                value={formData.businessLicenseUrl}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="VD: https://example.com/license.pdf"
-                            />
+                            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-border-default border-dashed rounded-ds-lg bg-bg-subtle hover:bg-bg-surface transition-colors">
+                                <div className="space-y-1 text-center">
+                                    <Upload className="mx-auto h-12 w-12 text-text-muted" />
+                                    <div className="flex text-sm text-text-muted justify-center">
+                                        <label
+                                            htmlFor="licenseFile"
+                                            className="relative cursor-pointer bg-transparent rounded-md font-semibold text-primary hover:text-primary-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary"
+                                        >
+                                            <span>Tải tệp lên</span>
+                                            <input
+                                                id="licenseFile"
+                                                name="licenseFile"
+                                                type="file"
+                                                accept="image/*,application/pdf"
+                                                className="sr-only"
+                                                onChange={(e) => setLicenseFile(e.target.files?.[0] || null)}
+                                            />
+                                        </label>
+                                    </div>
+                                    <p className="text-xs text-text-muted">PDF hoặc hình ảnh (PNG, JPG) lên đến 10MB</p>
+                                    {licenseFile && (
+                                        <p className="text-sm font-medium text-action-success-text-default mt-2 flex items-center justify-center gap-1">
+                                            <Check className="h-4 w-4" /> Đã chọn: {licenseFile.name}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
                         {/* Submit Button */}
@@ -520,15 +846,16 @@ export default function RegisterOrganizerPage() {
                             <button
                                 type="button"
                                 onClick={() => router.back()}
-                                className="flex-1 px-6 py-3 border border-border-default text-text-primary rounded-ds-lg font-medium hover:bg-secondary transition-colors"
+                                className="flex-1 px-6 py-3 bg-secondary hover:bg-secondary/80 border border-border-default text-text-primary rounded-ds-lg font-semibold transition-all"
                             >
                                 Hủy
                             </button>
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="flex-1 px-6 py-3 bg-button-primary-bg-defaul hover:bg-button-primary-bg-defaul-hovertext-button-primary-text-default rounded-ds-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-ds-lg font-semibold transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
+                                {isLoading && <Loader2 className="h-5 w-5 animate-spin" />}
                                 {isLoading ? "Đang xử lý..." : "Đăng ký"}
                             </button>
                         </div>
