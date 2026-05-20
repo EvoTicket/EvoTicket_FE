@@ -23,7 +23,6 @@ interface OrganizerFormData {
     businessEmail: string;
     website: string;
     businessLicenseUrl: string;
-    coverUrl?: string;
     shortDescription?: string;
     publicBio?: string;
     businessType: string;
@@ -100,7 +99,6 @@ export default function RegisterOrganizerPage() {
         businessEmail: "",
         website: "",
         businessLicenseUrl: "",
-        coverUrl: "",
         shortDescription: "",
         publicBio: "",
         businessType: "Công ty TNHH",
@@ -111,6 +109,8 @@ export default function RegisterOrganizerPage() {
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [licenseFile, setLicenseFile] = useState<File | null>(null);
+    const [coverFile, setCoverFile] = useState<File | null>(null);
+    const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
     // Bank Account States
     const [bankProfileName, setBankProfileName] = useState("");
@@ -321,7 +321,6 @@ export default function RegisterOrganizerPage() {
                 organizationType: formData.organizationType,
                 shortDescription: formData.shortDescription || formData.description,
                 publicBio: formData.publicBio || formData.description,
-                coverUrl: formData.coverUrl || "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80",
                 bankInfos: [
                     {
                         profileName: bankProfileName,
@@ -346,6 +345,9 @@ export default function RegisterOrganizerPage() {
             }
             if (licenseFile) {
                 submitFormData.append("licenseFile", licenseFile);
+            }
+            if (coverFile) {
+                submitFormData.append("coverFile", coverFile);
             }
 
             const response = await api.post<OrganizationRegisterResponse>(
@@ -759,19 +761,47 @@ export default function RegisterOrganizerPage() {
                             />
                         </div>
 
-                        {/* Cover Image URL */}
-                        <div>
-                            <label className="block text-sm font-medium text-text-primary mb-2">
-                                Đường dẫn ảnh bìa (Cover Image URL)
+                        {/* Cover Image Upload */}
+                        <div className="bg-bg-subtle p-6 rounded-ds-lg border border-border-default">
+                            <label className="block text-sm font-medium text-text-primary mb-3">
+                                <Upload className="inline mr-2 h-4 w-4" />
+                                Ảnh bìa tổ chức (Cover Image)
                             </label>
+                            {/* Preview banner */}
+                            <div className="relative w-full h-36 rounded-ds-lg border-2 border-dashed border-border-default overflow-hidden flex items-center justify-center bg-bg-surface mb-3">
+                                {coverPreview ? (
+                                    <img src={coverPreview} alt="Cover Preview" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="flex flex-col items-center gap-1 text-text-muted">
+                                        <Upload className="h-8 w-8" />
+                                        <span className="text-xs">Chưa có ảnh bìa</span>
+                                    </div>
+                                )}
+                            </div>
                             <input
-                                type="url"
-                                name="coverUrl"
-                                value={formData.coverUrl}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="VD: https://example.com/cover.jpg (hoặc để trống để dùng ảnh mặc định)"
+                                type="file"
+                                id="coverFile"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0] || null;
+                                    if (file) {
+                                        setCoverFile(file);
+                                        setCoverPreview(URL.createObjectURL(file));
+                                    } else {
+                                        setCoverFile(null);
+                                        setCoverPreview(null);
+                                    }
+                                }}
                             />
+                            <label
+                                htmlFor="coverFile"
+                                className="inline-flex items-center px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary text-sm font-medium hover:bg-bg-subtle cursor-pointer transition-colors"
+                            >
+                                <Upload className="mr-2 h-4 w-4" />
+                                Chọn ảnh bìa
+                            </label>
+                            <p className="text-xs text-text-muted mt-2">Hỗ trợ JPG, PNG. Tỷ lệ 16:9 khuyến nghị. Tối đa 5MB. Để trống sẽ dùng ảnh mặc định.</p>
                         </div>
 
                         {/* Short Description & Public Bio */}
