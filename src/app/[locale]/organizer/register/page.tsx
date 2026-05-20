@@ -23,6 +23,12 @@ interface OrganizerFormData {
     businessEmail: string;
     website: string;
     businessLicenseUrl: string;
+    coverUrl?: string;
+    shortDescription?: string;
+    publicBio?: string;
+    businessType: string;
+    billingAddress: string;
+    organizationType: string;
 }
 
 interface Province {
@@ -94,6 +100,12 @@ export default function RegisterOrganizerPage() {
         businessEmail: "",
         website: "",
         businessLicenseUrl: "",
+        coverUrl: "",
+        shortDescription: "",
+        publicBio: "",
+        businessType: "Công ty TNHH",
+        billingAddress: "",
+        organizationType: "Doanh nghiệp tổ chức sự kiện",
     });
 
     const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -304,6 +316,12 @@ export default function RegisterOrganizerPage() {
                 businessPhone: formData.businessPhone,
                 businessEmail: formData.businessEmail,
                 website: formData.website,
+                businessType: formData.businessType,
+                billingAddress: formData.billingAddress || formData.businessAddress,
+                organizationType: formData.organizationType,
+                shortDescription: formData.shortDescription || formData.description,
+                publicBio: formData.publicBio || formData.description,
+                coverUrl: formData.coverUrl || "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80",
                 bankInfos: [
                     {
                         profileName: bankProfileName,
@@ -468,6 +486,45 @@ export default function RegisterOrganizerPage() {
                             </div>
                         </div>
 
+                        {/* Organization Type & Business Type */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-text-primary mb-2">
+                                    Loại hình tổ chức *
+                                </label>
+                                <select
+                                    name="organizationType"
+                                    value={formData.organizationType}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary h-[42px]"
+                                >
+                                    <option value="Doanh nghiệp tổ chức sự kiện">Doanh nghiệp tổ chức sự kiện</option>
+                                    <option value="Nhà hát/Đoàn nghệ thuật">Nhà hát/Đoàn nghệ thuật</option>
+                                    <option value="Cá nhân tự do">Cá nhân tự do</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-text-primary mb-2">
+                                    Loại hình kinh doanh *
+                                </label>
+                                <select
+                                    name="businessType"
+                                    value={formData.businessType}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary h-[42px]"
+                                >
+                                    <option value="Công ty TNHH">Công ty TNHH</option>
+                                    <option value="Công ty Cổ phần">Công ty Cổ phần</option>
+                                    <option value="Hộ kinh doanh">Hộ kinh doanh</option>
+                                    <option value="Cá nhân">Cá nhân</option>
+                                </select>
+                            </div>
+                        </div>
+
                         {/* Tax Code & Phone */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
@@ -552,6 +609,31 @@ export default function RegisterOrganizerPage() {
                                 required
                                 className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                                 placeholder="VD: 123 Đường ABC"
+                            />
+                        </div>
+
+                        {/* Billing Address */}
+                        <div>
+                            <div className="flex justify-between items-center mb-2">
+                                <label className="block text-sm font-medium text-text-primary">
+                                    <MapPin className="inline mr-2 h-4 w-4" />
+                                    Địa chỉ xuất hoá đơn
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, billingAddress: prev.businessAddress }))}
+                                    className="text-xs text-primary hover:text-primary-hover font-semibold"
+                                >
+                                    Sao chép địa chỉ kinh doanh
+                                </button>
+                            </div>
+                            <input
+                                type="text"
+                                name="billingAddress"
+                                value={formData.billingAddress}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                                placeholder="Địa chỉ để xuất hoá đơn tài chính, nếu khác địa chỉ kinh doanh"
                             />
                         </div>
 
@@ -675,6 +757,52 @@ export default function RegisterOrganizerPage() {
                                 className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                                 placeholder="Mô tả ngắn về tổ chức của bạn..."
                             />
+                        </div>
+
+                        {/* Cover Image URL */}
+                        <div>
+                            <label className="block text-sm font-medium text-text-primary mb-2">
+                                Đường dẫn ảnh bìa (Cover Image URL)
+                            </label>
+                            <input
+                                type="url"
+                                name="coverUrl"
+                                value={formData.coverUrl}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                                placeholder="VD: https://example.com/cover.jpg (hoặc để trống để dùng ảnh mặc định)"
+                            />
+                        </div>
+
+                        {/* Short Description & Public Bio */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-text-primary mb-2">
+                                    Mô tả ngắn (Hiển thị trang chủ)
+                                </label>
+                                <textarea
+                                    name="shortDescription"
+                                    value={formData.shortDescription}
+                                    onChange={handleChange}
+                                    rows={3}
+                                    className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                    placeholder="Tóm tắt về tổ chức (nếu trống sẽ lấy mô tả trên)"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-text-primary mb-2">
+                                    Tiểu sử công khai (Public Bio)
+                                </label>
+                                <textarea
+                                    name="publicBio"
+                                    value={formData.publicBio}
+                                    onChange={handleChange}
+                                    rows={3}
+                                    className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                    placeholder="Giới thiệu chi tiết cho công chúng (nếu trống sẽ lấy mô tả trên)"
+                                />
+                            </div>
                         </div>
 
                         {/* Bank Account Info */}

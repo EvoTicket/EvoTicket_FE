@@ -357,3 +357,43 @@ export interface FileUploadResponse {
   height?: number;
   resourceType?: string;
 }
+
+export interface AccountBankInfoResponse {
+  accountName: string;
+  bankName: string;
+  accountNumber: string;
+}
+
+export interface AccountOwnerInfo {
+  fullName: string;
+  email: string;
+  phone: string;
+  employeeCode: string;
+  twoFactorEnabled: boolean;
+  lastPasswordChangeAt: string;
+  activeSessions: number;
+}
+
+export interface OrganizerAccountProfileResponse {
+  id: number;
+  userId: number;
+  organizationName: string;
+  organizationType: string;
+  status: string;
+  verificationLevel: string;
+  joinedAt: string;
+  primaryContactName: string;
+  logoUrl: string;
+  coverUrl: string;
+  website: string;
+  supportEmail: string;
+  supportPhone: string;
+  shortDescription: string;
+  publicBio: string;
+  businessType: string;
+  taxCode: string;
+  taxVerified: boolean;
+  billingAddress: string;
+  ownerInfo: AccountOwnerInfo;
+  payoutInfo: AccountBankInfoResponse[];
+}
