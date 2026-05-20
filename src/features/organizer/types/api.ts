@@ -197,7 +197,7 @@ export type OrganizerEventStatus =
   | "COMPLETED"
   | "CANCELLED";
 
-export type OrganizerApprovalStatus = "PENDING" | "ACCEPTED" | "REJECTED";
+export type OrganizerApprovalStatus = "PENDING_REVIEW" | "PUBLISHED" | "REJECTED";
 
 export type OrganizerEventSort =
   | "PRICE_ASC"
