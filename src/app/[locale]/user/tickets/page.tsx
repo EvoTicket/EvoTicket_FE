@@ -342,10 +342,10 @@ export default function MyTicketsPage() {
                         <p className="text-sm text-text-secondary w-3/4 max-w-md">{t('empty_subtitle')}</p>
                     </div>
                 ) : (
-                    filteredEvents.map((event) => {
+                    filteredEvents.map((event, index) => {
                         const isExpanded = expandedEvents.includes(event.id);
                         return (
-                            <div key={event.id} className="bg-bg-surface border border-border-default rounded-lg overflow-hidden shadow-sm">
+                            <div key={event.id || event.orderId || `event-${index}`} className="bg-bg-surface border border-border-default rounded-lg overflow-hidden shadow-sm">
                                 <div className="p-4 sm:p-6 flex flex-col md:flex-row gap-4 justify-between md:items-center">
                                     <div className="flex-1 max-w-sm">
                                         <h3 className="font-semibold text-[15px] text-text-primary mb-1">{event.eventName}</h3>
@@ -382,11 +382,11 @@ export default function MyTicketsPage() {
                                         </div>
 
                                         <div className="space-y-3 relative z-10 w-full overflow-visible">
-                                            {event.tickets.map((ticket: any) => {
+                                            {event.tickets.map((ticket: any, ticketIndex: number) => {
                                                 const isTicketExpanded = expandedTickets.includes(ticket.id);
 
                                                 return (
-                                                    <div key={ticket.id} className="bg-bg-surface border border-border-default rounded-ds-md overflow-hidden relative">
+                                                    <div key={ticket.id || ticket.ticketAssetId || `ticket-${ticketIndex}`} className="bg-bg-surface border border-border-default rounded-ds-md overflow-hidden relative">
                                                         <div className="p-4 sm:px-6 sm:py-4 flex flex-col md:flex-row gap-4 justify-between md:items-center">
                                                             <div className="w-full md:w-1/4 shrink-0">
                                                                 <h5 className="font-bold text-text-primary text-[13px] mb-1">{ticket.ticketName}</h5>
