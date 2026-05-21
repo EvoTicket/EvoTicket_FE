@@ -133,11 +133,11 @@ export const organizerEventApi = {
     return response.data?.data ?? { count: 0 };
   },
 
-  async initDraft(): Promise<{ id: number }> {
-    const response = await api.post<BaseResponse<{ id: number }>>(
+  async initDraft(): Promise<{ eventId: number }> {
+    const response = await api.post<BaseResponse<{ eventId: number }>>(
       "/inventory-service/api/events/draft"
     );
-    return response.data?.data as { id: number };
+    return response.data?.data as { eventId: number };
   },
 
   async getDraft(id: number | string): Promise<any> {

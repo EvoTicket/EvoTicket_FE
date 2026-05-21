@@ -168,7 +168,8 @@
     "online_default": "Online",
     "location_label": "Location",
     "genre_label": "Genre",
-    "date_label": "Event Date"
+    "date_label": "Event Date",
+    "resale_market": "Resale Market"
   },
   "Footer": {
     "desc_line1": "The first Blockchain & AI event",
@@ -210,6 +211,8 @@
   },
   "Events": {
     "location_all": "All locations",
+    "search_placeholder": "Search events, artists, venues...",
+    "search_button": "Search",
     "search_for": "Search Results",
     "search_results": "Search results",
     "back_homepage": "Back to homepage",

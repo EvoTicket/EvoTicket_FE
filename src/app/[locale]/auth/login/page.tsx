@@ -12,6 +12,7 @@ import { useAppDispatch, useAppSelector } from "@/src/store/hooks";
 import { setCredentials } from "@/src/store/slices/authSlice";
 import { setAppLoading, selectAppLoading } from "@/src/store/slices/appSlice";
 import { useGoogleLogin } from "@react-oauth/google";
+import { decodeJWT } from "@/src/lib/jwt";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,6 +29,20 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
 
   const loading = useAppSelector(selectAppLoading);
+
+  const getTargetRoute = (token: string) => {
+    const decoded = decodeJWT(token);
+    const roles = decoded?.roles || [];
+
+    if (roles.includes("ROLE_ADMIN") || roles.includes("ADMIN")) {
+      return `/${locale}/admin`;
+    } 
+    if (roles.includes("ROLE_CHECKER") || roles.includes("CHECKER")) {
+      return `/${locale}/checker`;
+    }
+    
+    return searchParams.get('callbackUrl') || `/${locale}/user/homepage`;
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +62,8 @@ export default function LoginPage() {
       if (data.status === 200) {
         dispatch(setCredentials({ token: data.data.token, refreshToken: data.data.refreshToken }));
         toast.success(data.message || t('login_success', { defaultMessage: "Đăng nhập thành công!" }));
-        router.push(callBackURL);
+        const targetRoute = getTargetRoute(data.data.token);
+        router.push(targetRoute);
       }
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {
@@ -76,7 +92,8 @@ export default function LoginPage() {
         if (data.status === 200) {
           dispatch(setCredentials({ token: data.data.token, refreshToken: data.data.refreshToken }));
           toast.success(data.message || t('login_google_success', { defaultMessage: "Đăng nhập Google thành công!" }));
-          router.push(callBackURL);
+          const targetRoute = getTargetRoute(data.data.token);
+          router.push(targetRoute);
         }
       } catch (error: any) {
         toast.error(error.response.data.message || t('login_google_failed', { defaultMessage: "Đăng nhập Google thất bại!" }));

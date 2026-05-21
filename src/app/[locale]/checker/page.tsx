@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import api from "@/src/lib/axios";
 import { useAppDispatch, useAppSelector } from "@/src/store/hooks";
 import { setCredentials, logout, selectAuth } from "@/src/store/slices/authSlice";
+import { decodeJWT } from "@/src/lib/jwt";
 
 type InputMode = "phone" | "laptop" | "scanner";
 
@@ -56,7 +57,21 @@ const extractQrToken = (scannedText: string): string => {
 export default function CheckerPage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { isAuthenticated, user } = useAppSelector(selectAuth);
+  const { isAuthenticated, user, token } = useAppSelector(selectAuth);
+
+  const hasCheckerAccess = React.useMemo(() => {
+    let roles: string[] = [];
+    if (user?.roles && user.roles.length > 0) {
+      roles = user.roles;
+    } else if (token) {
+      const decoded = decodeJWT(token);
+      roles = decoded?.roles || [];
+    }
+    return roles.includes("CHECKER") || roles.includes("ROLE_CHECKER") || roles.includes("ADMIN") || roles.includes("ROLE_ADMIN");
+  }, [user?.roles, token]);
+
+  const params = useParams();
+  const locale = params?.locale || "vi";
 
   const [isConfigured, setIsConfigured] = useState(false);
   const [config, setConfig] = useState({ eventId: "", eventName: "", showtimeId: "", showtimeName: "", gate: "" });
@@ -66,42 +81,20 @@ export default function CheckerPage() {
   const [scanStatus, setScanStatus] = useState<"idle" | "verifying" | "success" | "error" | "invalid">("idle");
   const [cameraError, setCameraError] = useState<string | null>(null);
 
-  // Checker Login States
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-
-  // Reset configuration on logout
+  // Reset configuration and redirect on logout or not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
       setIsConfigured(false);
       setConfig({ eventId: "", eventName: "", showtimeId: "", showtimeName: "", gate: "" });
-    }
-  }, [isAuthenticated]);
-
-  const handleCheckerLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoggingIn(true);
-    try {
-      const response = await api.post(
-        "/iam-service/api/auth/login",
-        { email, password },
-        { skipAuth: true } as any
-      );
-      const data = response.data;
-      if (data.status === 200) {
-        dispatch(setCredentials({ token: data.data.token, refreshToken: data.data.refreshToken, user: data.data.user }));
-        toast.success(locale === "vi" ? "Đăng nhập tài khoản kiểm soát viên thành công!" : "Checker account logged in successfully!");
+      
+      if (typeof window !== 'undefined') {
+        const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
+        router.replace(`/${locale}/auth/login?callbackUrl=${currentUrl}`);
       }
-    } catch (err: any) {
-      const msg = err.response?.data?.message || (locale === "vi" ? "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!" : "Login failed. Please check your credentials!");
-      toast.error(msg);
-    } finally {
-      setIsLoggingIn(false);
+    } else if (!hasCheckerAccess) {
+      router.replace(`/${locale}/user/homepage`);
     }
-  };
-
+  }, [isAuthenticated, hasCheckerAccess, locale, router]);
   const [lastResult, setLastResult] = useState<{
     code: string;
     time: string;
@@ -109,8 +102,6 @@ export default function CheckerPage() {
     message: string;
   } | null>(null);
 
-  const params = useParams();
-  const locale = params?.locale || "vi";
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const scannerRef = useRef<QrScanner | null>(null);
   const [flashlightOn, setFlashlightOn] = useState(false);
@@ -446,80 +437,16 @@ export default function CheckerPage() {
     setIsScanning(!isScanning);
   };
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !hasCheckerAccess) {
     return (
       <div className="min-h-screen bg-[#0F0F1A] flex items-center justify-center p-6 relative overflow-hidden font-sans">
-        {/* Neon Glow Effects */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-10%] right-[-10%] w-[70vw] h-[70vw] rounded-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/20 via-emerald-500/5 to-transparent blur-[80px]"></div>
-          <div className="absolute bottom-[-10%] left-[-10%] w-[70vw] h-[70vw] rounded-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/10 via-emerald-500/0 to-transparent blur-[80px]"></div>
-        </div>
-
-        {/* Login Card */}
-        <div className="z-10 w-full max-w-[420px] bg-[#161624]/85 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-[0_0_50px_-12px_rgba(16,185,129,0.3)] animate-in fade-in zoom-in duration-500">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 relative group overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="absolute top-0 left-0 right-0 h-0.5 bg-emerald-400 shadow-[0_0_8px_2px_rgba(52,211,153,0.6)] animate-scanner-laser"></div>
-              <User className="w-8 h-8 text-emerald-400" />
-            </div>
-            <h1 className="text-[26px] font-black text-white tracking-tighter mb-1.5 uppercase">EVOTICKET CHECKER</h1>
-            <p className="text-[12px] text-emerald-400 font-bold tracking-wider uppercase">
-              {locale === "vi" ? "HỆ THỐNG KIỂM SOÁT VÉ SỰ KIỆN" : "EVENT TICKET CHECK-IN SYSTEM"}
-            </p>
-          </div>
-
-          <form className="space-y-5" onSubmit={handleCheckerLogin}>
-            <div>
-              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
-                {locale === "vi" ? "Email Tài khoản" : "Account Email"}
-              </label>
-              <input
-                type="email"
-                placeholder="checker@evoticket.com"
-                className="w-full px-4 py-3.5 bg-[#1F1F30] text-white border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-[14px] placeholder-gray-500 font-medium"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
-                {locale === "vi" ? "Mật khẩu" : "Password"}
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3.5 bg-[#1F1F30] text-white border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-[14px] placeholder-gray-500 font-medium pr-12"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={isLoggingIn}
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-2xl transition-all active:scale-[0.98] text-[15px] shadow-lg shadow-emerald-500/20 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer uppercase tracking-wider"
-              >
-                {isLoggingIn
-                  ? (locale === "vi" ? "ĐANG XÁC THỰC..." : "AUTHENTICATING...")
-                  : (locale === "vi" ? "ĐĂNG NHẬP KIỂM SOÁT" : "LOG IN TO CHECKER")}
-              </button>
-            </div>
-          </form>
+        <div className="flex flex-col items-center">
+          <RefreshCw className="w-8 h-8 animate-spin text-emerald-400 mb-4" />
+          <p className="text-gray-400 font-medium">
+            {!isAuthenticated 
+              ? (locale === "vi" ? "Đang chuyển hướng đến trang đăng nhập..." : "Redirecting to login...")
+              : (locale === "vi" ? "Đang chuyển hướng về trang chủ..." : "Redirecting to homepage...")}
+          </p>
         </div>
       </div>
     );

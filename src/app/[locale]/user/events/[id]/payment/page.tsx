@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import api from "@/src/lib/axios";
 import { Header } from "@/src/components/header";
 import { Footer } from "@/src/components/footer";
-import { ArrowLeft, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, Loader2, XCircle } from "lucide-react";
 import { EventDetail } from "@/src/types/event";
 import { OdometerDigit } from "@/src/components/ui/odoMeterDigit";
 import { isValidEmail, isValidPhone, isValidFullName } from "@/src/lib/validations";
@@ -278,17 +278,37 @@ export default function PaymentPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-bg-surface">
+            <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center bg-bg-surface">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-button-primary-bg-default"></div>
                 <p className="ml-4 text-text-secondary">{tr('loading_result')}</p>
             </div>
         );
     }
 
-    if (!event) return null;
+    if (!event) {
+        return (
+            <div className="min-h-[calc(100vh-5rem)] flex flex-col items-center justify-center bg-bg-surface p-4 text-center">
+                <div className="w-16 h-16 bg-feedback-error-bg/10 text-feedback-error-text rounded-full flex items-center justify-center mb-4">
+                    <XCircle size={32} />
+                </div>
+                <h2 className="text-2xl font-bold text-text-primary mb-2">
+                    {tr('not_found_title', { defaultMessage: 'Không tìm thấy thông tin' })}
+                </h2>
+                <p className="text-text-secondary max-w-md mb-6">
+                    {tr('not_found_desc', { defaultMessage: 'Rất tiếc, chúng tôi không thể tìm thấy thông tin cho đơn hàng này hoặc phiên đặt vé đã bị hủy.' })}
+                </p>
+                <button
+                    onClick={() => router.push(`/${locale}/user/events/${id}`)}
+                    className="px-6 py-2.5 bg-button-primary-bg-default text-button-primary-text-default font-medium rounded-lg hover:bg-button-primary-bg-hover transition-colors"
+                >
+                    {tb('back_to_event', { defaultMessage: 'Quay lại sự kiện' })}
+                </button>
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-bg-page flex flex-col font-sans">
+        <div className="min-h-[calc(100vh-5rem)] bg-bg-page flex flex-col font-sans">
             {/* <Header /> */}
 
             {/* STICKY COUNTDOWN FLOATING BAR */}

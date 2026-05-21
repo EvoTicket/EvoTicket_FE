@@ -360,7 +360,8 @@ export default function EventsPage() {
                             </span>
                         </Link>
                     </div>
-                    <p className="text-text-secondary">
+
+                    <p className="text-text-secondary mt-2">
                         {t("results_count", {
                             count: totalElements,
                             keyword: keyword ? `"${keyword}"` : t("all_events")
@@ -400,6 +401,33 @@ export default function EventsPage() {
                                 }} className="hover:text-button-primary-bg-default"><X size={14} /></button>
                             </div>
                         ))}
+                    </div>
+
+                    {/* Search Bar */}
+                    <div className="flex flex-col gap-4 max-w-full mt-2 mb-6">
+                        <div className="flex flex-col md:flex-row gap-4 items-center">
+                            <div className="relative flex-1 w-full">
+                                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-text-secondary">
+                                    <Search size={18} />
+                                </div>
+                                <input
+                                    type="text"
+                                    className="w-full pl-10 pr-4 py-3 bg-bg-surface text-text-primary rounded-ds-lg border border-border-default focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
+                                    placeholder={t("search_placeholder", { defaultMessage: "Tìm kiếm sự kiện..." })}
+                                    value={keyword}
+                                    onChange={(e) => setKeyword(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") handleApplyFilters();
+                                    }}
+                                />
+                            </div>
+                            <button
+                                onClick={() => handleApplyFilters()}
+                                className="w-full md:w-auto px-8 py-3 font-semibold text-button-primary-text-default bg-button-primary-bg-default border border-transparent rounded-ds-lg hover:bg-button-primary-bg-hover transition-colors cursor-pointer"
+                            >
+                                {t("search_button", { defaultMessage: "Tìm kiếm" })}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="h-px w-full bg-border"></div>
@@ -458,7 +486,7 @@ export default function EventsPage() {
                                                 text-text-primary outline-none
                                                 focus:ring-1 focus:ring-button-primary-bg-default focus:border-button-primary-bg-default 
                                                 cursor-pointer transition-colors text-left">
-                                            {selectedProvince?.name || "Địa điểm"}
+                                            {selectedProvince?.name || t("location_all")}
                                         </ListboxButton>
 
                                         <ListboxOptions
@@ -480,6 +508,13 @@ export default function EventsPage() {
                                                     <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-button-primary-bg-default ml-2" />
                                                 </ListboxOption>
                                             ))}
+                                            <ListboxOption
+                                                value={""}
+                                                className="
+                                                        group flex items-center justify-between px-3 py-2 cursor-pointer
+                                                        hover:bg-secondary rounded-ds-md">
+                                                <span>{t("location_all")}</span>
+                                            </ListboxOption>
                                         </ListboxOptions>
                                     </Listbox>
                                 </div>
@@ -667,19 +702,19 @@ export default function EventsPage() {
                                 </div>
 
                                 {/* Icon chuyển đổi Grid / List */}
-                                <div className="flex border border-border-default rounded-ds-lg overflow-hidden bg-bg-page">
+                                <div className="flex border border-border-default rounded-ds-lg overflow-hidden bg-bg-page shrink-0">
                                     <button
-                                        className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-bg-surface-strong text-button-primary-text-default' : 'text-text-muted hover:bg-secondary'}`}
+                                        className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-bg-inverse text-text-inverse' : 'text-text-muted hover:bg-secondary'}`}
                                         onClick={() => setViewMode("grid")}
                                     >
-                                        <LayoutGrid size={18} />
+                                        <LayoutGrid size={16} />
                                     </button>
-                                    <div className="w-px bg-border"></div>
+                                    <div className="w-px bg-border-strong"></div>
                                     <button
-                                        className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-bg-surface-strong text-button-primary-text-default' : 'text-text-muted hover:bg-secondary'}`}
+                                        className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-bg-inverse text-text-inverse' : 'text-text-muted hover:bg-secondary'}`}
                                         onClick={() => setViewMode("list")}
                                     >
-                                        <ListIcon size={18} />
+                                        <ListIcon size={16} />
                                     </button>
                                 </div>
                             </div>

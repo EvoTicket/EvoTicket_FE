@@ -168,7 +168,8 @@
     "online_default": "Trực tuyến",
     "location_label": "Địa điểm",
     "genre_label": "Thể loại",
-    "date_label": "Ngày diễn"
+    "date_label": "Ngày diễn",
+    "resale_market": "Chợ vé bán lại"
   },
   "Footer": {
     "desc_line1": "Nền tảng vé sự kiện Blockchain & AI",
@@ -210,6 +211,8 @@
   },
   "Events": {
     "location_all": "Tất cả địa điểm",
+    "search_placeholder": "Tìm kiếm sự kiện, nghệ sĩ, địa điểm...",
+    "search_button": "Tìm kiếm",
     "search_for": "Kết quả tìm kiếm",
     "search_results": "Kết quả tìm kiếm",
     "back_homepage": "Quay về trang chủ",

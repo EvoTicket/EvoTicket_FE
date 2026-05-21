@@ -29,6 +29,25 @@ export function Header() {
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const t = useTranslations('Header');
+  
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const kw = searchParams?.get("keyword");
+    if (kw) {
+      setSearchQuery(kw);
+    } else {
+      setSearchQuery("");
+    }
+  }, [searchParams]);
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      router.push(`/${locale}/user/events?keyword=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      router.push(`/${locale}/user/events`);
+    }
+  };
 
   // Get auth state from Redux
   const { user, token, refreshToken, isOrganization } = useAppSelector((state) => state.auth);
@@ -92,7 +111,11 @@ export function Header() {
     if (!pathname) return;
     const segments = pathname.split("/");
     segments[1] = newLocale;
-    router.push(segments.join("/"));
+    
+    const search = searchParams.toString();
+    const newPath = segments.join("/") + (search ? `?${search}` : "");
+    
+    router.push(newPath);
   };
 
   return (
@@ -124,9 +147,17 @@ export function Header() {
               type="text"
               placeholder={t('search_placeholder')}
               className="flex-1 px-3 py-2 bg-transparent text-text-primary outline-none placeholder:text-text-muted"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSearch();
+              }}
             />
             <div className="h-6 w-px bg-border mx-2"></div>
-            <button className="px-6 py-2 text-sm font-medium text-text-secondary hover:text-button-primary-bg-default transition-colors">
+            <button 
+              onClick={handleSearch}
+              className="px-6 py-2 text-sm font-medium text-text-secondary hover:text-button-primary-bg-default transition-colors cursor-pointer"
+            >
               {t("search_button")}
             </button>
           </div>

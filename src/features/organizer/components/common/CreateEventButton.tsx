@@ -46,9 +46,9 @@ export function CreateEventButton({ children, className, onDraftSelect }: Create
     const handleCreateNew = async () => {
         try {
             setIsChecking(true);
-            const { id } = await organizerEventApi.initDraft();
+            const { eventId } = await organizerEventApi.initDraft();
             setShowModal(false);
-            router.push(`/${locale}/organizer/events/create?draftId=${id}&isNew=true`);
+            router.push(`/${locale}/organizer/events/create?draftId=${eventId}&isNew=true`);
         } catch (error) {
             console.error("Failed to init draft", error);
             router.push(`/${locale}/organizer/events/create`);
@@ -67,7 +67,7 @@ export function CreateEventButton({ children, className, onDraftSelect }: Create
             // Dispatch a custom event so OrganizerCenterPage can listen to it
             // and update its activeTab without a Next.js router push
             window.dispatchEvent(new CustomEvent("switchTab", { detail: "draft" }));
-            
+
             // Also softly update the URL for consistency
             window.history.pushState(null, "", `/${locale}/organizer/events/center?tab=draft`);
         } else {

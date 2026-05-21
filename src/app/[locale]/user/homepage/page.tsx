@@ -271,20 +271,20 @@ export default function HomePage() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-                  <Link
-                    href={`/${locale}/user/events`}
+                  <button
+                    onClick={() => document.getElementById('trending-events')?.scrollIntoView({ behavior: 'smooth' })}
                     onMouseMove={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
                       e.currentTarget.style.setProperty('--x', `${e.clientX - rect.left}px`);
                       e.currentTarget.style.setProperty('--y', `${e.clientY - rect.top}px`);
                     }}
-                    className="group relative overflow-hidden w-full sm:w-auto bg-button-primary-bg-default text-button-primary-text-default font-bold py-4 px-10 rounded-ds-lg shadow-lg shadow-primary/30 text-center"
+                    className="group relative overflow-hidden w-full sm:w-auto bg-button-primary-bg-default text-button-primary-text-default font-bold py-4 px-10 rounded-ds-lg shadow-lg shadow-primary/30 text-center cursor-pointer"
                   >
                     <span className="absolute w-[250%] aspect-square bg-button-accent-bg-hover rounded-full transition-transform duration-900 ease-out -translate-x-1/2 -translate-y-1/2 scale-0 group-hover:scale-100 z-0" style={{ top: 'var(--y, 50%)', left: 'var(--x, 50%)' }}></span>
                     <span className="relative z-10">{t('explore_now')}</span>
-                  </Link>
+                  </button>
                   <Link
-                    href={`/${locale}/about`}
+                    href={`/${locale}/user/resale`}
                     onMouseMove={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
                       e.currentTarget.style.setProperty('--x', `${e.clientX - rect.left}px`);
@@ -293,7 +293,7 @@ export default function HomePage() {
                     className="group relative overflow-hidden w-full sm:w-auto bg-transparent border border-border-default hover:border-border-strong text-text-primary font-bold py-4 px-8 rounded-ds-lg text-center transition-colors"
                   >
                     <span className="absolute w-[250%] aspect-square bg-bg-subtle rounded-full transition-transform duration-500 ease-out -translate-x-1/2 -translate-y-1/2 scale-0 group-hover:scale-100 z-0" style={{ top: 'var(--y, 50%)', left: 'var(--x, 50%)' }}></span>
-                    <span className="relative z-10">{t('how_it_works')}</span>
+                    <span className="relative z-10">{t('resale_market', { defaultMessage: 'Chợ vé bán lại' })}</span>
                   </Link>
                 </div>
               </div>
@@ -404,7 +404,7 @@ export default function HomePage() {
         </div>
 
         {/* === TRENDING EVENTS (Mocked) === */}
-        <section className="max-w-[90%] mx-auto px-4">
+        <section id="trending-events" className="max-w-[90%] mx-auto px-4">
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 

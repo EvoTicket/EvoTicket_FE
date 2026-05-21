@@ -78,7 +78,7 @@ export default function ResaleDetailPage() {
         try {
             const response = await api.post(`/order-service/api/v1/resale/listings/${listingCode}/reserve`);
             if (response.data && response.data.data) {
-                toast.success(t('bought_resale_ticket_successfully'));
+                // toast.success(t('bought_resale_ticket_successfully'));
                 sessionStorage.setItem('listing_to_buy', JSON.stringify(response.data.data.resaleSessionId));
                 router.push(`/${locale}/user/resale/${listingCode}/checkout`);
             }

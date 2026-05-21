@@ -9,6 +9,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 
 interface ChatMessage {
     id: number;
@@ -21,6 +22,7 @@ interface ChatMessage {
 const PDF_PLACEHOLDER = "https://img.freepik.com/premium-vector/modern-flat-design-of-pdf-file-icon-for-web_599062-7115.jpg?w=2000";
 
 export function ChatBot() {
+    const pathname = usePathname();
     const t = useTranslations("Chatbot");
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -153,6 +155,10 @@ export function ChatBot() {
     const isImageFile = (url: string) => {
         return /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url);
     };
+
+    if (!pathname || !pathname.match(/^\/[^/]+\/user(\/|$)/)) {
+        return null;
+    }
 
     return (
         <>
