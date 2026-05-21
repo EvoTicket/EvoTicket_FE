@@ -1,9 +1,21 @@
 "use client";
-import { Search, Bell, ChevronDown, Sun, Moon, Languages } from "lucide-react";
+import { Search, Bell, ChevronDown, Sun, Moon, Languages, LogOut, User } from "lucide-react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/src/components/ui/dropdown-menu";
+import { useAppDispatch, useAppSelector } from "@/src/store/hooks";
+import { logout as logoutAction } from "@/src/store/slices/authSlice";
+import api from "@/src/lib/axios";
+import { toast } from "react-toastify";
 
 export function AdminHeader() {
     const { locale } = useParams();
@@ -12,9 +24,25 @@ export function AdminHeader() {
     const t = useTranslations("Admin");
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
+    
+    const dispatch = useAppDispatch();
+    const { refreshToken, user } = useAppSelector((state) => state.auth);
 
     // Tránh lỗi hydration với next-themes
     useEffect(() => setMounted(true), []);
+
+    const handleLogout = async () => {
+        if (refreshToken) {
+            try {
+                await api.post("/iam-service/api/auth/logout", { refreshToken }, { skipAuth: true });
+            } catch (error) {
+                console.error("Logout API failed", error);
+            }
+        }
+        dispatch(logoutAction());
+        toast.info("Đăng xuất thành công");
+        router.push(`/${locale}/user/homepage`);
+    };
 
     const toggleTheme = () => {
         setTheme(theme === "dark" ? "light" : "dark");
@@ -37,7 +65,7 @@ export function AdminHeader() {
                 </div>
             </div>
 
-            <div className="flex-1 max-w-2xl px-12">
+            {/* <div className="flex-1 max-w-2xl px-12">
                 <div className="relative group">
                     <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                         <Search size={18} className="text-txt-muted group-focus-within:text-primary transition-colors" />
@@ -53,55 +81,69 @@ export function AdminHeader() {
                         </span>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
-            <div className="flex items-center gap-2">
-                {/* Theme Toggle */}
-                <button 
-                    onClick={toggleTheme}
-                    className="w-10 h-10 flex items-center justify-center rounded-ds-xl hover:bg-main text-txt-secondary transition-all hover:scale-110 active:scale-95"
-                    title={mounted ? (theme === "dark" ? t("header.theme_light") : t("header.theme_dark")) : ""}
-                >
-                    {mounted && (theme === "dark" ? <Sun size={20} /> : <Moon size={20} />)}
-                </button>
-
+            <div className="flex items-center gap-3">
                 {/* Language Switcher */}
-                <div className="relative group/lang">
-                    <button className="w-10 h-10 flex items-center justify-center rounded-ds-xl hover:bg-main text-txt-secondary transition-all">
-                        <Languages size={20} />
-                    </button>
-                    <div className="absolute top-full right-0 mt-2 w-32 bg-surface border border-border rounded-ds-2xl shadow-xl opacity-0 invisible group-hover/lang:opacity-100 group-hover/lang:visible transition-all z-50 overflow-hidden">
-                        <button 
-                            onClick={() => changeLanguage("vi")}
-                            className={`w-full px-4 py-2 text-xs font-bold text-left hover:bg-main transition-colors ${locale === "vi" ? "text-primary bg-primary/5" : "text-txt-secondary"}`}
-                        >
-                            {t("header.lang_vi")}
-                        </button>
-                        <button 
-                            onClick={() => changeLanguage("en")}
-                            className={`w-full px-4 py-2 text-xs font-bold text-left hover:bg-main transition-colors ${locale === "en" ? "text-primary bg-primary/5" : "text-txt-secondary"}`}
-                        >
-                            {t("header.lang_en")}
-                        </button>
-                    </div>
-                </div>
+                <button
+                    onClick={() => changeLanguage(locale === "vi" ? "en" : "vi")}
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-main text-txt-secondary hover:bg-border transition-colors font-bold text-xs cursor-pointer"
+                    title="Chuyển đổi ngôn ngữ / Switch Language"
+                >
+                    {locale === "vi" ? "VI" : "EN"}
+                </button>
 
-                <div className="h-8 w-[1px] bg-border mx-2"></div>
+                {/* Theme Toggle */}
+                <button
+                    onClick={toggleTheme}
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-main text-txt-secondary hover:bg-border transition-colors cursor-pointer"
+                    title={mounted ? (theme === "dark" ? t("header.theme_light") : t("header.theme_dark")) : "Chuyển đổi giao diện"}
+                >
+                    {mounted ? (
+                        theme === "dark" ? <Sun size={20} className="text-primary" /> : <Moon size={20} />
+                    ) : (
+                        <div className="w-5 h-5" />
+                    )}
+                </button>
 
-                <button className="w-10 h-10 flex items-center justify-center rounded-ds-xl hover:bg-main text-txt-muted relative transition-colors">
+                <div className="h-6 w-[1px] bg-border mx-1"></div>
+
+                {/* <button className="relative w-10 h-10 flex items-center justify-center rounded-lg border border-border text-txt-secondary hover:border-primary transition-colors cursor-pointer">
                     <Bell size={20} />
-                    <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-error border-2 border-surface rounded-full"></span>
-                </button>
-                
-                <div className="h-8 w-[1px] bg-border mx-2"></div>
+                    <span className="absolute -top-1.5 -right-1.5 bg-error text-white text-[10px] font-bold h-5 min-w-5 px-1 flex items-center justify-center rounded-full border-2 border-surface">
+                        99
+                    </span>
+                </button> */}
 
-                <button className="flex items-center gap-3 p-1.5 pr-3 rounded-ds-xl hover:bg-main transition-all group">
-                    <div className="w-9 h-9 rounded-ds-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-                        <span className="text-xs font-bold text-primary">AD</span>
-                    </div>
-                    <span className="text-sm font-bold text-txt-secondary group-hover:text-txt-primary">Admin</span>
-                    <ChevronDown size={16} className="text-txt-muted group-hover:text-txt-secondary transition-colors" />
-                </button>
+                <div className="h-6 w-[1px] bg-border mx-1"></div>
+
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button className="flex items-center gap-2 border border-border rounded-lg p-1 pr-2 hover:border-primary cursor-pointer transition-colors outline-none group">
+                            <div className="w-8 h-8 rounded bg-primary/10 border border-primary/20 flex items-center justify-center">
+                                <span className="text-xs font-bold text-primary">AD</span>
+                            </div>
+                            <ChevronDown size={16} className="text-txt-muted group-hover:text-txt-secondary transition-colors" />
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 bg-surface border-border" align="end" forceMount>
+                        <DropdownMenuLabel className="font-normal">
+                            <div className="flex flex-col space-y-1">
+                                <p className="text-sm font-medium leading-none text-txt-primary">
+                                    {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "Admin"}
+                                </p>
+                                <p className="text-xs leading-none text-txt-muted">
+                                    {user?.email || "admin@evoticket.com"}
+                                </p>
+                            </div>
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator className="bg-border" />
+                        <DropdownMenuItem onClick={handleLogout} className="text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 cursor-pointer focus:bg-rose-500/10 focus:text-rose-600">
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Đăng xuất</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </header>
     );

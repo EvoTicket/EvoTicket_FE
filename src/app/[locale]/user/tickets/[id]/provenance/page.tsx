@@ -97,6 +97,12 @@ export default function ProvenancePage() {
         }
     };
 
+    // const truncateHash = (hash: string) => {
+    //     if (!hash) return "—";
+    //     if (hash.length <= 12) return hash;
+    //     return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
+    // };
+
     const openTxExplorer = (txHash: string) => {
         console.log('----------------------------------------------------------------------------------------------------------');
         console.log(txHash);

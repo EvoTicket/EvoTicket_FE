@@ -14,6 +14,7 @@ import { EventItem } from "@/src/types/event";
 import { useRouter } from "next/navigation";
 import { useEventFilters } from "@/src/hooks/useEventFilters";
 import { TICKET_AVAILABILITY_OPTIONS } from "@/src/constants/eventFilters";
+import { noInteraction } from "recharts/types/state/tooltipSlice";
 
 
 
@@ -452,13 +453,13 @@ export default function HomePage() {
                         </div>
                       </td>
                       <td className="py-4 text-right text-sm text-text-secondary font-medium">
-                        {event.floorPrice ? `${event.floorPrice.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US')} VND` : t("contact")}
+                        {event.floorPrice != null ? `${event.floorPrice.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US')} VND` : t("contact")}
                       </td>
                       <td className="py-4 text-right text-sm text-text-muted">
-                        {event.volume24H ? `${event.volume24H.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US')} VND` : '-'}
+                        {event.volume24H != null ? `${event.volume24H.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US')} VND` : '-'}
                       </td>
-                      <td className={`py-4 text-right text-sm font-bold ${event.hotness && event.hotness < 0 ? 'text-feedback-error-text' : 'text-feedback-success-text'}`}>
-                        {event.hotness !== undefined ? (event.hotness > 0 ? `+${event.hotness}%` : `${event.hotness}%`) : '-'}
+                      <td className={`py-4 text-right text-sm font-bold ${event.hotness != null && event.hotness < 0 ? 'text-feedback-error-text' : 'text-feedback-success-text'}`}>
+                        {event.hotness != null ? (event.hotness > 0 ? `+${event.hotness}%` : `${event.hotness}%`) : '-'}
                       </td>
                     </tr>
                   ))}
