@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Download,
   RefreshCw,
@@ -105,7 +105,8 @@ const CHART_VARS = {
   borderDefault: "--color-border-default",
 } as const;
 
-const REPORT_DAYS = 30;
+const DAY_OPTIONS = [30, 60, 90] as const;
+type ReportDays = (typeof DAY_OPTIONS)[number];
 
 /* ── Helpers ─────────────────────────────────────────────── */
 
@@ -177,16 +178,20 @@ function FormatBtn({
   icon,
   label,
   active,
+  onClick,
 }: {
   icon: React.ReactNode;
   label: string;
   active?: boolean;
+  onClick?: () => void;
 }) {
   return (
     <button
-      className={`flex flex-1 items-center justify-center gap-1.5 rounded-ds-md border px-2.5 py-2 text-xs font-medium ${active
-          ? "border-[var(--color-action-brand-bg-default)] bg-[var(--color-action-brand-bg-pressed)] text-white"
-          : "border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)]"
+      type="button"
+      onClick={onClick}
+      className={`flex flex-1 items-center justify-center gap-1.5 rounded-ds-md border px-2.5 py-2 text-xs font-medium transition-colors ${active
+        ? "border-[var(--color-action-brand-bg-default)] bg-[var(--color-action-brand-bg-pressed)] text-white"
+        : "border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-default)]"
         }`}
     >
       {icon}
@@ -203,33 +208,55 @@ export default function ReportsPage() {
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>(EMPTY_REPORT_FILTERS);
   const [dashboard, setDashboard] = useState<OrganizerDashboardMetricsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [reportDays, setReportDays] = useState<ReportDays>(30);
+  const [exportHighlighted, setExportHighlighted] = useState(false);
+  // ── Export config state ─────────────────────────────────────────────────────
+  const [exportFormat, setExportFormat] = useState<"CSV" | "XLSX" | "PDF">("CSV");
+  const [exportSections, setExportSections] = useState<Record<string, boolean>>({
+    summary: true,
+    revenue: true,
+    checkin: false,
+    resale: false,
+  });
+  const [csvSeparator, setCsvSeparator] = useState<"," | ";" | "\t">(",");
+  const [includeHeaders, setIncludeHeaders] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
+  const hasLoadedOnce = useRef(false);
   const c = useTokenColors(CHART_VARS);
 
   const handleFilterChange = useCallback((key: string, value: string) => {
     setSelectedFilters((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const clearFilters = useCallback(() => {
-    setSearch("");
-    setSelectedFilters(EMPTY_REPORT_FILTERS);
-  }, []);
+  // const clearFilters = useCallback(() => {
+  //   setSearch("");
+  //   setSelectedFilters(EMPTY_REPORT_FILTERS);
+  // }, []);
 
   const loadDashboard = useCallback(async () => {
-    setIsLoading(true);
+    const isFirst = !hasLoadedOnce.current;
+    if (isFirst) {
+      setIsLoading(true);
+    } else {
+      setIsRefreshing(true);
+    }
     setError(null);
 
     try {
-      const data = await organizerDashboardApi.getDashboard(REPORT_DAYS);
+      const data = await organizerDashboardApi.getDashboard(reportDays);
       setDashboard(data);
     } catch (loadError) {
       console.error("Failed to load organizer dashboard", loadError);
       setDashboard(null);
       setError(t("load_error"));
     } finally {
+      hasLoadedOnce.current = true;
       setIsLoading(false);
+      setIsRefreshing(false);
     }
-  }, [t]);
+  }, [t, reportDays]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -239,8 +266,8 @@ export default function ReportsPage() {
     return () => cancelAnimationFrame(frame);
   }, [loadDashboard]);
 
-  const kpis = useMemo(() => mapDashboardKpis(dashboard), [dashboard]);
-  const revenueSeries = useMemo(() => mapRevenueTrend(dashboard), [dashboard]);
+  const kpis = useMemo(() => mapDashboardKpis(dashboard, t), [dashboard, t]);
+  const revenueSeries = useMemo(() => mapRevenueTrend(dashboard, reportDays), [dashboard, reportDays]);
   const ticketByEvent = useMemo(() => mapTicketSalesByEvent(dashboard), [dashboard]);
   const checkIn = useMemo(() => mapCheckInStatus(dashboard), [dashboard]);
   const performanceTable = useMemo(() => mapPerformanceTable(dashboard), [dashboard]);
@@ -306,6 +333,16 @@ export default function ReportsPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <style>{`
+        @keyframes exportPanelFlash {
+          0%   { box-shadow: 0 0 0 0px var(--color-action-brand-bg-default); }
+          20%  { box-shadow: 0 0 0 4px var(--color-action-brand-bg-default), 0 0 18px 4px var(--color-action-brand-bg-default); }
+          45%  { box-shadow: 0 0 0 2px var(--color-action-brand-bg-default), 0 0 8px 2px var(--color-action-brand-bg-default); }
+          65%  { box-shadow: 0 0 0 4px var(--color-action-brand-bg-default), 0 0 18px 4px var(--color-action-brand-bg-default); }
+          85%  { box-shadow: 0 0 0 2px var(--color-action-brand-bg-default); }
+          100% { box-shadow: 0 0 0 0px transparent; }
+        }
+      `}</style>
       {/* Header */}
       <div>
         <h1 className="m-0 text-2xl font-semibold text-[var(--color-text-primary)]">
@@ -318,10 +355,30 @@ export default function ReportsPage() {
 
       {/* Filter toolbar */}
       <div className="flex flex-wrap items-center gap-3 rounded-ds-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-3">
-        <button className="flex items-center gap-2 rounded-ds-md border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] px-3 py-2 text-[13px] text-[var(--color-text-primary)]">
-          <Calendar size={14} className="text-[var(--color-icon-muted)]" />
-          {t("last_days", { days: REPORT_DAYS })}
-        </button>
+        {/* Day range toggle */}
+        <div className="flex items-center gap-1 rounded-ds-md border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] p-1">
+          <Calendar size={13} className="ml-1 text-[var(--color-icon-muted)]" />
+          {DAY_OPTIONS.map((d) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => setReportDays(d)}
+              className="rounded px-2.5 py-1 text-[12px] font-medium transition-colors"
+              style={{
+                background:
+                  reportDays === d
+                    ? "var(--color-action-brand-bg-default)"
+                    : "transparent",
+                color:
+                  reportDays === d
+                    ? "var(--color-action-brand-text-default)"
+                    : "var(--color-text-secondary)",
+              }}
+            >
+              {d}d
+            </button>
+          ))}
+        </div>
         <OrganizerToolbar
           searchValue={search}
           onSearchChange={setSearch}
@@ -329,7 +386,7 @@ export default function ReportsPage() {
           filters={REPORT_FILTER_OPTIONS}
           selectedFilters={selectedFilters}
           onFilterChange={handleFilterChange}
-          onClearFilters={clearFilters}
+          // onClearFilters={clearFilters}
           actions={
             <>
               <button
@@ -340,7 +397,19 @@ export default function ReportsPage() {
                 <RefreshCw size={13} />
                 {t("refresh")}
               </button>
-              <button className="flex items-center gap-2 rounded-ds-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3 py-2 text-[13px] font-medium text-[var(--color-action-brand-text-default)]">
+              <button
+                className="flex items-center gap-2 rounded-ds-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3 py-2 text-[13px] font-medium text-[var(--color-action-brand-text-default)]"
+                onClick={() => {
+                  document
+                    .getElementById("export-panel")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  // Flash highlight after scroll animation completes (~600ms)
+                  setTimeout(() => {
+                    setExportHighlighted(true);
+                    setTimeout(() => setExportHighlighted(false), 1800);
+                  }, 650);
+                }}
+              >
                 <Download size={13} />
                 {t("export_data")}
               </button>
@@ -349,431 +418,561 @@ export default function ReportsPage() {
         />
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-6 gap-4">
-        {kpis.map((kpi) => (
-          <OrganizerMetricCard
-            key={kpi.label}
-            label={kpi.label}
-            value={kpi.value}
-            delta={kpi.delta}
-            tone={kpi.tone}
-          />
-        ))}
-      </div>
-
-      {!hasData && (
-        <div className="rounded-ds-lg border border-dashed border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-5 py-4 text-sm text-[var(--color-text-muted)]">
-          {t("no_data")}
-        </div>
-      )}
-
-      {/* Charts grid */}
-      <div className="grid grid-cols-3 gap-4">
-        {/* Left 2/3 */}
-        <div className="col-span-2 flex flex-col gap-4">
-          {/* Revenue chart */}
-          <Panel
-            title={t("revenue_chart_title")}
-            subtitle={t("revenue_chart_subtitle")}
-            right={
-              <div className="flex items-center gap-2">
-                <OrganizerStatusBadge tone="success">
-                  +12.4%
-                </OrganizerStatusBadge>
-                <span className="text-[11px] text-[var(--color-text-muted)]">
-                  {t("vnd_million")}
-                </span>
-              </div>
-            }
-          >
-            <div style={{ width: "100%", height: 240 }}>
-              <ResponsiveContainer>
-                <AreaChart
-                  data={revenueSeries}
-                  margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop
-                        offset="0%"
-                        stopColor={c.brand}
-                        stopOpacity={0.45}
-                      />
-                      <stop
-                        offset="100%"
-                        stopColor={c.brand}
-                        stopOpacity={0}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid
-                    stroke={c.borderSubtle}
-                    strokeDasharray="3 3"
-                    vertical={false}
-                  />
-                  <XAxis
-                    dataKey="day"
-                    tick={{ fill: c.textMuted, fontSize: 11 }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fill: c.textMuted, fontSize: 11 }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: c.bgElevated,
-                      border: `1px solid ${c.borderDefault}`,
-                      borderRadius: 8,
-                      color: c.textPrimary,
-                      fontSize: 12,
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="rev"
-                    stroke={c.brand}
-                    strokeWidth={2}
-                    fill="url(#revFill)"
-                    dot={false}
-                    activeDot={false}
-                    isAnimationActive={false}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+      {/* Data content — overlay spinner on refresh (day change) */}
+      <div className="relative flex flex-col gap-6">
+        {isRefreshing && (
+          <div className="absolute inset-0 z-20 flex items-start justify-center rounded-ds-lg pt-16 backdrop-blur-[1px]">
+            <div className="flex items-center gap-2 rounded-full border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] px-4 py-2 shadow-md">
+              <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-border-default)] border-t-[var(--color-action-brand-bg-default)]" />
+              <span className="text-[12px] text-[var(--color-text-muted)]">{t("refresh")}</span>
             </div>
-          </Panel>
+          </div>
+        )}
 
-          {/* Ticket by event bar chart */}
-          <Panel
-            title={t("ticket_chart_title")}
-            subtitle={t("ticket_chart_subtitle")}
-          >
-            <div style={{ width: "100%", height: 240 }}>
-              <ResponsiveContainer>
-                <BarChart
-                  data={ticketByEvent}
-                  layout="vertical"
-                  margin={{ top: 0, right: 20, left: 20, bottom: 0 }}
-                >
-                  <CartesianGrid
-                    stroke={c.borderSubtle}
-                    strokeDasharray="3 3"
-                    horizontal={false}
-                  />
-                  <XAxis
-                    type="number"
-                    tick={{ fill: c.textMuted, fontSize: 11 }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    tick={{ fill: c.textSecondary, fontSize: 11 }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={120}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: c.bgElevated,
-                      border: `1px solid ${c.borderDefault}`,
-                      borderRadius: 8,
-                      color: c.textPrimary,
-                      fontSize: 12,
-                    }}
-                  />
-                  <Bar
-                    dataKey="value"
-                    fill={c.brand}
-                    radius={[0, 4, 4, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Panel>
-        </div>
-
-        {/* Right 1/3 */}
-        <div className="flex flex-col gap-4">
-          {/* Occupancy donut */}
-          <Panel title={t("occupancy_chart_title")} subtitle={t("occupancy_chart_subtitle")}>
-            <div style={{ width: "100%", height: 200, position: "relative" }}>
-              <ResponsiveContainer>
-                <PieChart>
-                  <Pie
-                    data={occupancyData}
-                    dataKey="value"
-                    innerRadius={56}
-                    outerRadius={78}
-                    paddingAngle={2}
-                    stroke="none"
-                  >
-                    {occupancyData.map((entry) => (
-                      <Cell key={entry.name} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-[var(--color-text-primary)]">
-                <span className="text-[22px] font-semibold">
-                  {Math.round(dashboard?.avgOccupancyRate || 0)}%
-                </span>
-                <span className="text-[11px] text-[var(--color-text-muted)]">
-                  {t("avg_org")}
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              {occupancyData.map((o) => (
-                <div
-                  key={o.name}
-                  className="flex items-center justify-between text-xs"
-                >
-                  <span className="flex items-center gap-2 text-[var(--color-text-secondary)]">
-                    <span
-                      className="h-2 w-2 rounded-ds-sm"
-                      style={{ background: o.color }}
-                    />
-                    {o.name}
-                  </span>
-                  <span className="font-medium text-[var(--color-text-primary)]">
-                    {o.value}%
-                  </span>
-                </div>
-              ))}
-            </div>
-          </Panel>
-
-          {/* Check-in status */}
-          <Panel
-            title={t("checkin_title")}
-            subtitle={t("checkin_subtitle")}
-          >
-            <div className="flex flex-col gap-3">
-              {/* Checked */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="h-2 w-2 rounded-full"
-                    style={{
-                      background: "var(--color-badge-success-text)",
-                    }}
-                  />
-                  <span className="text-[13px] text-[var(--color-text-secondary)]">
-                    {t("checked_in")}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[13px] font-medium text-[var(--color-text-primary)]">
-                    {checkIn.checked.value.toLocaleString()}
-                  </span>
-                  <span className="text-xs text-[var(--color-text-muted)]">
-                    {checkIn.checked.pct}%
-                  </span>
-                </div>
-              </div>
-
-              {/* Unchecked */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="h-2 w-2 rounded-full"
-                    style={{
-                      background: "var(--color-badge-warning-text)",
-                    }}
-                  />
-                  <span className="text-[13px] text-[var(--color-text-secondary)]">
-                    {t("not_checked_in")}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[13px] font-medium text-[var(--color-text-primary)]">
-                    {checkIn.unchecked.value.toLocaleString()}
-                  </span>
-                  <span className="text-xs text-[var(--color-text-muted)]">
-                    {checkIn.unchecked.pct}%
-                  </span>
-                </div>
-              </div>
-
-              {/* Progress bar */}
-              <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-badge-neutral-bg)]">
-                <div
-                  className="h-full"
-                  style={{
-                    width: `${checkIn.checked.pct}%`,
-                    background: "var(--color-feedback-success-icon)",
-                  }}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-1">
-                <MiniStat
-                  label={t("gate_rate")}
-                  value={checkIn.gateRate}
-                />
-                <MiniStat
-                  label={t("peak_time")}
-                  value={checkIn.peakTime}
-                />
-              </div>
-            </div>
-          </Panel>
-        </div>
-      </div>
-
-      {/* Resale / blockchain */}
-      <Panel
-        title={t("resale_title")}
-        subtitle={t("resale_subtitle")}
-        right={
-          <OrganizerStatusBadge tone="accent">{t("blockchain")}</OrganizerStatusBadge>
-        }
-      >
-        <div className="grid grid-cols-4 gap-4">
-          {resaleStats.map((r) => (
-            <ResaleStat
-              key={r.label}
-              label={r.label}
-              value={r.value}
-              tone={r.tone}
+        {/* KPIs */}
+        <div className="grid grid-cols-6 gap-4">
+          {kpis.map((kpi) => (
+            <OrganizerMetricCard
+              key={kpi.label}
+              label={kpi.label}
+              value={kpi.value}
+              delta={kpi.delta}
+              tone={kpi.tone}
             />
           ))}
         </div>
-      </Panel>
 
-      {/* Performance table + export */}
-      <div className="grid grid-cols-4 gap-4">
-        <div className="col-span-3">
-          <Panel
-            title={t("performance_title")}
-            subtitle={t("performance_subtitle")}
-          >
-            <div className="overflow-hidden rounded-ds-md border border-[var(--color-border-subtle)]">
-              {/* Header */}
-              <div
-                className="grid gap-3 px-4 py-2.5 text-[11px] uppercase tracking-wide text-[var(--color-text-muted)]"
-                style={{
-                  gridTemplateColumns:
-                    "2fr 1fr 0.9fr 0.8fr 1fr 0.9fr 1fr 1fr 1fr",
-                  background: "var(--color-bg-elevated)",
-                }}
-              >
-                <span>{t("col_event")}</span>
-                <span>{t("col_type")}</span>
-                <span>{t("col_sold")}</span>
-                <span>{t("col_fill")}</span>
-                <span>{t("col_revenue")}</span>
-                <span>{t("col_checkin")}</span>
-                <span>{t("col_resale")}</span>
-                <span>{t("col_royalty")}</span>
-                <span>{t("col_status")}</span>
+        {!hasData && (
+          <div className="rounded-ds-lg border border-dashed border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-5 py-4 text-sm text-[var(--color-text-muted)]">
+            {t("no_data")}
+          </div>
+        )}
+
+        {/* Charts grid */}
+        <div className="grid grid-cols-3 gap-4">
+          {/* Left 2/3 */}
+          <div className="col-span-2 flex flex-col gap-4">
+            {/* Revenue chart */}
+            <Panel
+              title={t("revenue_chart_title")}
+              subtitle={t("revenue_chart_subtitle", { days: reportDays })}
+            // right={
+            //   <div className="flex items-center gap-2">
+            //     <OrganizerStatusBadge tone="success">
+            //       +12.4%
+            //     </OrganizerStatusBadge>
+            //     <span className="text-[11px] text-[var(--color-text-muted)]">
+            //       {t("vnd_million")}
+            //     </span>
+            //   </div>
+            // }
+            >
+              <div style={{ width: "100%", height: 240 }}>
+                <ResponsiveContainer>
+                  <AreaChart
+                    data={revenueSeries}
+                    margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop
+                          offset="0%"
+                          stopColor={c.brand}
+                          stopOpacity={0.45}
+                        />
+                        <stop
+                          offset="100%"
+                          stopColor={c.brand}
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      stroke={c.borderSubtle}
+                      strokeDasharray="3 3"
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="day"
+                      tick={{ fill: c.textMuted, fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fill: c.textMuted, fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: c.bgElevated,
+                        border: `1px solid ${c.borderDefault}`,
+                        borderRadius: 8,
+                        color: c.textPrimary,
+                        fontSize: 12,
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="rev"
+                      stroke={c.brand}
+                      strokeWidth={2}
+                      fill="url(#revFill)"
+                      dot={false}
+                      activeDot={false}
+                      isAnimationActive={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
+            </Panel>
 
-              {/* Rows */}
-              {performanceTable.map((r, i) => (
-                <div
-                  key={r.event}
-                  className="grid items-center gap-3 px-4 py-3 text-[12.5px] text-[var(--color-text-primary)]"
-                  style={{
-                    gridTemplateColumns:
-                      "2fr 1fr 0.9fr 0.8fr 1fr 0.9fr 1fr 1fr 1fr",
-                    borderTop:
-                      i === 0
-                        ? "none"
-                        : "1px solid var(--color-border-subtle)",
-                  }}
-                >
-                  <span className="font-medium">{r.event}</span>
-                  <span className="text-[var(--color-text-secondary)]">
-                    {r.type}
+            {/* Ticket by event bar chart */}
+            <Panel
+              title={t("ticket_chart_title")}
+              subtitle={t("ticket_chart_subtitle")}
+            >
+              <div style={{ width: "100%", height: 240 }}>
+                <ResponsiveContainer>
+                  <BarChart
+                    data={ticketByEvent}
+                    layout="vertical"
+                    margin={{ top: 0, right: 20, left: 20, bottom: 0 }}
+                  >
+                    <CartesianGrid
+                      stroke={c.borderSubtle}
+                      strokeDasharray="3 3"
+                      horizontal={false}
+                    />
+                    <XAxis
+                      type="number"
+                      tick={{ fill: c.textMuted, fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      tick={{ fill: c.textSecondary, fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={120}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: c.bgElevated,
+                        border: `1px solid ${c.borderDefault}`,
+                        borderRadius: 8,
+                        color: c.textPrimary,
+                        fontSize: 12,
+                      }}
+                    />
+                    <Bar
+                      dataKey="value"
+                      fill={c.brand}
+                      radius={[0, 4, 4, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </Panel>
+          </div>
+
+          {/* Right 1/3 */}
+          <div className="flex flex-col gap-4">
+            {/* Occupancy donut */}
+            <Panel title={t("occupancy_chart_title")} subtitle={t("occupancy_chart_subtitle")}>
+              <div style={{ width: "100%", height: 200, position: "relative" }}>
+                <ResponsiveContainer>
+                  <PieChart>
+                    <Pie
+                      data={occupancyData}
+                      dataKey="value"
+                      innerRadius={56}
+                      outerRadius={78}
+                      paddingAngle={2}
+                      stroke="none"
+                    >
+                      {occupancyData.map((entry) => (
+                        <Cell key={entry.name} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-[var(--color-text-primary)]">
+                  <span className="text-[22px] font-semibold">
+                    {Math.round(dashboard?.avgOccupancyRate || 0)}%
                   </span>
-                  <span>{r.sold}</span>
-                  <span className="text-[var(--color-text-secondary)]">
-                    {r.fill}
-                  </span>
-                  <span className="font-medium">{r.rev}</span>
-                  <span className="text-[var(--color-text-secondary)]">
-                    {r.checkin}
-                  </span>
-                  <span className="text-[var(--color-text-secondary)]">
-                    {r.resale}
-                  </span>
-                  <span className="text-[var(--color-badge-accent-text)]">
-                    {r.royalty}
-                  </span>
-                  <span>
-                    <OrganizerStatusBadge tone={r.tone}>
-                      {r.status}
-                    </OrganizerStatusBadge>
+                  <span className="text-[11px] text-[var(--color-text-muted)]">
+                    {t("avg_org")}
                   </span>
                 </div>
-              ))}
-            </div>
-          </Panel>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                {occupancyData.map((o) => (
+                  <div
+                    key={o.name}
+                    className="flex items-center justify-between text-xs"
+                  >
+                    <span className="flex items-center gap-2 text-[var(--color-text-secondary)]">
+                      <span
+                        className="h-2 w-2 rounded-ds-sm"
+                        style={{ background: o.color }}
+                      />
+                      {o.name}
+                    </span>
+                    <span className="font-medium text-[var(--color-text-primary)]">
+                      {o.value}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Panel>
+
+            {/* Check-in status */}
+            <Panel
+              title={t("checkin_title")}
+              subtitle={t("checkin_subtitle")}
+            >
+              <div className="flex flex-col gap-3">
+                {/* Checked */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="h-2 w-2 rounded-full"
+                      style={{
+                        background: "var(--color-badge-success-text)",
+                      }}
+                    />
+                    <span className="text-[13px] text-[var(--color-text-secondary)]">
+                      {t("checked_in")}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[13px] font-medium text-[var(--color-text-primary)]">
+                      {checkIn.checked.value.toLocaleString()}
+                    </span>
+                    <span className="text-xs text-[var(--color-text-muted)]">
+                      {checkIn.checked.pct}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* Unchecked */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="h-2 w-2 rounded-full"
+                      style={{
+                        background: "var(--color-badge-warning-text)",
+                      }}
+                    />
+                    <span className="text-[13px] text-[var(--color-text-secondary)]">
+                      {t("not_checked_in")}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[13px] font-medium text-[var(--color-text-primary)]">
+                      {checkIn.unchecked.value.toLocaleString()}
+                    </span>
+                    <span className="text-xs text-[var(--color-text-muted)]">
+                      {checkIn.unchecked.pct}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* Progress bar */}
+                <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-badge-neutral-bg)]">
+                  <div
+                    className="h-full"
+                    style={{
+                      width: `${checkIn.checked.pct}%`,
+                      background: "var(--color-feedback-success-icon)",
+                    }}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <MiniStat
+                    label={t("gate_rate")}
+                    value={checkIn.gateRate}
+                  />
+                  <MiniStat
+                    label={t("peak_time")}
+                    value={checkIn.peakTime}
+                  />
+                </div>
+              </div>
+            </Panel>
+          </div>
         </div>
 
-        {/* Export panel */}
-        <Panel title={t("export_panel_title")} subtitle={t("export_panel_subtitle")}>
-          <div className="flex flex-col gap-2">
-            <span className="text-[11px] uppercase tracking-wide text-[var(--color-text-muted)]">
-              {t("format")}
-            </span>
-            <div className="flex gap-2">
-              <FormatBtn
-                icon={<FileSpreadsheet size={13} />}
-                label=".CSV"
-                active
+        {/* Resale / blockchain */}
+        <Panel
+          title={t("resale_title")}
+          subtitle={t("resale_subtitle")}
+          right={
+            <OrganizerStatusBadge tone="accent">{t("blockchain")}</OrganizerStatusBadge>
+          }
+        >
+          <div className="grid grid-cols-4 gap-4">
+            {resaleStats.map((r) => (
+              <ResaleStat
+                key={r.label}
+                label={r.label}
+                value={r.value}
+                tone={r.tone}
               />
-              <FormatBtn
-                icon={<FileSpreadsheet size={13} />}
-                label=".XLSX"
-              />
-              <FormatBtn icon={<FileText size={13} />} label=".PDF" />
-            </div>
+            ))}
           </div>
-          <div className="flex flex-col gap-2">
-            <span className="text-[11px] uppercase tracking-wide text-[var(--color-text-muted)]">
-              {t("scope")}
-            </span>
-            <div className="flex flex-col gap-1.5">
-              {[
-                t("scope_options.summary"),
-                t("scope_options.revenue"),
-                t("scope_options.checkin"),
-                t("scope_options.resale"),
-                t("scope_options.buyers"),
-              ].map((label, i) => (
-                <label
-                  key={label}
-                  className="flex cursor-pointer items-center gap-2 rounded-ds-md border px-2.5 py-2 text-[13px] text-[var(--color-text-primary)]"
+        </Panel>
+
+        {/* Performance table + export */}
+        <div className="grid grid-cols-4 gap-4">
+          <div className="col-span-3">
+            <Panel
+              title={t("performance_title")}
+              subtitle={t("performance_subtitle")}
+            >
+              {/* Single scroll container: X+Y together, header sticky inside */}
+              <div
+                className="scrollbar-none max-h-[380px] overflow-x-auto overflow-y-auto rounded-ds-md border border-[var(--color-border-subtle)]"
+              >
+                {/* Inner min-width wrapper so both header and rows expand equally */}
+                <div style={{ minWidth: 860 }}>
+                  {/* Header — sticky vertically, scrolls horizontally with body */}
+                  <div
+                    className="sticky top-0 z-10 grid gap-3 px-4 py-2.5 text-[11px] uppercase tracking-wide text-[var(--color-text-muted)]"
+                    style={{
+                      gridTemplateColumns: "2fr 1fr 0.9fr 0.8fr 1fr 0.9fr 1fr 1fr 1fr",
+                      background: "var(--color-bg-elevated)",
+                      borderBottom: "1px solid var(--color-border-subtle)",
+                    }}
+                  >
+                    <span>{t("col_event")}</span>
+                    <span>{t("col_type")}</span>
+                    <span>{t("col_sold")}</span>
+                    <span>{t("col_fill")}</span>
+                    <span>{t("col_revenue")}</span>
+                    <span>{t("col_checkin")}</span>
+                    <span>{t("col_resale")}</span>
+                    <span>{t("col_royalty")}</span>
+                    <span>{t("col_status")}</span>
+                  </div>
+
+                  {/* Rows */}
+                  {performanceTable.map((r, i) => (
+                    <div
+                      key={i}
+                      className="grid items-center gap-3 px-4 py-3 text-[12.5px] text-[var(--color-text-primary)]"
+                      style={{
+                        gridTemplateColumns: "2fr 1fr 0.9fr 0.8fr 1fr 0.9fr 1fr 1fr 1fr",
+                        borderTop: i === 0 ? "none" : "1px solid var(--color-border-subtle)",
+                      }}
+                    >
+                      {/* Event name — truncate if too long */}
+                      <span
+                        className="block overflow-hidden text-ellipsis whitespace-nowrap font-medium"
+                        title={r.event}
+                      >
+                        {r.event}
+                      </span>
+                      <span className="text-[var(--color-text-secondary)]">
+                        {r.type}
+                      </span>
+                      <span>{r.sold}</span>
+                      <span className="text-[var(--color-text-secondary)]">
+                        {r.fill}
+                      </span>
+                      {/* Revenue — success green */}
+                      <span className="font-semibold text-[var(--color-badge-success-text)]">
+                        {r.rev}
+                      </span>
+                      <span className="text-[var(--color-text-secondary)]">
+                        {r.checkin}
+                      </span>
+                      {/* Resale — accent purple */}
+                      <span className="text-[var(--color-badge-accent-text)]">
+                        {r.resale}
+                      </span>
+                      {/* Royalty — dimmed muted */}
+                      <span className="text-[var(--color-text-muted)]">
+                        {r.royalty}
+                      </span>
+                      <span>
+                        <OrganizerStatusBadge tone={r.tone}>
+                          {r.status}
+                        </OrganizerStatusBadge>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Panel>
+          </div>
+
+          {/* Export panel */}
+          <div
+            id="export-panel"
+            className="rounded-ds-lg"
+            style={{
+              animation: exportHighlighted ? "exportPanelFlash 1.8s ease-out" : "none",
+            }}
+          >
+            <Panel title={t("export_panel_title")} subtitle={t("export_panel_subtitle")}>
+
+              {/* File format */}
+              <div className="flex flex-col gap-2">
+                <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
+                  {t("format")}
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  <FormatBtn
+                    icon={<FileSpreadsheet size={13} />}
+                    label=".CSV"
+                    active={exportFormat === "CSV"}
+                    onClick={() => setExportFormat("CSV")}
+                  />
+                  <FormatBtn
+                    icon={<FileSpreadsheet size={13} />}
+                    label=".XLSX"
+                    active={exportFormat === "XLSX"}
+                    onClick={() => setExportFormat("XLSX")}
+                  />
+                  <FormatBtn
+                    icon={<FileText size={13} />}
+                    label=".PDF"
+                    active={exportFormat === "PDF"}
+                    onClick={() => setExportFormat("PDF")}
+                  />
+                </div>
+              </div>
+
+              {/* Data sections */}
+              <div className="flex flex-col gap-2">
+                <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
+                  {t("scope")}
+                </span>
+                <div className="flex flex-col gap-1.5">
+                  {([
+                    ["summary", t("scope_options.summary")],
+                    ["revenue", t("scope_options.revenue")],
+                    ["checkin", t("scope_options.checkin")],
+                    ["resale", t("scope_options.resale")]
+                  ] as [string, string][]).map(([key, label]) => (
+                    <label
+                      key={key}
+                      className="flex cursor-pointer items-center gap-2 rounded-ds-md border px-2.5 py-2 text-[13px] transition-colors"
+                      style={{
+                        background: exportSections[key]
+                          ? "var(--color-action-brand-bg-pressed)"
+                          : "transparent",
+                        borderColor: exportSections[key]
+                          ? "var(--color-action-brand-bg-default)"
+                          : "var(--color-border-subtle)",
+                        color: exportSections[key]
+                          ? "white"
+                          : "var(--color-text-primary)",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={exportSections[key]}
+                        onChange={(e) =>
+                          setExportSections((prev) => ({ ...prev, [key]: e.target.checked }))
+                        }
+                        className="accent-[var(--color-action-brand-bg-default)]"
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* CSV-only options */}
+              {exportFormat === "CSV" && (
+                <div className="flex flex-col gap-2">
+                  <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
+                    {t("separator")}
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {([[",", "Comma (,)"], [";", "Semicolon (;)"], ["\t", "Tab"]] as ["," | ";" | "\t", string][]).map(
+                      ([val, lab]) => (
+                        <button
+                          key={lab}
+                          type="button"
+                          onClick={() => setCsvSeparator(val)}
+                          className="rounded-ds-md border px-2.5 py-1.5 text-[11px] font-medium transition-colors"
+                          style={{
+                            background: csvSeparator === val ? "var(--color-action-brand-bg-pressed)" : "var(--color-bg-elevated)",
+                            borderColor: csvSeparator === val ? "var(--color-action-brand-bg-default)" : "var(--color-border-subtle)",
+                            color: csvSeparator === val ? "white" : "var(--color-text-secondary)",
+                          }}
+                        >
+                          {lab}
+                        </button>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Include headers toggle */}
+              <label className="flex cursor-pointer items-center justify-between gap-2 rounded-ds-md border border-[var(--color-border-subtle)] px-3 py-2.5">
+                <span className="text-[13px] text-[var(--color-text-primary)]">
+                  {t("include_headers")}
+                </span>
+                <div
+                  onClick={() => setIncludeHeaders((v) => !v)}
+                  className="relative h-5 w-9 cursor-pointer rounded-full transition-colors"
                   style={{
-                    background:
-                      i === 0
-                        ? "var(--color-action-brand-bg-pressed)"
-                        : "transparent",
-                    borderColor:
-                      i === 0
-                        ? "var(--color-action-brand-bg-default)"
-                        : "var(--color-border-subtle)",
+                    background: includeHeaders
+                      ? "var(--color-action-brand-bg-default)"
+                      : "var(--color-bg-elevated)",
+                    border: "1.5px solid var(--color-border-default)",
                   }}
                 >
-                  <input type="checkbox" defaultChecked={i === 0} />
-                  {label}
-                </label>
-              ))}
-            </div>
+                  <span
+                    className="absolute top-0.5 h-3.5 w-3.5 rounded-full bg-white transition-all"
+                    style={{ left: includeHeaders ? "18px" : "2px" }}
+                  />
+                </div>
+              </label>
+
+              {/* Export now */}
+              <button
+                type="button"
+                disabled={isExporting}
+                onClick={async () => {
+                  setIsExporting(true);
+                  try {
+                    const activeSections = (Object.keys(exportSections) as Array<"summary" | "revenue" | "checkin" | "resale">)
+                      .filter((k) => exportSections[k]);
+                    await organizerDashboardApi.exportReport({
+                      format: exportFormat,
+                      days: reportDays,
+                      sections: activeSections,
+                      ...(exportFormat === "CSV" && { separator: csvSeparator }),
+                      ...(exportFormat !== "PDF" && { includeHeaders }),
+                    });
+                  } catch {
+                    // TODO: show toast on error
+                  } finally {
+                    setIsExporting(false);
+                  }
+                }}
+                className="mt-1 flex items-center justify-center gap-2 rounded-ds-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3 py-2.5 text-[13px] font-medium text-[var(--color-action-brand-text-default)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isExporting ? (
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                ) : (
+                  <FileDown size={14} />
+                )}
+                {isExporting ? "..." : `${t("export_now")} (${exportFormat})`}
+              </button>
+            </Panel>
           </div>
-          <button className="mt-2 flex items-center justify-center gap-2 rounded-ds-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3 py-2.5 text-[13px] font-medium text-[var(--color-action-brand-text-default)]">
-            <FileDown size={14} />
-            {t("export_now")}
-          </button>
-        </Panel>
+        </div>
       </div>
     </div>
   );

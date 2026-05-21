@@ -397,3 +397,17 @@ export interface OrganizerAccountProfileResponse {
   ownerInfo: AccountOwnerInfo;
   payoutInfo: AccountBankInfoResponse[];
 }
+
+/** Export report request payload */
+export interface ExportReportRequest {
+  /** File format */
+  format: "CSV" | "XLSX" | "PDF";
+  /** Number of days to include in the report */
+  days: number;
+  /** Data sections to export */
+  sections: Array<"summary" | "revenue" | "tickets" | "checkin" | "resale">;
+  /** Column separator — CSV only */
+  separator?: "," | ";" | "\t";
+  /** Whether to include column headers — CSV and XLSX */
+  includeHeaders?: boolean;
+}

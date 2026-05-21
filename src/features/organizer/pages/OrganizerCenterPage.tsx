@@ -367,8 +367,8 @@ export default function OrganizerCenterPage() {
   // ── Main render ─────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between">
+    <div className="flex h-full flex-col gap-4">
+      <div className="flex shrink-0 items-start justify-between">
         <div>
           <h1 className="m-0 text-2xl font-semibold text-[var(--color-text-primary)]">
             {t("title")}
@@ -380,24 +380,28 @@ export default function OrganizerCenterPage() {
         </div>
       </div>
 
-      <OrganizerTabs
-        tabs={tabs}
-        activeKey={activeTab}
-        onTabChange={handleTabChange}
-      />
+      <div className="shrink-0">
+        <OrganizerTabs
+          tabs={tabs}
+          activeKey={activeTab}
+          onTabChange={handleTabChange}
+        />
+      </div>
 
-      <OrganizerToolbar
-        searchValue={search}
-        onSearchChange={setSearch}
-        searchPlaceholder={t("searchPlaceholder")}
-        filters={filterOptions}
-        selectedFilters={selectedFilters}
-        onFilterChange={handleFilterChange}
-        onClearFilters={clearFilters}
-      />
+      <div className="shrink-0">
+        <OrganizerToolbar
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder={t("searchPlaceholder")}
+          filters={filterOptions}
+          selectedFilters={selectedFilters}
+          onFilterChange={handleFilterChange}
+          onClearFilters={clearFilters}
+        />
+      </div>
 
-      {/* Table area — shows spinner overlay while searching/filtering */}
-      <div className="relative">
+      {/* Table area — flex-1, scroll internally */}
+      <div className="relative min-h-0 flex-1">
         {/* Table loading overlay — only for search/filter refetch, not first load */}
         {isTableLoading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-ds-lg bg-[var(--color-bg-page)]/60 backdrop-blur-[2px]">
@@ -424,9 +428,9 @@ export default function OrganizerCenterPage() {
             createHref={createHref}
           />
         ) : (
-          <div className="scrollbar-none overflow-x-auto rounded-ds-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)]">
+          <div className="scrollbar-none max-h-full overflow-y-auto overflow-x-auto rounded-ds-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)]">
             <div
-              className="grid min-w-[980px] items-center gap-4 border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] px-5 py-3 text-[11px] uppercase tracking-wide text-[var(--color-text-muted)]"
+              className="sticky top-0 z-10 grid min-w-[980px] items-center gap-4 border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] px-5 py-3 text-[11px] uppercase tracking-wide text-[var(--color-text-muted)]"
               style={{ gridTemplateColumns: EVENT_TABLE_GRID }}
             >
               <span>{t("tableHeaders.event")}</span>

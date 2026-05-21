@@ -173,7 +173,7 @@ export function OrganizerToolbar({
   filters = [],
   selectedFilters = {},
   onFilterChange,
-  onClearFilters,
+  // onClearFilters,
   actions,
 }: OrganizerToolbarProps) {
   const t = useTranslations("Organizer.Common.Toolbar");
@@ -221,21 +221,21 @@ export function OrganizerToolbar({
           label={f.label}
           options={f.options}
           value={selectedFilters[f.key] ?? ""}
-          onChange={onFilterChange ?? (() => {})}
+          onChange={onFilterChange ?? (() => { })}
         />
       ))}
 
       {/* Clear filters — only shown when something is active */}
-      {hasActiveFilters && onClearFilters && (
+      {/* {hasActiveFilters && onClearFilters && (
         <button
           type="button"
-          onClick={onClearFilters}
+          // onClick={onClearFilters}
           className="flex items-center gap-1.5 rounded-ds-md border border-[var(--color-border-default)] bg-transparent px-3 py-2 text-[13px] text-[var(--color-text-secondary)] hover:border-[var(--color-feedback-error-icon)] hover:text-[var(--color-feedback-error-text)] transition-colors"
         >
           <X size={13} />
           {t("clearFilter")}
         </button>
-      )}
+      )} */}
 
       {/* Right-aligned actions */}
       {actions && <div className="ml-auto flex items-center gap-2">{actions}</div>}
