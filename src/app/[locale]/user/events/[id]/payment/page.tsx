@@ -419,6 +419,7 @@ export default function PaymentPage() {
                                     <input
                                         type="text"
                                         value={phone}
+                                        maxLength={10}
                                         placeholder={tp('phone_placeholder')}
                                         onChange={(e) => {
                                             setPhone(e.target.value);
@@ -699,7 +700,7 @@ export default function PaymentPage() {
 
                                 <p className="text-[11px] text-text-muted mb-4">
                                     {tp.rich('terms_agree_note', {
-                                        link: (chunks) => <Link href="#" className="text-button-primary-bg-default hover:underline">{tp('terms_link_text')}</Link>
+                                        link: (chunks) => <Link href="#" className="text-button-primary-bg-default hover:underline">{chunks}</Link>
                                     })}
                                 </p>
 

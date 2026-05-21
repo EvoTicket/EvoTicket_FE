@@ -37,6 +37,8 @@ interface TicketDetail {
     qrAvailable: boolean;
     canResell: boolean;
     resaleBlockedReason: string | null;
+    platformFeeRate: number;
+    priceCapRate?: number;
 }
 
 export default function ResellTicketPage() {
@@ -281,8 +283,9 @@ export default function ResellTicketPage() {
     if (!ticket) return null;
 
     const currentPriceNum = parseInt(desiredPrice.replace(/\D/g, "")) || 0;
-    const priceCap = Math.floor(ticket.originalPrice * 1.1);
-    const feeRate = 0.02;
+    const capRate = ticket.priceCapRate ?? 1.1;
+    const priceCap = Math.floor(ticket.originalPrice * capRate);
+    const feeRate = ticket.platformFeeRate ?? 0.02;
     const calculatedFee = Math.floor(currentPriceNum * feeRate);
     const netReceived = Math.max(0, currentPriceNum - calculatedFee);
 
@@ -404,7 +407,7 @@ export default function ResellTicketPage() {
                                 </div>
                                 <div className="flex justify-between items-center text-[12px] text-text-muted mt-4 pt-4 border-t border-border-default">
                                     <span>{t("price_cap_rule")}</span>
-                                    <span>{t("price_cap_value")}</span>
+                                    <span>{t("price_cap_value", { rate: (capRate * 100).toFixed(0) })}</span>
                                 </div>
                             </div>
 

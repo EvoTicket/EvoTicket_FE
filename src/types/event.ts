@@ -112,4 +112,5 @@ export interface EventDetail {
     // Khai báo thêm thuộc tính fallback phía giao diện
     hasSeatMap?: boolean | null;
     ticketAvailabilityStatus?: string;
+    allowMultipleTicketTypesPerOrder?: boolean;
 }

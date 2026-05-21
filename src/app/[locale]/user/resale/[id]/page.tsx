@@ -224,10 +224,12 @@ export default function ResaleDetailPage() {
                                 <span className="text-text-secondary">{t('ticket_type')}</span>
                                 <span className="font-bold text-text-primary">{listingData.ticketTypeName}</span>
                             </div>
-                            <div className="flex justify-between items-center pb-3 border-b border-border-subtle hover:bg-bg-subtle transition-colors">
-                                <span className="text-text-secondary">{t('seat_area')}</span>
-                                <span className="font-bold text-text-primary">-</span>
-                            </div>
+                            {listingData?.seat && (
+                                <div className="flex justify-between items-center pb-3 border-b border-border-subtle hover:bg-bg-subtle transition-colors">
+                                    <span className="text-text-secondary">{t('seat_area')}</span>
+                                    <span className="font-bold text-text-primary">-</span>
+                                </div>
+                            )}
                             <div className="flex justify-between items-center pb-3 border-b border-border-subtle hover:bg-bg-subtle transition-colors">
                                 <span className="text-text-secondary">{t('listing_code')}</span>
                                 <span className="font-bold text-text-primary font-mono text-[12px]">{listingData.listingCode}</span>
@@ -360,10 +362,12 @@ export default function ResaleDetailPage() {
                                 <span className="text-text-secondary">{t('ticket_type')}</span>
                                 <span className="font-bold text-text-primary">{listingData.ticketTypeName}</span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-text-secondary">{t('seat_area')}</span>
-                                <span className="font-bold text-text-primary">-</span>
-                            </div>
+                            {listingData?.seat && (
+                                <div className="flex justify-between">
+                                    <span className="text-text-secondary">{t('seat_area')}</span>
+                                    <span className="font-bold text-text-primary">-</span>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex justify-between items-center mb-6">

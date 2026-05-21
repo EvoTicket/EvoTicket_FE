@@ -98,6 +98,9 @@ export default function ProvenancePage() {
     };
 
     const openTxExplorer = (txHash: string) => {
+        console.log('----------------------------------------------------------------------------------------------------------');
+        console.log(txHash);
+        console.log('----------------------------------------------------------------------------------------------------------');
         window.open(`https://amoy.polygonscan.com/tx/${txHash}`, "_blank");
     };
 

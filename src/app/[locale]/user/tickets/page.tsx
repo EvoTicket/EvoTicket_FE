@@ -25,6 +25,7 @@ import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Dialog, DialogPa
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import api from "@/src/lib/axios";
+import { toast } from "react-toastify";
 
 export default function MyTicketsPage() {
     const t = useTranslations("MyTickets");
@@ -98,6 +99,19 @@ export default function MyTicketsPage() {
         { id: "minting", label: t("tab_minting") },
         { id: "reselling", label: t("tab_reselling") },
     ];
+
+    const cancelResell = async (listingCode: string) => {
+        try {
+            const response = await api.post(`/order-service/api/v1/resale/listings/${listingCode}/cancel`);
+            if (response.data && response.data.status === 200) {
+                toast.success(t('cancel_resell_success'));
+                fetchTickets();
+            }
+        } catch (error) {
+            console.error("Failed to cancel resell", error);
+            toast.error(t('cancel_resell_failed'));
+        }
+    };
 
     const fetchTickets = async () => {
         setIsLoading(true);
@@ -432,6 +446,14 @@ export default function MyTicketsPage() {
                                                                             {t('resell_button')}
                                                                         </button>
                                                                     </Link>
+                                                                )}
+                                                                {ticket.status === 'on_sale' && (
+                                                                    <button
+                                                                        onClick={() => cancelResell(ticket.listingCode)}
+                                                                        className="bg-feedback-error-bg/10 hover:bg-feedback-error-bg/20 text-feedback-error-text border border-feedback-error-border px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap block"
+                                                                    >
+                                                                        {t('cancel_resell')}
+                                                                    </button>
                                                                 )}
                                                                 <button
                                                                     onClick={() => toggleTicket(ticket.id)}
