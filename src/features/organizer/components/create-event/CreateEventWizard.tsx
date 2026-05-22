@@ -455,13 +455,13 @@ export default function CreateEventPage() {
                     return nextState;
                 });
 
-                if (draft.currentStep && draft.currentStep > 0 && draft.currentStep <= 5) {
-                    setStep(draft.currentStep);
+                if (draft.currentStep && draft.currentStep >= 0 && draft.currentStep <= 5) {
+                    setStep(draft.currentStep + 1);
                 }
             }
         } catch (error) {
             console.error("Failed to load draft", error);
-            toast.error("Không thể tải bản nháp.");
+            toast.error(tValidation("toast_draft_load_failed"));
         }
     }, [draftId, isNew, setFormData, setStep]);
 
@@ -621,7 +621,7 @@ export default function CreateEventPage() {
                 toast.success(tValidation("toast_draft_saved"));
             } catch (error) {
                 console.error("Failed to save draft", error);
-                toast.error("Không thể lưu bản nháp.");
+                toast.error(tValidation("toast_draft_save_failed"));
             }
         } else {
             toast.success(tValidation("toast_draft_saved"));

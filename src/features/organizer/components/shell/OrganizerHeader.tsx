@@ -122,7 +122,7 @@ export function OrganizerHeader() {
                     className="w-10 h-10 flex items-center justify-center rounded-full bg-button-secondary-bg-default text-text-secondary hover:bg-border-default border border-border-default transition-colors font-bold text-xs cursor-pointer shrink-0"
                     title="Chuyển đổi ngôn ngữ / Switch Language"
                 >
-                    {locale === "vi" ? "VI" : "EN"}
+                    {locale === "vi" ? "EN" : "VI"}
                 </button>
 
                 {/* === THEME TOGGLE === */}
@@ -171,10 +171,10 @@ export function OrganizerHeader() {
                             </div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="end" forceMount>
-                            <DropdownMenuLabel className="font-normal">
-                                <div className="flex flex-col space-y-1">
-                                    <p className="text-sm font-medium leading-none">{getFullName()}</p>
-                                    <p className="text-xs leading-none text-muted-foreground truncate">
+                            <DropdownMenuLabel className="font-normal p-3">
+                                <div className="flex flex-col gap-1.5">
+                                    <p className="text-sm font-medium leading-tight">{getFullName()}</p>
+                                    <p className="text-xs leading-tight text-text-muted truncate">
                                         {user?.email || "organizer@evoticket.com"}
                                     </p>
                                 </div>

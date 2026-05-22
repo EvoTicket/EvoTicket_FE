@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useParams, usePathname } from "next/navigation";
 import {
     ArrowLeft,
@@ -61,15 +62,16 @@ export function OrganizerSidebar() {
         <aside className="dark w-[280px] bg-navbar-sidebar-bg border-r border-navbar-sidebar-border min-h-screen flex flex-col fixed h-full z-10">
             {/* Logo/Brand */}
             <div className="p-6 border-b border-navbar-sidebar-border">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-action-brand-bg-default/10 rounded-ds-lg flex items-center justify-center">
-                        <span className="text-action-brand-bg-default font-bold text-xl">E</span>
-                    </div>
-                    <div>
-                        <h1 className="text-lg font-bold text-navbar-sidebar-text-active leading-tight">EvoTicket</h1>
-                        <p className="text-xs text-navbar-sidebar-text-default">Organizer Workspace</p>
-                    </div>
-                </div>
+                <Link href={`/${locale}/organizer/center`} className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+                    <Image 
+                        src="/evoticket-logo/dark/dark-primary=horizontal-logo.svg" 
+                        alt="EvoTicket Organizer" 
+                        width={140} 
+                        height={32} 
+                        className="object-contain" 
+                        priority 
+                    />
+                </Link>
             </div>
 
             <div className="flex-1 overflow-y-auto flex flex-col">

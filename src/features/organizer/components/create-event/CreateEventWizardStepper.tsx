@@ -22,17 +22,17 @@ export function CreateEventWizardStepper({ currentStep, onStepClick }: Props) {
     const t = useTranslations("CreateEvent.Wizard");
 
     return (
-        <div className="flex items-center gap-2 overflow-x-auto pb-4">
+        <div className="flex items-center w-full overflow-x-auto pb-4">
             {steps.map((step, idx) => {
                 const isActive = currentStep === step.id;
                 const isCompleted = currentStep > step.id;
                 
                 return (
-                    <div key={step.id} className="flex items-center gap-2 flex-shrink-0">
+                    <div key={step.id} className={`flex items-center ${idx < steps.length - 1 ? 'flex-1' : ''}`}>
                         <button
                             type="button"
                             onClick={() => onStepClick && isCompleted && onStepClick(step.id)}
-                            className={`flex items-center gap-3 px-4 py-2.5 rounded-ds-lg border transition-colors ${
+                            className={`flex items-center gap-3 px-4 py-2.5 rounded-ds-lg border transition-colors flex-shrink-0 ${
                                 isActive 
                                     ? "bg-bg-elevated border-border-default text-text-primary" 
                                     : isCompleted
@@ -59,7 +59,7 @@ export function CreateEventWizardStepper({ currentStep, onStepClick }: Props) {
                             </div>
                         </button>
                         {idx < steps.length - 1 && (
-                            <div className="text-text-muted/50 px-2">&gt;</div>
+                            <div className="flex-1 flex justify-center text-text-muted/50 min-w-[32px] font-medium">&gt;</div>
                         )}
                     </div>
                 );

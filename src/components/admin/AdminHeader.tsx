@@ -4,13 +4,14 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "@/src/components/ui/dropdown-menu";
 import { useAppDispatch, useAppSelector } from "@/src/store/hooks";
 import { logout as logoutAction } from "@/src/store/slices/authSlice";
@@ -24,7 +25,7 @@ export function AdminHeader() {
     const t = useTranslations("Admin");
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
-    
+
     const dispatch = useAppDispatch();
     const { refreshToken, user } = useAppSelector((state) => state.auth);
 
@@ -58,7 +59,24 @@ export function AdminHeader() {
         <header className="h-20 bg-surface/80 backdrop-blur-md border-b border-border flex items-center justify-between px-8 sticky top-0 z-10 transition-colors duration-300">
             <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-txt-primary">EvoTicket Admin</span>
+                    <Image
+                        src="/evoticket-logo/light/light-primary=horizontal-logo.svg"
+                        alt="EvoTicket Admin"
+                        width={120}
+                        height={28}
+                        className="object-contain dark:hidden"
+                        priority
+                    />
+                    <Image
+                        src="/evoticket-logo/dark/dark-primary=horizontal-logo.svg"
+                        alt="EvoTicket Admin"
+                        width={120}
+                        height={28}
+                        className="object-contain hidden dark:block"
+                        priority
+                    />
+                    <div className="h-6 w-px bg-border mx-2"></div>
+                    <span className="text-sm font-bold text-txt-primary uppercase tracking-widest hidden sm:inline-block">Admin</span>
                     <span className="bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded border border-amber-500/20 uppercase tracking-wider">
                         {t("header.production")}
                     </span>
@@ -115,7 +133,7 @@ export function AdminHeader() {
                     </span>
                 </button> */}
 
-                <div className="h-6 w-[1px] bg-border mx-1"></div>
+                {/* <div className="h-6 w-[1px] bg-border mx-1"></div> */}
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

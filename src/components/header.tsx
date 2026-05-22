@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Bell, Ticket, Plus, ChevronDown, Moon, Sun, User, LogOut, LogInIcon, Subscript, UserPlus, Users } from "lucide-react";
+import { Search, Bell, Ticket, Plus, ChevronDown, Moon, Sun, User, LogOut, LogInIcon, Subscript, UserPlus, Users, Globe } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter, usePathname, useSearchParams } from "next/navigation";
@@ -29,7 +29,7 @@ export function Header() {
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const t = useTranslations('Header');
-  
+
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -111,10 +111,10 @@ export function Header() {
     if (!pathname) return;
     const segments = pathname.split("/");
     segments[1] = newLocale;
-    
+
     const search = searchParams.toString();
     const newPath = segments.join("/") + (search ? `?${search}` : "");
-    
+
     router.push(newPath);
   };
 
@@ -123,18 +123,23 @@ export function Header() {
       <div className="mx-auto px-4 h-20 flex items-center justify-between gap-4">
 
         {/* === LEFT: LOGO === */}
-        <Link href={`/${locale}/user/homepage`} className="flex items-center gap-2 shrink-0 group">
-          {/* Logo Icon */}
-          <div className="relative w-8 h-8 flex items-center justify-center border-2 border-button-primary-bg-default rounded transition-colors group-hover:border-button-primary-bg-hover">
-            <div className="w-4 h-4 border border-button-primary-bg-default rotate-45 group-hover:border-button-primary-bg-hover transition-colors"></div>
-          </div>
-          {/* Logo Text */}
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold text-text-primary leading-none">
-              Evo<span className="text-button-primary-bg-default">Ticket</span>
-            </span>
-            <span className="text-[10px] text-text-muted uppercase tracking-wider">Event-booking</span>
-          </div>
+        <Link href={`/${locale}/user/homepage`} className="flex items-center shrink-0 hover:opacity-90 transition-opacity">
+          <Image
+            src="/evoticket-logo/light/light-primary=horizontal-logo.svg"
+            alt="EvoTicket"
+            width={150}
+            height={36}
+            className="object-contain dark:hidden"
+            priority
+          />
+          <Image
+            src="/evoticket-logo/dark/dark-primary=horizontal-logo.svg"
+            alt="EvoTicket"
+            width={150}
+            height={36}
+            className="object-contain hidden dark:block"
+            priority
+          />
         </Link>
 
         {/* === CENTER: SEARCH BAR === */}
@@ -154,7 +159,7 @@ export function Header() {
               }}
             />
             <div className="h-6 w-px bg-border mx-2"></div>
-            <button 
+            <button
               onClick={handleSearch}
               className="px-6 py-2 text-sm font-medium text-text-secondary hover:text-button-primary-bg-default transition-colors cursor-pointer"
             >
@@ -182,7 +187,7 @@ export function Header() {
 
           {/* Nút Vé của tôi (Secondary Button) */}
           {user &&
-            <Link href={`/${locale}/user/tickets`} className="group relative overflow-hidden hidden lg:flex items-center gap-2 border border-border-default text-text-primary px-4 py-2.5 rounded-lg font-medium hover:border-button-primary-bg-default transition-colors cursor-pointer bg-transparent">
+            <Link href={`/${locale}/user/tickets`} className="group relative overflow-hidden flex lg:flex items-center gap-2 border border-border-default text-text-primary px-4 py-2.5 rounded-lg font-medium hover:border-button-primary-bg-default transition-colors cursor-pointer bg-transparent">
               <span className="absolute inset-0 w-full h-full bg-bg-subtle origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 z-0"></span>
               <Ticket size={18} className="relative z-10 text-text-secondary" />
               <span className="relative z-10">{t("my_tickets")}</span>
@@ -191,18 +196,44 @@ export function Header() {
 
           {/* Icon Notification */}
 
-          {user &&
+          {/* {user &&
             <button className="relative p-2.5 border border-border-default rounded-lg text-text-secondary hover:border-button-primary-bg-default transition-colors cursor-pointer">
               <Bell size={20} />
               <span className="absolute -top-1.5 -right-1.5 bg-feedback-error-bg text-button-primary-text-default text-[10px] font-bold h-5 min-w-5 px-1 flex items-center justify-center rounded-full border-2 border-navbar-topbar-bg">
                 99
               </span>
             </button>
-          }
+          } */}
+          {/* === THEME & LANGUAGE (OUTSIDE) === */}
+          <div className={`${user ? "hidden lg:flex" : "flex"} items-center`}>
+            <button
+              onClick={switchLanguage}
+              className="ml-2 w-10 h-10 flex items-center justify-center rounded-full bg-button-secondary-bg-default text-text-secondary hover:bg-border-default transition-colors font-bold text-xs cursor-pointer"
+              title="Chuyển đổi ngôn ngữ / Switch Language"
+            >
+              {locale === "vi" ? "EN" : "VI"}
+            </button>
+
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="ml-2 p-2 rounded-full bg-button-secondary-bg-default text-text-secondary hover:bg-border-default transition-colors cursor-pointer"
+              title="Chuyển đổi giao diện"
+            >
+              {mounted ? (
+                theme === "dark" ? (
+                  <Sun size={20} className="text-accent" />
+                ) : (
+                  <Moon size={20} />
+                )
+              ) : (
+                <div className="w-5 h-5" /> // Placeholder khi chưa load xong
+              )}
+            </button>
+          </div>
 
           {/* User Profile Dropdown */}
           {user ? (
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <div className="flex items-center gap-2 border border-border-default rounded-lg p-1 pr-2 hover:border-button-primary-bg-default cursor-pointer transition-colors outline-none">
                   <div className="w-8 h-8 rounded bg-linear-to-tr from-button-primary-bg-default to-button-accent-bg-default overflow-hidden relative">
@@ -229,6 +260,23 @@ export function Header() {
                 <DropdownMenuItem onClick={() => router.push(`/${locale}/user/profile`)}>
                   <User className="mr-2 h-4 w-4" />
                   <span>{t("profile")}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push(`/${locale}/user/tickets`)} className="hidden lg:hidden">
+                  <Ticket className="mr-2 h-4 w-4" />
+                  <span>{t("my_tickets")}</span>
+                </DropdownMenuItem>
+                {/* <DropdownMenuSeparator className="lg:hidden" /> */}
+                <DropdownMenuItem onClick={switchLanguage} className="lg:hidden">
+                  <Globe className="mr-2 h-4 w-4" />
+                  <span>{locale === "vi" ? "English" : "Tiếng Việt"}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="lg:hidden">
+                  {mounted ? (
+                    theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />
+                  ) : (
+                    <div className="mr-2 h-4 w-4" />
+                  )}
+                  <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-feedback-error-text hover:text-feedback-error-text hover:bg-feedback-error-bg/10 cursor-pointer">
@@ -260,32 +308,6 @@ export function Header() {
             </>
           )}
 
-          {/* === LANGUAGE TOGGLE === */}
-          <button
-            onClick={switchLanguage}
-            className="ml-2 w-10 h-10 flex items-center justify-center rounded-full bg-button-secondary-bg-default text-text-secondary hover:bg-border-default transition-colors font-bold text-xs cursor-pointer"
-            title="Chuyển đổi ngôn ngữ / Switch Language"
-          >
-            {locale === "vi" ? "VI" : "EN"}
-          </button>
-
-          {/* === THEME TOGGLE === */}
-          {/* Chỉ render icon khi client đã mounted để tránh lỗi hydration */}
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="ml-2 p-2 rounded-full bg-button-secondary-bg-default text-text-secondary hover:bg-border-default transition-colors cursor-pointer"
-            title="Chuyển đổi giao diện"
-          >
-            {mounted ? (
-              theme === "dark" ? (
-                <Sun size={20} className="text-accent" />
-              ) : (
-                <Moon size={20} />
-              )
-            ) : (
-              <div className="w-5 h-5" /> // Placeholder khi chưa load xong
-            )}
-          </button>
 
         </div>
       </div>

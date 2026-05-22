@@ -242,7 +242,30 @@ export default function HomePage() {
 
         {/* === HERO SECTION === */}
         <div className="relative mb-32">
-          <section className="relative w-full min-h-[600px] flex items-center justify-between pt-20 pb-28 bg-gradient-to-br from-bg-subtle to-bg-page overflow-hidden">
+          <section 
+            className="relative w-full min-h-[600px] flex items-center justify-between pt-20 pb-28 overflow-hidden group/hero"
+            onMouseMove={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              e.currentTarget.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+              e.currentTarget.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+            }}
+          >
+            
+            {/* Dynamic Animated Gradient Frame (Base - subtle) */}
+            <div className="absolute inset-0 w-full h-full z-0 bg-gradient-to-r from-blue-500 via-fuchsia-500 to-amber-500 bg-[length:400%_400%] animate-gradient opacity-15 dark:opacity-25 pointer-events-none blur-3xl"></div>
+
+            {/* Spotlight that follows mouse (Vibrant) */}
+            <div 
+              className="absolute inset-0 w-full h-full z-0 bg-gradient-to-r from-blue-400 via-fuchsia-500 to-amber-400 bg-[length:400%_400%] animate-gradient opacity-0 group-hover/hero:opacity-80 transition-opacity duration-700 pointer-events-none blur-2xl"
+              style={{
+                WebkitMaskImage: `radial-gradient(circle 350px at var(--mouse-x, 50%) var(--mouse-y, 50%), black, transparent 80%)`,
+                maskImage: `radial-gradient(circle 350px at var(--mouse-x, 50%) var(--mouse-y, 50%), black, transparent 80%)`
+              }}
+            ></div>
+
+            {/* Base Background Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-bg-page/80 via-bg-page/60 to-bg-page/20 z-0"></div>
+
             <div className="w-full px-[5%] mx-auto relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
 
               {/* Left Content */}
@@ -272,8 +295,8 @@ export default function HomePage() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-                  <button
-                    onClick={() => document.getElementById('trending-events')?.scrollIntoView({ behavior: 'smooth' })}
+                  <Link
+                    href={`/${locale}/user/resale`}
                     onMouseMove={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
                       e.currentTarget.style.setProperty('--x', `${e.clientX - rect.left}px`);
@@ -282,10 +305,10 @@ export default function HomePage() {
                     className="group relative overflow-hidden w-full sm:w-auto bg-button-primary-bg-default text-button-primary-text-default font-bold py-4 px-10 rounded-ds-lg shadow-lg shadow-primary/30 text-center cursor-pointer"
                   >
                     <span className="absolute w-[250%] aspect-square bg-button-accent-bg-hover rounded-full transition-transform duration-900 ease-out -translate-x-1/2 -translate-y-1/2 scale-0 group-hover:scale-100 z-0" style={{ top: 'var(--y, 50%)', left: 'var(--x, 50%)' }}></span>
-                    <span className="relative z-10">{t('explore_now')}</span>
-                  </button>
-                  <Link
-                    href={`/${locale}/user/resale`}
+                    <span className="relative z-10">{t('resale_market', { defaultMessage: 'Chợ vé bán lại' })}</span>
+                  </Link>
+                  <button
+                    onClick={() => document.getElementById('trending-events')?.scrollIntoView({ behavior: 'smooth' })}
                     onMouseMove={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
                       e.currentTarget.style.setProperty('--x', `${e.clientX - rect.left}px`);
@@ -294,8 +317,8 @@ export default function HomePage() {
                     className="group relative overflow-hidden w-full sm:w-auto bg-transparent border border-border-default hover:border-border-strong text-text-primary font-bold py-4 px-8 rounded-ds-lg text-center transition-colors"
                   >
                     <span className="absolute w-[250%] aspect-square bg-bg-subtle rounded-full transition-transform duration-500 ease-out -translate-x-1/2 -translate-y-1/2 scale-0 group-hover:scale-100 z-0" style={{ top: 'var(--y, 50%)', left: 'var(--x, 50%)' }}></span>
-                    <span className="relative z-10">{t('resale_market', { defaultMessage: 'Chợ vé bán lại' })}</span>
-                  </Link>
+                    <span className="relative z-10">{t('explore_now')}</span>
+                  </button>
                 </div>
               </div>
 

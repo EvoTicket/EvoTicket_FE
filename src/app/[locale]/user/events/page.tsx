@@ -56,6 +56,7 @@ export default function EventsPage() {
     const [endDate, setEndDate] = useState<Date | null>(
         searchParams?.get("toDate") ? new Date(searchParams.get("toDate")!) : null
     );
+    const [fetchTrigger, setFetchTrigger] = useState(0);
     const [provinces, setProvinces] = useState<Province[]>([]);
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     // const [openSelectLocation, setOpenSelectLocation] = useState(false);
@@ -101,7 +102,8 @@ export default function EventsPage() {
 
     useEffect(() => {
         fetchEvents(page === 1);
-    }, [page, sortBy, selectedProvince, startDate, endDate, selectedCategories, keyword]); // Trigger fetch khi bất kỳ bộ lọc nào thay đổi
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [page, sortBy, fetchTrigger]); // Chỉ tự động fetch khi đổi trang, cách sắp xếp, hoặc ấn Apply
 
     useEffect(() => {
         if (suggestedEvents.length === 0) {
@@ -112,7 +114,7 @@ export default function EventsPage() {
 
     const isFilterApplied = Boolean(
         keyword ||
-        selectedProvince ||
+        (selectedProvince && selectedProvince.code !== "all") ||
         startDate ||
         endDate ||
         selectedCategories.length > 0 ||
@@ -237,8 +239,11 @@ export default function EventsPage() {
     };
 
     const handleApplyFilters = () => {
-        setPage(1);
-        fetchEvents(true);
+        if (page !== 1) {
+            setPage(1);
+        } else {
+            setFetchTrigger(prev => prev + 1);
+        }
     };
 
     const clearFilters = () => {
@@ -251,8 +256,11 @@ export default function EventsPage() {
         setPriceTo("");
         setTicketStatuses([]);
         setSelectedDateFilter(null);
-        setPage(1);
-        setTimeout(() => fetchEvents(true), 0);
+        if (page !== 1) {
+            setPage(1);
+        } else {
+            setFetchTrigger(prev => prev + 1);
+        }
     };
 
     const loadMore = useCallback(() => {
@@ -376,10 +384,10 @@ export default function EventsPage() {
                                 <button onClick={() => { setKeyword(""); handleApplyFilters(); }} className="hover:text-button-primary-bg-default"><X size={14} /></button>
                             </div>
                         )}
-                        {selectedProvince && (
+                        {selectedProvince && selectedProvince.code !== "all" && (
                             <div className="flex items-center gap-2 px-3 py-1.5 text-text-primary border border-border-default rounded-full text-sm">
-                                <span>{provinces.find(p => p.code === selectedProvince.code)?.name}</span>
-                                <button onClick={() => { setSelectedProvince(""); handleApplyFilters(); }} className="hover:text-button-primary-bg-default"><X size={14} /></button>
+                                <span>{provinces.find(p => p.code === selectedProvince.code)?.name || selectedProvince.name}</span>
+                                <button onClick={() => { setSelectedProvince({ code: "all", name: t("location_all") || "Tất cả địa điểm" }); handleApplyFilters(); }} className="hover:text-button-primary-bg-default"><X size={14} /></button>
                             </div>
                         )}
                         {(startDate || endDate) && (

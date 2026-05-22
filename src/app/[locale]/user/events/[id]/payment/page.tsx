@@ -72,7 +72,19 @@ export default function PaymentPage() {
         }
 
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        
+        if (Object.keys(newErrors).length > 0) {
+            setTimeout(() => {
+                const firstErrorElement = document.querySelector('.border-feedback-error-text');
+                if (firstErrorElement) {
+                    const y = firstErrorElement.getBoundingClientRect().top + window.scrollY - 150;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                }
+            }, 100);
+            return false;
+        }
+        
+        return true;
     };
 
     useEffect(() => {

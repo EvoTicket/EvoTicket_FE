@@ -48,6 +48,11 @@ export default function MyTicketsPage() {
     const [qrLoading, setQrLoading] = useState(false);
     const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
 
+    // Cancel Resell Modal State
+    const [cancelModalOpen, setCancelModalOpen] = useState(false);
+    const [listingToCancel, setListingToCancel] = useState<string | null>(null);
+    const [isCancelling, setIsCancelling] = useState(false);
+
     // Sort setup
     const sortByList = [
         { id: "popular", name: t("sort_popular") },
@@ -100,9 +105,16 @@ export default function MyTicketsPage() {
         { id: "reselling", label: t("tab_reselling") },
     ];
 
-    const cancelResell = async (listingCode: string) => {
+    const handleCancelClick = (listingCode: string) => {
+        setListingToCancel(listingCode);
+        setCancelModalOpen(true);
+    };
+
+    const executeCancelResell = async () => {
+        if (!listingToCancel) return;
+        setIsCancelling(true);
         try {
-            const response = await api.post(`/order-service/api/v1/resale/listings/${listingCode}/cancel`);
+            const response = await api.post(`/order-service/api/v1/resale/listings/${listingToCancel}/cancel`);
             if (response.data && response.data.status === 200) {
                 toast.success(t('cancel_resell_success'));
                 fetchTickets();
@@ -110,6 +122,10 @@ export default function MyTicketsPage() {
         } catch (error) {
             console.error("Failed to cancel resell", error);
             toast.error(t('cancel_resell_failed'));
+        } finally {
+            setIsCancelling(false);
+            setCancelModalOpen(false);
+            setListingToCancel(null);
         }
     };
 
@@ -237,9 +253,11 @@ export default function MyTicketsPage() {
                     <h1 className="text-3xl font-bold text-text-primary mb-1">{t('page_title')}</h1>
                     <p className="text-sm text-text-secondary">{t('page_subtitle')}</p>
                 </div>
-                <button className="bg-button-secondary-bg-default hover:bg-button-secondary-bg-hover text-button-secondary-text-default border border-button-secondary-border-default px-4 py-2 rounded-lg outline-none font-medium transition-colors text-sm flex items-center gap-2">
-                    <Ticket size={16} className="text-button-secondary-text-default" /> {t('explore_events')}
-                </button>
+                <Link href={`/${locale}/user/events`}>
+                    <button className="bg-button-secondary-bg-default hover:bg-button-secondary-bg-hover text-button-secondary-text-default border border-button-secondary-border-default px-4 py-2 rounded-lg outline-none font-medium transition-colors text-sm flex items-center gap-2">
+                        <Ticket size={16} className="text-button-secondary-text-default" /> {t('explore_events')}
+                    </button>
+                </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -449,7 +467,7 @@ export default function MyTicketsPage() {
                                                                 )}
                                                                 {ticket.status === 'on_sale' && (
                                                                     <button
-                                                                        onClick={() => cancelResell(ticket.listingCode)}
+                                                                        onClick={() => handleCancelClick(ticket.listingCode)}
                                                                         className="bg-feedback-error-bg/10 hover:bg-feedback-error-bg/20 text-feedback-error-text border border-feedback-error-border px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap block"
                                                                     >
                                                                         {t('cancel_resell')}
@@ -625,6 +643,78 @@ export default function MyTicketsPage() {
                                                 </p>
                                             </div>
                                         </div>
+                                    </div>
+                                </DialogPanel>
+                            </TransitionChild>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+            {/* Cancel Resell Confirmation Modal */}
+            <Transition appear show={cancelModalOpen} as={React.Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={() => !isCancelling && setCancelModalOpen(false)}>
+                    <TransitionChild
+                        as={React.Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+                    </TransitionChild>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                            <TransitionChild
+                                as={React.Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-bg-surface p-6 text-left align-middle shadow-xl transition-all border border-border-default">
+                                    <DialogTitle
+                                        as="h3"
+                                        className="text-lg font-bold leading-6 text-text-primary mb-4"
+                                    >
+                                        {locale === 'vi' ? 'Xác nhận hủy niêm yết' : 'Confirm Cancel Listing'}
+                                    </DialogTitle>
+                                    <div className="mt-2">
+                                        <p className="text-sm text-text-secondary mb-6">
+                                            {locale === 'vi'
+                                                ? 'Bạn có chắc chắn muốn hủy niêm yết vé này không? Sau khi hủy, vé sẽ được trả về trạng thái bình thường và bạn có thể sử dụng lại vé này.'
+                                                : 'Are you sure you want to cancel this listing? Once canceled, the ticket will be returned to normal status and you can use it again.'}
+                                        </p>
+                                    </div>
+
+                                    <div className="mt-4 flex gap-3 justify-end">
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 border border-border-default rounded-lg text-sm font-semibold text-text-secondary hover:bg-bg-subtle transition-colors"
+                                            onClick={() => setCancelModalOpen(false)}
+                                            disabled={isCancelling}
+                                        >
+                                            {locale === 'vi' ? 'Hủy bỏ' : 'Cancel'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 bg-feedback-error-bg hover:opacity-90 text-feedback-error-text rounded-lg text-sm font-bold transition-opacity flex items-center justify-center gap-2 min-w-[120px]"
+                                            onClick={executeCancelResell}
+                                            disabled={isCancelling}
+                                        >
+                                            {isCancelling ? (
+                                                <>
+                                                    <Loader2 size={16} className="animate-spin" />
+                                                    {locale === 'vi' ? 'Đang xử lý...' : 'Processing...'}
+                                                </>
+                                            ) : (
+                                                locale === 'vi' ? 'Xác nhận hủy' : 'Confirm Cancel'
+                                            )}
+                                        </button>
                                     </div>
                                 </DialogPanel>
                             </TransitionChild>
