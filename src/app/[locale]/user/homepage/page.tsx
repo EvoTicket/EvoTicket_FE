@@ -15,6 +15,8 @@ import { useRouter } from "next/navigation";
 import { useEventFilters } from "@/src/hooks/useEventFilters";
 import { TICKET_AVAILABILITY_OPTIONS } from "@/src/constants/eventFilters";
 import { noInteraction } from "recharts/types/state/tooltipSlice";
+import HeroTicket3DLoader from "@/src/components/home/HeroTicket3DLoader";
+
 
 
 
@@ -242,7 +244,7 @@ export default function HomePage() {
 
         {/* === HERO SECTION === */}
         <div className="relative mb-32">
-          <section 
+          <section
             className="relative w-full min-h-[600px] flex items-center justify-between pt-20 pb-28 overflow-hidden group/hero"
             onMouseMove={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
@@ -250,12 +252,12 @@ export default function HomePage() {
               e.currentTarget.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
             }}
           >
-            
+
             {/* Dynamic Animated Gradient Frame (Base - subtle) */}
             <div className="absolute inset-0 w-full h-full z-0 bg-gradient-to-r from-blue-500 via-fuchsia-500 to-amber-500 bg-[length:400%_400%] animate-gradient opacity-15 dark:opacity-25 pointer-events-none blur-3xl"></div>
 
             {/* Spotlight that follows mouse (Vibrant) */}
-            <div 
+            <div
               className="absolute inset-0 w-full h-full z-0 bg-gradient-to-r from-blue-400 via-fuchsia-500 to-amber-400 bg-[length:400%_400%] animate-gradient opacity-0 group-hover/hero:opacity-80 transition-opacity duration-700 pointer-events-none blur-2xl"
               style={{
                 WebkitMaskImage: `radial-gradient(circle 350px at var(--mouse-x, 50%) var(--mouse-y, 50%), black, transparent 80%)`,
@@ -266,7 +268,7 @@ export default function HomePage() {
             {/* Base Background Overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-bg-page/80 via-bg-page/60 to-bg-page/20 z-0"></div>
 
-            <div className="w-full px-[5%] mx-auto relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
+            <div className="w-full px-[5%] mx-auto relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12 overflow-visible">
 
               {/* Left Content */}
               <div className="lg:w-1/2 w-full flex flex-col items-center lg:items-start text-center lg:text-left pt-10 lg:pt-0">
@@ -323,30 +325,8 @@ export default function HomePage() {
               </div>
 
               {/* Right Content - Floating Tickets Graphic */}
-              <div className="lg:w-1/2 w-full flex justify-center relative min-h-[400px]">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-brand-glow-purple rounded-full blur-[100px] opacity-20 pointer-events-none"></div>
-
-                {/* Decorative rings */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] border border-white/5 rounded-full rotate-45 pointer-events-none"></div>
-                <div className="absolute top-1/2 left-[55%] -translate-x-1/2 -translate-y-[45%] w-[420px] h-[420px] border border-white/5 rounded-full -rotate-12 pointer-events-none"></div>
-
-                {/* Tickets Placeholder */}
-                <div className="relative w-full max-w-[500px] aspect-[4/3] z-10 flex items-center justify-center">
-                  {/* Fake ticket 1 */}
-                  <div className="absolute right-[5%] top-[5%] w-[180px] md:w-[240px] h-[340px] md:h-[460px] bg-gradient-to-br from-[#FDE599] via-[#D5A02B] to-[#B38018] rounded-ds-2xl rotate-12 shadow-[0_30px_60px_rgba(0,0,0,0.6)] flex items-center justify-center overflow-hidden border border-[#FFE484]/50">
-                    <div className="absolute m-3 inset-0 border-2 border-dashed border-[#FFE484]/40 rounded-ds-xl relative">
-                      <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#3B1F4F] shadow-inner"></div>
-                      <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#20102E] shadow-inner"></div>
-                    </div>
-                  </div>
-                  {/* Fake ticket 2 */}
-                  <div className="absolute left-[8%] top-0 w-[160px] md:w-[220px] h-[300px] md:h-[420px] bg-gradient-to-br from-[#FAF0C0] via-[#C99119] to-[#996509] rounded-ds-2xl -rotate-[15deg] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-center overflow-hidden border border-white/20">
-                    <div className="absolute m-3 inset-0 border border-[#FAF0C0]/30 rounded-ds-xl relative">
-                      <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#3C1A52] shadow-inner"></div>
-                      <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#2E1541] shadow-inner"></div>
-                    </div>
-                  </div>
-                </div>
+              <div className="relative w-full lg:w-1/3 min-w-0">
+                <HeroTicket3DLoader />
               </div>
             </div>
           </section>
