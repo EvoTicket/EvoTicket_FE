@@ -708,7 +708,12 @@
     "qr_expires_in": "Expires in",
     "qr_security_note": "Please show this code to the staff at the check-in gate. The QR code will automatically refresh for security.",
     "qr_fetch_failed": "Failed to load QR code",
-    "qr_ready": "Ready"
+    "qr_ready": "Ready",
+    "tab_checked_in": "Checked In",
+    "tab_withdrawn": "Withdrawn",
+    "withdraw_button": "Withdraw",
+    "withdraw_success": "Withdrawal successful",
+    "withdraw_failed": "Withdrawal failed"
   },
   "Provenance": {
     "breadcrumb_account": "Account",

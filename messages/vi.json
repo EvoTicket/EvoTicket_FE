@@ -705,7 +705,12 @@
     "qr_expires_in": "Hết hạn sau",
     "qr_security_note": "Vui lòng đưa mã này cho nhân viên tại quầy soát vé để check-in. Mã QR sẽ tự động cập nhật để bảo mật.",
     "qr_fetch_failed": "Không thể tải mã QR",
-    "qr_ready": "Sẵn sàng"
+    "qr_ready": "Sẵn sàng",
+    "tab_checked_in": "Đã check-in",
+    "tab_withdrawn": "Đã rút",
+    "withdraw_button": "Withdraw",
+    "withdraw_success": "Rút thành công",
+    "withdraw_failed": "Rút thất bại"
   },
   "Provenance": {
     "breadcrumb_account": "Tài khoản",

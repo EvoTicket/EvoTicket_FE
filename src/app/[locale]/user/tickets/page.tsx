@@ -19,7 +19,8 @@ import {
     CheckCircle2,
     X,
     RefreshCcw,
-    Clock
+    Clock,
+    CheckLineIcon
 } from "lucide-react";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import Link from "next/link";
@@ -52,6 +53,13 @@ export default function MyTicketsPage() {
     const [cancelModalOpen, setCancelModalOpen] = useState(false);
     const [listingToCancel, setListingToCancel] = useState<string | null>(null);
     const [isCancelling, setIsCancelling] = useState(false);
+
+    // Withdraw Modal State
+    const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
+    const [withdrawConfirmModalOpen, setWithdrawConfirmModalOpen] = useState(false);
+    const [personalWallet, setPersonalWallet] = useState("");
+    const [selectedWithdrawTicket, setSelectedWithdrawTicket] = useState<{ id: number; tokenId: string } | null>(null);
+    const [isWithdrawing, setIsWithdrawing] = useState(false);
 
     // Sort setup
     const sortByList = [
@@ -126,6 +134,46 @@ export default function MyTicketsPage() {
             setIsCancelling(false);
             setCancelModalOpen(false);
             setListingToCancel(null);
+        }
+    };
+
+    const handleWithdrawClick = (ticketId: number, tokenId: string) => {
+        setSelectedWithdrawTicket({ id: ticketId, tokenId });
+        setPersonalWallet("");
+        setWithdrawModalOpen(true);
+    };
+
+    const handleWithdrawNext = () => {
+        if (!personalWallet || personalWallet.trim() === "") {
+            toast.error(locale === 'vi' ? 'Vui lòng nhập địa chỉ ví cá nhân' : 'Please enter your personal wallet address');
+            return;
+        }
+        setWithdrawModalOpen(false);
+        setWithdrawConfirmModalOpen(true);
+    };
+
+    const executeWithdraw = async () => {
+        if (!selectedWithdrawTicket) return;
+        setIsWithdrawing(true);
+        try {
+            const response = await api.post(`/order-service/api/v1/tickets/${selectedWithdrawTicket.id}/withdraw`, {
+                personalWallet: personalWallet.trim(),
+                tokenId: selectedWithdrawTicket.tokenId
+            });
+            if (response.data && response.data.status === 200) {
+                toast.success(t('withdraw_success') || "Withdrawal successful");
+                fetchTickets();
+            } else {
+                toast.error(response.data?.message || t('withdraw_failed') || "Withdrawal failed");
+            }
+        } catch (error: any) {
+            console.error("Failed to withdraw ticket", error);
+            const msg = error.response?.data?.message || t('withdraw_failed') || "Withdrawal failed";
+            toast.error(msg);
+        } finally {
+            setIsWithdrawing(false);
+            setWithdrawConfirmModalOpen(false);
+            setSelectedWithdrawTicket(null);
         }
     };
 
@@ -448,22 +496,42 @@ export default function MyTicketsPage() {
                                                                             {t('tab_used')}
                                                                         </span>
                                                                     )}
+                                                                    {ticket.status === 'checked_in' && (
+                                                                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-feedback-success-border bg-feedback-success-bg text-feedback-success-text text-[10px] font-medium whitespace-nowrap">
+                                                                            <CheckLineIcon size={10} /> {t('tab_checked_in') || 'Checked In'}
+                                                                        </span>
+                                                                    )}
+                                                                    {ticket.status === 'withdrawn' && (
+                                                                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-border-default bg-secondary text-text-muted text-[10px] font-medium whitespace-nowrap">
+                                                                            {t('tab_withdrawn') || 'Withdrawn'}
+                                                                        </span>
+                                                                    )}
                                                                 </div>
                                                             </div>
 
                                                             <div className="flex items-center justify-end gap-2 shrink-0 md:flex-1 w-full md:w-auto relative z-20">
-                                                                <button
-                                                                    onClick={() => fetchQRToken(ticket.id)}
-                                                                    className="bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors shadow-sm whitespace-nowrap"
-                                                                >
-                                                                    {t('view_qr')}
-                                                                </button>
-                                                                {ticket.status !== 'on_sale' && (
+                                                                {ticket.status !== 'checked_in' && ticket.status !== 'used' && ticket.status !== 'withdrawn' && (
+                                                                    <button
+                                                                        onClick={() => fetchQRToken(ticket.id)}
+                                                                        className="bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors shadow-sm whitespace-nowrap"
+                                                                    >
+                                                                        {t('view_qr')}
+                                                                    </button>
+                                                                )}
+                                                                {ticket.status !== 'on_sale' && ticket.status !== 'checked_in' && ticket.status !== 'used' && ticket.status !== 'withdrawn' && (
                                                                     <Link href={`/${locale}/user/tickets/${ticket.id}/resell`}>
                                                                         <button className="bg-button-ghost-bg-default hover:bg-button-ghost-bg-hover text-button-ghost-text-default border border-button-ghost-border-default px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap block">
                                                                             {t('resell_button')}
                                                                         </button>
                                                                     </Link>
+                                                                )}
+                                                                {ticket.status === 'used' && (
+                                                                    <button
+                                                                        onClick={() => handleWithdrawClick(ticket.id, ticket.tokenId)}
+                                                                        className="bg-button-ghost-bg-default hover:bg-button-ghost-bg-hover text-button-ghost-text-default border border-button-ghost-border-default px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap block"
+                                                                    >
+                                                                        {t('withdraw_button') || 'Withdraw'}
+                                                                    </button>
                                                                 )}
                                                                 {ticket.status === 'on_sale' && (
                                                                     <button
@@ -713,6 +781,158 @@ export default function MyTicketsPage() {
                                                 </>
                                             ) : (
                                                 locale === 'vi' ? 'Xác nhận hủy' : 'Confirm Cancel'
+                                            )}
+                                        </button>
+                                    </div>
+                                </DialogPanel>
+                            </TransitionChild>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+
+            {/* Withdraw Enter Wallet Modal */}
+            <Transition appear show={withdrawModalOpen} as={React.Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={() => setWithdrawModalOpen(false)}>
+                    <TransitionChild
+                        as={React.Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+                    </TransitionChild>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                            <TransitionChild
+                                as={React.Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-bg-surface p-6 text-left align-middle shadow-xl transition-all border border-border-default">
+                                    <DialogTitle
+                                        as="h3"
+                                        className="text-lg font-bold leading-6 text-text-primary mb-4"
+                                    >
+                                        {locale === 'vi' ? 'Rút vé về ví cá nhân' : 'Withdraw ticket to personal wallet'}
+                                    </DialogTitle>
+                                    <div className="mt-2">
+                                        <p className="text-sm text-text-secondary mb-4">
+                                            {locale === 'vi'
+                                                ? 'Vui lòng nhập địa chỉ ví cá nhân (personal wallet) của bạn để nhận Token NFT của vé này.'
+                                                : 'Please enter your personal wallet address to receive the NFT Token for this ticket.'}
+                                        </p>
+                                        <input
+                                            type="text"
+                                            className="w-full px-4 py-2 border border-border-strong rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-button-primary-bg-default focus:border-button-primary-bg-default bg-bg-surface text-text-primary"
+                                            placeholder="0x..."
+                                            value={personalWallet}
+                                            onChange={(e) => setPersonalWallet(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="mt-6 flex gap-3 justify-end">
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 border border-border-default rounded-lg text-sm font-semibold text-text-secondary hover:bg-bg-subtle transition-colors"
+                                            onClick={() => setWithdrawModalOpen(false)}
+                                        >
+                                            {locale === 'vi' ? 'Hủy bỏ' : 'Cancel'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 bg-button-primary-bg-default hover:opacity-90 text-button-primary-text-default rounded-lg text-sm font-bold transition-opacity flex items-center justify-center min-w-[100px]"
+                                            onClick={handleWithdrawNext}
+                                        >
+                                            {locale === 'vi' ? 'Tiếp tục' : 'Next'}
+                                        </button>
+                                    </div>
+                                </DialogPanel>
+                            </TransitionChild>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+
+            {/* Withdraw Confirm Modal */}
+            <Transition appear show={withdrawConfirmModalOpen} as={React.Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={() => !isWithdrawing && setWithdrawConfirmModalOpen(false)}>
+                    <TransitionChild
+                        as={React.Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+                    </TransitionChild>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                            <TransitionChild
+                                as={React.Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-bg-surface p-6 text-left align-middle shadow-xl transition-all border border-border-default">
+                                    <DialogTitle
+                                        as="h3"
+                                        className="text-lg font-bold leading-6 text-text-primary mb-4"
+                                    >
+                                        {locale === 'vi' ? 'Xác nhận rút vé' : 'Confirm Withdrawal'}
+                                    </DialogTitle>
+                                    <div className="mt-2 space-y-3">
+                                        <p className="text-sm text-text-secondary">
+                                            {locale === 'vi'
+                                                ? 'Bạn sắp rút vé này về địa chỉ ví cá nhân sau:'
+                                                : 'You are about to withdraw this ticket to the following personal wallet address:'}
+                                        </p>
+                                        <div className="p-3 bg-bg-subtle border border-border-default rounded-lg break-all">
+                                            <span className="font-mono text-sm font-semibold text-text-primary">{personalWallet}</span>
+                                        </div>
+                                        <p className="text-xs text-text-muted mt-2">
+                                            {locale === 'vi'
+                                                ? 'Lưu ý: Quá trình rút vé không thể hoàn tác. Token NFT sẽ được chuyển thẳng về ví cá nhân của bạn.'
+                                                : 'Note: This action cannot be undone. The NFT Token will be transferred directly to your personal wallet.'}
+                                        </p>
+                                    </div>
+
+                                    <div className="mt-6 flex gap-3 justify-end">
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 border border-border-default rounded-lg text-sm font-semibold text-text-secondary hover:bg-bg-subtle transition-colors"
+                                            onClick={() => setWithdrawConfirmModalOpen(false)}
+                                            disabled={isWithdrawing}
+                                        >
+                                            {locale === 'vi' ? 'Quay lại' : 'Back'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 bg-button-primary-bg-default hover:opacity-90 text-button-primary-text-default rounded-lg text-sm font-bold transition-opacity flex items-center justify-center gap-2 min-w-[120px]"
+                                            onClick={executeWithdraw}
+                                            disabled={isWithdrawing}
+                                        >
+                                            {isWithdrawing ? (
+                                                <>
+                                                    <Loader2 size={16} className="animate-spin" />
+                                                    {locale === 'vi' ? 'Đang xử lý...' : 'Processing...'}
+                                                </>
+                                            ) : (
+                                                locale === 'vi' ? 'Xác nhận rút' : 'Confirm Withdraw'
                                             )}
                                         </button>
                                     </div>
