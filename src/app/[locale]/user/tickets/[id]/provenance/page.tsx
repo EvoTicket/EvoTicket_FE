@@ -478,11 +478,17 @@ export default function ProvenancePage() {
                                     {t("back_to_ticket")}
                                 </button>
                             </Link>
-                            <Link href={`/${locale}/user/tickets/${id}/resell`}>
-                                <button className="w-full bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2.5 rounded-lg text-sm font-medium transition-colors active:scale-[0.98]">
+                            {data.ticketInfo.checkInStatus === "NOT_CHECKED_IN" && data.ticketInfo.status === "VALID" ? (
+                                <Link href={`/${locale}/user/tickets/${id}/resell`}>
+                                    <button className="w-full bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2.5 rounded-lg text-sm font-medium transition-colors active:scale-[0.98]">
+                                        {t("resell_ticket")}
+                                    </button>
+                                </Link>
+                            ) : (
+                                <button disabled className="w-full bg-bg-subtle border border-border-default text-text-muted px-4 py-2.5 rounded-lg text-sm font-medium cursor-not-allowed">
                                     {t("resell_ticket")}
                                 </button>
-                            </Link>
+                            )}
                             <button className="w-full bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-secondary px-4 py-2.5 rounded-lg text-sm font-medium transition-colors active:scale-[0.98]">
                                 {t("contact_support")}
                             </button>

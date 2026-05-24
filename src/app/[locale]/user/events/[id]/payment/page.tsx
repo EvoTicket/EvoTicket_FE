@@ -12,6 +12,8 @@ import { EventDetail } from "@/src/types/event";
 import { OdometerDigit } from "@/src/components/ui/odoMeterDigit";
 import { isValidEmail, isValidPhone, isValidFullName } from "@/src/lib/validations";
 import { toast } from "react-toastify";
+import { useAppSelector } from "@/src/store/hooks";
+import { selectUser } from "@/src/store/slices/authSlice";
 
 export default function PaymentPage() {
     const { locale, id } = useParams();
@@ -30,9 +32,18 @@ export default function PaymentPage() {
     const [timeLeft, setTimeLeft] = useState(9 * 60 + 9); // 09:09
 
     // Mock user context if needed
+    const user = useAppSelector(selectUser);
     const [fullName, setFullName] = useState("");
     const [phone, setPhone] = useState("");
     const [email, setEmail] = useState("");
+
+    useEffect(() => {
+        if (user) {
+            setFullName(prev => prev || `${user.firstName || ""} ${user.lastName || ""}`.trim());
+            setPhone(prev => prev || user.phoneNumber || "");
+            setEmail(prev => prev || user.email || "");
+        }
+    }, [user]);
 
     const [discountCode, setDiscountCode] = useState("");
     const [appliedDiscount, setAppliedDiscount] = useState(0);
@@ -46,6 +57,7 @@ export default function PaymentPage() {
     const [isCreatingOrder, setIsCreatingOrder] = useState(false);
 
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [allowDiscountCode, setAllowDiscountCode] = useState(true);
 
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
@@ -72,7 +84,7 @@ export default function PaymentPage() {
         }
 
         setErrors(newErrors);
-        
+
         if (Object.keys(newErrors).length > 0) {
             setTimeout(() => {
                 const firstErrorElement = document.querySelector('.border-feedback-error-text');
@@ -83,7 +95,7 @@ export default function PaymentPage() {
             }, 100);
             return false;
         }
-        
+
         return true;
     };
 
@@ -163,6 +175,8 @@ export default function PaymentPage() {
                         });
                         setSelectedTickets(mappedTickets);
                     }
+
+                    setAllowDiscountCode(sessionData.allowDiscountCode ?? true);
                 }
 
                 // Cập nhật timer
@@ -464,7 +478,7 @@ export default function PaymentPage() {
                         </div>
 
                         {/* Block: Mã giảm giá */}
-                        <div className="bg-card-bg-default border border-border-default rounded-ds-xl p-6">
+                        <div className={`bg-card-bg-default border border-border-default rounded-ds-xl p-6 ${!allowDiscountCode ? 'opacity-50 pointer-events-none grayscale-[0.5]' : ''}`}>
                             <h3 className="font-bold text-text-primary mb-4">{tp('discount_title')}</h3>
                             <div className="flex gap-3 mb-2">
                                 <input
@@ -472,11 +486,12 @@ export default function PaymentPage() {
                                     placeholder={tp('discount_placeholder')}
                                     value={discountCode}
                                     onChange={(e) => setDiscountCode(e.target.value)}
+                                    disabled={!allowDiscountCode}
                                     className="flex-1 bg-bg-surface border border-border-default rounded-ds-lg px-4 py-2.5 text-text-primary outline-none focus:border-primary transition-colors placeholder:text-text-muted"
                                 />
                                 <button
                                     onClick={handleApplyVoucher}
-                                    disabled={isApplyingVoucher}
+                                    disabled={!allowDiscountCode || isApplyingVoucher}
                                     className={`bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-ds-lg font-medium transition-colors flex items-center justify-center min-w-[100px] ${isApplyingVoucher ? 'opacity-70 cursor-not-allowed' : ''}`}
                                 >
                                     {isApplyingVoucher ? <span className="w-5 h-5 border-2 border-white/30 border-t-button-primary-text-default rounded-full animate-spin"></span> : tp('apply_button')}
@@ -492,7 +507,7 @@ export default function PaymentPage() {
                                 </p>
                             )}
                             <div className="bg-[#19274e] border border-[#253f7f] rounded-ds-lg p-3 text-sm text-[#87a5f8]">
-                                {tp('discount_note')}
+                                {allowDiscountCode ? tp('discount_note') : tp('discount_not_allowed', { defaultMessage: 'Sự kiện này không áp dụng mã giảm giá' })}
                             </div>
                         </div>
 
@@ -511,8 +526,8 @@ export default function PaymentPage() {
                                         onChange={() => setPaymentMethod("payos")}
                                         className="w-4 h-4 accent-button-primary-bg-default"
                                     />
-                                    <div className="w-8 h-8 rounded bg-white flex items-center justify-center p-1 shrink-0">
-                                        <div className="text-blue-600 font-black text-xs">PayOS</div>
+                                    <div className="w-12 h-8 rounded bg-white flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                                        <img src="/images/payos-logo.png" alt="PayOS" className="w-full h-full object-contain" />
                                     </div>
                                     <div className="flex-1">
                                         <span className="text-sm font-bold text-text-primary">{tp('payos_label')}</span>
@@ -529,8 +544,8 @@ export default function PaymentPage() {
                                         onChange={() => setPaymentMethod("sepay")}
                                         className="w-4 h-4 accent-button-primary-bg-default"
                                     />
-                                    <div className="w-8 h-8 rounded bg-bg-surface border border-border-strong flex items-center justify-center shrink-0">
-                                        <div className="text-button-primary-bg-default font-bold text-[8px]">sepay</div>
+                                    <div className="w-12 h-8 rounded bg-bg-surface flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                                        <img src="/images/sepay-logo.png" alt="Sepay" className="w-full h-full object-contain" />
                                     </div>
                                     <div className="flex-1">
                                         <span className="text-sm font-bold text-text-primary">{tp('balance_label')}</span>
@@ -611,7 +626,7 @@ export default function PaymentPage() {
                         </div>
 
                         {/* Block: Xác nhận giao dịch */}
-                        <div className="bg-card-bg-default border border-border-default rounded-ds-xl p-6">
+                        <div id="confirmation-section" className="bg-card-bg-default border border-border-default rounded-ds-xl p-6 scroll-mt-24">
                             <h3 className="font-bold text-text-primary mb-4">{tp('confirmation_title')}</h3>
                             <div className="space-y-3">
                                 <label className="flex items-start gap-3 cursor-pointer group">
@@ -679,7 +694,7 @@ export default function PaymentPage() {
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="text-text-secondary">{tb('price_label')}</span>
-                                                    <span className="font-medium text-text-primary">{(t.price * t.quantity).toLocaleString(locale === 'vi' ? "vi-VN" : "en-US")}đ</span>
+                                                    <span className="font-medium text-text-primary">{(t.price).toLocaleString(locale === 'vi' ? "vi-VN" : "en-US")}đ</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -717,9 +732,16 @@ export default function PaymentPage() {
                                 </p>
 
                                 <button
-                                    className={`w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm mb-3 ${!(agreedToTerms && checkedInfo && understoodTime) || isCreatingOrder ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
-                                    disabled={!(agreedToTerms && checkedInfo && understoodTime) || isCreatingOrder}
-                                    onClick={() => createOrder()}
+                                    className={`w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm mb-3 ${isCreatingOrder ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
+                                    disabled={isCreatingOrder}
+                                    onClick={() => {
+                                        if (!(agreedToTerms && checkedInfo && understoodTime)) {
+                                            toast.error(tp('error_confirm_terms') || "Vui lòng xác nhận các điều khoản trước khi thanh toán");
+                                            document.getElementById('confirmation-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            return;
+                                        }
+                                        createOrder();
+                                    }}
                                 >
                                     {isCreatingOrder ? (
                                         <div className="flex items-center justify-center gap-2">

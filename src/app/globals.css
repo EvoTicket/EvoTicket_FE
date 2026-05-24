@@ -65,11 +65,13 @@
 }
 
 /* Hide scrollbar while keeping scroll functionality */
-.scrollbar-none {
+.scrollbar-none,
+[role="listbox"] {
   scrollbar-width: none;        /* Firefox */
   -ms-overflow-style: none;     /* IE / Edge legacy */
 }
-.scrollbar-none::-webkit-scrollbar {
+.scrollbar-none::-webkit-scrollbar,
+[role="listbox"]::-webkit-scrollbar {
   display: none;                /* Chrome / Safari / newer Edge */
 }
 

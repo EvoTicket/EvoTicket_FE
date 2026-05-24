@@ -10,6 +10,8 @@ import { toast } from "react-toastify";
 import api from "@/src/lib/axios";
 import { TimeOutModal } from "@/src/components/modals/TimeOutModal";
 import { OdometerDigit } from "@/src/components/ui/odoMeterDigit";
+import { useAppSelector } from "@/src/store/hooks";
+import { selectUser } from "@/src/store/slices/authSlice";
 
 export default function ResaleCheckoutPage() {
     const params = useParams();
@@ -67,10 +69,19 @@ export default function ResaleCheckoutPage() {
     const timeObj = formatTime(timeLeft);
 
     // Form logic
+    const user = useAppSelector(selectUser);
     const [fullName, setFullName] = useState("");
     const [phone, setPhone] = useState("");
     const [email, setEmail] = useState("");
     const [paymentMethod, setPaymentMethod] = useState("payos");
+
+    useEffect(() => {
+        if (user) {
+            setFullName(prev => prev || `${user.firstName || ""} ${user.lastName || ""}`.trim());
+            setPhone(prev => prev || user.phoneNumber || "");
+            setEmail(prev => prev || user.email || "");
+        }
+    }, [user]);
 
     // Checkboxes
     const [confirmedInfo, setConfirmedInfo] = useState(false);
@@ -178,6 +189,12 @@ export default function ResaleCheckoutPage() {
     const handlePurchaseResaleTicket = async () => {
         if (!validateForm()) {
             toast.error(t('error_check_contact') || "Vui lòng kiểm tra lại thông tin liên hệ");
+            return;
+        }
+
+        if (!(confirmedInfo && understoodOwnership && agreedToTerms)) {
+            toast.error("Vui lòng xác nhận các điều khoản trước khi thanh toán");
+            document.getElementById('confirmation-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
 
@@ -346,8 +363,8 @@ export default function ResaleCheckoutPage() {
                                     onChange={() => setPaymentMethod("payos")}
                                     className="w-4 h-4 accent-button-primary-bg-default"
                                 />
-                                <div className="w-8 h-8 rounded bg-bg-surface flex items-center justify-center p-1 shrink-0">
-                                    <div className="text-feedback-info-text font-black text-xs">PayOS</div>
+                                <div className="w-12 h-8 rounded bg-bg-surface flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                                    <img src="/images/payos-logo.png" alt="PayOS" className="w-full h-full object-contain" />
                                 </div>
                                 <div className="flex-1">
                                     <span className="text-sm font-bold text-text-primary">{t('payos_label')}</span>
@@ -365,8 +382,8 @@ export default function ResaleCheckoutPage() {
                                     onChange={() => setPaymentMethod("sepay")}
                                     className="w-4 h-4 accent-button-primary-bg-default"
                                 />
-                                <div className="w-8 h-8 rounded bg-bg-surface border border-border-strong flex items-center justify-center shrink-0">
-                                    <div className="text-button-primary-bg-default font-bold text-[8px]">sepay</div>
+                                <div className="w-12 h-8 rounded bg-bg-surface flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                                    <img src="/images/sepay-logo.png" alt="Sepay" className="w-full h-full object-contain" />
                                 </div>
                                 <div className="flex-1">
                                     <span className="text-sm font-bold text-text-primary">{t('balance_label')}</span>
@@ -450,7 +467,7 @@ export default function ResaleCheckoutPage() {
                     </div>
 
                     {/* Xác nhận giao dịch Checkboxes */}
-                    <div className="border border-border-default rounded-xl p-6 shadow-sm bg-bg-surface">
+                    <div id="confirmation-section" className="border border-border-default rounded-xl p-6 shadow-sm bg-bg-surface scroll-mt-24">
                         <h3 className="text-[16px] font-bold text-text-primary mb-5">{t('confirmation_title')}</h3>
                         <div className="space-y-3.5">
                             <label className="flex items-start gap-3 cursor-pointer group">
@@ -580,11 +597,11 @@ export default function ResaleCheckoutPage() {
                             <button
                                 onClick={handlePurchaseResaleTicket}
                                 className={`w-full py-3 rounded-lg text-[13px] font-bold transition-all duration-200 shadow-sm
-                                ${confirmedInfo && understoodOwnership && agreedToTerms && !isCreatingOrder
+                                ${!isCreatingOrder
                                         ? 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default active:scale-[0.98]'
                                         : 'bg-button-secondary-bg-default text-text-muted cursor-not-allowed border border-border-default'
                                     }`}
-                                disabled={!(confirmedInfo && understoodOwnership && agreedToTerms) || isCreatingOrder}
+                                disabled={isCreatingOrder}
                             >
                                 {isCreatingOrder ? (
                                     <div className="flex items-center justify-center gap-2">

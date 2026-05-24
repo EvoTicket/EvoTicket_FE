@@ -218,8 +218,8 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                                         <div className="text-text-secondary flex gap-1 flex-wrap">
                                             <span className="font-medium">{t("sale_time", { defaultMessage: "Mở bán:" })}</span>
                                             <span>
-                                                {formatTime(ticket.saleStartDate)} {new Date(ticket.saleStartDate).toLocaleDateString('vi-VN')} 
-                                                {' - '} 
+                                                {formatTime(ticket.saleStartDate)} {new Date(ticket.saleStartDate).toLocaleDateString('vi-VN')}
+                                                {' - '}
                                                 {formatTime(ticket.saleEndDate)} {new Date(ticket.saleEndDate).toLocaleDateString('vi-VN')}
                                             </span>
                                         </div>
@@ -280,7 +280,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                                 ) : (
                                     selectedTickets.map(ticket => (
                                         <div key={ticket.id} className="  flex gap-3 relative group">
-                                            <div className="flex-1 space-y-1 border-r pr-tab-padding-x">
+                                            <div className="flex-1 space-y-1 border-r pr-2">
                                                 <div className="flex justify-between text-sm">
                                                     <span className="text-payment-summary-text-body">{t("ticket_type_label")}</span>
                                                     <span className="font-medium text-payment-summary-text-title">{ticket.name}</span>
@@ -291,7 +291,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                                                 </div>
                                                 <div className="flex justify-between text-sm pt-1">
                                                     <span className="text-payment-summary-text-body">{t("price_label")}</span>
-                                                    <span className="font-medium text-payment-summary-text-title">{(ticket.price * ticket.quantity).toLocaleString("vi-VN")}đ</span>
+                                                    <span className="font-medium text-payment-summary-text-title">{(ticket.price).toLocaleString("vi-VN")}đ</span>
                                                 </div>
                                             </div>
                                             <button
