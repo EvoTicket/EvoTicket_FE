@@ -10,6 +10,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
+import { store } from "@/src/store";
 
 interface ChatMessage {
     id: number;
@@ -95,45 +96,82 @@ export function ChatBot() {
         setSelectedFiles([]);
 
         setIsLoading(true);
+        let accumulatedMessage = "";
 
         try {
-            const formData = new FormData();
-            formData.append("question", messageToSend);
-            filesToSend.forEach((file) => {
-                formData.append("files", file);
-            });
-            formData.append("useRag", "false");
+            const token = store.getState().auth.token;
+            const url = `${process.env.NEXT_PUBLIC_API_GATEWAY_BE || ""}/inventory-service/api/chatbot/stream-ask?question=${encodeURIComponent(messageToSend)}&useRag=false`;
 
-            // Use axios (api) instead of fetch, as we don't need streaming anymore
-            const response = await api.post("/inventory-service/api/chatbot/ask", formData, {
+            const response = await fetch(url, {
+                method: "GET",
                 headers: {
-                    "Content-Type": "multipart/form-data",
+                    "Authorization": token ? `Bearer ${token}` : "",
                 },
             });
 
-            if (response.data && response.data.status === 200) {
-                const answer = response.data.data.answer;
-                // Clean the response message (remove internal session info)
-                const cleanAnswer = answer ? answer.replace(/\n\n\[Thông tin phiên: .*\]/g, "") : "";
+            if (!response.ok) {
+                throw new Error("Failed to start chat stream");
+            }
 
-                const assistantMessage: ChatMessage = {
-                    id: Date.now(),
-                    message: cleanAnswer,
-                    images: [],
-                    senderType: "ASSISTANT",
-                    createdAt: new Date().toISOString(),
-                };
-                setMessages((prev) => [...prev, assistantMessage]);
-            } else {
-                throw new Error("Failed to get response from chatbot");
+            const reader = response.body?.getReader();
+            const decoder = new TextDecoder("utf-8");
+
+            if (!reader) {
+                throw new Error("Response body is not readable");
+            }
+
+            const assistantMessageId = Date.now();
+            const assistantMessage: ChatMessage = {
+                id: assistantMessageId,
+                message: "",
+                images: [],
+                senderType: "ASSISTANT",
+                createdAt: new Date().toISOString(),
+            };
+            setMessages((prev) => [...prev, assistantMessage]);
+
+            let buffer = "";
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                let boundary = buffer.indexOf("\n\n");
+                while (boundary !== -1) {
+                    const message = buffer.slice(0, boundary);
+                    buffer = buffer.slice(boundary + 2);
+
+                    const lines = message.split("\n");
+                    for (const line of lines) {
+                        if (line.startsWith("data:")) {
+                            let dataVal = line.slice(5);
+                            if (dataVal.startsWith(" ")) {
+                                dataVal = dataVal.slice(1);
+                            }
+                            accumulatedMessage += dataVal;
+                        }
+                    }
+
+                    boundary = buffer.indexOf("\n\n");
+                }
+
+                const cleanAnswer = accumulatedMessage ? accumulatedMessage.replace(/\n\n\[Thông tin phiên: .*\]/g, "") : "";
+                setMessages((prev) =>
+                    prev.map((msg) =>
+                        msg.id === assistantMessageId
+                            ? { ...msg, message: cleanAnswer }
+                            : msg
+                    )
+                );
             }
         } catch (error: any) {
-            if (error.response?.status === 500) {
-                toast.error(t("error_generic"));
-            } else {
+            if (!accumulatedMessage) {
                 toast.error(t("error_send_failed"));
+                console.error("Failed to send message", error);
+            } else {
+                console.log("Chat stream connection ended:", error.message || error);
             }
-            console.error("Failed to send message", error);
         } finally {
             setIsLoading(false);
         }
