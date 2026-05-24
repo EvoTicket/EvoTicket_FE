@@ -33,6 +33,16 @@ export function ChatBot() {
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const targetTextRef = useRef("");
+    const currentTextRef = useRef("");
+    const streamFinishedRef = useRef(false);
+    const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (typingTimerRef.current) clearInterval(typingTimerRef.current);
+        };
+    }, []);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -98,6 +108,14 @@ export function ChatBot() {
         setIsLoading(true);
         let accumulatedMessage = "";
 
+        targetTextRef.current = "";
+        currentTextRef.current = "";
+        streamFinishedRef.current = false;
+        if (typingTimerRef.current) {
+            clearInterval(typingTimerRef.current);
+            typingTimerRef.current = null;
+        }
+
         try {
             const token = store.getState().auth.token;
             const url = `${process.env.NEXT_PUBLIC_API_GATEWAY_BE || ""}/inventory-service/api/chatbot/stream-ask?question=${encodeURIComponent(messageToSend)}&useRag=false`;
@@ -130,6 +148,30 @@ export function ChatBot() {
             };
             setMessages((prev) => [...prev, assistantMessage]);
 
+            // Start typing timer
+            typingTimerRef.current = setInterval(() => {
+                const target = targetTextRef.current;
+                let current = currentTextRef.current;
+                if (current.length < target.length) {
+                    const diff = target.length - current.length;
+                    const step = diff > 30 ? Math.ceil(diff / 5) : 1;
+                    const nextText = current + target.substring(current.length, current.length + step);
+                    currentTextRef.current = nextText;
+                    setMessages((prev) =>
+                        prev.map((msg) =>
+                            msg.id === assistantMessageId
+                                ? { ...msg, message: nextText }
+                                : msg
+                        )
+                    );
+                } else if (streamFinishedRef.current) {
+                    if (typingTimerRef.current) {
+                        clearInterval(typingTimerRef.current);
+                        typingTimerRef.current = null;
+                    }
+                }
+            }, 15);
+
             let buffer = "";
 
             while (true) {
@@ -143,27 +185,25 @@ export function ChatBot() {
                     buffer = buffer.slice(boundary + 2);
 
                     const lines = message.split("\n");
+                    const dataLines: string[] = [];
                     for (const line of lines) {
                         if (line.startsWith("data:")) {
                             let dataVal = line.slice(5);
                             if (dataVal.startsWith(" ")) {
                                 dataVal = dataVal.slice(1);
                             }
-                            accumulatedMessage += dataVal;
+                            dataLines.push(dataVal);
                         }
+                    }
+                    if (dataLines.length > 0) {
+                        accumulatedMessage += dataLines.join("\n");
                     }
 
                     boundary = buffer.indexOf("\n\n");
                 }
 
                 const cleanAnswer = accumulatedMessage ? accumulatedMessage.replace(/\n\n\[Thông tin phiên: .*\]/g, "") : "";
-                setMessages((prev) =>
-                    prev.map((msg) =>
-                        msg.id === assistantMessageId
-                            ? { ...msg, message: cleanAnswer }
-                            : msg
-                    )
-                );
+                targetTextRef.current = cleanAnswer;
             }
         } catch (error: any) {
             if (!accumulatedMessage) {
@@ -174,6 +214,7 @@ export function ChatBot() {
             }
         } finally {
             setIsLoading(false);
+            streamFinishedRef.current = true;
         }
     };
 
