@@ -824,8 +824,8 @@ export default function CheckerPage() {
             ) : (
               <video
                 ref={videoRef}
-                className={`absolute inset-0 w-full h-full object-cover z-0 ${isMirrored ? "scale-x-[-1]" : ""
-                  }`}
+                className="absolute inset-0 w-full h-full object-cover z-0"
+                style={{ transform: isMirrored ? "scaleX(-1)" : "none" }}
                 playsInline
                 muted
               />
