@@ -412,16 +412,53 @@ export default function ProvenancePage() {
                                             </>
                                         )}
 
-                                        {(item.type === "RESOLD" || item.type === "USED") && (
+                                        {(item.type === "RESOLD" || item.type === "USED" || item.type === "CHECKED_IN") && (
                                             <div className="border border-border-default rounded p-3 bg-bg-page">
                                                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 text-[11px]">
-                                                    <div className="sm:col-span-3 text-text-muted">{t("status")}:</div>
-                                                    <div className="sm:col-span-9 font-medium">{item.details.status ? t(item.details.status) : ""}</div>
+                                                    {/* <div className="sm:col-span-3 text-text-muted">{t("status")}:</div>
+                                                    <div className="sm:col-span-9 font-medium">{item.details.status ? t(item.details.status) : ""}</div> */}
+                                                    <div className="sm:col-span-3 text-text-muted">{t("token_id")}:</div>
+                                                    <div className="sm:col-span-9 font-medium">{item.details.tokenId || data.ticketInfo.tokenId || "—"}</div>
+                                                    <div className="sm:col-span-3 text-text-muted">{t("tx_label")}:</div>
+                                                    <div className="sm:col-span-9 font-medium font-mono text-[10px]">
+                                                        {item.details.txHash ? (
+                                                            <button
+                                                                onClick={() => openTxExplorer(item.details.txHash)}
+                                                                className="text-button-primary-bg-default hover:underline"
+                                                            >
+                                                                {truncateHash(item.details.txHash)}
+                                                            </button>
+                                                        ) : "—"}
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
 
-                                        {item.type !== "OWNERSHIP_ASSIGNED" && item.type !== "TRANSFERRED" && (
+                                        {item.type === "WITHDRAWN" && (
+                                            <div className="border border-border-default rounded p-3 bg-bg-page">
+                                                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 text-[11px]">
+                                                    <div className="sm:col-span-3 text-text-muted">{t("token_id")}:</div>
+                                                    <div className="sm:col-span-9 font-medium">{item.details.tokenId || data.ticketInfo.tokenId || "—"}</div>
+                                                    <div className="sm:col-span-3 text-text-muted">{t("from_wallet")}:</div>
+                                                    <div className="sm:col-span-9 font-medium font-mono text-[10px]">{item.details.fromWallet || "—"}</div>
+                                                    <div className="sm:col-span-3 text-text-muted">{t("to_wallet")}:</div>
+                                                    <div className="sm:col-span-9 font-medium font-mono text-[10px]">{item.details.toWallet || "—"}</div>
+                                                    <div className="sm:col-span-3 text-text-muted">{t("tx_label")}:</div>
+                                                    <div className="sm:col-span-9 font-medium font-mono text-[10px]">
+                                                        {item.details.txHash ? (
+                                                            <button
+                                                                onClick={() => openTxExplorer(item.details.txHash)}
+                                                                className="text-button-primary-bg-default hover:underline"
+                                                            >
+                                                                {truncateHash(item.details.txHash)}
+                                                            </button>
+                                                        ) : "—"}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {item.type !== "OWNERSHIP_ASSIGNED" && item.type !== "TRANSFERRED" && item.type !== "WITHDRAWN" && item.type !== "CHECKED_IN" && item.type !== "USED" && item.type !== "ISSUED" && (
                                             <button onClick={() => openTxExplorer(item.details.txHash)} className="mt-2 text-xs font-medium text-text-secondary hover:text-text-primary underline underline-offset-2 w-full text-left">
                                                 {t("blockchain_details")}
                                             </button>
