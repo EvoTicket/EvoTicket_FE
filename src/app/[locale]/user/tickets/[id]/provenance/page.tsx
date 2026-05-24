@@ -515,7 +515,7 @@ export default function ProvenancePage() {
                                     {t("back_to_ticket")}
                                 </button>
                             </Link>
-                            {data.ticketInfo.checkInStatus === "NOT_CHECKED_IN" && data.ticketInfo.status === "VALID" ? (
+                            {data.ticketInfo.status === "VALID" ? (
                                 <Link href={`/${locale}/user/tickets/${id}/resell`}>
                                     <button className="w-full bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2.5 rounded-lg text-sm font-medium transition-colors active:scale-[0.98]">
                                         {t("resell_ticket")}
