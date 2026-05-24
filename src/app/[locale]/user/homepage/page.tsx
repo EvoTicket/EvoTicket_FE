@@ -245,7 +245,7 @@ export default function HomePage() {
         {/* === HERO SECTION === */}
         <div className="relative mb-32">
           <section
-            className="relative w-full min-h-[600px] flex items-center justify-between pt-20 pb-28 overflow-hidden group/hero"
+            className="relative w-full min-h-[600px] flex items-center justify-between pb-8 overflow-hidden group/hero"
             onMouseMove={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
               e.currentTarget.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);

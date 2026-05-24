@@ -773,6 +773,7 @@
     "NOT_CHECKED_IN": "Not checked in",
     "CHECKED_IN": "Checked in",
     "LOCKED_RESALE": "Locked (Reselling)",
+    "WITHDRAWN": "Withdrawn",
     "unused": "Unused",
     "ownership_history": "Ownership history",
     "ownership_history_desc": "Track key milestones in the life cycle of the ticket.",

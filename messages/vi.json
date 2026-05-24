@@ -769,6 +769,7 @@
     "NOT_CHECKED_IN": "Chưa sử dụng",
     "CHECKED_IN": "Đã sử dụng",
     "LOCKED_RESALE": "Đã khóa (Đang bán lại)",
+    "WITHDRAWN": "Đã rút",
     "unused": "Chưa sử dụng",
     "ownership_history": "Lịch sử sở hữu",
     "ownership_history_desc": "Theo dõi các mốc chính trong vòng đời của vé.",
