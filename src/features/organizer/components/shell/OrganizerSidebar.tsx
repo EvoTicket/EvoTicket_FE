@@ -59,9 +59,9 @@ export function OrganizerSidebar() {
     };
 
     return (
-        <aside className="dark w-[280px] bg-navbar-sidebar-bg border-r border-navbar-sidebar-border min-h-screen flex flex-col fixed h-full z-10">
+        <aside className="w-[280px] bg-navbar-sidebar-bg border-r border-navbar-sidebar-border min-h-screen flex flex-col fixed h-full z-10">
             {/* Logo/Brand */}
-            <div className="p-6 border-b border-navbar-sidebar-border">
+            <div className="p-6 ">
                 {/* <Link href={`/${locale}/organizer/center`} className="flex items-center gap-3 hover:opacity-90 transition-opacity">
                     <Image 
                         src="/evoticket-logo/dark/dark-primary=horizontal-logo.svg" 
