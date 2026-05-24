@@ -7,7 +7,7 @@ const HeroTicket3DScene = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="relative h-[420px] w-full mx- md:h-[520px]">
+      <div className="relative h-[450px] w-full md:w-[85%] md:h-[600px] mx-auto">
         <div className="absolute inset-8 rounded-[2rem] bg-white/5 blur-2xl" />
         <div className="h-full w-full animate-pulse rounded-[2rem] bg-white/[0.03]" />
       </div>

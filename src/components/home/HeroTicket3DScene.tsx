@@ -382,7 +382,7 @@ function TicketModel() {
 
 export default function HeroTicket3DScene() {
     return (
-        <div className="relative h-[360px] w-full md:w-[78%] md:h-[440px] ">
+        <div className="relative h-[450px] w-full md:w-[85%] md:h-[600px] mx-auto">
             <Canvas className="!h-full !w-full"
                 camera={{
                     position: [0, 0, 5.4],

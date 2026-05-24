@@ -187,7 +187,7 @@ export function Header() {
 
           {/* Nút Vé của tôi (Secondary Button) */}
           {user &&
-            <Link href={`/${locale}/user/tickets`} className="group relative overflow-hidden flex lg:flex items-center gap-2 border border-border-default text-text-primary px-4 py-2.5 rounded-lg font-medium hover:border-button-primary-bg-default transition-colors cursor-pointer bg-transparent">
+            <Link href={`/${locale}/user/tickets`} className="group relative overflow-hidden hidden lg:flex items-center gap-2 border border-border-default text-text-primary px-4 py-2.5 rounded-lg font-medium hover:border-button-primary-bg-default transition-colors cursor-pointer bg-transparent">
               <span className="absolute inset-0 w-full h-full bg-bg-subtle origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 z-0"></span>
               <Ticket size={18} className="relative z-10 text-text-secondary" />
               <span className="relative z-10">{t("my_tickets")}</span>
@@ -261,7 +261,7 @@ export function Header() {
                   <User className="mr-2 h-4 w-4" />
                   <span>{t("profile")}</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push(`/${locale}/user/tickets`)} className="hidden lg:hidden">
+                <DropdownMenuItem onClick={() => router.push(`/${locale}/user/tickets`)} className="flex lg:hidden">
                   <Ticket className="mr-2 h-4 w-4" />
                   <span>{t("my_tickets")}</span>
                 </DropdownMenuItem>
