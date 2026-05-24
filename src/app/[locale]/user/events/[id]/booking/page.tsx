@@ -114,6 +114,17 @@ export default function BookingPage() {
     };
 
     const handleUpdateQuantity = (ticketType: any, delta: number) => {
+        const now = new Date().getTime();
+        const start = new Date(ticketType.saleStartDate).getTime();
+        const end = new Date(ticketType.saleEndDate).getTime();
+        
+        if (now < start || now > end) {
+            if (delta > 0) {
+                toast.warning(t("ticket_not_in_sale_period") || "Vé này hiện không trong thời gian mở bán");
+            }
+            return;
+        }
+
         const minPurchase = ticketType.minPurchase > 0 ? ticketType.minPurchase : 1;
         const maxPurchase = ticketType.maxPurchase > 0 ? Math.min(ticketType.maxPurchase, ticketType.quantityAvailable || Infinity) : (ticketType.quantityAvailable || Infinity);
 

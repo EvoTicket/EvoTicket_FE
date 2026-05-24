@@ -58,6 +58,56 @@ export default function EventDetailPage() {
     // Xử lý cờ sold out
     const isSoldOut = !!(event?.eventStatus === "SOLD_OUT" || (event && event.showtimes.map(showtime => showtime.ticketTypes).flat().every(t => t.quantityAvailable <= 0)));
 
+    const now = new Date().getTime();
+
+    let isUpcoming = false;
+    let isEnded = false;
+    let isActiveSale = false;
+
+    if (event) {
+        const allTickets = event.showtimes.flatMap(st => st.ticketTypes || []);
+        if (allTickets.length > 0) {
+            for (const t of allTickets) {
+                const start = new Date(t.saleStartDate).getTime();
+                const end = new Date(t.saleEndDate).getTime();
+                if (now >= start && now <= end) {
+                    isActiveSale = true;
+                    break;
+                }
+            }
+            if (!isActiveSale) {
+                const allStartsInFuture = allTickets.every(t => new Date(t.saleStartDate).getTime() > now);
+                const allEndsInPast = allTickets.every(t => new Date(t.saleEndDate).getTime() < now);
+
+                if (allStartsInFuture) {
+                    isUpcoming = true;
+                } else if (allEndsInPast) {
+                    isEnded = true;
+                } else {
+                    const hasFuture = allTickets.some(t => new Date(t.saleStartDate).getTime() > now);
+                    if (hasFuture) {
+                        isUpcoming = true;
+                    } else {
+                        isEnded = true;
+                    }
+                }
+            }
+        } else {
+            // Nếu event không có ticket types nào (có thể là lỗi data hoặc chưa setup)
+            isActiveSale = false;
+            isEnded = true;
+        }
+    }
+
+    const isBuyDisabled = isSoldOut || isUpcoming || isEnded || !isActiveSale;
+
+    const getBuyButtonText = () => {
+        if (isSoldOut) return te('sold_out_temp');
+        if (isUpcoming) return te('sale_upcoming');
+        if (isEnded || !isActiveSale) return te('sale_ended');
+        return te('buy_now');
+    };
+
     // Tính giá vé nhỏ nhất
     const minPrice = event?.showtimes.map(showtime => showtime.ticketTypes).flat().length
         ? Math.min(...event.showtimes.map(showtime => showtime.ticketTypes).flat().map(t => t.price))
@@ -248,7 +298,7 @@ export default function EventDetailPage() {
                     <div className="text-xs text-text-secondary flex items-center gap-2 mb-6 uppercase tracking-wider">
                         <Link href={`/${locale}/user/homepage`} className="hover:text-button-primary-bg-default transition-colors">{tb('home')}</Link>
                         <span>{'>'}</span>
-                        <Link href={`/${locale}/user/events`} className="hover:text-button-primary-bg-default transition-colors">{te('see_more')}</Link>
+                        <Link href={`/${locale}/user/events`} className="hover:text-button-primary-bg-default transition-colors">{te('all_events')}</Link>
                         <span>{'>'}</span>
                         <span className="text-button-primary-bg-default font-semibold">{te('event_breadcrumb')}</span>
                     </div>
@@ -323,10 +373,10 @@ export default function EventDetailPage() {
                                     </span>
                                 </div>
                                 <button
-                                    className={`w-full py-4 px-10 rounded-button-radius font-bold text-lg transition-all shadow-lg ${isSoldOut ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default hover:shadow-xl hover:-translate-y-0.5'}`}
-                                    disabled={isSoldOut}
+                                    className={`w-full py-4 px-10 rounded-button-radius font-bold text-lg transition-all shadow-lg ${isBuyDisabled ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default hover:shadow-xl hover:-translate-y-0.5'}`}
+                                    disabled={isBuyDisabled}
                                     onClick={() => {
-                                        if (isSoldOut) return;
+                                        if (isBuyDisabled) return;
                                         if (!isAuthenticated) {
                                             router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`);
                                             return;
@@ -334,7 +384,7 @@ export default function EventDetailPage() {
                                         router.push(`/${locale}/user/events/${id}/booking`);
                                     }}
                                 >
-                                    {isSoldOut ? te('sold_out_temp') : te('buy_now')}
+                                    {getBuyButtonText()}
                                 </button>
                             </div>
                         </div>
@@ -447,16 +497,16 @@ export default function EventDetailPage() {
                                             <span className="font-bold text-text-primary">{te('location_map')}</span>
                                         </div>
                                         <div className="h-[350px] w-full rounded-ds-xl overflow-hidden border border-border-default shadow-sm relative z-0">
-                                            <Map 
-                                                pos={[event.latitude, event.longitude]} 
-                                                popupText={event.venue || event.address} 
+                                            <Map
+                                                pos={[event.latitude, event.longitude]}
+                                                popupText={event.venue || event.address}
                                             />
                                         </div>
                                         <div className="mt-3 flex justify-between items-center">
                                             <p className="text-xs text-text-secondary italic">
                                                 * {te('map_instruction')}
                                             </p>
-                                            <a 
+                                            <a
                                                 href={`https://www.google.com/maps/search/?api=1&query=${event.latitude},${event.longitude}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
@@ -556,17 +606,42 @@ export default function EventDetailPage() {
                                             <span className="text-sm text-text-muted shrink-0 w-24">{te('time_label')}</span>
                                             <span className="text-sm font-medium text-text-primary text-right">{formatTime(activeShowtime.startDatetime)} - {formatDate(activeShowtime.startDatetime)}</span>
                                         </div>
-                                        <div className="flex justify-between items-start pb-1">
+                                        <div className="flex justify-between items-start border-b border-border-subtle pb-3">
                                             <span className="text-sm text-text-muted shrink-0 w-24">{te('venue_label')}</span>
                                             <span className="text-sm font-medium text-text-primary text-right">{event.venue || "Nhà Hát Hòa Bình"}</span>
                                         </div>
+                                        {(() => {
+                                            const allTickets = event.showtimes?.flatMap(st => st.ticketTypes || []) || [];
+                                            if (allTickets.length > 0) {
+                                                const earliestSaleStart = Math.min(...allTickets.map(t => new Date(t.saleStartDate).getTime()));
+                                                const latestSaleEnd = Math.max(...allTickets.map(t => new Date(t.saleEndDate).getTime()));
+                                                const startStr = new Date(earliestSaleStart).toISOString();
+                                                const endStr = new Date(latestSaleEnd).toISOString();
+                                                
+                                                const formatCompactDate = (dateString: string) => {
+                                                    const d = new Date(dateString);
+                                                    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+                                                };
+
+                                                return (
+                                                    <div className="flex justify-between items-start pb-1">
+                                                        <span className="text-sm text-text-muted shrink-0 w-24">{te('sale_time_label', { defaultMessage: 'Mở bán' })}</span>
+                                                        <div className="text-sm font-medium text-text-primary text-right flex flex-col items-end gap-0.5">
+                                                            <span>{formatTime(startStr)} - {formatCompactDate(startStr)}</span>
+                                                            <span className="text-[11px] text-text-secondary italic">đến {formatTime(endStr)} - {formatCompactDate(endStr)}</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
                                     </div>
 
                                     <button
-                                        className={`w-full py-3.5 rounded-button-radius font-semibold mb-6 transition-colors shadow-sm ${isSoldOut ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
-                                        disabled={isSoldOut}
+                                        className={`w-full py-3.5 rounded-button-radius font-semibold mb-6 transition-colors shadow-sm ${isBuyDisabled ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
+                                        disabled={isBuyDisabled}
                                         onClick={() => {
-                                            if (isSoldOut) return;
+                                            if (isBuyDisabled) return;
                                             if (!isAuthenticated) {
                                                 router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`);
                                                 return;
@@ -574,7 +649,7 @@ export default function EventDetailPage() {
                                             router.push(`/${locale}/user/events/${id}/booking`);
                                         }}
                                     >
-                                        {isSoldOut ? te('sold_out_temp') : te('buy_now')}
+                                        {getBuyButtonText()}
                                     </button>
 
                                     <div className="space-y-2">

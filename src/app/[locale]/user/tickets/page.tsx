@@ -20,7 +20,8 @@ import {
     X,
     RefreshCcw,
     Clock,
-    CheckLineIcon
+    CheckLineIcon,
+    History
 } from "lucide-react";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import Link from "next/link";
@@ -111,6 +112,7 @@ export default function MyTicketsPage() {
         { id: "used", label: t("tab_used") },
         { id: "minting", label: t("tab_minting") },
         { id: "reselling", label: t("tab_reselling") },
+        { id: "withdrawn", label: t("tab_withdrawn") },
     ];
 
     const handleCancelClick = (listingCode: string) => {
@@ -156,12 +158,12 @@ export default function MyTicketsPage() {
         if (!selectedWithdrawTicket) return;
         setIsWithdrawing(true);
         try {
-            const response = await api.post(`/order-service/api/v1/tickets/${selectedWithdrawTicket.id}/withdraw`, {
+            const response = await api.post(`/order-service/api/v1/tickets/withdraw`, {
                 personalWallet: personalWallet.trim(),
                 tokenId: selectedWithdrawTicket.tokenId
             });
-            if (response.data && response.data.status === 200) {
-                toast.success(t('withdraw_success') || "Withdrawal successful");
+            if (response.data && response.data.status === 'Accepted') {
+                toast.success(response.data?.message || t('withdraw_success') || "Withdrawal successful");
                 fetchTickets();
             } else {
                 toast.error(response.data?.message || t('withdraw_failed') || "Withdrawal failed");
@@ -221,10 +223,11 @@ export default function MyTicketsPage() {
             let matchTab = false;
             switch (activeTab) {
                 case "all": matchTab = true; break;
-                case "upcoming": matchTab = ticket.status === 'active'; break;
-                case "used": matchTab = ticket.status === 'used'; break;
-                case "minting": matchTab = ticket.status === 'minting'; break;
-                case "reselling": matchTab = ticket.status === 'on_sale'; break;
+                case "upcoming": matchTab = ticket.ticketAccessStatus === 'VALID'; break;
+                case "used": matchTab = ticket.ticketAccessStatus === 'USED' || ticket.ticketAccessStatus === 'CHECKED_IN'; break;
+                case "minting": matchTab = ticket.ticketChainStatus === 'MINT_PENDING'; break;
+                case "reselling": matchTab = ticket.ticketAccessStatus === 'LOCKED_RESALE'; break;
+                case "withdrawn": matchTab = ticket.ticketAccessStatus === 'WITHDRAWN'; break;
                 default: matchTab = true;
             }
 
@@ -253,10 +256,11 @@ export default function MyTicketsPage() {
             finalTickets = event.tickets.filter((ticket: any) => {
                 switch (activeTab) {
                     case "all": return true;
-                    case "upcoming": return ticket.status === 'active';
-                    case "used": return ticket.status === 'used';
-                    case "minting": return ticket.status === 'minting';
-                    case "reselling": return ticket.status === 'on_sale';
+                    case "upcoming": return ticket.ticketAccessStatus === 'VALID';
+                    case "used": return ticket.ticketAccessStatus === 'USED' || ticket.ticketAccessStatus === 'CHECKED_IN';
+                    case "minting": return ticket.ticketChainStatus === 'MINT_PENDING';
+                    case "reselling": return ticket.ticketAccessStatus === 'LOCKED_RESALE';
+                    case "withdrawn": return ticket.ticketAccessStatus === 'WITHDRAWN';
                     default: return true;
                 }
             });
@@ -460,7 +464,7 @@ export default function MyTicketsPage() {
                                                             </div>
 
                                                             <div className="w-full md:w-1/3 flex flex-col gap-1 text-[11px]">
-                                                                {ticket.status === 'on_sale' ? (
+                                                                {ticket.ticketAccessStatus === 'LOCKED_RESALE' ? (
                                                                     <div>
                                                                         <span className="text-text-muted">{t('listing_id')} </span>
                                                                         <span className="text-text-primary font-medium">{ticket.listingCode}</span>
@@ -476,32 +480,32 @@ export default function MyTicketsPage() {
                                                                     <span className="text-text-primary font-medium">{ticket.tokenId}</span>
                                                                 </div>
                                                                 <div className="mt-1 flex items-center gap-2">
-                                                                    {ticket.status === 'minting' && (
+                                                                    {ticket.ticketChainStatus === 'MINT_PENDING' && (
                                                                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-border-default bg-bg-surface text-text-muted text-[10px] font-medium whitespace-nowrap">
                                                                             <Loader2 size={10} className="animate-spin" /> {t('minting')}
                                                                         </span>
                                                                     )}
-                                                                    {ticket.status === 'active' && (
+                                                                    {ticket.ticketAccessStatus === 'VALID' && (
                                                                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-feedback-success-border bg-feedback-success-bg text-feedback-success-text text-[10px] font-medium whitespace-nowrap">
                                                                             <CheckCircle2 size={10} /> {t('valid')}
                                                                         </span>
                                                                     )}
-                                                                    {ticket.status === 'on_sale' && (
+                                                                    {ticket.ticketAccessStatus === 'LOCKED_RESALE' && (
                                                                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-feedback-warning-border bg-feedback-warning-bg text-feedback-warning-text text-[10px] font-medium whitespace-nowrap">
                                                                             {t('tab_reselling')}
                                                                         </span>
                                                                     )}
-                                                                    {ticket.status === 'used' && (
+                                                                    {ticket.ticketAccessStatus === 'USED' && (
                                                                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-border-default bg-secondary text-text-muted text-[10px] font-medium whitespace-nowrap">
-                                                                            {t('tab_used')}
+                                                                            <History size={10} /> {t('tab_used')}
                                                                         </span>
                                                                     )}
-                                                                    {ticket.status === 'checked_in' && (
+                                                                    {ticket.ticketAccessStatus === 'CHECKED_IN' && (
                                                                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-feedback-success-border bg-feedback-success-bg text-feedback-success-text text-[10px] font-medium whitespace-nowrap">
                                                                             <CheckLineIcon size={10} /> {t('tab_checked_in') || 'Checked In'}
                                                                         </span>
                                                                     )}
-                                                                    {ticket.status === 'withdrawn' && (
+                                                                    {ticket.ticketAccessStatus === 'WITHDRAWN' && (
                                                                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-border-default bg-secondary text-text-muted text-[10px] font-medium whitespace-nowrap">
                                                                             {t('tab_withdrawn') || 'Withdrawn'}
                                                                         </span>
@@ -510,7 +514,7 @@ export default function MyTicketsPage() {
                                                             </div>
 
                                                             <div className="flex items-center justify-end gap-2 shrink-0 md:flex-1 w-full md:w-auto relative z-20">
-                                                                {ticket.status !== 'checked_in' && ticket.status !== 'used' && ticket.status !== 'withdrawn' && (
+                                                                {ticket.ticketAccessStatus === 'VALID' && !ticket.ticketChainStatus?.includes('PENDING') && (
                                                                     <button
                                                                         onClick={() => fetchQRToken(ticket.id)}
                                                                         className="bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors shadow-sm whitespace-nowrap"
@@ -518,22 +522,22 @@ export default function MyTicketsPage() {
                                                                         {t('view_qr')}
                                                                     </button>
                                                                 )}
-                                                                {ticket.status !== 'on_sale' && ticket.status !== 'checked_in' && ticket.status !== 'used' && ticket.status !== 'withdrawn' && (
+                                                                {ticket.ticketAccessStatus !== 'LOCKED_RESALE' && ticket.ticketAccessStatus !== 'CHECKED_IN' && ticket.ticketAccessStatus !== 'USED' && ticket.ticketAccessStatus !== 'WITHDRAWN' && !ticket.ticketChainStatus?.includes('PENDING') && (
                                                                     <Link href={`/${locale}/user/tickets/${ticket.id}/resell`}>
                                                                         <button className="bg-button-ghost-bg-default hover:bg-button-ghost-bg-hover text-button-ghost-text-default border border-button-ghost-border-default px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap block">
                                                                             {t('resell_button')}
                                                                         </button>
                                                                     </Link>
                                                                 )}
-                                                                {ticket.status === 'used' && (
+                                                                {ticket.ticketAccessStatus === 'USED' && !ticket.ticketChainStatus?.includes('PENDING') && (
                                                                     <button
                                                                         onClick={() => handleWithdrawClick(ticket.id, ticket.tokenId)}
-                                                                        className="bg-button-ghost-bg-default hover:bg-button-ghost-bg-hover text-button-ghost-text-default border border-button-ghost-border-default px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap block"
+                                                                        className="bg-transparent border border-button-primary-bg-default text-button-primary-bg-default hover:bg-button-primary-bg-default/10 px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap block"
                                                                     >
                                                                         {t('withdraw_button') || 'Withdraw'}
                                                                     </button>
                                                                 )}
-                                                                {ticket.status === 'on_sale' && (
+                                                                {ticket.ticketAccessStatus === 'LOCKED_RESALE' && !ticket.ticketChainStatus?.includes('PENDING') && (
                                                                     <button
                                                                         onClick={() => handleCancelClick(ticket.listingCode)}
                                                                         className="bg-feedback-error-bg/10 hover:bg-feedback-error-bg/20 text-feedback-error-text border border-feedback-error-border px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap block"
@@ -566,11 +570,11 @@ export default function MyTicketsPage() {
                                                                             <div className="font-medium text-text-primary pl-2 text-right">{ticket.tokenId}</div>
 
                                                                             <div className="text-text-muted">{t('ticket_status')}</div>
-                                                                            <div className="font-medium text-text-primary pl-2 text-right">{ticket.status.toUpperCase().replace(/_/g, ' ')}</div>
-                                                                            {ticket.status === 'on_sale' &&
+                                                                            <div className="font-medium text-text-primary pl-2 text-right">{ticket.ticketAccessStatus.replace(/_/g, ' ')}</div>
+                                                                            {ticket.ticketAccessStatus === 'LOCKED_RESALE' &&
                                                                                 <div className="text-text-muted">{t('listing_price')}</div>
                                                                             }
-                                                                            {ticket.status === 'on_sale' &&
+                                                                            {ticket.ticketAccessStatus === 'LOCKED_RESALE' &&
                                                                                 <div className="font-medium text-text-primary pl-2 text-right">{ticket.listingPrice}</div>
                                                                             }
                                                                             <div className="text-text-muted">{t('qr_status')}</div>

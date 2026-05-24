@@ -62,7 +62,7 @@ export function OrganizerSidebar() {
         <aside className="dark w-[280px] bg-navbar-sidebar-bg border-r border-navbar-sidebar-border min-h-screen flex flex-col fixed h-full z-10">
             {/* Logo/Brand */}
             <div className="p-6 border-b border-navbar-sidebar-border">
-                <Link href={`/${locale}/organizer/center`} className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+                {/* <Link href={`/${locale}/organizer/center`} className="flex items-center gap-3 hover:opacity-90 transition-opacity">
                     <Image 
                         src="/evoticket-logo/dark/dark-primary=horizontal-logo.svg" 
                         alt="EvoTicket Organizer" 
@@ -70,6 +70,24 @@ export function OrganizerSidebar() {
                         height={32} 
                         className="object-contain" 
                         priority 
+                    />
+                </Link> */}
+                <Link href={`/${locale}/organizer/center`} className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+                    <Image
+                        src="/evoticket-logo/light/light-primary=horizontal-logo.svg"
+                        alt="EvoTicket"
+                        width={150}
+                        height={36}
+                        className="object-contain dark:hidden"
+                        priority
+                    />
+                    <Image
+                        src="/evoticket-logo/dark/dark-primary=horizontal-logo.svg"
+                        alt="EvoTicket"
+                        width={150}
+                        height={36}
+                        className="object-contain hidden dark:block"
+                        priority
                     />
                 </Link>
             </div>
