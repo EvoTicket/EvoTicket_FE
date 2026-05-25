@@ -19,7 +19,7 @@ export interface EventItem {
     favoriteCount: number;
     floorPrice?: number;
     ticketTypes?: any[];
-    volume24H?: number;
+    volume24h?: number;
     hotness?: number;
     organizerName?: string;
     ticketAvailabilityStatus?: string;

@@ -461,7 +461,7 @@ export default function HomePage() {
                         {event.floorPrice != null ? `${event.floorPrice.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US')} VND` : t("contact")}
                       </td>
                       <td className="py-4 text-right text-sm text-text-muted">
-                        {event.volume24H != null ? `${event.volume24H.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US')} VND` : '-'}
+                        {event.volume24h != null ? `${event.volume24h.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US')} VND` : '-'}
                       </td>
                       <td className={`py-4 text-right text-sm font-bold ${event.hotness != null && event.hotness < 0 ? 'text-feedback-error-text' : 'text-feedback-success-text'}`}>
                         {event.hotness != null ? (event.hotness > 0 ? `+${event.hotness}%` : `${event.hotness}%`) : '-'}
