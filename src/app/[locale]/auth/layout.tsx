@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter, usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Languages } from "lucide-react";
+import { Sun, Moon, Languages, Link } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const { theme, setTheme } = useTheme();
@@ -11,6 +12,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   const router = useRouter();
   const { locale } = useParams();
   const pathname = usePathname();
+  const t = useTranslations("MyTickets");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -27,8 +29,24 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     router.push(segments.join("/"));
   };
 
+  const handleBackToHomepage = () => {
+    router.push(`/${locale}/user/homepage`);
+  }
+
   return (
     <div className="relative min-h-screen w-full bg-main text-txt-primary">
+      {/* Floating Action Buttons Container left */}
+      <div className="fixed top-6 left-6 z-50 flex items-center gap-3.5">
+        {/* Back to Homepage */}
+        <button
+          onClick={handleBackToHomepage}
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface border border-border text-txt-primary hover:bg-secondary hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-primary/10 cursor-pointer text-xs font-bold font-sans"
+          title={t('explore_events')}
+        >
+          <span>{t('explore_events')}</span>
+        </button>
+
+      </div>
       {/* Floating Action Buttons Container */}
       <div className="fixed top-6 right-6 z-50 flex items-center gap-3.5">
         {/* Language Switcher Button */}

@@ -2,6 +2,7 @@ import { CheckCircle2, Home, PlusCircle, Settings, FileText, Image as ImageIcon,
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { CreateEventState } from "./useCreateEventWizard";
+import { useTranslations } from "next-intl";
 
 interface Props {
     formData: CreateEventState;
@@ -9,6 +10,7 @@ interface Props {
 
 export function CreateEventSuccessScreen({ formData }: Props) {
     const { locale } = useParams();
+    const t = useTranslations("CreateEvent.Success");
 
     return (
         <div className="max-w-[800px] mx-auto py-10 px-4">
@@ -16,20 +18,22 @@ export function CreateEventSuccessScreen({ formData }: Props) {
                 <div className="w-20 h-20 bg-feedback-success-bg border-[4px] border-feedback-success-bg/30 rounded-full flex items-center justify-center mx-auto mb-6">
                     <CheckCircle2 size={40} className="text-feedback-success-text" />
                 </div>
-                <h1 className="text-3xl font-bold text-text-primary mb-2">Sự kiện đã được gửi duyệt!</h1>
+                <h1 className="text-3xl font-bold text-text-primary mb-2">{t("title")}</h1>
                 <p className="text-text-secondary max-w-[500px] mx-auto mb-6">
-                    Hồ sơ sự kiện của bạn đã được gửi đến ban quản trị EvoTicket. Chúng tôi sẽ tiến hành kiểm duyệt trong vòng <span className="font-bold text-text-primary">24h làm việc</span>.
+                    {t.rich("desc", {
+                        bold: (chunks) => <span className="font-bold text-text-primary">{chunks}</span>
+                    })}
                 </p>
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-feedback-warning-bg/20 border border-feedback-warning-border text-feedback-warning-text font-bold text-sm rounded-full">
                     <span className="w-2 h-2 rounded-full bg-feedback-warning-text animate-pulse"></span>
-                    Trạng thái: Pending Review
+                    {t("status_pending")}
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="md:col-span-2 bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm">
                     <h3 className="font-bold text-lg text-text-primary mb-4 flex items-center gap-2">
-                        <FileText size={20} className="text-text-secondary"/> Thông tin sự kiện
+                        <FileText size={20} className="text-text-secondary"/> {t("event_info")}
                     </h3>
                     
                     <div className="flex gap-4">
@@ -53,28 +57,30 @@ export function CreateEventSuccessScreen({ formData }: Props) {
                                 </div>
                                 <div className="flex items-start gap-2">
                                     <Calendar size={14} className="shrink-0 mt-0.5" />
-                                    <span className="text-xs">{formData.showtimes.length} suất diễn • {formData.ticketTypes.length} loại vé</span>
+                                    <span className="text-xs">
+                                        {t("showtimes_tickets_format", { showtimes: formData.showtimes.length, tickets: formData.ticketTypes.length })}
+                                    </span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <div className="mt-6 pt-6 border-t border-border-default">
-                        <h4 className="font-bold text-sm text-text-primary mb-3">Quy trình duyệt sự kiện</h4>
+                        <h4 className="font-bold text-sm text-text-primary mb-3">{t("process_title")}</h4>
                         <div className="flex items-center">
                             <div className="flex flex-col items-center">
                                 <div className="w-8 h-8 rounded-full bg-feedback-success-bg text-feedback-success-text flex items-center justify-center font-bold mb-2">1</div>
-                                <span className="text-xs font-medium">Gửi duyệt</span>
+                                <span className="text-xs font-medium">{t("process_step_1")}</span>
                             </div>
                             <div className="flex-1 h-px bg-border-strong mx-2 mb-6"></div>
                             <div className="flex flex-col items-center opacity-50">
                                 <div className="w-8 h-8 rounded-full bg-bg-elevated border border-border-strong text-text-secondary flex items-center justify-center font-bold mb-2">2</div>
-                                <span className="text-xs font-medium">Kiểm tra</span>
+                                <span className="text-xs font-medium">{t("process_step_2")}</span>
                             </div>
                             <div className="flex-1 h-px bg-border-default mx-2 mb-6"></div>
                             <div className="flex flex-col items-center opacity-50">
                                 <div className="w-8 h-8 rounded-full bg-bg-elevated border border-border-strong text-text-secondary flex items-center justify-center font-bold mb-2">3</div>
-                                <span className="text-xs font-medium">Công bố</span>
+                                <span className="text-xs font-medium">{t("process_step_3")}</span>
                             </div>
                         </div>
                     </div>
@@ -82,26 +88,26 @@ export function CreateEventSuccessScreen({ formData }: Props) {
 
                 <div className="space-y-4">
                     <div className="bg-bg-surface border border-border-default rounded-ds-xl p-5 shadow-sm">
-                        <h3 className="font-bold text-sm text-text-primary mb-3">Ý nghĩa các trạng thái</h3>
+                        <h3 className="font-bold text-sm text-text-primary mb-3">{t("status_meaning_title")}</h3>
                         <ul className="space-y-3 text-xs">
                             <li className="flex gap-2">
-                                <span className="text-feedback-warning-text font-bold whitespace-nowrap">Pending:</span>
-                                <span className="text-text-secondary">Đang chờ EvoTicket kiểm duyệt nội dung. Bạn vẫn có thể sửa.</span>
+                                <span className="text-feedback-warning-text font-bold whitespace-nowrap">{t("status_pending_title")}</span>
+                                <span className="text-text-secondary">{t("status_pending_desc")}</span>
                             </li>
                             <li className="flex gap-2">
-                                <span className="text-feedback-success-text font-bold whitespace-nowrap">Published:</span>
-                                <span className="text-text-secondary">Đã duyệt. Sự kiện sẵn sàng hiển thị (nếu public).</span>
+                                <span className="text-feedback-success-text font-bold whitespace-nowrap">{t("status_published_title")}</span>
+                                <span className="text-text-secondary">{t("status_published_desc")}</span>
                             </li>
                             <li className="flex gap-2">
-                                <span className="text-feedback-error-text font-bold whitespace-nowrap">Rejected:</span>
-                                <span className="text-text-secondary">Bị từ chối. Kèm lý do để bạn chỉnh sửa và gửi lại.</span>
+                                <span className="text-feedback-error-text font-bold whitespace-nowrap">{t("status_rejected_title")}</span>
+                                <span className="text-text-secondary">{t("status_rejected_desc")}</span>
                             </li>
                         </ul>
                     </div>
 
                     <div className="bg-bg-subtle border border-border-default rounded-ds-xl p-5 text-sm text-text-secondary">
-                        <span className="font-bold text-text-primary block mb-1">Lưu ý:</span>
-                        Vé sẽ không được mở bán chính thức cho đến khi sự kiện chuyển sang trạng thái Published.
+                        <span className="font-bold text-text-primary block mb-1">{t("notes_title")}</span>
+                        {t("notes_desc")}
                     </div>
                 </div>
             </div>
@@ -111,19 +117,19 @@ export function CreateEventSuccessScreen({ formData }: Props) {
                     href={`/${locale}/organizer/events/new-event-123/overview`} // Fixture link
                     className="px-6 py-3 bg-action-brand-bg-default text-action-brand-text-default font-bold rounded-ds-xl hover:bg-action-brand-bg-hover transition-colors flex items-center justify-center gap-2"
                 >
-                    <Settings size={18} /> Vào quản trị sự kiện này
+                    <Settings size={18} /> {t("btn_manage")}
                 </Link>
                 <button 
                     onClick={() => window.location.reload()}
                     className="px-6 py-3 bg-bg-surface border border-border-default text-text-primary font-bold rounded-ds-xl hover:bg-bg-subtle transition-colors flex items-center justify-center gap-2"
                 >
-                    <PlusCircle size={18} /> Tạo sự kiện khác
+                    <PlusCircle size={18} /> {t("btn_create_another")}
                 </button>
                 <Link 
                     href={`/${locale}/organizer/center`}
                     className="px-6 py-3 bg-transparent text-text-secondary font-bold rounded-ds-xl hover:text-text-primary hover:bg-bg-surface transition-colors flex items-center justify-center gap-2"
                 >
-                    <Home size={18} /> Về Organizer Center
+                    <Home size={18} /> {t("btn_back_center")}
                 </Link>
             </div>
         </div>

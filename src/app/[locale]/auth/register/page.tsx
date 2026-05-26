@@ -245,7 +245,7 @@ export default function RegisterPage() {
       }
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {
-        toast.error(error.response.data.message || "Đăng ký thất bại");
+        toast.error(error.response.data.message || t('register_failed'));
       } else {
         toast.error(t('login_error'));
       }
@@ -288,7 +288,7 @@ export default function RegisterPage() {
                 setName(e.target.value);
                 if (errors.name) setErrors(prev => ({ ...prev, name: "" }));
               }}
-              placeholder="Nguyễn Văn A"
+              placeholder={t('name_placeholder')}
               className={`w-full px-4 py-2.5 bg-secondary text-txt-primary border rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-[13px] placeholder-txt-muted ${errors.name ? 'border-red-500' : 'border-border'}`}
             />
             {errors.name && (
@@ -306,7 +306,7 @@ export default function RegisterPage() {
                 setEmail(e.target.value);
                 if (errors.email) setErrors(prev => ({ ...prev, email: "" }));
               }}
-              placeholder="abc@gmail.com"
+              placeholder={t('email_placeholder')}
               className={`w-full px-4 py-2.5 bg-secondary text-txt-primary border rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-[13px] placeholder-txt-muted mb-1.5 ${errors.email ? 'border-red-500' : 'border-border'}`}
             />
             {errors.email && (
@@ -328,7 +328,7 @@ export default function RegisterPage() {
                 setPhone(e.target.value);
                 if (errors.phone) setErrors(prev => ({ ...prev, phone: "" }));
               }}
-              placeholder="0988 xxx xxx"
+              placeholder={t('phone_placeholder')}
               className={`w-full px-4 py-2.5 bg-secondary text-txt-primary border rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-[13px] placeholder-txt-muted ${errors.phone ? 'border-red-500' : 'border-border'}`}
             />
             {errors.phone && (
@@ -338,7 +338,7 @@ export default function RegisterPage() {
 
           {/* Ngày sinh */}
           <div>
-            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{locale === "vi" ? "Ngày sinh" : "Date of Birth"}</label>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{t('dob_label')}</label>
             <div className={`relative w-full rounded-ds-lg border ${errors.dateOfBirth ? 'border-red-500' : 'border-transparent'}`}>
               <CustomDatePicker
                 selectedDate={dateOfBirth}
@@ -356,7 +356,7 @@ export default function RegisterPage() {
 
           {/* Giới tính */}
           <div>
-            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{locale === "vi" ? "Giới tính" : "Gender"}</label>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{t('gender_label')}</label>
             <Listbox
               value={gender}
               onChange={(val) => {
@@ -368,9 +368,9 @@ export default function RegisterPage() {
                 <ListboxButton className={`w-full flex items-center justify-between px-4 py-2.5 bg-secondary text-txt-primary border rounded-ds-xl text-left text-[13px] outline-none cursor-pointer focus:border-primary transition-all ${errors.gender ? 'border-red-500' : 'border-border'}`}>
                   <span className="truncate">
                     {(() => {
-                      if (gender === "MALE") return locale === "vi" ? "Nam" : "Male";
-                      if (gender === "FEMALE") return locale === "vi" ? "Nữ" : "Female";
-                      return locale === "vi" ? "Khác" : "Other";
+                      if (gender === "MALE") return t('gender_male');
+                      if (gender === "FEMALE") return t('gender_female');
+                      return t('gender_other');
                     })()}
                   </span>
                   <ChevronRight size={14} className="text-txt-muted transform rotate-90" />
@@ -384,19 +384,19 @@ export default function RegisterPage() {
                     value="MALE"
                     className="group flex items-center px-4 py-2.5 cursor-pointer hover:bg-secondary rounded-ds-md transition-colors font-medium"
                   >
-                    {locale === "vi" ? "Nam" : "Male"}
+                    {t('gender_male')}
                   </ListboxOption>
                   <ListboxOption
                     value="FEMALE"
                     className="group flex items-center px-4 py-2.5 cursor-pointer hover:bg-secondary rounded-ds-md transition-colors font-medium"
                   >
-                    {locale === "vi" ? "Nữ" : "Female"}
+                    {t('gender_female')}
                   </ListboxOption>
                   <ListboxOption
                     value="OTHER"
                     className="group flex items-center px-4 py-2.5 cursor-pointer hover:bg-secondary rounded-ds-md transition-colors font-medium"
                   >
-                    {locale === "vi" ? "Khác" : "Other"}
+                    {t('gender_other')}
                   </ListboxOption>
                 </ListboxOptions>
               </div>
@@ -408,7 +408,7 @@ export default function RegisterPage() {
 
           {/* Tỉnh/Thành phố */}
           <div>
-            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{locale === "vi" ? "Tỉnh/Thành phố" : "Province"}</label>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{t('province_label')}</label>
             <Listbox
               value={provinceCode}
               onChange={(val) => {
@@ -421,7 +421,7 @@ export default function RegisterPage() {
                   <span className="truncate">
                     {(() => {
                       const prov = provinces.find((p) => p.code === provinceCode);
-                      return prov ? prov.name : (locale === "vi" ? "Chọn Tỉnh/TP" : "Select Province");
+                      return prov ? prov.name : t('province_placeholder');
                     })()}
                   </span>
                   <ChevronRight size={14} className="text-txt-muted transform rotate-90" />
@@ -435,7 +435,7 @@ export default function RegisterPage() {
                     value={0}
                     className="group flex items-center px-4 py-2.5 cursor-pointer hover:bg-secondary rounded-ds-md transition-colors font-medium text-txt-muted"
                   >
-                    -- {locale === "vi" ? "Chọn Tỉnh/TP" : "Select Province"} --
+                    -- {t('province_placeholder')} --
                   </ListboxOption>
                   {provinces.map((prov) => (
                     <ListboxOption
@@ -456,7 +456,7 @@ export default function RegisterPage() {
 
           {/* Phường/Xã */}
           <div>
-            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{locale === "vi" ? "Phường/Xã" : "Ward"}</label>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{t('ward_label')}</label>
             <Listbox
               value={wardCode}
               onChange={(val) => {
@@ -470,7 +470,7 @@ export default function RegisterPage() {
                   <span className="truncate">
                     {(() => {
                       const ward = wards.find((w) => w.code === wardCode);
-                      return ward ? ward.name : (locale === "vi" ? "Chọn Phường/Xã" : "Select Ward");
+                      return ward ? ward.name : t('ward_placeholder');
                     })()}
                   </span>
                   <ChevronRight size={14} className="text-txt-muted transform rotate-90" />
@@ -484,7 +484,7 @@ export default function RegisterPage() {
                     value={0}
                     className="group flex items-center px-4 py-2.5 cursor-pointer hover:bg-secondary rounded-ds-md transition-colors font-medium text-txt-muted"
                   >
-                    -- {locale === "vi" ? "Chọn Phường/Xã" : "Select Ward"} --
+                    -- {t('ward_placeholder')} --
                   </ListboxOption>
                   {wards.map((ward) => (
                     <ListboxOption
@@ -505,7 +505,7 @@ export default function RegisterPage() {
 
           {/* Địa chỉ */}
           <div>
-            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{locale === "vi" ? "Địa chỉ" : "Address"}</label>
+            <label className="block text-[12px] font-medium text-txt-secondary mb-1.5">{t('address_label')}</label>
             <input
               type="text"
               value={userAddress}
@@ -513,7 +513,7 @@ export default function RegisterPage() {
                 setUserAddress(e.target.value);
                 if (errors.address) setErrors(prev => ({ ...prev, address: "" }));
               }}
-              placeholder={locale === "vi" ? "Số nhà, tên đường..." : "123 Street..."}
+              placeholder={t('address_placeholder')}
               className={`w-full px-4 py-2.5 bg-secondary text-txt-primary border rounded-ds-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-[13px] placeholder-txt-muted ${errors.address ? 'border-red-500' : 'border-border'}`}
             />
             {errors.address && (

@@ -4,6 +4,7 @@ import type {
 } from "@/src/features/organizer/types/organizer";
 import { OrganizerStatusBadge } from "../common/OrganizerStatusBadge";
 import type { StatusTone } from "@/src/features/organizer/constants/organizerStatusMapping";
+import { useTranslations } from "next-intl";
 
 type TableRow = Record<string, string | StatusTone>;
 
@@ -25,9 +26,14 @@ export function OrganizerDataTable<T extends TableRow>({
   columns,
   rows,
   state,
-  emptyMessage = "Chưa có dữ liệu.",
-  errorMessage = "Không thể tải dữ liệu. Vui lòng thử lại sau.",
+  emptyMessage,
+  errorMessage,
 }: OrganizerDataTableProps<T>) {
+  const t = useTranslations("Organizer.Common.DataTable");
+  
+  const displayEmptyMessage = emptyMessage ?? t("emptyMessage");
+  const displayErrorMessage = errorMessage ?? t("errorMessage");
+
   if (state === "loading") {
     return (
       <div className="flex flex-col gap-3 rounded-ds-lg border border-border-subtle bg-bg-surface p-4">
@@ -44,7 +50,7 @@ export function OrganizerDataTable<T extends TableRow>({
   if (state === "error") {
     return (
       <div className="rounded-ds-lg border border-feedback-error-border bg-feedback-error-bg p-5 text-sm text-feedback-error-text">
-        {errorMessage}
+        {displayErrorMessage}
       </div>
     );
   }
@@ -52,7 +58,7 @@ export function OrganizerDataTable<T extends TableRow>({
   if (state === "empty" || rows.length === 0) {
     return (
       <div className="rounded-ds-lg border border-border-subtle bg-bg-surface p-8 text-center text-sm text-text-muted">
-        {emptyMessage}
+        {displayEmptyMessage}
       </div>
     );
   }

@@ -157,7 +157,7 @@ function formatDateTime(value: Nullable<string>): string {
 
 /**
  * Inventory backend có 2 trục:
- * - approvalStatus: PENDING / ACCEPTED / REJECTED
+ * - approvalStatus: PENDING_REVIEW / PUBLISHED / REJECTED
  * - status: UPCOMING / ON_SALE / SALE_CLOSED / ON_GOING / COMPLETED / CANCELLED
  *
  * OrgEventStatus hiện tại của FE là model cũ, nên mapper cần ép về các status FE đang hiểu.
@@ -179,8 +179,12 @@ function normalizeEventStatus(
     return "REJECTED";
   }
 
-  if (normalizedApprovalStatus === "PENDING") {
+  if (normalizedApprovalStatus === "PENDING_REVIEW") {
     return "PENDING_REVIEW";
+  }
+
+  if (normalizedApprovalStatus === "DRAFT") {
+    return "DRAFT";
   }
 
   switch (normalizedStatus) {
@@ -222,7 +226,7 @@ function normalizeEventStatus(
       return "COMPLETED";
 
     default:
-      return normalizedApprovalStatus === "ACCEPTED" ? "APPROVED" : "DRAFT";
+      return normalizedApprovalStatus === "PUBLISHED" ? "APPROVED" : "DRAFT";
   }
 }
 
@@ -237,7 +241,7 @@ function getOrganizerDisplayStatus(params: {
   const status = params.status?.toUpperCase();
   const approvalStatus = params.approvalStatus?.toUpperCase();
 
-  if (approvalStatus === "PENDING") {
+  if (approvalStatus === "PENDING_REVIEW") {
     return {
       key: "PENDING",
       label: "Chờ duyệt",
@@ -250,6 +254,14 @@ function getOrganizerDisplayStatus(params: {
       key: "REJECTED",
       label: "Bị từ chối",
       tone: "error" as const,
+    };
+  }
+
+  if (approvalStatus === "DRAFT") {
+    return {
+      key: "DRAFT",
+      label: "Bản nháp",
+      tone: "neutral" as const,
     };
   }
 
@@ -447,43 +459,44 @@ export function mapListEventToOrganizerCard(
 }
 
 export function mapDashboardKpis(
-  data: OrganizerDashboardMetricsResponse | null | undefined
+  data: OrganizerDashboardMetricsResponse | null | undefined,
+  t: (key: string) => string
 ) {
   const raw = data as DashboardLike | null | undefined;
 
   return [
     {
-      label: "Tổng doanh thu",
+      label: t("kpi_revenue"),
       value: formatMoney(raw?.totalRevenue),
       delta: undefined,
       tone: "success" as StatusTone,
     },
     {
-      label: "Số vé đã bán",
+      label: t("kpi_tickets"),
       value: formatNumber(raw?.totalTicketsSold),
       delta: undefined,
       tone: "success" as StatusTone,
     },
     {
-      label: "Tỷ lệ lấp đầy TB",
+      label: t("kpi_occupancy"),
       value: formatPercent(raw?.avgOccupancyRate),
       delta: undefined,
       tone: "brand" as StatusTone,
     },
     {
-      label: "Tỷ lệ check-in TB",
+      label: t("kpi_checkin"),
       value: formatPercent(raw?.avgCheckInRate),
       delta: undefined,
       tone: "warning" as StatusTone,
     },
     {
-      label: "Volume resale",
+      label: t("kpi_resale_vol"),
       value: formatNumber(raw?.resaleVolume),
       delta: undefined,
-      tone: "info" as StatusTone,
+      tone: "accent" as StatusTone,
     },
     {
-      label: "Royalty fee",
+      label: t("kpi_royalty"),
       value: formatMoney(raw?.royaltyFee),
       delta: undefined,
       tone: "accent" as StatusTone,
@@ -492,16 +505,30 @@ export function mapDashboardKpis(
 }
 
 export function mapRevenueTrend(
-  data: OrganizerDashboardMetricsResponse | null | undefined
+  data: OrganizerDashboardMetricsResponse | null | undefined,
+  reportDays: number = 30
 ) {
   const raw = data as DashboardLike | null | undefined;
+  if (!Array.isArray(raw?.revenueTrend)) return [];
 
-  return Array.isArray(raw?.revenueTrend)
-    ? raw.revenueTrend.map((item, index) => ({
-        day: String(item?.day ?? index + 1),
-        rev: toNumber(item?.revenue) ?? 0,
-      }))
-    : [];
+  const today = new Date();
+  // We assume the last item is today. If the array is dense, its length should match reportDays.
+  // To be safe, we calculate backwards from today based on the index relative to the end of the array.
+  const len = raw.revenueTrend.length;
+
+  return raw.revenueTrend.map((item, index) => {
+    const d = new Date(today);
+    // index = len - 1 is today
+    d.setDate(today.getDate() - (len - 1 - index));
+    
+    const dayStr = d.getDate().toString().padStart(2, "0");
+    const monthStr = (d.getMonth() + 1).toString().padStart(2, "0");
+
+    return {
+      day: `${dayStr}/${monthStr}`,
+      rev: toNumber(item?.revenue) ?? 0,
+    };
+  });
 }
 
 export function mapTicketSalesByEvent(

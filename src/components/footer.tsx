@@ -18,19 +18,26 @@ export function Footer() {
 
           {/* CỘT 1: LOGO & GIỚI THIỆU */}
           <div className="lg:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-4 group">
-              <div className="w-10 h-10 bg-txt-primary rounded flex items-center justify-center transition-colors group-hover:bg-button-primary-bg-defaul">
-                <div className="w-6 h-6 bg-bg-page" style={{ clipPath: "polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)" }}></div>
+            <Link href="/" className="flex flex-col gap-2 mb-4 group hover:opacity-90 transition-opacity">
+              <div className="flex items-center">
+                <Image 
+                    src="/evoticket-logo/light/light-primary=horizontal-logo.svg" 
+                    alt="EvoTicket" 
+                    width={150} 
+                    height={36} 
+                    className="object-contain dark:hidden" 
+                />
+                <Image 
+                    src="/evoticket-logo/dark/dark-primary=horizontal-logo.svg" 
+                    alt="EvoTicket" 
+                    width={150} 
+                    height={36} 
+                    className="object-contain hidden dark:block" 
+                />
               </div>
-              {/* Logo Text */}
-              <div className="flex flex-col">
-                <span className="text-xl font-bold text-text-primary leading-none">
-                  Evo<span className="text-primary">Ticket</span>
-                </span>
-                <span className="text-[10px] text-text-muted">
-                  {t("desc_line1")}<br />{t("desc_line2")}
-                </span>
-              </div>
+              <span className="text-[10px] text-text-muted mt-1">
+                {t("desc_line1")}<br />{t("desc_line2")}
+              </span>
             </Link>
             <p className="mb-4 text-xs leading-relaxed text-text-secondary">
               {t("slogan")}

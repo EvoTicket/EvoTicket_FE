@@ -19,7 +19,7 @@ export interface EventItem {
     favoriteCount: number;
     floorPrice?: number;
     ticketTypes?: any[];
-    volume24H?: number;
+    volume24h?: number;
     hotness?: number;
     organizerName?: string;
     ticketAvailabilityStatus?: string;
@@ -112,4 +112,5 @@ export interface EventDetail {
     // Khai báo thêm thuộc tính fallback phía giao diện
     hasSeatMap?: boolean | null;
     ticketAvailabilityStatus?: string;
+    allowMultipleTicketTypesPerOrder?: boolean;
 }

@@ -19,12 +19,15 @@ import {
     CheckCircle2,
     X,
     RefreshCcw,
-    Clock
+    Clock,
+    CheckLineIcon,
+    History
 } from "lucide-react";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import api from "@/src/lib/axios";
+import { toast } from "react-toastify";
 
 export default function MyTicketsPage() {
     const t = useTranslations("MyTickets");
@@ -46,6 +49,18 @@ export default function MyTicketsPage() {
     const [qrTimer, setQrTimer] = useState(0);
     const [qrLoading, setQrLoading] = useState(false);
     const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+
+    // Cancel Resell Modal State
+    const [cancelModalOpen, setCancelModalOpen] = useState(false);
+    const [listingToCancel, setListingToCancel] = useState<string | null>(null);
+    const [isCancelling, setIsCancelling] = useState(false);
+
+    // Withdraw Modal State
+    const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
+    const [withdrawConfirmModalOpen, setWithdrawConfirmModalOpen] = useState(false);
+    const [personalWallet, setPersonalWallet] = useState("");
+    const [selectedWithdrawTicket, setSelectedWithdrawTicket] = useState<{ id: number; tokenId: string } | null>(null);
+    const [isWithdrawing, setIsWithdrawing] = useState(false);
 
     // Sort setup
     const sortByList = [
@@ -97,7 +112,72 @@ export default function MyTicketsPage() {
         { id: "used", label: t("tab_used") },
         { id: "minting", label: t("tab_minting") },
         { id: "reselling", label: t("tab_reselling") },
+        { id: "withdrawn", label: t("tab_withdrawn") },
     ];
+
+    const handleCancelClick = (listingCode: string) => {
+        setListingToCancel(listingCode);
+        setCancelModalOpen(true);
+    };
+
+    const executeCancelResell = async () => {
+        if (!listingToCancel) return;
+        setIsCancelling(true);
+        try {
+            const response = await api.post(`/order-service/api/v1/resale/listings/${listingToCancel}/cancel`);
+            if (response.data && response.data.status === 200) {
+                toast.success(t('cancel_resell_success'));
+                fetchTickets();
+            }
+        } catch (error) {
+            console.error("Failed to cancel resell", error);
+            toast.error(t('cancel_resell_failed'));
+        } finally {
+            setIsCancelling(false);
+            setCancelModalOpen(false);
+            setListingToCancel(null);
+        }
+    };
+
+    const handleWithdrawClick = (ticketId: number, tokenId: string) => {
+        setSelectedWithdrawTicket({ id: ticketId, tokenId });
+        setPersonalWallet("");
+        setWithdrawModalOpen(true);
+    };
+
+    const handleWithdrawNext = () => {
+        if (!personalWallet || personalWallet.trim() === "") {
+            toast.error(locale === 'vi' ? 'Vui lòng nhập địa chỉ ví cá nhân' : 'Please enter your personal wallet address');
+            return;
+        }
+        setWithdrawModalOpen(false);
+        setWithdrawConfirmModalOpen(true);
+    };
+
+    const executeWithdraw = async () => {
+        if (!selectedWithdrawTicket) return;
+        setIsWithdrawing(true);
+        try {
+            const response = await api.post(`/order-service/api/v1/tickets/withdraw`, {
+                personalWallet: personalWallet.trim(),
+                tokenId: selectedWithdrawTicket.tokenId
+            });
+            if (response.data && response.data.status === 'Accepted') {
+                toast.success(response.data?.message || t('withdraw_success') || "Withdrawal successful");
+                fetchTickets();
+            } else {
+                toast.error(response.data?.message || t('withdraw_failed') || "Withdrawal failed");
+            }
+        } catch (error: any) {
+            console.error("Failed to withdraw ticket", error);
+            const msg = error.response?.data?.message || t('withdraw_failed') || "Withdrawal failed";
+            toast.error(msg);
+        } finally {
+            setIsWithdrawing(false);
+            setWithdrawConfirmModalOpen(false);
+            setSelectedWithdrawTicket(null);
+        }
+    };
 
     const fetchTickets = async () => {
         setIsLoading(true);
@@ -143,10 +223,11 @@ export default function MyTicketsPage() {
             let matchTab = false;
             switch (activeTab) {
                 case "all": matchTab = true; break;
-                case "upcoming": matchTab = ticket.status === 'active'; break;
-                case "used": matchTab = ticket.status === 'used'; break;
-                case "minting": matchTab = ticket.status === 'minting'; break;
-                case "reselling": matchTab = ticket.status === 'on_sale'; break;
+                case "upcoming": matchTab = ticket.ticketAccessStatus === 'VALID'; break;
+                case "used": matchTab = ticket.ticketAccessStatus === 'USED' || ticket.ticketAccessStatus === 'CHECKED_IN'; break;
+                case "minting": matchTab = ticket.ticketChainStatus === 'MINT_PENDING'; break;
+                case "reselling": matchTab = ticket.ticketAccessStatus === 'LOCKED_RESALE'; break;
+                case "withdrawn": matchTab = ticket.ticketAccessStatus === 'WITHDRAWN'; break;
                 default: matchTab = true;
             }
 
@@ -175,10 +256,11 @@ export default function MyTicketsPage() {
             finalTickets = event.tickets.filter((ticket: any) => {
                 switch (activeTab) {
                     case "all": return true;
-                    case "upcoming": return ticket.status === 'active';
-                    case "used": return ticket.status === 'used';
-                    case "minting": return ticket.status === 'minting';
-                    case "reselling": return ticket.status === 'on_sale';
+                    case "upcoming": return ticket.ticketAccessStatus === 'VALID';
+                    case "used": return ticket.ticketAccessStatus === 'USED' || ticket.ticketAccessStatus === 'CHECKED_IN';
+                    case "minting": return ticket.ticketChainStatus === 'MINT_PENDING';
+                    case "reselling": return ticket.ticketAccessStatus === 'LOCKED_RESALE';
+                    case "withdrawn": return ticket.ticketAccessStatus === 'WITHDRAWN';
                     default: return true;
                 }
             });
@@ -223,9 +305,11 @@ export default function MyTicketsPage() {
                     <h1 className="text-3xl font-bold text-text-primary mb-1">{t('page_title')}</h1>
                     <p className="text-sm text-text-secondary">{t('page_subtitle')}</p>
                 </div>
-                <button className="bg-button-secondary-bg-default hover:bg-button-secondary-bg-hover text-button-secondary-text-default border border-button-secondary-border-default px-4 py-2 rounded-lg outline-none font-medium transition-colors text-sm flex items-center gap-2">
-                    <Ticket size={16} className="text-button-secondary-text-default" /> {t('explore_events')}
-                </button>
+                <Link href={`/${locale}/user/events`}>
+                    <button className="bg-button-secondary-bg-default hover:bg-button-secondary-bg-hover text-button-secondary-text-default border border-button-secondary-border-default px-4 py-2 rounded-lg outline-none font-medium transition-colors text-sm flex items-center gap-2">
+                        <Ticket size={16} className="text-button-secondary-text-default" /> {t('explore_events')}
+                    </button>
+                </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -328,10 +412,10 @@ export default function MyTicketsPage() {
                         <p className="text-sm text-text-secondary w-3/4 max-w-md">{t('empty_subtitle')}</p>
                     </div>
                 ) : (
-                    filteredEvents.map((event) => {
+                    filteredEvents.map((event, index) => {
                         const isExpanded = expandedEvents.includes(event.id);
                         return (
-                            <div key={event.id} className="bg-bg-surface border border-border-default rounded-lg overflow-hidden shadow-sm">
+                            <div key={event.id || event.orderId || `event-${index}`} className="bg-bg-surface border border-border-default rounded-lg overflow-hidden shadow-sm">
                                 <div className="p-4 sm:p-6 flex flex-col md:flex-row gap-4 justify-between md:items-center">
                                     <div className="flex-1 max-w-sm">
                                         <h3 className="font-semibold text-[15px] text-text-primary mb-1">{event.eventName}</h3>
@@ -368,11 +452,11 @@ export default function MyTicketsPage() {
                                         </div>
 
                                         <div className="space-y-3 relative z-10 w-full overflow-visible">
-                                            {event.tickets.map((ticket: any) => {
+                                            {event.tickets.map((ticket: any, ticketIndex: number) => {
                                                 const isTicketExpanded = expandedTickets.includes(ticket.id);
 
                                                 return (
-                                                    <div key={ticket.id} className="bg-bg-surface border border-border-default rounded-ds-md overflow-hidden relative">
+                                                    <div key={ticket.id || ticket.ticketAssetId || `ticket-${ticketIndex}`} className="bg-bg-surface border border-border-default rounded-ds-md overflow-hidden relative">
                                                         <div className="p-4 sm:px-6 sm:py-4 flex flex-col md:flex-row gap-4 justify-between md:items-center">
                                                             <div className="w-full md:w-1/4 shrink-0">
                                                                 <h5 className="font-bold text-text-primary text-[13px] mb-1">{ticket.ticketName}</h5>
@@ -380,7 +464,7 @@ export default function MyTicketsPage() {
                                                             </div>
 
                                                             <div className="w-full md:w-1/3 flex flex-col gap-1 text-[11px]">
-                                                                {ticket.status === 'on_sale' ? (
+                                                                {ticket.ticketAccessStatus === 'LOCKED_RESALE' ? (
                                                                     <div>
                                                                         <span className="text-text-muted">{t('listing_id')} </span>
                                                                         <span className="text-text-primary font-medium">{ticket.listingCode}</span>
@@ -396,42 +480,70 @@ export default function MyTicketsPage() {
                                                                     <span className="text-text-primary font-medium">{ticket.tokenId}</span>
                                                                 </div>
                                                                 <div className="mt-1 flex items-center gap-2">
-                                                                    {ticket.status === 'minting' && (
+                                                                    {ticket.ticketChainStatus === 'MINT_PENDING' && (
                                                                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-border-default bg-bg-surface text-text-muted text-[10px] font-medium whitespace-nowrap">
                                                                             <Loader2 size={10} className="animate-spin" /> {t('minting')}
                                                                         </span>
                                                                     )}
-                                                                    {ticket.status === 'active' && (
+                                                                    {ticket.ticketAccessStatus === 'VALID' && (
                                                                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-feedback-success-border bg-feedback-success-bg text-feedback-success-text text-[10px] font-medium whitespace-nowrap">
                                                                             <CheckCircle2 size={10} /> {t('valid')}
                                                                         </span>
                                                                     )}
-                                                                    {ticket.status === 'on_sale' && (
+                                                                    {ticket.ticketAccessStatus === 'LOCKED_RESALE' && (
                                                                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-feedback-warning-border bg-feedback-warning-bg text-feedback-warning-text text-[10px] font-medium whitespace-nowrap">
                                                                             {t('tab_reselling')}
                                                                         </span>
                                                                     )}
-                                                                    {ticket.status === 'used' && (
+                                                                    {ticket.ticketAccessStatus === 'USED' && (
                                                                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-border-default bg-secondary text-text-muted text-[10px] font-medium whitespace-nowrap">
-                                                                            {t('tab_used')}
+                                                                            <History size={10} /> {t('tab_used')}
+                                                                        </span>
+                                                                    )}
+                                                                    {ticket.ticketAccessStatus === 'CHECKED_IN' && (
+                                                                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-feedback-success-border bg-feedback-success-bg text-feedback-success-text text-[10px] font-medium whitespace-nowrap">
+                                                                            <CheckLineIcon size={10} /> {t('tab_checked_in') || 'Checked In'}
+                                                                        </span>
+                                                                    )}
+                                                                    {ticket.ticketAccessStatus === 'WITHDRAWN' && (
+                                                                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-border-default bg-secondary text-text-muted text-[10px] font-medium whitespace-nowrap">
+                                                                            {t('tab_withdrawn') || 'Withdrawn'}
                                                                         </span>
                                                                     )}
                                                                 </div>
                                                             </div>
 
                                                             <div className="flex items-center justify-end gap-2 shrink-0 md:flex-1 w-full md:w-auto relative z-20">
-                                                                <button
-                                                                    onClick={() => fetchQRToken(ticket.id)}
-                                                                    className="bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors shadow-sm whitespace-nowrap"
-                                                                >
-                                                                    {t('view_qr')}
-                                                                </button>
-                                                                {ticket.status !== 'on_sale' && (
+                                                                {ticket.ticketAccessStatus === 'VALID' && !ticket.ticketChainStatus?.includes('PENDING') && (
+                                                                    <button
+                                                                        onClick={() => fetchQRToken(ticket.id)}
+                                                                        className="bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors shadow-sm whitespace-nowrap"
+                                                                    >
+                                                                        {t('view_qr')}
+                                                                    </button>
+                                                                )}
+                                                                {ticket.ticketAccessStatus !== 'LOCKED_RESALE' && ticket.ticketAccessStatus !== 'CHECKED_IN' && ticket.ticketAccessStatus !== 'USED' && ticket.ticketAccessStatus !== 'WITHDRAWN' && !ticket.ticketChainStatus?.includes('PENDING') && (
                                                                     <Link href={`/${locale}/user/tickets/${ticket.id}/resell`}>
                                                                         <button className="bg-button-ghost-bg-default hover:bg-button-ghost-bg-hover text-button-ghost-text-default border border-button-ghost-border-default px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap block">
                                                                             {t('resell_button')}
                                                                         </button>
                                                                     </Link>
+                                                                )}
+                                                                {ticket.ticketAccessStatus === 'USED' && !ticket.ticketChainStatus?.includes('PENDING') && (
+                                                                    <button
+                                                                        onClick={() => handleWithdrawClick(ticket.id, ticket.tokenId)}
+                                                                        className="bg-transparent border border-button-primary-bg-default text-button-primary-bg-default hover:bg-button-primary-bg-default/10 px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap block"
+                                                                    >
+                                                                        {t('withdraw_button') || 'Withdraw'}
+                                                                    </button>
+                                                                )}
+                                                                {ticket.ticketAccessStatus === 'LOCKED_RESALE' && !ticket.ticketChainStatus?.includes('PENDING') && (
+                                                                    <button
+                                                                        onClick={() => handleCancelClick(ticket.listingCode)}
+                                                                        className="bg-feedback-error-bg/10 hover:bg-feedback-error-bg/20 text-feedback-error-text border border-feedback-error-border px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors whitespace-nowrap block"
+                                                                    >
+                                                                        {t('cancel_resell')}
+                                                                    </button>
                                                                 )}
                                                                 <button
                                                                     onClick={() => toggleTicket(ticket.id)}
@@ -458,11 +570,11 @@ export default function MyTicketsPage() {
                                                                             <div className="font-medium text-text-primary pl-2 text-right">{ticket.tokenId}</div>
 
                                                                             <div className="text-text-muted">{t('ticket_status')}</div>
-                                                                            <div className="font-medium text-text-primary pl-2 text-right">{ticket.status.toUpperCase().replace(/_/g, ' ')}</div>
-                                                                            {ticket.status === 'on_sale' &&
+                                                                            <div className="font-medium text-text-primary pl-2 text-right">{ticket.ticketAccessStatus.replace(/_/g, ' ')}</div>
+                                                                            {ticket.ticketAccessStatus === 'LOCKED_RESALE' &&
                                                                                 <div className="text-text-muted">{t('listing_price')}</div>
                                                                             }
-                                                                            {ticket.status === 'on_sale' &&
+                                                                            {ticket.ticketAccessStatus === 'LOCKED_RESALE' &&
                                                                                 <div className="font-medium text-text-primary pl-2 text-right">{ticket.listingPrice}</div>
                                                                             }
                                                                             <div className="text-text-muted">{t('qr_status')}</div>
@@ -603,6 +715,230 @@ export default function MyTicketsPage() {
                                                 </p>
                                             </div>
                                         </div>
+                                    </div>
+                                </DialogPanel>
+                            </TransitionChild>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+            {/* Cancel Resell Confirmation Modal */}
+            <Transition appear show={cancelModalOpen} as={React.Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={() => !isCancelling && setCancelModalOpen(false)}>
+                    <TransitionChild
+                        as={React.Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+                    </TransitionChild>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                            <TransitionChild
+                                as={React.Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-bg-surface p-6 text-left align-middle shadow-xl transition-all border border-border-default">
+                                    <DialogTitle
+                                        as="h3"
+                                        className="text-lg font-bold leading-6 text-text-primary mb-4"
+                                    >
+                                        {locale === 'vi' ? 'Xác nhận hủy niêm yết' : 'Confirm Cancel Listing'}
+                                    </DialogTitle>
+                                    <div className="mt-2">
+                                        <p className="text-sm text-text-secondary mb-6">
+                                            {locale === 'vi'
+                                                ? 'Bạn có chắc chắn muốn hủy niêm yết vé này không? Sau khi hủy, vé sẽ được trả về trạng thái bình thường và bạn có thể sử dụng lại vé này.'
+                                                : 'Are you sure you want to cancel this listing? Once canceled, the ticket will be returned to normal status and you can use it again.'}
+                                        </p>
+                                    </div>
+
+                                    <div className="mt-4 flex gap-3 justify-end">
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 border border-border-default rounded-lg text-sm font-semibold text-text-secondary hover:bg-bg-subtle transition-colors"
+                                            onClick={() => setCancelModalOpen(false)}
+                                            disabled={isCancelling}
+                                        >
+                                            {locale === 'vi' ? 'Hủy bỏ' : 'Cancel'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 bg-feedback-error-bg hover:opacity-90 text-feedback-error-text rounded-lg text-sm font-bold transition-opacity flex items-center justify-center gap-2 min-w-[120px]"
+                                            onClick={executeCancelResell}
+                                            disabled={isCancelling}
+                                        >
+                                            {isCancelling ? (
+                                                <>
+                                                    <Loader2 size={16} className="animate-spin" />
+                                                    {locale === 'vi' ? 'Đang xử lý...' : 'Processing...'}
+                                                </>
+                                            ) : (
+                                                locale === 'vi' ? 'Xác nhận hủy' : 'Confirm Cancel'
+                                            )}
+                                        </button>
+                                    </div>
+                                </DialogPanel>
+                            </TransitionChild>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+
+            {/* Withdraw Enter Wallet Modal */}
+            <Transition appear show={withdrawModalOpen} as={React.Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={() => setWithdrawModalOpen(false)}>
+                    <TransitionChild
+                        as={React.Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+                    </TransitionChild>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                            <TransitionChild
+                                as={React.Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-bg-surface p-6 text-left align-middle shadow-xl transition-all border border-border-default">
+                                    <DialogTitle
+                                        as="h3"
+                                        className="text-lg font-bold leading-6 text-text-primary mb-4"
+                                    >
+                                        {locale === 'vi' ? 'Rút vé về ví cá nhân' : 'Withdraw ticket to personal wallet'}
+                                    </DialogTitle>
+                                    <div className="mt-2">
+                                        <p className="text-sm text-text-secondary mb-4">
+                                            {locale === 'vi'
+                                                ? 'Vui lòng nhập địa chỉ ví cá nhân (personal wallet) của bạn để nhận Token NFT của vé này.'
+                                                : 'Please enter your personal wallet address to receive the NFT Token for this ticket.'}
+                                        </p>
+                                        <input
+                                            type="text"
+                                            className="w-full px-4 py-2 border border-border-strong rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-button-primary-bg-default focus:border-button-primary-bg-default bg-bg-surface text-text-primary"
+                                            placeholder="0x..."
+                                            value={personalWallet}
+                                            onChange={(e) => setPersonalWallet(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="mt-6 flex gap-3 justify-end">
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 border border-border-default rounded-lg text-sm font-semibold text-text-secondary hover:bg-bg-subtle transition-colors"
+                                            onClick={() => setWithdrawModalOpen(false)}
+                                        >
+                                            {locale === 'vi' ? 'Hủy bỏ' : 'Cancel'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 bg-button-primary-bg-default hover:opacity-90 text-button-primary-text-default rounded-lg text-sm font-bold transition-opacity flex items-center justify-center min-w-[100px]"
+                                            onClick={handleWithdrawNext}
+                                        >
+                                            {locale === 'vi' ? 'Tiếp tục' : 'Next'}
+                                        </button>
+                                    </div>
+                                </DialogPanel>
+                            </TransitionChild>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+
+            {/* Withdraw Confirm Modal */}
+            <Transition appear show={withdrawConfirmModalOpen} as={React.Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={() => !isWithdrawing && setWithdrawConfirmModalOpen(false)}>
+                    <TransitionChild
+                        as={React.Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+                    </TransitionChild>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                            <TransitionChild
+                                as={React.Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-bg-surface p-6 text-left align-middle shadow-xl transition-all border border-border-default">
+                                    <DialogTitle
+                                        as="h3"
+                                        className="text-lg font-bold leading-6 text-text-primary mb-4"
+                                    >
+                                        {locale === 'vi' ? 'Xác nhận rút vé' : 'Confirm Withdrawal'}
+                                    </DialogTitle>
+                                    <div className="mt-2 space-y-3">
+                                        <p className="text-sm text-text-secondary">
+                                            {locale === 'vi'
+                                                ? 'Bạn sắp rút vé này về địa chỉ ví cá nhân sau:'
+                                                : 'You are about to withdraw this ticket to the following personal wallet address:'}
+                                        </p>
+                                        <div className="p-3 bg-bg-subtle border border-border-default rounded-lg break-all">
+                                            <span className="font-mono text-sm font-semibold text-text-primary">{personalWallet}</span>
+                                        </div>
+                                        <p className="text-xs text-text-muted mt-2">
+                                            {locale === 'vi'
+                                                ? 'Lưu ý: Quá trình rút vé không thể hoàn tác. Token NFT sẽ được chuyển thẳng về ví cá nhân của bạn.'
+                                                : 'Note: This action cannot be undone. The NFT Token will be transferred directly to your personal wallet.'}
+                                        </p>
+                                    </div>
+
+                                    <div className="mt-6 flex gap-3 justify-end">
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 border border-border-default rounded-lg text-sm font-semibold text-text-secondary hover:bg-bg-subtle transition-colors"
+                                            onClick={() => setWithdrawConfirmModalOpen(false)}
+                                            disabled={isWithdrawing}
+                                        >
+                                            {locale === 'vi' ? 'Quay lại' : 'Back'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 bg-button-primary-bg-default hover:opacity-90 text-button-primary-text-default rounded-lg text-sm font-bold transition-opacity flex items-center justify-center gap-2 min-w-[120px]"
+                                            onClick={executeWithdraw}
+                                            disabled={isWithdrawing}
+                                        >
+                                            {isWithdrawing ? (
+                                                <>
+                                                    <Loader2 size={16} className="animate-spin" />
+                                                    {locale === 'vi' ? 'Đang xử lý...' : 'Processing...'}
+                                                </>
+                                            ) : (
+                                                locale === 'vi' ? 'Xác nhận rút' : 'Confirm Withdraw'
+                                            )}
+                                        </button>
                                     </div>
                                 </DialogPanel>
                             </TransitionChild>

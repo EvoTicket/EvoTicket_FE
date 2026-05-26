@@ -160,6 +160,13 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                     <div className="grid grid-cols-1 gap-6">
                         {ticketOptions.map((ticket: any) => {
                             const isSoldOut = (ticket.quantityAvailable <= 0);
+                            const now = new Date().getTime();
+                            const saleStart = new Date(ticket.saleStartDate).getTime();
+                            const saleEnd = new Date(ticket.saleEndDate).getTime();
+                            const isUpcoming = now < saleStart;
+                            const isEnded = now > saleEnd;
+                            const isUnavailable = isSoldOut || isUpcoming || isEnded;
+
                             const quantity = selectedTickets.find(t => t.id === ticket.ticketTypeId)?.quantity || 0;
                             const maxPurchase = ticket.maxPurchase > 0 ? Math.min(ticket.maxPurchase, ticket.quantityAvailable || Infinity) : (ticket.quantityAvailable || Infinity);
 
@@ -167,9 +174,9 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                                 <div key={ticket.ticketTypeId} className="border border-border-default rounded-ds-xl p-4 bg-bg-surface">
                                     <div className="flex justify-between items-start mb-2">
                                         <div>
-                                            <h4 className={`text-xl font-semibold text-body-large ${isSoldOut ? 'text-text-muted' : 'text-ticket-card-text-title'}`}>{ticket.typeName}</h4>
-                                            <p className={`text-lg mt-1 ${isSoldOut ? 'text-text-muted' : 'text-ticket-card-text-meta '}`}>{ticket.description}</p>
-                                            {(!isSoldOut && (ticket.minPurchase > 1 || ticket.maxPurchase > 0)) && (
+                                            <h4 className={`text-xl font-semibold text-body-large ${isUnavailable ? 'text-text-muted' : 'text-ticket-card-text-title'}`}>{ticket.typeName}</h4>
+                                            <p className={`text-lg mt-1 ${isUnavailable ? 'text-text-muted' : 'text-ticket-card-text-meta '}`}>{ticket.description}</p>
+                                            {(!isUnavailable && (ticket.minPurchase > 1 || ticket.maxPurchase > 0)) && (
                                                 <p className="text-[11px] mt-1 font-medium text-button-primary-bg-default">
                                                     {ticket.minPurchase > 1 && t("min_purchase", { min: ticket.minPurchase })}
                                                     {ticket.maxPurchase > 0 && t("max_purchase", { max: ticket.maxPurchase })}
@@ -179,6 +186,10 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
 
                                         {isSoldOut ? (
                                             <div className="bg-button-destructive-bg-default text-text-on-error px-3 py-1 rounded text-sm font-semibold">{t("sold_out")}</div>
+                                        ) : isUpcoming ? (
+                                            <div className="bg-bg-subtle text-text-muted px-3 py-1 rounded text-sm font-semibold border border-border-default">{t("sale_upcoming")}</div>
+                                        ) : isEnded ? (
+                                            <div className="bg-bg-subtle text-text-muted px-3 py-1 rounded text-sm font-semibold border border-border-default">{t("sale_ended")}</div>
                                         ) : (
                                             <div className="flex items-center gap-4 border border-border-strong rounded-checkbox-radius p-1">
                                                 <button
@@ -200,12 +211,18 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                                         )}
                                     </div>
 
-                                    <div className={`font-semibold text-body-base ${isSoldOut ? 'text-text-muted' : 'text-alert-warning-text'}`}>
+                                    <div className={`font-semibold text-body-base ${isUnavailable ? 'text-text-muted' : 'text-alert-warning-text'}`}>
                                         {ticket.price.toLocaleString("vi-VN")} VND
                                     </div>
-                                    <div className="mt-4 pt-4 border-t border-border-subtle flex justify-between items-center text-xs">
-                                        <span className="text-button-primary-bg-default font-semibold hover:underline cursor-pointer">{t("view_conditions")}</span>
-                                        {/* icon dropdown */}
+                                    <div className="mt-4 pt-4 border-t border-border-subtle flex flex-col md:flex-row md:justify-end items-start md:items-center text-xs gap-2">
+                                        <div className="text-text-secondary flex gap-1 flex-wrap">
+                                            <span className="font-medium">{t("sale_time", { defaultMessage: "Mở bán:" })}</span>
+                                            <span>
+                                                {formatTime(ticket.saleStartDate)} {new Date(ticket.saleStartDate).toLocaleDateString('vi-VN')}
+                                                {' - '}
+                                                {formatTime(ticket.saleEndDate)} {new Date(ticket.saleEndDate).toLocaleDateString('vi-VN')}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             );
@@ -263,7 +280,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                                 ) : (
                                     selectedTickets.map(ticket => (
                                         <div key={ticket.id} className="  flex gap-3 relative group">
-                                            <div className="flex-1 space-y-1 border-r pr-tab-padding-x">
+                                            <div className="flex-1 space-y-1 border-r pr-2">
                                                 <div className="flex justify-between text-sm">
                                                     <span className="text-payment-summary-text-body">{t("ticket_type_label")}</span>
                                                     <span className="font-medium text-payment-summary-text-title">{ticket.name}</span>
@@ -274,7 +291,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                                                 </div>
                                                 <div className="flex justify-between text-sm pt-1">
                                                     <span className="text-payment-summary-text-body">{t("price_label")}</span>
-                                                    <span className="font-medium text-payment-summary-text-title">{(ticket.price * ticket.quantity).toLocaleString("vi-VN")}đ</span>
+                                                    <span className="font-medium text-payment-summary-text-title">{(ticket.price).toLocaleString("vi-VN")}đ</span>
                                                 </div>
                                             </div>
                                             <button

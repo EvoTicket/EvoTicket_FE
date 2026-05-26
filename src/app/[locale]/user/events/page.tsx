@@ -56,6 +56,7 @@ export default function EventsPage() {
     const [endDate, setEndDate] = useState<Date | null>(
         searchParams?.get("toDate") ? new Date(searchParams.get("toDate")!) : null
     );
+    const [fetchTrigger, setFetchTrigger] = useState(0);
     const [provinces, setProvinces] = useState<Province[]>([]);
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     // const [openSelectLocation, setOpenSelectLocation] = useState(false);
@@ -101,7 +102,8 @@ export default function EventsPage() {
 
     useEffect(() => {
         fetchEvents(page === 1);
-    }, [page, sortBy, selectedProvince, startDate, endDate, selectedCategories, keyword]); // Trigger fetch khi bất kỳ bộ lọc nào thay đổi
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [page, sortBy, fetchTrigger]); // Chỉ tự động fetch khi đổi trang, cách sắp xếp, hoặc ấn Apply
 
     useEffect(() => {
         if (suggestedEvents.length === 0) {
@@ -112,7 +114,7 @@ export default function EventsPage() {
 
     const isFilterApplied = Boolean(
         keyword ||
-        selectedProvince ||
+        (selectedProvince && selectedProvince.code !== "all") ||
         startDate ||
         endDate ||
         selectedCategories.length > 0 ||
@@ -237,8 +239,11 @@ export default function EventsPage() {
     };
 
     const handleApplyFilters = () => {
-        setPage(1);
-        fetchEvents(true);
+        if (page !== 1) {
+            setPage(1);
+        } else {
+            setFetchTrigger(prev => prev + 1);
+        }
     };
 
     const clearFilters = () => {
@@ -251,8 +256,11 @@ export default function EventsPage() {
         setPriceTo("");
         setTicketStatuses([]);
         setSelectedDateFilter(null);
-        setPage(1);
-        setTimeout(() => fetchEvents(true), 0);
+        if (page !== 1) {
+            setPage(1);
+        } else {
+            setFetchTrigger(prev => prev + 1);
+        }
     };
 
     const loadMore = useCallback(() => {
@@ -360,7 +368,8 @@ export default function EventsPage() {
                             </span>
                         </Link>
                     </div>
-                    <p className="text-text-secondary">
+
+                    <p className="text-text-secondary mt-2">
                         {t("results_count", {
                             count: totalElements,
                             keyword: keyword ? `"${keyword}"` : t("all_events")
@@ -375,10 +384,10 @@ export default function EventsPage() {
                                 <button onClick={() => { setKeyword(""); handleApplyFilters(); }} className="hover:text-button-primary-bg-default"><X size={14} /></button>
                             </div>
                         )}
-                        {selectedProvince && (
+                        {selectedProvince && selectedProvince.code !== "all" && (
                             <div className="flex items-center gap-2 px-3 py-1.5 text-text-primary border border-border-default rounded-full text-sm">
-                                <span>{provinces.find(p => p.code === selectedProvince.code)?.name}</span>
-                                <button onClick={() => { setSelectedProvince(""); handleApplyFilters(); }} className="hover:text-button-primary-bg-default"><X size={14} /></button>
+                                <span>{provinces.find(p => p.code === selectedProvince.code)?.name || selectedProvince.name}</span>
+                                <button onClick={() => { setSelectedProvince({ code: "all", name: t("location_all") || "Tất cả địa điểm" }); handleApplyFilters(); }} className="hover:text-button-primary-bg-default"><X size={14} /></button>
                             </div>
                         )}
                         {(startDate || endDate) && (
@@ -400,6 +409,33 @@ export default function EventsPage() {
                                 }} className="hover:text-button-primary-bg-default"><X size={14} /></button>
                             </div>
                         ))}
+                    </div>
+
+                    {/* Search Bar */}
+                    <div className="flex flex-col gap-4 max-w-full mt-2 mb-6">
+                        <div className="flex flex-col md:flex-row gap-4 items-center">
+                            <div className="relative flex-1 w-full">
+                                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-text-secondary">
+                                    <Search size={18} />
+                                </div>
+                                <input
+                                    type="text"
+                                    className="w-full pl-10 pr-4 py-3 bg-bg-surface text-text-primary rounded-ds-lg border border-border-default focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
+                                    placeholder={t("search_placeholder", { defaultMessage: "Tìm kiếm sự kiện..." })}
+                                    value={keyword}
+                                    onChange={(e) => setKeyword(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") handleApplyFilters();
+                                    }}
+                                />
+                            </div>
+                            <button
+                                onClick={() => handleApplyFilters()}
+                                className="w-full md:w-auto px-8 py-3 font-semibold text-button-primary-text-default bg-button-primary-bg-default border border-transparent rounded-ds-lg hover:bg-button-primary-bg-hover transition-colors cursor-pointer"
+                            >
+                                {t("search_button", { defaultMessage: "Tìm kiếm" })}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="h-px w-full bg-border"></div>
@@ -458,7 +494,7 @@ export default function EventsPage() {
                                                 text-text-primary outline-none
                                                 focus:ring-1 focus:ring-button-primary-bg-default focus:border-button-primary-bg-default 
                                                 cursor-pointer transition-colors text-left">
-                                            {selectedProvince?.name || "Địa điểm"}
+                                            {selectedProvince?.name || t("location_all")}
                                         </ListboxButton>
 
                                         <ListboxOptions
@@ -480,6 +516,13 @@ export default function EventsPage() {
                                                     <CheckIcon className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-button-primary-bg-default ml-2" />
                                                 </ListboxOption>
                                             ))}
+                                            <ListboxOption
+                                                value={""}
+                                                className="
+                                                        group flex items-center justify-between px-3 py-2 cursor-pointer
+                                                        hover:bg-secondary rounded-ds-md">
+                                                <span>{t("location_all")}</span>
+                                            </ListboxOption>
                                         </ListboxOptions>
                                     </Listbox>
                                 </div>
@@ -667,19 +710,19 @@ export default function EventsPage() {
                                 </div>
 
                                 {/* Icon chuyển đổi Grid / List */}
-                                <div className="flex border border-border-default rounded-ds-lg overflow-hidden bg-bg-page">
+                                <div className="flex border border-border-default rounded-ds-lg overflow-hidden bg-bg-page shrink-0">
                                     <button
-                                        className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-bg-surface-strong text-button-primary-text-default' : 'text-text-muted hover:bg-secondary'}`}
+                                        className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-bg-inverse text-text-inverse' : 'text-text-muted hover:bg-secondary'}`}
                                         onClick={() => setViewMode("grid")}
                                     >
-                                        <LayoutGrid size={18} />
+                                        <LayoutGrid size={16} />
                                     </button>
-                                    <div className="w-px bg-border"></div>
+                                    <div className="w-px bg-border-strong"></div>
                                     <button
-                                        className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-bg-surface-strong text-button-primary-text-default' : 'text-text-muted hover:bg-secondary'}`}
+                                        className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-bg-inverse text-text-inverse' : 'text-text-muted hover:bg-secondary'}`}
                                         onClick={() => setViewMode("list")}
                                     >
-                                        <ListIcon size={18} />
+                                        <ListIcon size={16} />
                                     </button>
                                 </div>
                             </div>

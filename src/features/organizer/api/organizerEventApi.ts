@@ -61,7 +61,10 @@ function normalizeParams(params?: OrganizerEventListParams) {
   return {
     ...params,
     page: Math.max(params.page ?? 1, 1),
-    size: Math.min(Math.max(params.size ?? 20, 1), 100),
+    // No upper cap — caller (e.g. OrganizerCenterPage) may request a large
+    // page (e.g. 200) so that all events are fetched at once and tab
+    // filtering is done purely on the client without extra API calls.
+    size: Math.max(params.size ?? 20, 1),
     sort: params.sort ?? "NEWEST",
   };
 }
@@ -122,4 +125,52 @@ export const organizerEventApi = {
 
     return response.data?.data === true;
   },
+
+  async getCurrentDrafts(): Promise<{ count: number }> {
+    const response = await api.get<BaseResponse<{ count: number }>>(
+      "/inventory-service/api/events/count/current-draft"
+    );
+    return response.data?.data ?? { count: 0 };
+  },
+
+  async initDraft(): Promise<{ eventId: number }> {
+    const response = await api.post<BaseResponse<{ eventId: number }>>(
+      "/inventory-service/api/events/draft"
+    );
+    return response.data?.data as { eventId: number };
+  },
+
+  async getDraft(id: number | string): Promise<any> {
+    const response = await api.get<BaseResponse<any>>(
+      `/inventory-service/api/events/${id}/draft`
+    );
+    return response.data?.data;
+  },
+
+  async updateDraftStep(id: number | string, step: number, data: any): Promise<boolean> {
+    const formData = new FormData();
+
+    // Check if data is already FormData (e.g. from step 1 with files)
+    if (data instanceof FormData) {
+      const response = await api.put<BaseResponse<boolean>>(
+        `/inventory-service/api/events/${id}/draft/step-${step}`,
+        data,
+        { headers: { "Content-Type": undefined } }
+      );
+      return response.data?.data === true;
+    }
+
+    const response = await api.put<BaseResponse<boolean>>(
+      `/inventory-service/api/events/${id}/draft/step-${step}`,
+      data
+    );
+    return response.data?.data === true;
+  },
+
+  async publishDraft(id: number | string): Promise<boolean> {
+    const response = await api.post<BaseResponse<boolean>>(
+      `/inventory-service/api/events/${id}/publish`
+    );
+    return response.data?.data === true;
+  }
 };

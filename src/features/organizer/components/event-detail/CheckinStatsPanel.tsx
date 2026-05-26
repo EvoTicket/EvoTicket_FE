@@ -1,7 +1,10 @@
 import { CHECKIN_GATES } from "@/src/features/organizer/fixtures/eventDetail";
 import { OrganizerStatusBadge } from "../common/OrganizerStatusBadge";
+import { useTranslations } from "next-intl";
 
 export function CheckinStatsPanel() {
+  const t = useTranslations("Organizer.EventDetail.Checkin");
+
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
       {CHECKIN_GATES.map((gate) => (
@@ -18,11 +21,11 @@ export function CheckinStatsPanel() {
           </div>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <div className="text-text-muted">Scanned</div>
+              <div className="text-text-muted">{t("scanned")}</div>
               <div className="mt-1 text-xl font-semibold text-text-primary">{gate.scanned}</div>
             </div>
             <div>
-              <div className="text-text-muted">Rejected</div>
+              <div className="text-text-muted">{t("rejected")}</div>
               <div className="mt-1 text-xl font-semibold text-text-primary">{gate.rejected}</div>
             </div>
           </div>

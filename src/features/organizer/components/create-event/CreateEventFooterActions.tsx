@@ -31,16 +31,6 @@ export function CreateEventFooterActions({ currentStep, totalSteps, onBack, onNe
             </div>
             
             <div className="flex items-center gap-3">
-                <button
-                    type="button"
-                    onClick={onSaveDraft}
-                    disabled={isSubmitting}
-                    className="px-6 py-2 rounded-ds-lg font-medium border border-border-default text-text-primary hover:bg-bg-subtle transition-colors flex items-center gap-2"
-                >
-                    <Save size={18} />
-                    {t("save_draft")}
-                </button>
-                
                 {isLastStep ? (
                     <button
                         type="button"

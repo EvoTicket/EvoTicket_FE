@@ -17,6 +17,8 @@ export function CustomDatePicker({ selectedDate, onChange, width, height }: Cust
   const t = useTranslations("Homepage");
 
   const [currentMonth, setCurrentMonth] = useState(selectedDate || new Date());
+  const [view, setView] = useState<"days" | "months" | "years">("days");
+  const [yearPage, setYearPage] = useState(currentMonth.getFullYear() - 5);
 
   const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
@@ -24,16 +26,28 @@ export function CustomDatePicker({ selectedDate, onChange, width, height }: Cust
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const blanks = Array.from({ length: firstDayOfMonth }, (_, i) => i);
 
-  const prevMonth = (e: React.MouseEvent) => {
+  const prevAction = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+    if (view === "days") {
+      setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+    } else if (view === "months") {
+      setCurrentMonth(new Date(currentMonth.getFullYear() - 1, currentMonth.getMonth(), 1));
+    } else if (view === "years") {
+      setYearPage(yearPage - 12);
+    }
   };
 
-  const nextMonth = (e: React.MouseEvent) => {
+  const nextAction = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+    if (view === "days") {
+      setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+    } else if (view === "months") {
+      setCurrentMonth(new Date(currentMonth.getFullYear() + 1, currentMonth.getMonth(), 1));
+    } else if (view === "years") {
+      setYearPage(yearPage + 12);
+    }
   };
 
   const isSelected = (day: number) => {
@@ -87,56 +101,137 @@ export function CustomDatePicker({ selectedDate, onChange, width, height }: Cust
             <div className="flex justify-between items-center mb-5">
               <button
                 type="button"
-                onClick={prevMonth}
+                onClick={prevAction}
                 className="p-1.5 hover:bg-secondary rounded-ds-lg text-text-muted hover:text-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
                 <ChevronLeft size={18} />
               </button>
-              <span className="font-semibold text-text-primary">
-                {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-              </span>
+              <div className="flex gap-1 items-center font-semibold text-text-primary">
+                {view === "days" && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setView("months")}
+                      className="hover:bg-secondary rounded px-2 py-1 transition-colors focus:outline-none"
+                    >
+                      {monthNames[currentMonth.getMonth()]}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setView("years"); setYearPage(currentMonth.getFullYear() - 5); }}
+                      className="hover:bg-secondary rounded px-2 py-1 transition-colors focus:outline-none"
+                    >
+                      {currentMonth.getFullYear()}
+                    </button>
+                  </>
+                )}
+                {view === "months" && (
+                  <button
+                    type="button"
+                    onClick={() => { setView("years"); setYearPage(currentMonth.getFullYear() - 5); }}
+                    className="hover:bg-secondary rounded px-2 py-1 transition-colors focus:outline-none"
+                  >
+                    {currentMonth.getFullYear()}
+                  </button>
+                )}
+                {view === "years" && (
+                  <span className="px-2 py-1">
+                    {yearPage} - {yearPage + 11}
+                  </span>
+                )}
+              </div>
               <button
                 type="button"
-                onClick={nextMonth}
+                onClick={nextAction}
                 className="p-1.5 hover:bg-secondary rounded-ds-lg text-text-muted hover:text-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
                 <ChevronRight size={18} />
               </button>
             </div>
 
-            <div className="grid grid-cols-7 gap-1.5 mb-2 text-center text-xs font-semibold text-text-muted">
-              {dayNames.map((day) => (
-                <div key={day} className="w-8 h-8 flex items-center justify-center">
-                  {day}
+            {view === "days" && (
+              <>
+                <div className="grid grid-cols-7 gap-1.5 mb-2 text-center text-xs font-semibold text-text-muted">
+                  {dayNames.map((day) => (
+                    <div key={day} className="w-8 h-8 flex items-center justify-center">
+                      {day}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            <div className="grid grid-cols-7 gap-1.5">
-              {blanks.map((_, i) => (
-                <div key={`blank-${i}`} className="w-8 h-8" />
-              ))}
-              {days.map((day) => (
-                <button
-                  key={day}
-                  type="button"
-                  onClick={() => {
-                    onChange(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day));
-                    close();
-                  }}
-                  className={`w-8 h-8 flex items-center justify-center rounded-full text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50
-                    ${isSelected(day)
-                      ? "bg-button-primary-bg-default text-button-primary-text-default font-bold shadow-md shadow-primary/30 scale-105"
-                      : isToday(day)
-                        ? "text-primary font-bold border border-primary/30 bg-button-primary-bg-default/10"
+                <div className="grid grid-cols-7 gap-1.5">
+                  {blanks.map((_, i) => (
+                    <div key={`blank-${i}`} className="w-8 h-8" />
+                  ))}
+                  {days.map((day) => (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => {
+                        onChange(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day));
+                        close();
+                      }}
+                      className={`w-8 h-8 flex items-center justify-center rounded-full text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50
+                        ${isSelected(day)
+                          ? "bg-button-primary-bg-default text-button-primary-text-default font-bold shadow-md shadow-primary/30 scale-105"
+                          : isToday(day)
+                            ? "text-primary font-bold border border-primary/30 bg-button-primary-bg-default/10"
+                            : "text-text-primary hover:bg-secondary hover:text-primary"
+                        }
+                      `}
+                    >
+                      {day}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {view === "months" && (
+              <div className="grid grid-cols-3 gap-2">
+                {monthNames.map((m, i) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => {
+                      setCurrentMonth(new Date(currentMonth.getFullYear(), i, 1));
+                      setView("days");
+                    }}
+                    className={`p-3 rounded-lg text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50
+                      ${currentMonth.getMonth() === i
+                        ? "bg-button-primary-bg-default text-button-primary-text-default font-bold shadow-md shadow-primary/30 scale-105"
                         : "text-text-primary hover:bg-secondary hover:text-primary"
-                    }
-                  `}
-                >
-                  {day}
-                </button>
-              ))}
-            </div>
+                      }
+                    `}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {view === "years" && (
+              <div className="grid grid-cols-3 gap-2">
+                {Array.from({ length: 12 }, (_, i) => yearPage + i).map((y) => (
+                  <button
+                    key={y}
+                    type="button"
+                    onClick={() => {
+                      setCurrentMonth(new Date(y, currentMonth.getMonth(), 1));
+                      setView("months");
+                    }}
+                    className={`p-3 rounded-lg text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50
+                      ${currentMonth.getFullYear() === y
+                        ? "bg-button-primary-bg-default text-button-primary-text-default font-bold shadow-md shadow-primary/30 scale-105"
+                        : "text-text-primary hover:bg-secondary hover:text-primary"
+                      }
+                    `}
+                  >
+                    {y}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="mt-4 pt-3 border-t border-border-default flex justify-end">
               <button

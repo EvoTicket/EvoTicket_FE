@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import api from "@/src/lib/axios";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { categoryApi } from "@/src/features/organizer/api/categoryApi";
 import { locationApi } from "@/src/features/organizer/api/locationApi";
@@ -108,16 +108,16 @@ function buildCreateEventPayload(state: ReturnType<typeof useCreateEventWizard>[
         longitude: state.longitude,
         category: state.category,
         showtimes,
-        
+
         checkInInstruction: state.checkinReminder?.trim(),
         postPurchaseInstruction: state.postPurchaseNotes?.trim(),
         entryGateInstruction: state.gateNotes?.trim(),
         reconciliationNote: state.reconciliationNotes?.trim(),
-        
+
         allowResale: state.allowResale,
         allowMultipleTicketTypesPerOrder: state.allowMultipleTicketTypes,
         allowDiscountCode: state.allowVouchers,
-        
+
         contactEmail: state.organizerEmail?.trim(),
         contactPhone: state.organizerPhone?.trim(),
         bankInfoId: state.selectedProfileId ?? 0,
@@ -127,6 +127,105 @@ function buildCreateEventPayload(state: ReturnType<typeof useCreateEventWizard>[
         event,
         bannerImage: state.bannerImage ?? state.bannerFile,
         thumbnailImage: state.thumbnailImage ?? state.thumbnailFile,
+    };
+}
+
+function buildDraftStepPayload(step: number, state: ReturnType<typeof useCreateEventWizard>["formData"]) {
+    if (step === 1) {
+        return {
+            event: {
+                shortDescription: state.shortDescription.trim(),
+                eventName: state.eventName.trim(),
+                wardCode: state.wardCode,
+                latitude: state.latitude,
+                longitude: state.longitude,
+                venue: state.venue.trim(),
+                eventType: state.eventType,
+                address: state.address.trim(),
+                introduction: state.tagline?.trim() || state.shortDescription.trim(),
+                description: state.detailedDescription.trim(),
+                provinceCode: state.provinceCode,
+                category: state.category
+            },
+            bannerImage: state.bannerImage ?? state.bannerFile,
+            thumbnailImage: state.thumbnailImage ?? state.thumbnailFile,
+            // seatMapImage: undefined
+        };
+    }
+
+    if (step === 2) {
+        const totalSeats = Math.max(1, state.ticketTypes.reduce((sum, ticket) => sum + ticket.quantityTotal, 0));
+        const showtimes = state.showtimes.map((showtime) => {
+            const ticketTypes = state.ticketTypes
+                .filter((ticket) => ticket.showtimeId === showtime.id)
+                .map((ticket) => ({
+                    typeName: ticket.typeName.trim(),
+                    description: ticket.description.trim() || undefined,
+                    price: ticket.price,
+                    quantityTotal: ticket.quantityTotal,
+                    minPurchase: ticket.minPurchase,
+                    maxPurchase: ticket.maxPurchase,
+                    saleStartDate: toLocalDateTime(ticket.saleStartDate),
+                    saleEndDate: toLocalDateTime(ticket.saleEndDate),
+                }));
+
+            return {
+                startDatetime: toLocalDateTime(showtime.startDatetime),
+                endDatetime: toLocalDateTime(showtime.endDatetime),
+                venue: state.venue.trim(),
+                address: state.address.trim(),
+                wardCode: state.wardCode,
+                provinceCode: state.provinceCode,
+                ticketTypes,
+            };
+        });
+
+        return {
+            event: {
+                showtimes,
+                totalSeats
+            },
+            // bannerImage: undefined,
+            // thumbnailImage: undefined,
+            seatMapImage: state.seatMapImage
+        };
+    }
+
+    if (step === 3) {
+        return {
+            // event: {
+            allowMultipleTicketTypesPerOrder: state.allowMultipleTicketTypes,
+            allowDiscountCode: state.allowVouchers,
+            allowResale: state.allowResale,
+            maxResalePricePercentage: state.resaleMaxPriceCap,
+            organizerRoyaltyFeePercentage: state.royaltyFee,
+            postPurchaseInstruction: state.postPurchaseNotes?.trim(),
+            checkInInstruction: state.checkinReminder?.trim(),
+            entryGateInstruction: state.gateNotes?.trim()
+            // },
+            // bannerImage: undefined,
+            // thumbnailImage: undefined,
+            // seatMapImage: undefined
+        };
+    }
+
+    if (step === 4) {
+        return {
+            // event: {
+            bankInfoId: state.selectedProfileId ?? 0,
+            reconciliationNote: state.reconciliationNotes?.trim()
+            // },
+            // bannerImage: undefined,
+            // thumbnailImage: undefined,
+            // seatMapImage: undefined
+        };
+    }
+
+    // For other steps, fallback to the full payload or whatever is appropriate
+    const fullPayload = buildCreateEventPayload(state);
+    return {
+        ...fullPayload,
+        seatMapImage: state.seatMapImage
     };
 }
 
@@ -193,6 +292,9 @@ export default function CreateEventPage() {
     const tValidation = useTranslations("CreateEvent");
     const router = useRouter();
     const params = useParams();
+    const searchParams = useSearchParams();
+    const draftId = searchParams?.get("draftId");
+
     const wizard = useCreateEventWizard();
     const [stepErrors, setStepErrors] = useState<Partial<Record<CreateEventStep, StepErrors>>>({});
 
@@ -272,7 +374,7 @@ export default function CreateEventPage() {
             wizard.updateField("organizerName", orgInfo.organizationName || "");
             wizard.updateField("organizerEmail", orgInfo.businessEmail || orgInfo.userEmail || "");
             wizard.updateField("organizerPhone", orgInfo.businessPhone || "");
-            
+
             if (orgInfo.bankInfos && orgInfo.bankInfos.length > 0) {
                 wizard.updateField("bankInfos", orgInfo.bankInfos);
                 wizard.updateField("selectedProfileId", orgInfo.bankInfos[0].id);
@@ -316,15 +418,98 @@ export default function CreateEventPage() {
         }
     }, [wizard.updateField]);
 
+    const isNew = searchParams?.get("isNew") === "true";
+
+    const { setFormData, setStep } = wizard;
+
+    const loadDraft = useCallback(async () => {
+        if (!draftId || isNew) return;
+        try {
+            const draft = await organizerEventApi.getDraft(draftId);
+            if (draft) {
+                // Populate draft data into the form using functional update
+                setFormData(prev => {
+                    const nextState = { ...prev };
+                    if (draft.eventName) nextState.eventName = draft.eventName;
+                    if (draft.description) nextState.detailedDescription = draft.description;
+                    if (draft.shortDescription) nextState.shortDescription = draft.shortDescription;
+                    if (draft.introduction) nextState.tagline = draft.introduction;
+                    if (draft.venue) nextState.venue = draft.venue;
+                    if (draft.address) nextState.address = draft.address;
+                    if (draft.category) nextState.category = draft.category;
+                    if (draft.bannerImage) nextState.bannerPreview = draft.bannerImage;
+                    if (draft.thumbnailImage) nextState.thumbnailPreview = draft.thumbnailImage;
+                    if (draft.seatMapImage) nextState.seatMapPreview = draft.seatMapImage;
+                    if (draft.totalSeats) { /* Total seats is derived */ }
+
+                    // Showtimes and tickets
+                    if (draft.showtimes && draft.showtimes.length > 0) {
+                        nextState.showtimes = draft.showtimes.map((st: any) => ({
+                            id: String(st.showtimeId),
+                            name: `Suất diễn ${st.showtimeId}`,
+                            startDatetime: st.startDatetime || "",
+                            endDatetime: st.endDatetime || ""
+                        }));
+
+                        const tickets: any[] = [];
+                        draft.showtimes.forEach((st: any) => {
+                            if (st.ticketTypes) {
+                                st.ticketTypes.forEach((t: any) => {
+                                    tickets.push({
+                                        id: String(t.ticketTypeId),
+                                        showtimeId: String(t.showtimeId),
+                                        typeName: t.typeName || "",
+                                        description: t.description || "",
+                                        price: t.price || 0,
+                                        isFree: t.price === 0,
+                                        quantityTotal: t.quantityAvailable || 0,
+                                        minPurchase: t.minPurchase || 1,
+                                        maxPurchase: t.maxPurchase || 10,
+                                        saleStartDate: t.saleStartDate || "",
+                                        saleEndDate: t.saleEndDate || "",
+                                        status: t.ticketTypeStatus || "AVAILABLE"
+                                    });
+                                });
+                            }
+                        });
+                        if (tickets.length > 0) nextState.ticketTypes = tickets;
+                    }
+
+                    // Settings
+                    if (draft.allowMultipleTicketTypesPerOrder !== null) nextState.allowMultipleTicketTypes = draft.allowMultipleTicketTypesPerOrder;
+                    if (draft.allowDiscountCode !== null) nextState.allowVouchers = draft.allowDiscountCode;
+                    if (draft.allowResale !== null) nextState.allowResale = draft.allowResale;
+                    if (draft.maxResalePricePercentage !== null) nextState.resaleMaxPriceCap = draft.maxResalePricePercentage;
+                    if (draft.organizerRoyaltyFeePercentage !== null) nextState.royaltyFee = draft.organizerRoyaltyFeePercentage;
+                    if (draft.postPurchaseInstruction) nextState.postPurchaseNotes = draft.postPurchaseInstruction;
+                    if (draft.checkInInstruction) nextState.checkinReminder = draft.checkInInstruction;
+                    if (draft.entryGateInstruction) nextState.gateNotes = draft.entryGateInstruction;
+                    if (draft.reconciliationNote) nextState.reconciliationNotes = draft.reconciliationNote;
+                    if (draft.bankInfoId) nextState.selectedProfileId = draft.bankInfoId;
+
+                    return nextState;
+                });
+
+                if (draft.currentStep && draft.currentStep >= 0 && draft.currentStep <= 5) {
+                    setStep(draft.currentStep + 1);
+                }
+            }
+        } catch (error) {
+            console.error("Failed to load draft", error);
+            toast.error(tValidation("toast_draft_load_failed"));
+        }
+    }, [draftId, isNew, setFormData, setStep]);
+
     useEffect(() => {
         const timer = window.setTimeout(() => {
             void loadCategories();
             void loadProvinces();
             void loadOrganization();
+            void loadDraft();
         }, 0);
 
         return () => window.clearTimeout(timer);
-    }, [loadCategories, loadProvinces, loadOrganization]);
+    }, [loadCategories, loadProvinces, loadOrganization, loadDraft]);
 
     useEffect(() => {
         const timer = window.setTimeout(() => {
@@ -369,18 +554,47 @@ export default function CreateEventPage() {
         }, 0);
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
         const currentStep = wizard.step as CreateEventStep;
         const validation = validateStep(currentStep, wizard.formData);
 
         if (Object.keys(validation.errors).length > 0) {
             setStepErrors(prev => ({ ...prev, [currentStep]: validation.errors }));
-            toast.error(t("toast_invalid_fields"));
+            toast.error(tValidation("toast_invalid_fields"));
             scrollToField(validation.firstInvalidField);
             return;
         }
 
         setStepErrors(prev => ({ ...prev, [currentStep]: {} }));
+
+        // Save draft step before moving to next
+        if (draftId) {
+            try {
+                // If it's step 1, we might need to send formData with images, but our API allows any
+                // Let's just build the payload and send it.
+                // The API expects the step data. We'll send the full payload for simplicity
+                // since the backend probably just extracts what it needs or updates the whole draft.
+                const payload = buildDraftStepPayload(currentStep, wizard.formData);
+
+                if (currentStep === 3 || currentStep === 4) {
+                    // Step 3 & 4: send plain JSON (no FormData, no files)
+                    await organizerEventApi.updateDraftStep(draftId, currentStep, payload);
+                } else {
+                    // Step 1 & 2: send multipart/form-data with files
+                    const formData = new FormData();
+                    formData.append("event", new Blob([JSON.stringify(payload.event)], { type: "application/json" }));
+                    if (payload.bannerImage) formData.append("bannerImage", payload.bannerImage);
+                    if (payload.thumbnailImage) formData.append("thumbnailImage", payload.thumbnailImage);
+                    if (payload.seatMapImage) formData.append("seatMapImage", payload.seatMapImage);
+                    await organizerEventApi.updateDraftStep(draftId, currentStep, formData);
+                }
+            } catch (error) {
+                console.error("Failed to update draft step", error);
+                // We can choose to block or continue. Let's continue for now but maybe show a warning.
+                toast.warning("Lưu nháp không thành công, nhưng bạn vẫn có thể tiếp tục.");
+            }
+        }
+
         wizard.nextStep();
         window.scrollTo(0, 0);
     };
@@ -390,7 +604,7 @@ export default function CreateEventPage() {
         if (validation.firstInvalidStep) {
             setStepErrors(prev => ({ ...prev, ...validation.stepErrors }));
             wizard.setStep(validation.firstInvalidStep);
-            toast.error(t("toast_incomplete"));
+            toast.error(tValidation("toast_incomplete"));
             window.setTimeout(() => scrollToField(validation.firstInvalidField), 0);
             return;
         }
@@ -398,26 +612,55 @@ export default function CreateEventPage() {
         try {
             const created = await wizard.submitForm(async (state) => {
                 const payload = buildCreateEventPayload(state);
+
+                if (draftId) {
+                    // Publish the draft
+                    return organizerEventApi.publishDraft(draftId);
+                }
+
                 return organizerEventApi.createEvent(payload);
             });
 
             if (!created) {
-                toast.error(t("toast_backend_unconfirmed"));
+                toast.error(tValidation("toast_backend_unconfirmed"));
                 return;
             }
 
-            toast.success(t("toast_success"));
+            toast.success(tValidation("toast_success"));
             const locale = typeof params.locale === "string" ? params.locale : "vi";
             router.replace(`/${locale}/organizer/center?refresh=${Date.now()}`);
             router.refresh();
         } catch (error) {
-            console.error("Failed to create organizer event", error);
+            console.error("Failed to submit event draft", error);
             toast.error(getCreateEventErrorMessage(error));
         }
     };
 
-    const handleSaveDraft = () => {
-        toast.success(t("toast_draft_saved"));
+    const handleSaveDraft = async () => {
+        if (draftId) {
+            try {
+                const currentStep = wizard.step as CreateEventStep;
+                const payload = buildDraftStepPayload(currentStep, wizard.formData);
+
+                if (currentStep === 3 || currentStep === 4) {
+                    await organizerEventApi.updateDraftStep(draftId, currentStep, payload);
+                } else {
+                    const formData = new FormData();
+                    formData.append("event", new Blob([JSON.stringify(payload.event)], { type: "application/json" }));
+                    if (payload.bannerImage) formData.append("bannerImage", payload.bannerImage);
+                    if (payload.thumbnailImage) formData.append("thumbnailImage", payload.thumbnailImage);
+                    if (payload.seatMapImage) formData.append("seatMapImage", payload.seatMapImage);
+                    await organizerEventApi.updateDraftStep(draftId, currentStep, formData);
+                }
+
+                toast.success(tValidation("toast_draft_saved"));
+            } catch (error) {
+                console.error("Failed to save draft", error);
+                toast.error(tValidation("toast_draft_save_failed"));
+            }
+        } else {
+            toast.success(tValidation("toast_draft_saved"));
+        }
     };
 
     const getChecklistItems = (): ChecklistItem[] => {

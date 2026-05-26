@@ -161,6 +161,12 @@ export function validateStep2(state: CreateEventState): StepValidationResult {
         tickets.forEach((ticket) => validateTicket(ticket, showtime.startDatetime, errors, fieldOrder));
     });
 
+    // Validate seat map image if useSeatMap is enabled
+    if (state.useSeatMap && !state.seatMapPreview) {
+        errors.seatMapImage = "Validation.seat_map_req";
+        fieldOrder.unshift("seatMapImage");
+    }
+
     return result(errors, fieldOrder);
 }
 

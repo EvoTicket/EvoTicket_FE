@@ -7,6 +7,7 @@ import api from "@/src/lib/axios";
 import { Header } from "@/src/components/header";
 import { Footer } from "@/src/components/footer";
 import { ArrowLeft, Trash2, Plus, Minus, CheckCircle2, X, ChevronUp, ChevronDown } from "lucide-react";
+import { toast } from "react-toastify";
 import { EventDetail } from "@/src/types/event";
 import { ChangeShowtimeModal } from "@/src/components/modals/ChangeShowtimeModal";
 import { useTranslations } from "next-intl";
@@ -113,6 +114,17 @@ export default function BookingPage() {
     };
 
     const handleUpdateQuantity = (ticketType: any, delta: number) => {
+        const now = new Date().getTime();
+        const start = new Date(ticketType.saleStartDate).getTime();
+        const end = new Date(ticketType.saleEndDate).getTime();
+        
+        if (now < start || now > end) {
+            if (delta > 0) {
+                toast.warning(t("ticket_not_in_sale_period") || "Vé này hiện không trong thời gian mở bán");
+            }
+            return;
+        }
+
         const minPurchase = ticketType.minPurchase > 0 ? ticketType.minPurchase : 1;
         const maxPurchase = ticketType.maxPurchase > 0 ? Math.min(ticketType.maxPurchase, ticketType.quantityAvailable || Infinity) : (ticketType.quantityAvailable || Infinity);
 
@@ -131,6 +143,11 @@ export default function BookingPage() {
                 }
                 return prev.map(t => t.id === ticketType.ticketTypeId ? { ...t, quantity: newQuantity } : t);
             } else if (delta > 0) {
+                if (event && event.allowMultipleTicketTypesPerOrder === false && prev.length > 0) {
+                    toast.warning(t('error_single_ticket_type'));
+                    return prev;
+                }
+
                 const initialQuantity = Math.min(minPurchase, maxPurchase);
                 if (initialQuantity > 0 && initialQuantity !== Infinity) {
                     return [...prev, { id: ticketType.ticketTypeId, name: ticketType.ticketTypeName || ticketType.typeName, price: ticketType.price, quantity: initialQuantity }];

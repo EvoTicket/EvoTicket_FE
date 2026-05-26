@@ -80,6 +80,7 @@ export interface CreateEventState {
     thumbnailImage: File | null;
     thumbnailPreview: string;
     seatMapImage: File | null;
+    seatMapPreview: string;
 
     // Step 2: Showtimes & Tickets
     showtimes: ShowtimeInput[];
@@ -135,6 +136,7 @@ const initialState: CreateEventState = {
     thumbnailImage: null,
     thumbnailPreview: "",
     seatMapImage: null,
+    seatMapPreview: "",
 
     showtimes: [
         {
@@ -225,6 +227,7 @@ export function useCreateEventWizard() {
         step,
         setStep,
         formData,
+        setFormData,
         updateField,
         nextStep,
         prevStep,

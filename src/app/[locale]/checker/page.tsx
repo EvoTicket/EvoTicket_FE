@@ -3,12 +3,16 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Search, Wifi, Clock, RefreshCw, Zap, Pause, Keyboard, CloudOff, CheckCircle2, XCircle, AlertCircle, Play, FlipHorizontal, Eye, EyeOff, LogOut, User } from "lucide-react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
+import { useParams, useRouter, usePathname } from "next/navigation";
 import QrScanner from "qr-scanner";
 import { toast } from "react-toastify";
 import api from "@/src/lib/axios";
 import { useAppDispatch, useAppSelector } from "@/src/store/hooks";
 import { setCredentials, logout, selectAuth } from "@/src/store/slices/authSlice";
+import { decodeJWT } from "@/src/lib/jwt";
+import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from "@headlessui/react";
+import { useTranslations } from "next-intl";
 
 type InputMode = "phone" | "laptop" | "scanner";
 
@@ -54,54 +58,54 @@ const extractQrToken = (scannedText: string): string => {
 };
 
 export default function CheckerPage() {
+  const t = useTranslations("CheckerPage");
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { isAuthenticated, user } = useAppSelector(selectAuth);
+  const pathname = usePathname();
+  const params = useParams();
+  const locale = params?.locale || "vi";
+  const switchLocale = () => {
+    const newLocale = locale === "vi" ? "en" : "vi";
+    const pathWithoutLocale = pathname.replace(`/${locale}`, "");
+    const newPath = `/${newLocale}${pathWithoutLocale}${window.location.search}`;
+    router.replace(newPath);
+  };
+
+  const { isAuthenticated, user, token } = useAppSelector(selectAuth);
+
+  const hasCheckerAccess = React.useMemo(() => {
+    let roles: string[] = [];
+    if (user?.roles && user.roles.length > 0) {
+      roles = user.roles;
+    } else if (token) {
+      const decoded = decodeJWT(token);
+      roles = decoded?.roles || [];
+    }
+    return roles.includes("CHECKER") || roles.includes("ROLE_CHECKER") || roles.includes("ADMIN") || roles.includes("ROLE_ADMIN");
+  }, [user?.roles, token]);
 
   const [isConfigured, setIsConfigured] = useState(false);
-  const [config, setConfig] = useState({ eventId: "", eventName: "", showtimeId: "", showtimeName: "", gate: "" });
+  const [config, setConfig] = useState({ eventId: "", eventName: "", showtimeId: "", showtimeName: "" });
 
   const [ticketCode, setTicketCode] = useState("");
   const [isScanning, setIsScanning] = useState(true);
   const [scanStatus, setScanStatus] = useState<"idle" | "verifying" | "success" | "error" | "invalid">("idle");
   const [cameraError, setCameraError] = useState<string | null>(null);
 
-  // Checker Login States
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-
-  // Reset configuration on logout
+  // Reset configuration and redirect on logout or not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
       setIsConfigured(false);
-      setConfig({ eventId: "", eventName: "", showtimeId: "", showtimeName: "", gate: "" });
-    }
-  }, [isAuthenticated]);
+      setConfig({ eventId: "", eventName: "", showtimeId: "", showtimeName: "" });
 
-  const handleCheckerLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoggingIn(true);
-    try {
-      const response = await api.post(
-        "/iam-service/api/auth/login",
-        { email, password },
-        { skipAuth: true } as any
-      );
-      const data = response.data;
-      if (data.status === 200) {
-        dispatch(setCredentials({ token: data.data.token, refreshToken: data.data.refreshToken, user: data.data.user }));
-        toast.success(locale === "vi" ? "Đăng nhập tài khoản kiểm soát viên thành công!" : "Checker account logged in successfully!");
+      if (typeof window !== 'undefined') {
+        const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
+        router.replace(`/${locale}/auth/login?callbackUrl=${currentUrl}`);
       }
-    } catch (err: any) {
-      const msg = err.response?.data?.message || (locale === "vi" ? "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!" : "Login failed. Please check your credentials!");
-      toast.error(msg);
-    } finally {
-      setIsLoggingIn(false);
+    } else if (!hasCheckerAccess) {
+      router.replace(`/${locale}/user/homepage`);
     }
-  };
-
+  }, [isAuthenticated, hasCheckerAccess, locale, router]);
   const [lastResult, setLastResult] = useState<{
     code: string;
     time: string;
@@ -109,8 +113,6 @@ export default function CheckerPage() {
     message: string;
   } | null>(null);
 
-  const params = useParams();
-  const locale = params?.locale || "vi";
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const scannerRef = useRef<QrScanner | null>(null);
   const [flashlightOn, setFlashlightOn] = useState(false);
@@ -118,45 +120,77 @@ export default function CheckerPage() {
   const [networkStatus, setNetworkStatus] = useState<{ online: boolean; strength: string; color: string }>({ online: true, strength: "...", color: "text-gray-400" });
   const [currentTime, setCurrentTime] = useState("");
 
-  // Mock Data
-  const availableEvents = [
-    {
-      id: "EVT-001",
-      name: "Anh Trai Say Hi Concert",
-      showtimes: [
-        { id: "ST-001", name: "Đêm diễn 1 - 20:00 19/05/2026" },
-        { id: "ST-002", name: "Đêm diễn 2 - 20:00 20/05/2026" }
-      ]
-    },
-    {
-      id: "EVT-002",
-      name: "Ráp Việt Season 4 Final",
-      showtimes: [
-        { id: "ST-003", name: "Chung kết Thương Hiệu - 19:30 24/05/2026" }
-      ]
-    },
-    {
-      id: "EVT-003",
-      name: "Sky Tour 2026 - Sơn Tùng MTP",
-      showtimes: [
-        { id: "ST-004", name: "Hà Nội - 19:00 30/05/2026" },
-        { id: "ST-005", name: "Đà Nẵng - 19:00 31/05/2026" }
-      ]
-    }
-  ];
+  const [availableEvents, setAvailableEvents] = useState<any[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
 
-  const availableGates = ["Gate A", "Gate B", "Gate C", "VIP Entrance"];
+  useEffect(() => {
+    if (!isAuthenticated || !hasCheckerAccess) return;
+
+    const fetchEvents = async () => {
+      try {
+        setLoadingEvents(true);
+        const response = await api.get("/inventory-service/api/checkers/approved-events");
+        const data = response.data?.data || [];
+
+        const mappedEvents = data.map((event: any) => ({
+          id: event.eventId.toString(),
+          name: event.eventName,
+          showtimes: (event.showtimes || []).map((st: any) => {
+            const d = new Date(st.startDatetime);
+            const timeStr = d.toLocaleTimeString(locale as string, { hour: '2-digit', minute: '2-digit' });
+            const dateStr = d.toLocaleDateString(locale as string, { day: '2-digit', month: '2-digit', year: 'numeric' });
+            let name = `${timeStr} ${dateStr}`;
+            if (st.venue || st.provinceName) {
+              name = `${st.venue || st.provinceName} - ${name}`;
+            }
+            return {
+              id: st.showtimeId.toString(),
+              name: name
+            };
+          })
+        }));
+
+        setAvailableEvents(mappedEvents);
+      } catch (error) {
+        console.error("Error fetching approved events:", error);
+        toast.error(t("err_load_events"));
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+
+    fetchEvents();
+  }, [isAuthenticated, hasCheckerAccess, locale]);
+
+
 
   const [inputMode, setInputMode] = useState<InputMode>("laptop");
   const [isMirrored, setIsMirrored] = useState(inputMode === "laptop");
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  // Automatically detect mobile device on mount to set default inputMode to "phone"
+  // Load config from sessionStorage and auto-detect mobile
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      if (isMobile) {
-        setInputMode("phone");
+      const savedConfig = sessionStorage.getItem("checker_config");
+      const savedIsConfigured = sessionStorage.getItem("checker_isConfigured");
+      const savedInputMode = sessionStorage.getItem("checker_inputMode");
+
+      if (savedConfig && savedIsConfigured === "true") {
+        try {
+          setConfig(JSON.parse(savedConfig));
+          setIsConfigured(true);
+        } catch (e) {}
       }
+
+      if (savedInputMode) {
+        setInputMode(savedInputMode as InputMode);
+      } else {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) {
+          setInputMode("phone");
+        }
+      }
+      setIsHydrated(true);
     }
   }, []);
 
@@ -166,13 +200,37 @@ export default function CheckerPage() {
   }, [inputMode]);
 
   const [currentHintIndex, setCurrentHintIndex] = useState(0);
+  const consecutiveErrorsRef = useRef(0);
+  const [scanWarning, setScanWarning] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isScanning || scanStatus !== "idle") {
+        setScanWarning(null);
+        consecutiveErrorsRef.current = 0;
+        return;
+    }
+    
+    const interval = setInterval(() => {
+       const errors = consecutiveErrorsRef.current;
+       if (errors > 120) {
+           setScanWarning(locale === 'vi' ? 'Mã QR lóa sáng hoặc mờ, hãy chạm màn hình để lấy nét' : 'QR might be blurred, tap to focus');
+       } else if (errors > 80) {
+           setScanWarning(locale === 'vi' ? 'Giữ camera thẳng góc và cố định' : 'Keep camera straight and still');
+       } else if (errors > 40) {
+           setScanWarning(locale === 'vi' ? 'Đưa mã QR lại gần khung ngắm hơn' : 'Move QR code closer to the frame');
+       } else {
+           setScanWarning(null);
+       }
+    }, 500);
+    return () => clearInterval(interval);
+  }, [isScanning, scanStatus, locale]);
 
   const scanHints = [
-    locale === "vi" ? "Hướng mã QR vào tâm khung hình" : "Point QR code at the center of the frame",
-    locale === "vi" ? "Giữ yên camera để tự động bắt nét" : "Hold camera still to focus automatically",
-    locale === "vi" ? "Đưa mã QR lại gần hơn nếu quá mờ" : "Move QR code closer if it is too blurry",
-    locale === "vi" ? "Tránh ánh sáng phản chiếu trực tiếp" : "Avoid direct light reflection or glare",
-    locale === "vi" ? "Đảm bảo mã QR hiển thị trọn vẹn" : "Make sure the entire QR code is visible"
+    t("hint_center"),
+    t("hint_still"),
+    t("hint_closer"),
+    t("hint_glare"),
+    t("hint_visible")
   ];
 
   useEffect(() => {
@@ -226,12 +284,15 @@ export default function CheckerPage() {
   const handleVerify = useCallback(async (code: string) => {
     if (scanStatus !== "idle") return;
 
+    consecutiveErrorsRef.current = 0;
+    setScanWarning(null);
+
     const qrToken = extractQrToken(code);
     console.log("Scanned raw content:", code);
     console.log("Extracted QR Token:", qrToken);
 
     if (!qrToken) {
-      toast.error(locale === "vi" ? "Không tìm thấy token trong mã QR!" : "No token found in QR code!");
+      toast.error(t("err_no_token"));
       return;
     }
 
@@ -243,11 +304,9 @@ export default function CheckerPage() {
       const parsedShowtimeId = isNaN(Number(config.showtimeId)) ? config.showtimeId : Number(config.showtimeId);
 
       const response = await api.post("/checkin-service/api/v1/checker/scan", {
-        QRtoken: qrToken,
-        showtimeID: parsedShowtimeId,
-        eventID: parsedEventId,
-        deviceId: activeCameraId || "no-camera-active",
-        gate: config.gate,
+        qrToken: qrToken,
+        showtimeId: parsedShowtimeId,
+        eventId: parsedEventId,
       });
 
       const now = new Date().toLocaleTimeString(locale as string, {
@@ -257,7 +316,24 @@ export default function CheckerPage() {
       });
 
       const resData = response.data;
-      const successMessage = resData?.message || (locale === "vi" ? "Vé hợp lệ. Chào mừng quý khách!" : "Valid ticket. Welcome!");
+      const payload = resData.data || resData;
+
+      if (payload.resultCode && payload.resultCode !== "VALID" && payload.resultMessage?.admitAllowed === false) {
+          const errorMessage = payload.resultMessage.message || payload.message || resData.message || t("invalid");
+          const responseStatus = payload.resultCode === "USED_QR" || payload.resultCode?.includes("USED") ? "USED" : "INVALID";
+          
+          setScanStatus("invalid");
+          setLastResult({
+              code: qrToken,
+              time: now,
+              status: responseStatus,
+              message: errorMessage,
+          });
+          setTimeout(() => setScanStatus("idle"), 3000);
+          return;
+      }
+
+      const successMessage = payload.resultMessage?.message || payload.message || resData.message || t("msg_valid");
 
       setScanStatus("success");
       setLastResult({
@@ -267,7 +343,6 @@ export default function CheckerPage() {
         message: successMessage,
       });
 
-      toast.success(locale === "vi" ? "Vé hợp lệ!" : "Valid ticket!");
       setTimeout(() => setScanStatus("idle"), 3000);
     } catch (error) {
       console.error("Verification error:", error);
@@ -282,7 +357,7 @@ export default function CheckerPage() {
         err.response?.data?.message ||
         err.response?.data?.error ||
         err.message ||
-        (locale === "vi" ? "Lỗi hệ thống khi xác minh vé." : "System error verifying ticket.");
+        (t("err_system"));
 
       const responseStatus =
         err.response?.data?.status ||
@@ -300,7 +375,6 @@ export default function CheckerPage() {
         message: errorMessage,
       });
 
-      toast.error(errorMessage);
       setTimeout(() => setScanStatus("idle"), 3000);
     }
   }, [scanStatus, locale, config, activeCameraId, setScanStatus, setTicketCode, setLastResult]);
@@ -337,9 +411,11 @@ export default function CheckerPage() {
             handleVerifyRef.current(decodedText);
           },
           {
-            onDecodeError: () => {}, // Quiet on normal decode errors
+            onDecodeError: () => { 
+                consecutiveErrorsRef.current += 1;
+            }, // Track decode errors to show dynamic hints
             preferredCamera: facingMode,
-            highlightScanRegion: true,
+            highlightScanRegion: false,
             highlightCodeOutline: true,
             maxScansPerSecond: 20
           }
@@ -358,7 +434,7 @@ export default function CheckerPage() {
             console.error("Camera start failed:", err);
             if (isMounted) {
               const errMsg = err instanceof Error ? err.message : String(err);
-              setCameraError(errMsg || (locale === "vi" ? "Không thể khởi động camera" : "Could not start camera"));
+              setCameraError(errMsg || (t("err_camera")));
             }
           }
         }
@@ -433,11 +509,11 @@ export default function CheckerPage() {
           await scanner.toggleFlash();
           setFlashlightOn(!flashlightOn);
         } else {
-          toast.info(locale === "vi" ? "Thiết bị không hỗ trợ đèn flash" : "Device does not support flashlight");
+          toast.info(t("err_no_flash"));
         }
       } catch (err) {
         console.error("Flashlight error:", err);
-        toast.error(locale === "vi" ? "Lỗi khi điều khiển đèn flash" : "Error controlling flashlight");
+        toast.error(t("err_flash"));
       }
     }
   };
@@ -446,80 +522,16 @@ export default function CheckerPage() {
     setIsScanning(!isScanning);
   };
 
-  if (!isAuthenticated) {
+  if (!isHydrated || !isAuthenticated || !hasCheckerAccess) {
     return (
       <div className="min-h-screen bg-[#0F0F1A] flex items-center justify-center p-6 relative overflow-hidden font-sans">
-        {/* Neon Glow Effects */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-10%] right-[-10%] w-[70vw] h-[70vw] rounded-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/20 via-emerald-500/5 to-transparent blur-[80px]"></div>
-          <div className="absolute bottom-[-10%] left-[-10%] w-[70vw] h-[70vw] rounded-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/10 via-emerald-500/0 to-transparent blur-[80px]"></div>
-        </div>
-
-        {/* Login Card */}
-        <div className="z-10 w-full max-w-[420px] bg-[#161624]/85 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-[0_0_50px_-12px_rgba(16,185,129,0.3)] animate-in fade-in zoom-in duration-500">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 relative group overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="absolute top-0 left-0 right-0 h-0.5 bg-emerald-400 shadow-[0_0_8px_2px_rgba(52,211,153,0.6)] animate-scanner-laser"></div>
-              <User className="w-8 h-8 text-emerald-400" />
-            </div>
-            <h1 className="text-[26px] font-black text-white tracking-tighter mb-1.5 uppercase">EVOTICKET CHECKER</h1>
-            <p className="text-[12px] text-emerald-400 font-bold tracking-wider uppercase">
-              {locale === "vi" ? "HỆ THỐNG KIỂM SOÁT VÉ SỰ KIỆN" : "EVENT TICKET CHECK-IN SYSTEM"}
-            </p>
-          </div>
-
-          <form className="space-y-5" onSubmit={handleCheckerLogin}>
-            <div>
-              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
-                {locale === "vi" ? "Email Tài khoản" : "Account Email"}
-              </label>
-              <input
-                type="email"
-                placeholder="checker@evoticket.com"
-                className="w-full px-4 py-3.5 bg-[#1F1F30] text-white border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-[14px] placeholder-gray-500 font-medium"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
-                {locale === "vi" ? "Mật khẩu" : "Password"}
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3.5 bg-[#1F1F30] text-white border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-[14px] placeholder-gray-500 font-medium pr-12"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={isLoggingIn}
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-2xl transition-all active:scale-[0.98] text-[15px] shadow-lg shadow-emerald-500/20 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer uppercase tracking-wider"
-              >
-                {isLoggingIn
-                  ? (locale === "vi" ? "ĐANG XÁC THỰC..." : "AUTHENTICATING...")
-                  : (locale === "vi" ? "ĐĂNG NHẬP KIỂM SOÁT" : "LOG IN TO CHECKER")}
-              </button>
-            </div>
-          </form>
+        <div className="flex flex-col items-center">
+          <RefreshCw className="w-8 h-8 animate-spin text-emerald-400 mb-4" />
+          <p className="text-gray-400 font-medium">
+            {!isAuthenticated
+              ? (t("redirecting_login"))
+              : (t("redirecting_home"))}
+          </p>
         </div>
       </div>
     );
@@ -533,109 +545,145 @@ export default function CheckerPage() {
           <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-sm">
             {user?.firstName ? user.firstName[0].toUpperCase() : "C"}
           </div>
-          <div className="hidden sm:flex flex-col">
-            <span className="text-xs font-bold text-white leading-none mb-0.5">{user?.firstName ? `${user.firstName} ${user.lastName || ""}` : (locale === "vi" ? "Kiểm soát viên" : "Checker")}</span>
+          <div className="hidden sm:flex flex-col mr-2">
+            <span className="text-xs font-bold text-white leading-none mb-0.5">{user?.firstName ? `${user.firstName} ${user.lastName || ""}` : (t("checker_role"))}</span>
             <span className="text-[9px] font-medium text-gray-400 leading-none">{user?.email || "online"}</span>
           </div>
+          <div className="h-6 w-[1px] bg-white/10 mx-1"></div>
+          <button
+            onClick={switchLocale}
+            className="text-gray-400 hover:text-emerald-400 transition-colors p-1.5 rounded-lg hover:bg-white/5 cursor-pointer flex items-center justify-center font-bold text-xs"
+            title="Switch Language"
+          >
+            {locale === "vi" ? "EN" : "VI"}
+          </button>
           <button
             onClick={() => {
               dispatch(logout());
-              toast.info(locale === "vi" ? "Đã đăng xuất tài khoản kiểm soát viên" : "Checker account logged out");
+              toast.info(t("logout_success"));
             }}
             className="ml-2 text-gray-400 hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-white/5 cursor-pointer"
-            title={locale === "vi" ? "Đăng xuất" : "Log out"}
+            title={t("logout")}
           >
             <LogOut className="w-4.5 h-4.5" />
           </button>
         </div>
 
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-500">
-          <div className="p-8">
+        <div className="flex flex-col items-center w-full max-w-md">
+          <div className="mb-6 flex items-center justify-center">
+            <Image 
+              src="/evoticket-logo/dark/dark-primary=horizontal-logo.svg" 
+              alt="EvoTicket Scanner" 
+              width={160} 
+              height={40} 
+              className="object-contain drop-shadow-md" 
+              priority 
+            />
+          </div>
+          <div className="w-full bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-500">
+            <div className="p-8">
             <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6">
               <Search className="w-8 h-8 text-emerald-600" />
             </div>
-            <h1 className="text-2xl font-black text-gray-900 mb-2">Checker Setup</h1>
-            <p className="text-gray-500 text-sm mb-8 font-medium">Vui lòng cấu hình sự kiện và cổng kiểm soát để bắt đầu.</p>
+            <h1 className="text-2xl font-black text-gray-900 mb-2">{t("setup_title")}</h1>
+            <p className="text-gray-500 text-sm mb-8 font-medium">{t("setup_desc")}</p>
 
             <div className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Sự kiện</label>
-                <div className="relative group">
-                  <select
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 font-bold focus:ring-2 focus:ring-emerald-500 outline-none appearance-none cursor-pointer transition-all"
-                    value={config.eventId}
-                    onChange={(e) => {
-                      const event = availableEvents.find(ev => ev.id === e.target.value);
-                      setConfig({
-                        eventId: e.target.value,
-                        eventName: event?.name || "",
-                        showtimeId: "",
-                        showtimeName: "",
-                        gate: config.gate
-                      });
-                    }}
-                  >
-                    <option value="" disabled>Chọn sự kiện...</option>
-                    {availableEvents.map(ev => (
-                      <option key={ev.id} value={ev.id}>{ev.name}</option>
-                    ))}
-                  </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-emerald-500 transition-colors">
-                    <Search className="w-4 h-4" />
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">{t("event_label")}</label>
+                <Listbox
+                  value={config.eventId}
+                  disabled={loadingEvents}
+                  onChange={(value: string) => {
+                    const event = availableEvents.find(ev => ev.id === value);
+                    setConfig({
+                      eventId: value,
+                      eventName: event?.name || "",
+                      showtimeId: "",
+                      showtimeName: "",
+                    });
+                  }}
+                >
+                  <div className="relative group">
+                    <ListboxButton className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-left cursor-pointer transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                      <span className="block truncate">
+                        {config.eventName || (loadingEvents ? (t("loading")) : (t("select_event")))}
+                      </span>
+                      <span className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400 group-hover:text-emerald-500 transition-colors">
+                        <Search className="w-4 h-4" />
+                      </span>
+                    </ListboxButton>
+                    <ListboxOptions anchor="bottom" modal={false} className="z-10 w-[var(--button-width)] mt-2 bg-white border border-gray-100 rounded-xl shadow-xl max-h-60 overflow-auto focus:outline-none">
+                      {availableEvents.length > 0 ? (
+                        availableEvents.map(ev => (
+                          <ListboxOption
+                            key={ev.id}
+                            value={ev.id}
+                            className="data-[focus]:bg-emerald-50 data-[focus]:text-emerald-900 cursor-pointer select-none relative px-4 py-3 text-gray-900 data-[selected]:font-black font-medium transition-colors border-b border-gray-50 last:border-0"
+                          >
+                            {ev.name}
+                          </ListboxOption>
+                        ))
+                      ) : (
+                        <div className="px-4 py-3 text-sm text-gray-500 italic text-center">
+                          {t("no_matching_data")}
+                        </div>
+                      )}
+                    </ListboxOptions>
                   </div>
-                </div>
+                </Listbox>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Suất diễn</label>
-                <div className="relative group">
-                  <select
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 font-bold focus:ring-2 focus:ring-emerald-500 outline-none appearance-none cursor-pointer transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                    value={config.showtimeId}
-                    disabled={!config.eventId}
-                    onChange={(e) => {
-                      const event = availableEvents.find(ev => ev.id === config.eventId);
-                      const showtime = event?.showtimes.find(st => st.id === e.target.value);
-                      setConfig({ ...config, showtimeId: e.target.value, showtimeName: showtime?.name || "" });
-                    }}
-                  >
-                    <option value="" disabled>{config.eventId ? "Chọn suất diễn..." : "Chọn sự kiện trước..."}</option>
-                    {config.eventId && availableEvents.find(ev => ev.id === config.eventId)?.showtimes.map(st => (
-                      <option key={st.id} value={st.id}>{st.name}</option>
-                    ))}
-                  </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-emerald-500 transition-colors">
-                    <Clock className="w-4 h-4" />
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">{t("showtime_label")}</label>
+                <Listbox
+                  value={config.showtimeId}
+                  disabled={!config.eventId}
+                  onChange={(value: string) => {
+                    const event = availableEvents.find(ev => ev.id === config.eventId);
+                    const showtime = event?.showtimes.find((st: any) => st.id === value);
+                    setConfig({ ...config, showtimeId: value, showtimeName: showtime?.name || "" });
+                  }}
+                >
+                  <div className="relative group">
+                    <ListboxButton className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 font-bold focus:ring-2 focus:ring-emerald-500 outline-none text-left cursor-pointer transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                      <span className="block truncate">
+                        {config.showtimeName || (config.eventId ? (t("select_showtime")) : (t("select_event_first")))}
+                      </span>
+                      <span className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400 group-hover:text-emerald-500 transition-colors">
+                        <Clock className="w-4 h-4" />
+                      </span>
+                    </ListboxButton>
+                    <ListboxOptions anchor="bottom" modal={false} className="z-10 w-[var(--button-width)] mt-2 bg-white border border-gray-100 rounded-xl shadow-xl max-h-60 overflow-auto focus:outline-none">
+                      {config.eventId && (availableEvents.find(ev => ev.id === config.eventId)?.showtimes?.length ? (
+                        availableEvents.find(ev => ev.id === config.eventId)?.showtimes.map((st: any) => (
+                          <ListboxOption
+                            key={st.id}
+                            value={st.id}
+                            className="data-[focus]:bg-emerald-50 data-[focus]:text-emerald-900 cursor-pointer select-none relative px-4 py-3 text-gray-900 data-[selected]:font-black font-medium transition-colors border-b border-gray-50 last:border-0"
+                          >
+                            {st.name}
+                          </ListboxOption>
+                        ))
+                      ) : (
+                        <div className="px-4 py-3 text-sm text-gray-500 italic text-center">
+                          {t("no_matching_data")}
+                        </div>
+                      ))}
+                    </ListboxOptions>
                   </div>
-                </div>
+                </Listbox>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Cổng kiểm soát</label>
-                <div className="relative group">
-                  <select
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 font-bold focus:ring-2 focus:ring-emerald-500 outline-none appearance-none cursor-pointer transition-all"
-                    value={config.gate}
-                    onChange={(e) => setConfig({ ...config, gate: e.target.value })}
-                  >
-                    <option value="" disabled>Chọn cổng...</option>
-                    {availableGates.map(gate => (
-                      <option key={gate} value={gate}>{gate}</option>
-                    ))}
-                  </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-emerald-500 transition-colors">
-                    <Search className="w-4 h-4" />
-                  </div>
-                </div>
-              </div>
+
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Thiết bị quét</label>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">{t("scan_device")}</label>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { value: "phone" as InputMode, icon: "📱", label: "Camera ĐT", desc: "Camera sau" },
-                    { value: "laptop" as InputMode, icon: "💻", label: "Laptop", desc: "Webcam" },
-                    { value: "scanner" as InputMode, icon: "🔌", label: "Máy quét", desc: "USB HID" },
+                    { value: "phone" as InputMode, icon: "📱", label: t("phone_camera"), desc: t("back_camera") },
+                    { value: "laptop" as InputMode, icon: "💻", label: t("laptop"), desc: t("webcam") },
+                    { value: "scanner" as InputMode, icon: "🔌", label: t("scanner"), desc: t("usb_hid") },
                   ].map((opt) => (
                     <button
                       key={opt.value}
@@ -654,25 +702,29 @@ export default function CheckerPage() {
                 </div>
                 {inputMode === "scanner" && (
                   <p className="text-[10px] text-emerald-600 font-bold ml-1 mt-1">
-                    * Máy quét USB sẽ tự nhập mã qua bàn phím. Không cần camera.
+                    {t("scanner_hint")}
                   </p>
                 )}
               </div>
 
               <button
                 onClick={() => {
-                  if (config.eventId && config.showtimeId && config.gate) {
+                  if (config.eventId && config.showtimeId) {
                     setIsConfigured(true);
+                    sessionStorage.setItem("checker_isConfigured", "true");
+                    sessionStorage.setItem("checker_config", JSON.stringify(config));
+                    sessionStorage.setItem("checker_inputMode", inputMode);
                   } else {
-                    toast.warning("Vui lòng chọn đầy đủ thông tin");
+                    toast.warning(t("warn_incomplete"));
                   }
                 }}
                 className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-emerald-500/20 transition-all active:scale-95 mt-4"
               >
-                BẮT ĐẦU QUÉT
+                {t("start_scanning")}
               </button>
             </div>
           </div>
+        </div>
         </div>
       </div>
     );
@@ -689,11 +741,6 @@ export default function CheckerPage() {
               <h1 className="text-xl font-bold text-gray-900 leading-tight">{config.eventName}</h1>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-gray-900 font-bold">
                 <div className="flex items-center">
-                  <Search className="w-4 h-4 mr-1 text-emerald-600" />
-                  <span className="text-base text-emerald-800">{config.gate}</span>
-                </div>
-                <div className="w-px h-3.5 bg-gray-200 hidden sm:block"></div>
-                <div className="flex items-center">
                   <Clock className="w-3.5 h-3.5 mr-1 text-amber-500" />
                   <span className="text-xs text-gray-500 font-medium">{config.showtimeName}</span>
                 </div>
@@ -702,19 +749,30 @@ export default function CheckerPage() {
             <div className="flex flex-col items-end gap-2">
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setIsConfigured(false)}
+                  onClick={switchLocale}
+                  className="bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition-colors flex items-center justify-center text-gray-600 hover:text-emerald-600 font-bold text-xs w-8 h-8"
+                  title="Switch Language"
+                >
+                  {locale === "vi" ? "EN" : "VI"}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsConfigured(false);
+                    sessionStorage.removeItem("checker_isConfigured");
+                    sessionStorage.removeItem("checker_config");
+                  }}
                   className="bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition-colors"
-                  title={locale === "vi" ? "Cấu hình lại" : "Reconfigure"}
+                  title={t("reconfigure")}
                 >
                   <RefreshCw className="w-4 h-4 text-gray-600" />
                 </button>
                 <button
                   onClick={() => {
                     dispatch(logout());
-                    toast.info(locale === "vi" ? "Đã đăng xuất tài khoản kiểm soát viên" : "Checker account logged out");
+                    toast.info(t("logout_success"));
                   }}
                   className="bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors"
-                  title={locale === "vi" ? "Đăng xuất" : "Log out"}
+                  title={t("logout")}
                 >
                   <LogOut className="w-4 h-4 text-red-600" />
                 </button>
@@ -754,21 +812,20 @@ export default function CheckerPage() {
                 <div className="w-20 h-20 bg-emerald-500/15 rounded-full flex items-center justify-center mb-6 ring-2 ring-emerald-500/30">
                   <Keyboard className="w-10 h-10 text-emerald-400" />
                 </div>
-                <h3 className="font-black text-xl mb-2">Chế độ máy quét USB</h3>
+                <h3 className="font-black text-xl mb-2">{t("usb_mode_title")}</h3>
                 <p className="text-sm text-gray-400 max-w-xs leading-relaxed">
                   Hướng máy quét vào mã QR trên vé. Kết quả sẽ tự động nhận diện.
                 </p>
                 <div className="mt-6 flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2">
                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Đang chờ tín hiệu...</span>
+                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">{t("waiting_signal")}</span>
                 </div>
               </div>
             ) : (
               <video
                 ref={videoRef}
-                className={`absolute inset-0 w-full h-full object-cover z-0 ${
-                  isMirrored ? "scale-x-[-1]" : ""
-                }`}
+                className="absolute inset-0 w-full h-full object-cover z-0"
+                style={{ transform: isMirrored ? "scaleX(-1)" : "none" }}
                 playsInline
                 muted
               />
@@ -779,8 +836,8 @@ export default function CheckerPage() {
                 <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4">
                   <Pause className="w-8 h-8" fill="currentColor" />
                 </div>
-                <h3 className="font-bold text-lg">Máy quét đang tạm dừng</h3>
-                <p className="text-sm text-gray-300 mt-2">Nhấn nút phát để tiếp tục quét</p>
+                <h3 className="font-bold text-lg">{t("scanner_paused")}</h3>
+                <p className="text-sm text-gray-300 mt-2">{t("press_play")}</p>
               </div>
             )}
 
@@ -789,7 +846,7 @@ export default function CheckerPage() {
                 <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-4">
                   <AlertCircle className="w-8 h-8 text-red-500" />
                 </div>
-                <h3 className="font-bold text-lg text-red-400">Lỗi Camera</h3>
+                <h3 className="font-bold text-lg text-red-400">{t("camera_error")}</h3>
                 <p className="text-sm text-gray-300 mt-2 mb-6">{cameraError}</p>
                 <button
                   onClick={() => setIsScanning(true)}
@@ -803,7 +860,7 @@ export default function CheckerPage() {
             {scanStatus === "verifying" && (
               <div className="absolute inset-0 z-30 bg-black/40 backdrop-blur-md flex flex-col items-center justify-center text-white">
                 <RefreshCw className="w-12 h-12 animate-spin text-emerald-400 mb-4" />
-                <span className="font-bold tracking-widest uppercase">Đang xác minh...</span>
+                <span className="font-bold tracking-widest uppercase">{t("verifying")}</span>
               </div>
             )}
 
@@ -812,8 +869,10 @@ export default function CheckerPage() {
                 <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-lg shadow-emerald-900/20">
                   <CheckCircle2 className="w-12 h-12 text-emerald-600" />
                 </div>
-                <h3 className="font-black text-2xl uppercase tracking-tighter">HỢP LỆ</h3>
-                <span className="text-emerald-50 font-bold mt-2">{ticketCode}</span>
+                <h3 className="font-black text-2xl uppercase tracking-tighter">{t("valid")}</h3>
+                {lastResult?.message && (
+                  <span className="text-emerald-50 text-sm mt-4 px-6 text-center max-w-sm bg-black/20 py-2 rounded-lg">{lastResult.message}</span>
+                )}
               </div>
             )}
 
@@ -822,8 +881,10 @@ export default function CheckerPage() {
                 <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-lg shadow-red-900/20">
                   <XCircle className="w-12 h-12 text-red-600" />
                 </div>
-                <h3 className="font-black text-2xl uppercase tracking-tighter">KHÔNG HỢP LỆ</h3>
-                <span className="text-red-50 font-bold mt-2">{ticketCode}</span>
+                <h3 className="font-black text-2xl uppercase tracking-tighter">{t("invalid")}</h3>
+                {lastResult?.message && (
+                  <span className="text-red-50 text-sm mt-4 px-6 text-center max-w-sm bg-black/20 py-2 rounded-lg font-medium">{lastResult.message}</span>
+                )}
               </div>
             )}
 
@@ -832,7 +893,7 @@ export default function CheckerPage() {
                 <button
                   onClick={() => setIsMirrored(!isMirrored)}
                   className={`p-2.5 rounded-full backdrop-blur-sm border transition-all ${isMirrored ? 'bg-emerald-500 text-white border-emerald-600' : 'bg-black/50 text-white border-white/10 hover:bg-black/70'}`}
-                  title={locale === "vi" ? "Lật camera" : "Mirror camera"}
+                  title={t("mirror_camera")}
                 >
                   <FlipHorizontal className="w-5 h-5" />
                 </button>
@@ -862,21 +923,21 @@ export default function CheckerPage() {
                 </div>
 
                 <div className="absolute bottom-6 left-4 right-4 z-20 flex justify-center animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="bg-black/65 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 flex items-center gap-2 max-w-[90%] text-center shadow-lg shadow-black/45">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
-                    <span className="text-[11px] font-bold text-gray-200 tracking-wide transition-all duration-300">
-                      {scanHints[currentHintIndex]}
+                  <div className={`backdrop-blur-md px-4 py-2.5 rounded-2xl border flex items-center gap-2 max-w-[90%] text-center shadow-lg transition-all duration-300 ${scanWarning ? 'bg-amber-500/20 border-amber-500/50 shadow-amber-900/20' : 'bg-black/65 border-white/10 shadow-black/45'}`}>
+                    <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${scanWarning ? 'bg-amber-400' : 'bg-emerald-400'}`}></div>
+                    <span className={`text-[11px] font-bold tracking-wide transition-all duration-300 ${scanWarning ? 'text-amber-100' : 'text-gray-200'}`}>
+                      {scanWarning || scanHints[currentHintIndex]}
                     </span>
                   </div>
                 </div>
               </>
             )}
 
-            <div className="absolute bottom-8 left-0 right-0 text-center z-20 px-4">
+            <div className="absolute bottom-24 left-0 right-0 text-center z-20 px-4">
               <h3 className="text-white font-bold text-lg mb-1 drop-shadow-md">
-                {cameraError ? "Lỗi Camera" : isScanning ? "Đưa mã QR vào khung quét" : "Camera đã tắt"}
+                {cameraError ? t("camera_error") : isScanning ? t("point_qr") : t("camera_off")}
               </h3>
-              <p className="text-gray-300 text-sm drop-shadow-md">Hỗ trợ quét trực tiếp & máy quét ngoài</p>
+              <p className="text-gray-300 text-sm drop-shadow-md">{t("support_scan")}</p>
             </div>
           </div>
 
@@ -889,19 +950,18 @@ export default function CheckerPage() {
               <div className="flex items-center gap-2">
                 <div className={`w-2.5 h-2.5 rounded-full ${scanStatus === "verifying" ? "bg-amber-500 animate-pulse" : isScanning ? "bg-emerald-500" : "bg-gray-400"}`}></div>
                 <h3 className="font-bold tracking-wide text-sm text-gray-700 uppercase">
-                  {scanStatus === "verifying" ? "ĐANG XÁC MINH..." : isScanning ? "SẴN SÀNG QUÉT" : "TẠM DỪNG"}
+                  {scanStatus === "verifying" ? t("verifying").toUpperCase() : isScanning ? t("ready_to_scan") : t("paused")}
                 </h3>
               </div>
               <span className="text-xs text-gray-500 font-medium uppercase">
-                {lastResult ? `LẦN CUỐI (${lastResult.time})` : "CHƯA QUÉT"}
+                {lastResult ? `${t("last_scan")} (${lastResult.time})` : t("not_scanned")}
               </span>
             </div>
 
             {lastResult && (
               <div className="flex justify-between items-center mt-1">
                 <div className="flex flex-col">
-                  <span className="font-bold text-gray-900">{lastResult.code}</span>
-                  <span className={`text-[11px] font-medium ${lastResult.status === "VALID" ? "text-emerald-600" : "text-red-600"}`}>
+                  <span className={`text-sm font-bold ${lastResult.status === "VALID" ? "text-emerald-600" : "text-red-600"}`}>
                     {lastResult.message}
                   </span>
                 </div>
@@ -920,12 +980,12 @@ export default function CheckerPage() {
           <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-3 text-gray-900 font-bold text-sm">
               <Keyboard className="w-4 h-4 text-gray-500" />
-              <h3>Nhập mã vé thủ công</h3>
+              <h3>{t("manual_input")}</h3>
             </div>
             <div className="flex gap-2">
               <input
                 id="manual-ticket-input"
-                type="text"
+                type="password"
                 value={ticketCode}
                 onChange={(e) => setTicketCode(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleVerify(ticketCode)}
@@ -947,7 +1007,7 @@ export default function CheckerPage() {
         <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex pb-safe shadow-lg">
           <Link href={`/${locale}/checker/sync`} className="flex-1 flex flex-col items-center justify-center py-4 gap-1 text-gray-400">
             <RefreshCw className="w-5 h-5" />
-            <span className="text-[10px] font-bold">ĐỒNG BỘ</span>
+            <span className="text-[10px] font-bold">{t("sync")}</span>
           </Link>
           <div className="w-px bg-gray-100 my-4"></div>
           <Link href={`/${locale}/checker/offline`} className="flex-1 flex flex-col items-center justify-center py-4 gap-1 text-gray-400">
