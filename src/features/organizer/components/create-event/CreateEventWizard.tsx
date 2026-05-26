@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
+import api from "@/src/lib/axios";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { categoryApi } from "@/src/features/organizer/api/categoryApi";
@@ -275,6 +276,40 @@ export default function CreateEventPage() {
             if (orgInfo.bankInfos && orgInfo.bankInfos.length > 0) {
                 wizard.updateField("bankInfos", orgInfo.bankInfos);
                 wizard.updateField("selectedProfileId", orgInfo.bankInfos[0].id);
+            } else {
+                try {
+                    const [userRes, banksRes] = await Promise.allSettled([
+                        api.get("/iam-service/api/users/me"),
+                        api.get("/inventory-service/api/banks")
+                    ]);
+                    
+                    let userData: any = null;
+                    let bankList: any[] = [];
+                    
+                    if (userRes.status === "fulfilled" && userRes.value.data?.data) {
+                        userData = userRes.value.data.data;
+                    }
+                    if (banksRes.status === "fulfilled" && banksRes.value.data?.data) {
+                        bankList = banksRes.value.data.data;
+                    }
+                    
+                    if (userData && userData.bankCode && userData.bankAccountNumber) {
+                        const matchedBank = bankList.find((b: any) => b.code === userData.bankCode);
+                        const bankName = matchedBank ? (matchedBank.shortName || matchedBank.name) : userData.bankCode;
+                        const fallbackBank = {
+                            id: 0,
+                            profileName: "Tài khoản cá nhân (Từ hồ sơ cá nhân)",
+                            bankCode: userData.bankCode,
+                            bankName: bankName,
+                            bankAccountNumber: userData.bankAccountNumber,
+                            bankOwnerName: userData.bankAccountName || ""
+                        };
+                        wizard.updateField("bankInfos", [fallbackBank]);
+                        wizard.updateField("selectedProfileId", 0);
+                    }
+                } catch (fallbackErr) {
+                    console.error("Failed to load user profile bank fallback", fallbackErr);
+                }
             }
         } catch (error) {
             console.error("Failed to load organization info", error);

@@ -1,5 +1,7 @@
 import { CreateEventState } from "./useCreateEventWizard";
-import { CheckCircle2, FileText, Landmark, Plus } from "lucide-react";
+import { CheckCircle2, FileText, Landmark } from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 interface Props {
     formData: CreateEventState;
@@ -8,6 +10,9 @@ interface Props {
 
 
 export function CreateEventStep4Settlement({ formData, updateField }: Props) {
+    const params = useParams();
+    const locale = typeof params.locale === "string" ? params.locale : "vi";
+
     return (
         <div className="space-y-6">
             <div className="bg-bg-surface border border-border-default rounded-ds-xl p-6 shadow-sm space-y-4">
@@ -28,7 +33,7 @@ export function CreateEventStep4Settlement({ formData, updateField }: Props) {
                                             ? "border-action-brand-bg-default bg-action-brand-bg-default/5 shadow-sm"
                                             : "border-border-default hover:bg-bg-subtle"
                                         }`}
-                                >
+                                  >
                                     <div className="mt-1">
                                         <input
                                             type="radio"
@@ -53,11 +58,17 @@ export function CreateEventStep4Settlement({ formData, updateField }: Props) {
                                     </div>
                                 </label>
                             )) : (
-                                <div className="text-sm text-text-muted border border-dashed border-border-strong rounded-ds-xl p-6 text-center">
-                                    <p>Chưa có tài khoản ngân hàng nào được thiết lập.</p>
-                                    <button type="button" className="mt-3 inline-flex items-center gap-2 text-action-brand-text-default font-bold hover:underline">
-                                        <Plus size={16} /> Thêm tài khoản ngân hàng
-                                    </button>
+                                <div className="text-sm text-text-muted border border-dashed border-border-strong rounded-ds-xl p-6 text-center flex flex-col items-center justify-center">
+                                    <p className="font-semibold text-text-primary mb-1">Chưa có tài khoản ngân hàng nào được thiết lập.</p>
+                                    <p className="text-xs text-text-muted max-w-sm mb-4">
+                                        Vui lòng liên kết tài khoản ngân hàng trong trang hồ sơ cá nhân để sử dụng cho đối soát doanh thu.
+                                    </p>
+                                    <Link
+                                        href={`/${locale}/user/profile`}
+                                        className="inline-flex items-center gap-2 text-action-brand-text-default font-bold hover:underline"
+                                    >
+                                        Đi đến trang hồ sơ cá nhân
+                                    </Link>
                                 </div>
                             )}
                         </div>
