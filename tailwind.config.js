@@ -39,6 +39,10 @@ const config = {
         'status-pill-radius': figmaTheme['status-pill'].radius,
       }
     },
+    fontFamily: {
+      // sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+      camaro: ["var(--font-camaro)", "var(--font-sans)", "system-ui", "sans-serif"],
+    },
   },
   plugins: [
   ],
