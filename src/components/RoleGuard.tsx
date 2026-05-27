@@ -33,7 +33,8 @@ export function RoleGuard({ children, requireAdmin, requireOrganizer, requireChe
         }
 
         // Kiểm tra quyền Admin
-        if (requireAdmin && (!user?.roles || !user.roles.includes("ADMIN"))) {
+        const isAdmin = user?.roles?.includes("ADMIN") || user?.roles?.includes("ROLE_ADMIN");
+        if (requireAdmin && !isAdmin) {
             router.replace(`/${locale}/user/homepage`);
             return;
         }
