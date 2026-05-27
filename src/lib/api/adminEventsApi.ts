@@ -52,7 +52,7 @@ export const adminEventsApi = {
   async searchEventsForModeration(
     params: SearchModerationEventsParams = {}
   ): Promise<BasePageResponse<ListEventResponse>> {
-    const response = await api.get<BasePageResponse<ListEventResponse>>(
+    const response = await api.get<{ data: BasePageResponse<ListEventResponse> }>(
       "/inventory-service/api/admin/events/moderation",
       {
         params,
@@ -62,7 +62,7 @@ export const adminEventsApi = {
         },
       }
     );
-    return response.data;
+    return response.data.data;
   },
 
   async updateApprovalStatus(
