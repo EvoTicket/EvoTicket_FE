@@ -11,6 +11,7 @@ import { ChatBot } from '@/src/components/chatbot';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ScrollToTop } from '@/src/components/ScrollToTop';
 import type { Metadata } from 'next';
+import { fontCamaro, fontSans } from '../fonts.';
 
 export const metadata: Metadata = {
   title: 'EvoTicket',
@@ -47,7 +48,7 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body>
+      <body className={`${fontSans.variable} ${fontCamaro.variable} font-sans`}>
         <StoreProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ThemeProvider

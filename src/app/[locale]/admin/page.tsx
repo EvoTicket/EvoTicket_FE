@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   TrendingUp,
   TrendingDown,
@@ -28,49 +28,164 @@ import {
   ResponsiveContainer
 } from "recharts";
 import { useTranslations } from "next-intl";
-
-// Mock data for the chart
-const chartData = [
-  { name: "T2", revenue: 2000, tickets: 120 },
-  { name: "T3", revenue: 3500, tickets: 210 },
-  { name: "T4", revenue: 2800, tickets: 180 },
-  { name: "T5", revenue: 5100, tickets: 350 },
-  { name: "T6", revenue: 4200, tickets: 280 },
-  { name: "T7", revenue: 7800, tickets: 520 },
-  { name: "CN", revenue: 6500, tickets: 430 },
-  { name: "T2", revenue: 2000, tickets: 120 },
-  { name: "T3", revenue: 3500, tickets: 210 },
-  { name: "T4", revenue: 2800, tickets: 180 },
-  { name: "T5", revenue: 5100, tickets: 350 },
-  { name: "T6", revenue: 4200, tickets: 280 },
-  { name: "T7", revenue: 7800, tickets: 520 },
-  { name: "CN", revenue: 6500, tickets: 430 },
-  { name: "T2", revenue: 2000, tickets: 120 },
-  { name: "T3", revenue: 3500, tickets: 210 },
-  { name: "T4", revenue: 2800, tickets: 180 },
-  { name: "T5", revenue: 5100, tickets: 350 },
-  { name: "T6", revenue: 4200, tickets: 280 },
-  { name: "T7", revenue: 7800, tickets: 520 },
-  { name: "CN", revenue: 6500, tickets: 430 },
-  { name: "T2", revenue: 2000, tickets: 120 },
-  { name: "T3", revenue: 3500, tickets: 210 },
-  { name: "T4", revenue: 2800, tickets: 180 },
-  { name: "T5", revenue: 5100, tickets: 350 },
-  { name: "T6", revenue: 4200, tickets: 280 },
-  { name: "T7", revenue: 7800, tickets: 520 },
-  { name: "11", revenue: 6500, tickets: 430 },
-];
+import { adminDashboardApi, type PlatformDashboardResponse } from "@/src/lib/api/adminDashboardApi";
 
 export default function AdminDashboard() {
   const t = useTranslations("Admin");
-  const [dateRange, setDateRange] = useState("01/04/2026 - 25/04/2026");
   const [chartView, setChartView] = useState<"revenue" | "tickets">("revenue");
-  const [chartTimeRange, setChartTimeRange] = useState("90");
+  const [chartTimeRange, setChartTimeRange] = useState("7");
+  const [dashboardData, setDashboardData] = useState<PlatformDashboardResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredData = useMemo(() => {
-    const count = parseInt(chartTimeRange);
-    return chartData.slice(-count);
+  const loadDashboard = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const days = parseInt(chartTimeRange) || 7;
+      const data = await adminDashboardApi.getPlatformDashboard(days);
+      setDashboardData(data);
+    } catch (err) {
+      console.error("Failed to load platform dashboard data:", err);
+      setError("Không thể tải dữ liệu dashboard. Vui lòng thử lại.");
+    } finally {
+      setIsLoading(false);
+    }
   }, [chartTimeRange]);
+
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
+
+  const dateRangeDisplay = useMemo(() => {
+    if (!dashboardData || !dashboardData.trend || dashboardData.trend.length === 0) {
+      return "";
+    }
+    const formatDate = (dateStr: string) => {
+      const parts = dateStr.split("-");
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return dateStr;
+    };
+    const first = formatDate(dashboardData.trend[0].date);
+    const last = formatDate(dashboardData.trend[dashboardData.trend.length - 1].date);
+    return `${first} - ${last}`;
+  }, [dashboardData]);
+
+  // Utility to format values like 12.8B or 286M
+  const formatCurrencyVal = (val: number) => {
+    if (val >= 1000000000) {
+      return `₫${(val / 1000000000).toFixed(1)}B`;
+    }
+    if (val >= 1000000) {
+      return `₫${(val / 1000000).toFixed(1)}M`;
+    }
+    return `₫${val.toLocaleString()}`;
+  };
+
+  // Dynamically calculate growth trend between first half and second half of the selected range
+  const calculateGrowth = (
+    trend: { gmv: number; ticketsSold: number }[] | undefined,
+    key: "gmv" | "ticketsSold"
+  ) => {
+    if (!trend || trend.length < 2) return { trendStr: "0.0%", isUp: true };
+    const half = Math.floor(trend.length / 2);
+    const firstHalf = trend.slice(0, half).reduce((acc, item) => acc + Number(item[key]), 0);
+    const secondHalf = trend.slice(-half).reduce((acc, item) => acc + Number(item[key]), 0);
+    if (firstHalf === 0) {
+      return { trendStr: secondHalf > 0 ? "+100%" : "0.0%", isUp: true };
+    }
+    const pct = ((secondHalf - firstHalf) / firstHalf) * 100;
+    const isUp = pct >= 0;
+    return {
+      trendStr: `${isUp ? "+" : ""}${pct.toFixed(1)}%`,
+      isUp
+    };
+  };
+
+  const gmvGrowth = useMemo(() => calculateGrowth(dashboardData?.trend, "gmv"), [dashboardData]);
+  const ticketsGrowth = useMemo(() => calculateGrowth(dashboardData?.trend, "ticketsSold"), [dashboardData]);
+
+  const chartDataMapped = useMemo(() => {
+    if (!dashboardData || !dashboardData.trend) return [];
+    return dashboardData.trend.map((item) => {
+      const parts = item.date.split("-");
+      const name = parts.length === 3 ? `${parts[2]}/${parts[1]}` : item.date;
+      return {
+        name,
+        revenue: item.gmv / 1000000, // Show in Millions on chart Y-axis/Tooltip
+        tickets: item.ticketsSold
+      };
+    });
+  }, [dashboardData]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        {/* Header Skeleton */}
+        <div className="flex items-end justify-between">
+          <div className="space-y-2">
+            <div className="h-3 w-12 bg-border rounded"></div>
+            <div className="h-8 w-64 bg-border rounded"></div>
+            <div className="h-4 w-96 bg-border rounded"></div>
+          </div>
+          <div className="flex gap-3">
+            <div className="h-10 w-44 bg-border rounded-ds-xl"></div>
+            <div className="h-10 w-36 bg-border rounded-ds-xl"></div>
+          </div>
+        </div>
+
+        {/* Stats Grid Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-surface border border-border rounded-ds-3xl p-6 h-36 flex flex-col justify-between">
+              <div className="flex justify-between items-center">
+                <div className="w-10 h-10 bg-border rounded-ds-xl"></div>
+                <div className="w-20 h-4 bg-border rounded"></div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-3 w-24 bg-border rounded"></div>
+                <div className="h-6 w-32 bg-border rounded"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Main Chart Skeleton */}
+        <div className="bg-surface border border-border rounded-ds-3xl p-8 h-[450px] flex flex-col justify-between">
+          <div className="flex justify-between items-center">
+            <div className="space-y-2">
+              <div className="h-5 w-48 bg-border rounded"></div>
+              <div className="h-3 w-64 bg-border rounded"></div>
+            </div>
+            <div className="h-8 w-60 bg-border rounded-ds-xl"></div>
+          </div>
+          <div className="h-[300px] w-full bg-border/50 rounded-ds-2xl"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-6 min-h-[400px] text-center bg-surface border border-border rounded-ds-3xl p-8">
+        <div className="w-16 h-16 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-600">
+          <AlertTriangle size={32} />
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-xl font-bold text-txt-primary">Đã xảy ra lỗi</h3>
+          <p className="text-sm text-txt-secondary max-w-md">{error}</p>
+        </div>
+        <button
+          onClick={loadDashboard}
+          className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-ds-xl font-bold shadow-lg shadow-primary/20 transition-all"
+        >
+          {t("btn_refresh") || "Thử lại"}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -82,11 +197,13 @@ export default function AdminDashboard() {
           <p className="text-sm text-txt-secondary mt-1">{t("overview_subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-surface border border-border rounded-ds-xl px-4 py-2.5 shadow-sm">
-            <Calendar size={18} className="text-txt-muted" />
-            <span className="text-sm font-bold text-txt-secondary">{dateRange}</span>
-            <ChevronDown size={14} className="text-txt-muted ml-2" />
-          </div>
+          {dateRangeDisplay && (
+            <div className="flex items-center gap-2 bg-surface border border-border rounded-ds-xl px-4 py-2.5 shadow-sm">
+              <Calendar size={18} className="text-txt-muted" />
+              <span className="text-sm font-bold text-txt-secondary">{dateRangeDisplay}</span>
+              <ChevronDown size={14} className="text-txt-muted ml-2" />
+            </div>
+          )}
           <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-ds-xl font-bold shadow-lg shadow-primary/20 transition-all">
             <Download size={18} />
             <span>{t("export_summary")}</span>
@@ -98,34 +215,34 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
           label={t("gmv_label")}
-          value="₫12.8B"
-          trend="+11.4%"
-          isUp={true}
+          value={formatCurrencyVal(dashboardData?.totalGmv || 0)}
+          trend={gmvGrowth.trendStr}
+          isUp={gmvGrowth.isUp}
           icon={<DollarSign size={20} />}
           color="amber"
           vsText={t("vs_7d_ago")}
         />
         <StatsCard
           label={t("revenue_label")}
-          value="₫286M"
-          trend="+6.2%"
-          isUp={true}
+          value={formatCurrencyVal(dashboardData?.totalRevenue || 0)}
+          trend={gmvGrowth.trendStr}
+          isUp={gmvGrowth.isUp}
           icon={<Briefcase size={20} />}
           color="amber"
           vsText={t("vs_7d_ago")}
         />
         <StatsCard
           label={t("tickets_label")}
-          value="18,420"
-          trend="+8.7%"
-          isUp={true}
+          value={(dashboardData?.totalTicketsSold || 0).toLocaleString()}
+          trend={ticketsGrowth.trendStr}
+          isUp={ticketsGrowth.isUp}
           icon={<Ticket size={20} />}
           color="purple"
           vsText={t("vs_7d_ago")}
         />
         <StatsCard
           label={t("users_label")}
-          value="1,284"
+          value={(dashboardData?.newUsersCount || 0).toLocaleString()}
           trend="+3.1%"
           isUp={true}
           icon={<Users size={20} />}
@@ -180,7 +297,7 @@ export default function AdminDashboard() {
 
         <div className="h-[350px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={filteredData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <AreaChart data={chartDataMapped} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.1} />

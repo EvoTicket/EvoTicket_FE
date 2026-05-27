@@ -474,9 +474,24 @@ export default function HomePage() {
 
             {/* Cột phải: Poster Top 1 */}
             <div className="lg:col-span-2 relative flex flex-col items-center justify-center pt-8">
-              <div className="absolute top-0 w-full text-center z-10 flex flex-col items-center pb-6">
-                <span className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-text-primary to-text-secondary tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" style={{ textShadow: '0px 0px 20px rgba(255,255,255,0.3)' }}>
-                  T<span className="relative inline-block w-9 h-9 mx-1.5 -translate-y-1"><Crown className="text-[#FFD700] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-9 h-9 drop-shadow-[0_0_8px_rgba(255,215,0,0.8)]" strokeWidth={2.5} /></span>P 1
+              <div className="absolute top-0 w-full text-center z-10 flex flex-col items-center pb-6 pointer-events-none">
+                <span
+                  className="
+                    relative inline-flex items-center justify-center
+                    font-camaro uppercase leading-none
+                    text-[2.75rem] sm:text-5xl md:text-6xl
+                    tracking-[0.22em]
+                    text-transparent bg-clip-text
+                    bg-gradient-to-b from-white via-text-primary to-text-secondary
+                    drop-shadow-[0_10px_24px_rgba(0,0,0,0.55)]
+                    before:absolute before:-inset-x-5 before:-inset-y-3 before:-z-10
+                    before:rounded-full before:bg-black/20 before:blur-2xl
+                    after:absolute after:-bottom-3 after:left-1/2
+                    after:h-px after:w-28 after:-translate-x-1/2
+                    after:bg-gradient-to-r after:from-transparent after:via-primary/70 after:to-transparent
+                  "
+                >
+                  TOP 1
                 </span>
               </div>
               <div onClick={() => handleOpenEvent(top1TrendingEvents?.id)} className="relative w-full aspect-square md:aspect-[4/5] rounded-[2rem] overflow-hidden border-2 border-border-strong shadow-xl group cursor-pointer mt-4">

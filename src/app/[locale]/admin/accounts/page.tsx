@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Users,
   Search,
@@ -21,127 +21,7 @@ import {
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-
-// Mock data for the table
-const accountsData = [
-  {
-    id: "ACC-10245",
-    name: "VBC Entertainment",
-    type: "Organizer",
-    email: "ops@vbc.vn",
-    phone: "+84 28 3822 1144",
-    verification: "Verified",
-    status: "Active",
-    activity: 412,
-    lastActive: "25/04 09:02",
-    avatar: "VB"
-  },
-  {
-    id: "ACC-10244",
-    name: "Nguyễn Hoàng Anh",
-    type: "Buyer",
-    email: "anh.nh@gmail.com",
-    phone: "+84 909 442 118",
-    verification: "Verified",
-    status: "Active",
-    activity: 24,
-    lastActive: "25/04 08:50",
-    avatar: "NG"
-  },
-  {
-    id: "ACC-10243",
-    name: "Builder DAO",
-    type: "Organizer",
-    email: "hello@builderdao.io",
-    phone: "+84 24 3556 0921",
-    verification: "Pending",
-    status: "Pending Approval",
-    activity: 3,
-    lastActive: "24/04 22:18",
-    avatar: "BU"
-  },
-  {
-    id: "ACC-10242",
-    name: "Trần Mỹ Linh",
-    type: "Buyer",
-    email: "linh.tran@outlook.com",
-    phone: "+84 935 110 882",
-    verification: "Missing Docs",
-    status: "Restricted",
-    activity: 7,
-    lastActive: "24/04 14:32",
-    avatar: "TR"
-  },
-  {
-    id: "ACC-10241",
-    name: "Dalat Tourism",
-    type: "Organizer",
-    email: "events@dalattourism.vn",
-    phone: "+84 263 3823 110",
-    verification: "Verified",
-    status: "Active",
-    activity: 188,
-    lastActive: "24/04 11:14",
-    avatar: "DA"
-  },
-  {
-    id: "ACC-10240",
-    name: "Phạm Quốc Đạt",
-    type: "Buyer",
-    email: "dat.pq@yahoo.com",
-    phone: "+84 902 884 552",
-    verification: "Verified",
-    status: "Suspended",
-    activity: 41,
-    lastActive: "23/04 19:45",
-    avatar: "PH"
-  },
-  {
-    id: "ACC-10239",
-    name: "HN Sports JSC",
-    type: "Organizer",
-    email: "contact@hnsports.vn",
-    phone: "+84 24 3733 5588",
-    verification: "Pending",
-    status: "Pending Approval",
-    activity: 1,
-    lastActive: "23/04 16:08",
-    avatar: "HN"
-  },
-  {
-    id: "ACC-10238",
-    name: "Lê Thanh Hà",
-    type: "Buyer",
-    email: "ha.le@protonmail.com",
-    phone: "+84 988 110 092",
-    verification: "Verified",
-    status: "Active",
-    activity: 12,
-    lastActive: "23/04 10:21",
-    avatar: "LÊ"
-  },
-];
-
-const pendingOrganizersData = [
-  { id: "ACC-10243", name: "Builder DAO", representative: "Đỗ Minh Khôi", role: "CEO", sentAt: "24/04 22:18", verification: "Pending", priority: "High", avatar: "BU" },
-  { id: "ACC-10239", name: "HN Sports JSC", representative: "Lương Tuấn Anh", role: "Giám đốc vận hành", sentAt: "23/04 16:08", verification: "Pending", priority: "Medium", avatar: "HN" },
-  { id: "ACC-10231", name: "Saigon Indie Collective", representative: "Nguyễn Hoài Phương", role: "Founder", sentAt: "22/04 09:45", verification: "Missing Docs", priority: "High", avatar: "SA" },
-  { id: "ACC-10227", name: "ESG Forum Vietnam", representative: "Phan Thanh Long", role: "Trưởng ban tổ chức", sentAt: "21/04 14:12", verification: "Pending", priority: "Low", avatar: "ES" },
-  { id: "ACC-10219", name: "VietJazz Festival", representative: "Trần Bích Vân", role: "Producer", sentAt: "20/04 17:35", verification: "Pending", priority: "Medium", avatar: "VI" },
-  { id: "ACC-10214", name: "Greenline Outdoor", representative: "Hồ Đăng Khoa", role: "COO", sentAt: "20/04 11:02", verification: "Pending", priority: "Low", avatar: "GR" },
-  { id: "ACC-10208", name: "DanceLab Studio", representative: "Vũ Quỳnh Anh", role: "Owner", sentAt: "19/04 22:54", verification: "Missing Docs", priority: "High", avatar: "DA" },
-  { id: "ACC-10201", name: "Code Camp Asia", representative: "Phạm Anh Tú", role: "Director", sentAt: "19/04 10:48", verification: "Pending", priority: "Medium", avatar: "CO" },
-];
-
-const restrictedAccountsData = [
-  { id: "ACC-10242", name: "Trần Mỹ Linh", type: "Buyer", reason: "Nhiều giao dịch chargeback liên tiếp", restrictionType: "Payment", restrictedFrom: "22/04/2026", avatar: "TR" },
-  { id: "ACC-10240", name: "Phạm Quốc Đạt", type: "Buyer", reason: "Nghi vấn dùng tài khoản chia sẻ", restrictionType: "Login", restrictedFrom: "21/04/2026", avatar: "PH" },
-  { id: "ACC-10198", name: "Indie Vibes Co.", type: "Organizer", reason: "Vi phạm chính sách bán vé", restrictionType: "Org", restrictedFrom: "19/04/2026", avatar: "IN" },
-  { id: "ACC-10187", name: "Bùi Khánh Linh", type: "Buyer", reason: "Phát hiện hoạt động bot bán lại", restrictionType: "Payment", restrictedFrom: "18/04/2026", avatar: "BÙ" },
-  { id: "ACC-10172", name: "Resale Hunters", type: "Organizer", reason: "Báo cáo lừa đảo từ nhiều buyer", restrictionType: "Org", restrictedFrom: "16/04/2026", avatar: "RE" },
-  { id: "ACC-10166", name: "Đặng Hoàng Vũ", type: "Buyer", reason: "KYC không khớp với tài khoản thanh toán", restrictionType: "Login", restrictedFrom: "15/04/2026", avatar: "ĐẶ" },
-  { id: "ACC-10159", name: "Mai Phương Thảo", type: "Buyer", reason: "Spam yêu cầu hoàn tiền", restrictionType: "Payment", restrictedFrom: "14/04/2026", avatar: "MA" },
-];
+import { adminAccountsApi, type AccountSummaryResponse, type AccountDetailsResponse } from "@/src/lib/api/adminAccountsApi";
 
 export default function AdminAccountsPage() {
   const t = useTranslations("Admin");
@@ -149,10 +29,84 @@ export default function AdminAccountsPage() {
   const router = useRouter();
   const locale = useLocale();
 
-  const navigateToDetail = (item: any) => {
-    router.push(`/${locale}/admin/accounts/${item.id}`);
+  const [summary, setSummary] = useState<AccountSummaryResponse | null>(null);
+  const [accountsPage, setAccountsPage] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [roleFilter, setRoleFilter] = useState("");
+  const [verificationFilter, setVerificationFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const navigateToDetail = (row: any) => {
+    router.push(`/${locale}/admin/accounts/${row.id}`);
   };
 
+  const fetchSummary = useCallback(async () => {
+    try {
+      const data = await adminAccountsApi.getAccountSummary();
+      setSummary(data);
+    } catch (err) {
+      console.error("Failed to load account summary:", err);
+    }
+  }, []);
+
+  const fetchAccounts = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      let role = roleFilter || undefined;
+      let verification = verificationFilter || undefined;
+      let status = statusFilter || undefined;
+
+      if (activeTab === "pending") {
+        role = "ORGANIZER";
+        verification = "PENDING";
+        status = undefined;
+      } else if (activeTab === "restricted") {
+        role = undefined;
+        verification = undefined;
+        status = "BANNED";
+      }
+
+      const response = await adminAccountsApi.searchAccounts({
+        page: currentPage,
+        size: 10,
+        keyword: searchQuery || undefined,
+        role,
+        verification,
+        status,
+        sortBy: "id",
+        direction: "desc"
+      });
+      setAccountsPage(response);
+    } catch (err) {
+      console.error("Failed to load accounts:", err);
+      setError("Không thể tải danh sách tài khoản. Vui lòng thử lại.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeTab, currentPage, searchQuery, roleFilter, verificationFilter, statusFilter]);
+
+  useEffect(() => {
+    fetchSummary();
+  }, [fetchSummary]);
+
+  useEffect(() => {
+    fetchAccounts();
+  }, [fetchAccounts]);
+
+  // Reset page when tab/filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, roleFilter, verificationFilter, statusFilter, searchQuery]);
+
+  const totalElements = accountsPage?.totalElements || 0;
+  const startElement = totalElements > 0 ? (currentPage - 1) * 10 + 1 : 0;
+  const endElement = Math.min(currentPage * 10, totalElements);
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Header */}
@@ -170,10 +124,10 @@ export default function AdminAccountsPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard icon={<Users size={20} />} label={t("total_accounts")} value="24,182" color="indigo" />
-        <StatsCard icon={<Building2 size={20} />} label={t("active_organizers")} value="46" color="emerald" />
-        <StatsCard icon={<Clock size={20} />} label={t("pending_approval")} value="8" color="amber" />
-        <StatsCard icon={<AlertCircle size={20} />} label={t("restricted_label")} value="11" color="rose" />
+        <StatsCard icon={<Users size={20} />} label={t("total_accounts")} value={summary?.totalAccounts?.toLocaleString() || "0"} color="indigo" />
+        <StatsCard icon={<Building2 size={20} />} label={t("active_organizers")} value={summary?.activeOrganizers?.toLocaleString() || "0"} color="emerald" />
+        <StatsCard icon={<Clock size={20} />} label={t("pending_approval")} value={summary?.pendingApprovals?.toLocaleString() || "0"} color="amber" />
+        <StatsCard icon={<AlertCircle size={20} />} label={t("restricted_label")} value={summary?.restrictedAccounts?.toLocaleString() || "0"} color="rose" />
       </div>
 
       {/* Main Content Area */}
@@ -184,19 +138,19 @@ export default function AdminAccountsPage() {
             active={activeTab === "all"}
             onClick={() => setActiveTab("all")}
             label={t("tab_all_accounts")}
-            count={8}
+            count={summary?.totalAccounts || 0}
           />
           <TabItem
             active={activeTab === "pending"}
             onClick={() => setActiveTab("pending")}
             label={t("tab_org_pending")}
-            count={8}
+            count={summary?.pendingApprovals || 0}
           />
           <TabItem
             active={activeTab === "restricted"}
             onClick={() => setActiveTab("restricted")}
             label={t("tab_restricted")}
-            count={7}
+            count={summary?.restrictedAccounts || 0}
           />
         </div>
 
@@ -207,14 +161,55 @@ export default function AdminAccountsPage() {
             <input
               type="text"
               placeholder={t("search_accounts_placeholder")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-2.5 bg-main border border-border rounded-ds-2xl text-sm focus:bg-surface focus:border-primary outline-none transition-all text-txt-primary placeholder:text-txt-muted"
             />
           </div>
 
-          <FilterSelect label={t("filter_type")} value={t("common.all")} />
-          <FilterSelect label={t("filter_verification")} value={t("common.all")} />
-          <FilterSelect label={t("filter_status")} value={t("common.all")} />
-          <FilterSelect label={t("filter_created_at")} value={t("dashboard.time_ranges.30n")} />
+          {activeTab === "all" && (
+            <>
+              <div className="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-ds-2xl shadow-sm">
+                <span className="text-[11px] font-medium text-txt-muted">{t("filter_type")}:</span>
+                <select
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                  className="text-[11px] font-bold text-txt-primary bg-transparent border-none outline-none cursor-pointer"
+                >
+                  <option value="">{t("common.all")}</option>
+                  <option value="USER">{t("type_buyer")}</option>
+                  <option value="ORGANIZER">{t("type_organizer")}</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-ds-2xl shadow-sm">
+                <span className="text-[11px] font-medium text-txt-muted">{t("filter_verification")}:</span>
+                <select
+                  value={verificationFilter}
+                  onChange={(e) => setVerificationFilter(e.target.value)}
+                  className="text-[11px] font-bold text-txt-primary bg-transparent border-none outline-none cursor-pointer"
+                >
+                  <option value="">{t("common.all")}</option>
+                  <option value="VERIFIED">{t("status_verified")}</option>
+                  <option value="PENDING">{t("status_pending")}</option>
+                  <option value="REJECTED">{t("status_rejected")}</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-ds-2xl shadow-sm">
+                <span className="text-[11px] font-medium text-txt-muted">{t("filter_status")}:</span>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="text-[11px] font-bold text-txt-primary bg-transparent border-none outline-none cursor-pointer"
+                >
+                  <option value="">{t("common.all")}</option>
+                  <option value="ACTIVE">{t("status_active")}</option>
+                  <option value="BANNED">{t("status_restricted")}</option>
+                </select>
+              </div>
+            </>
+          )}
 
           <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-txt-muted hover:text-txt-primary transition-colors">
             <Filter size={18} />
@@ -283,375 +278,219 @@ export default function AdminAccountsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border text-txt-primary">
-              {activeTab === "all" && accountsData.map((row) => (
-                <tr key={row.id} className="hover:bg-main/30 transition-colors group">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold ${row.type === "Organizer" ? "bg-primary/10 text-primary" : "bg-sky-500/10 text-sky-600"
-                        }`}>
-                        {row.avatar}
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold line-clamp-1">{row.name}</p>
-                        <p className="text-[10px] font-medium text-txt-muted">{row.id}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-ds-lg text-[10px] font-bold border ${row.type === "Organizer"
-                      ? "bg-primary/10 text-primary border-primary/20"
-                      : "bg-sky-500/10 text-sky-600 border-sky-500/20"
-                      }`}>
-                      {row.type === "Organizer" ? <Building2 size={12} /> : <User size={12} />}
-                      {row.type === "Organizer" ? t("type_organizer") : t("type_buyer")}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div>
-                      <p className="text-[11px] font-bold">{row.email}</p>
-                      <p className="text-[10px] text-txt-muted">{row.phone}</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4"><VerificationBadge status={row.verification} /></td>
-                  <td className="px-6 py-4"><StatusBadge status={row.status} /></td>
-                  <td className="px-6 py-4"><span className="text-sm font-bold">{row.activity}</span></td>
-                  <td className="px-6 py-4 whitespace-nowrap"><span className="text-xs font-medium text-txt-muted">{row.lastActive}</span></td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-ds-lg hover:bg-main transition-all shadow-sm" onClick={() => navigateToDetail(row)}>{t("view_details")}</button>
-                      <button className="w-8 h-8 flex items-center justify-center text-txt-muted hover:text-txt-primary transition-colors"><MoreHorizontal size={16} /></button>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-12 text-center text-txt-muted">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-sm font-medium">Đang tải dữ liệu...</span>
                     </div>
                   </td>
                 </tr>
-              ))}
-              {activeTab === "pending" && pendingOrganizersData.map((row) => (
-                <tr key={row.id} className="hover:bg-main/30 transition-colors group">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-ds-xl bg-primary/10 text-primary flex items-center justify-center text-xs font-bold"><Building2 size={18} /></div>
-                      <div>
-                        <p className="text-sm font-bold line-clamp-1">{row.name}</p>
-                        <p className="text-[10px] font-medium text-txt-muted">{row.id}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4"><div><p className="text-sm font-bold">{row.representative}</p><p className="text-[10px] text-txt-muted">{row.role}</p></div></td>
-                  <td className="px-6 py-4"><span className="text-xs font-medium text-txt-secondary">{row.sentAt}</span></td>
-                  <td className="px-6 py-4"><VerificationBadge status={row.verification} /></td>
-                  <td className="px-6 py-4"><PriorityBadge priority={row.priority} /></td>
-                  <td className="px-6 py-4"><button className="px-4 py-1.5 text-[10px] font-bold text-white bg-primary hover:bg-primary-hover rounded-ds-lg transition-all shadow-sm" onClick={() => navigateToDetail(row)}>{t("view_details")}</button></td>
-                </tr>
-              ))}
-              {activeTab === "restricted" && restrictedAccountsData.map((row) => (
-                <tr key={row.id} className="hover:bg-main/30 transition-colors group">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold ${row.type === "Organizer" ? "bg-primary/10 text-primary" : "bg-sky-500/10 text-sky-600"
-                        }`}>{row.avatar}</div>
-                      <div>
-                        <p className="text-sm font-bold line-clamp-1">{row.name}</p>
-                        <div className="flex items-center gap-2">
-                          <p className="text-[10px] font-medium text-txt-muted">{row.id}</p>
-                          <div className={`px-1.5 py-0.5 rounded-ds-md text-[8px] font-bold border ${row.type === "Organizer" ? "bg-primary/5 text-primary border-primary/10" : "bg-sky-500/5 text-sky-600 border-sky-500/10"
-                            }`}>{row.type === "Organizer" ? t("type_organizer") : t("type_buyer")}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4"><p className="text-xs font-medium text-txt-secondary max-w-[250px] leading-relaxed">{row.reason}</p></td>
-                  <td className="px-6 py-4"><RestrictionBadge type={row.restrictionType} /></td>
-                  <td className="px-6 py-4"><span className="text-xs font-medium text-txt-muted">{row.restrictedFrom}</span></td>
-                  <td className="px-6 py-4"><button className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-ds-lg hover:bg-main transition-all shadow-sm" onClick={() => navigateToDetail(row)}>{t("view_details")}</button></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Sub-components
-function StatusCard({ icon, label, value, color }: any) {
-  const t = useTranslations("Admin");
-  const [activeTab, setActiveTab] = useState("all");
-
-  return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex items-end justify-between">
-        <div>
-          <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-1">ADM-02</p>
-          <h1 className="text-3xl font-extrabold text-txt-primary tracking-tight">{t("accounts_title")}</h1>
-          <p className="text-sm text-txt-secondary mt-1">{t("accounts_subtitle")}</p>
-        </div>
-        <button className="flex items-center gap-2 bg-surface hover:bg-main text-txt-primary px-5 py-2.5 rounded-ds-xl font-bold border border-border shadow-sm transition-all">
-          <Download size={18} />
-          <span>{t("export_list")}</span>
-        </button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard icon={<Users size={20} />} label={t("total_accounts")} value="24,182" color="indigo" />
-        <StatsCard icon={<Building2 size={20} />} label={t("active_organizers")} value="46" color="emerald" />
-        <StatsCard icon={<Clock size={20} />} label={t("pending_approval")} value="8" color="amber" />
-        <StatsCard icon={<AlertCircle size={20} />} label={t("restricted_label")} value="11" color="rose" />
-      </div>
-
-      {/* Main Content Area */}
-      <div className="bg-surface border border-border rounded-ds-3xl shadow-sm overflow-hidden transition-colors duration-300">
-        {/* Tabs */}
-        <div className="flex items-center border-b border-border px-6 overflow-x-auto whitespace-nowrap scrollbar-hide">
-          <TabItem
-            active={activeTab === "all"}
-            onClick={() => setActiveTab("all")}
-            label={t("tab_all_accounts")}
-            count={8}
-          />
-          <TabItem
-            active={activeTab === "pending"}
-            onClick={() => setActiveTab("pending")}
-            label={t("tab_org_pending")}
-            count={8}
-          />
-          <TabItem
-            active={activeTab === "restricted"}
-            onClick={() => setActiveTab("restricted")}
-            label={t("tab_restricted")}
-            count={7}
-          />
-        </div>
-
-        {/* Filters Bar */}
-        <div className="p-4 flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[300px]">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-txt-muted" size={18} />
-            <input
-              type="text"
-              placeholder={t("search_accounts_placeholder")}
-              className="w-full pl-12 pr-4 py-2.5 bg-main border border-border rounded-ds-2xl text-sm focus:bg-surface focus:border-primary outline-none transition-all text-txt-primary placeholder:text-txt-muted"
-            />
-          </div>
-
-          <FilterSelect label={t("filter_type")} value={t("common.all")} />
-          <FilterSelect label={t("filter_verification")} value={t("common.all")} />
-          <FilterSelect label={t("filter_status")} value={t("common.all")} />
-          <FilterSelect label={t("filter_created_at")} value={t("dashboard.time_ranges.30n")} />
-
-          <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-txt-muted hover:text-txt-primary transition-colors">
-            <Filter size={18} />
-            <span>{t("advanced_filters")}</span>
-          </button>
-        </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-main/50 border-y border-border">
-                {activeTab === "all" && (
-                  <>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">
-                      <div className="flex items-center gap-1">
-                        {t("col_account")} <MoreHorizontal size={12} className="rotate-90" />
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_type")}</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_contact")}</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_verification")}</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_status")}</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">
-                      <div className="flex items-center gap-1">
-                        {t("col_activity")} <MoreHorizontal size={12} className="rotate-90" />
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_last_active")}</th>
-                  </>
-                )}
-                {activeTab === "pending" && (
-                  <>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">
-                      <div className="flex items-center gap-1">
-                        {t("col_org_name")} <MoreHorizontal size={12} className="rotate-90" />
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_representative")}</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">
-                      <div className="flex items-center gap-1">
-                        {t("col_sent_at")} <MoreHorizontal size={12} className="rotate-90" />
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_verification")}</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_review_priority")}</th>
-                  </>
-                )}
-                {activeTab === "restricted" && (
-                  <>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">
-                      <div className="flex items-center gap-1">
-                        {t("col_account")} <MoreHorizontal size={12} className="rotate-90" />
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_reason")}</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_restriction_type")}</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">
-                      <div className="flex items-center gap-1">
-                        {t("col_restricted_from")} <MoreHorizontal size={12} className="rotate-90" />
-                      </div>
-                    </th>
-                  </>
-                )}
-                <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_actions")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border text-txt-primary">
-              {activeTab === "all" && accountsData.map((row) => (
-                <tr key={row.id} className="hover:bg-main/30 transition-colors group">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold ${row.type === "Organizer" ? "bg-primary/10 text-primary" : "bg-sky-500/10 text-sky-600"
-                        }`}>
-                        {row.avatar}
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold line-clamp-1">{row.name}</p>
-                        <p className="text-[10px] font-medium text-txt-muted">{row.id}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-ds-lg text-[10px] font-bold border ${row.type === "Organizer"
-                      ? "bg-primary/10 text-primary border-primary/20"
-                      : "bg-sky-500/10 text-sky-600 border-sky-500/20"
-                      }`}>
-                      {row.type === "Organizer" ? <Building2 size={12} /> : <User size={12} />}
-                      {row.type === "Organizer" ? t("type_organizer") : t("type_buyer")}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div>
-                      <p className="text-[11px] font-bold">{row.email}</p>
-                      <p className="text-[10px] text-txt-muted">{row.phone}</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <VerificationBadge status={row.verification} />
-                  </td>
-                  <td className="px-6 py-4">
-                    <StatusBadge status={row.status} />
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm font-bold">{row.activity}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-xs font-medium text-txt-muted">{row.lastActive}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-ds-lg hover:bg-main transition-all shadow-sm">
-                        {t("view_details")}
-                      </button>
-                      <button className="w-8 h-8 flex items-center justify-center text-txt-muted hover:text-txt-primary transition-colors">
-                        <MoreHorizontal size={16} />
-                      </button>
-                    </div>
+              ) : error ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-12 text-center text-rose-500 font-medium">
+                    {error}
                   </td>
                 </tr>
-              ))}
-              {activeTab === "pending" && pendingOrganizersData.map((row) => (
-                <tr key={row.id} className="hover:bg-main/30 transition-colors group">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-ds-xl bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
-                        <Building2 size={18} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold line-clamp-1">{row.name}</p>
-                        <p className="text-[10px] font-medium text-txt-muted">{row.id}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div>
-                      <p className="text-sm font-bold">{row.representative}</p>
-                      <p className="text-[10px] text-txt-muted">{row.role}</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-xs font-medium text-txt-secondary">{row.sentAt}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <VerificationBadge status={row.verification} />
-                  </td>
-                  <td className="px-6 py-4">
-                    <PriorityBadge priority={row.priority} />
-                  </td>
-                  <td className="px-6 py-4">
-                    <button className="px-4 py-1.5 text-[10px] font-bold text-white bg-primary hover:bg-primary-hover rounded-ds-lg transition-all shadow-sm">
-                      {t("view_details")}
-                    </button>
+              ) : !accountsPage || accountsPage.content.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-12 text-center text-txt-muted font-medium">
+                    Không tìm thấy tài khoản nào khớp với tiêu chí tìm kiếm.
                   </td>
                 </tr>
-              ))}
-              {activeTab === "restricted" && restrictedAccountsData.map((row) => (
-                <tr key={row.id} className="hover:bg-main/30 transition-colors group">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold ${row.type === "Organizer" ? "bg-primary/10 text-primary" : "bg-sky-500/10 text-sky-600"
-                        }`}>
-                        {row.avatar}
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold line-clamp-1">{row.name}</p>
-                        <div className="flex items-center gap-2">
-                          <p className="text-[10px] font-medium text-txt-muted">{row.id}</p>
-                          <div className={`px-1.5 py-0.5 rounded-ds-md text-[8px] font-bold border ${row.type === "Organizer"
-                            ? "bg-primary/5 text-primary border-primary/10"
-                            : "bg-sky-500/5 text-sky-600 border-sky-500/10"
-                            }`}>
-                            {row.type === "Organizer" ? t("type_organizer") : t("type_buyer")}
+              ) : (
+                <>
+                  {activeTab === "all" && accountsPage.content.map((row: any) => {
+                    const avatar = row.fullName ? row.fullName.substring(0, 2).toUpperCase() : "US";
+                    const isOrg = row.role === "ORGANIZER";
+                    const lastActiveStr = row.lastActive
+                      ? new Date(row.lastActive).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" }) + " " + new Date(row.lastActive).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", hour12: false })
+                      : "—";
+
+                    return (
+                      <tr key={row.id} className="hover:bg-main/30 transition-colors group">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold ${isOrg ? "bg-primary/10 text-primary" : "bg-sky-500/10 text-sky-600"
+                              }`}>
+                              {avatar}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold line-clamp-1">{row.fullName || "—"}</p>
+                              <p className="text-[10px] font-medium text-txt-muted">ACC-{row.id}</p>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="text-xs font-medium text-txt-secondary max-w-[250px] leading-relaxed">{row.reason}</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <RestrictionBadge type={row.restrictionType} />
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-xs font-medium text-txt-muted">{row.restrictedFrom}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-ds-lg hover:bg-main transition-all shadow-sm">
-                      {t("view_details")}
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-ds-lg text-[10px] font-bold border ${isOrg ? "bg-primary/10 text-primary border-primary/20" : "bg-sky-500/10 text-sky-600 border-sky-500/20"
+                            }`}>
+                            {isOrg ? <Building2 size={12} /> : <User size={12} />}
+                            {isOrg ? t("type_organizer") : t("type_buyer")}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="text-[11px] font-bold">{row.email}</p>
+                            <p className="text-[10px] text-txt-muted">{row.phoneNumber || "—"}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4"><VerificationBadge status={row.verificationStatus} /></td>
+                        <td className="px-6 py-4"><StatusBadge status={row.status} /></td>
+                        <td className="px-6 py-4"><span className="text-sm font-bold">15</span></td>
+                        <td className="px-6 py-4 whitespace-nowrap"><span className="text-xs font-medium text-txt-muted">{lastActiveStr}</span></td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <button
+                              className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-ds-lg hover:bg-main transition-all shadow-sm"
+                              onClick={() => navigateToDetail(row)}
+                            >
+                              {t("view_details")}
+                            </button>
+                            <button className="w-8 h-8 flex items-center justify-center text-txt-muted hover:text-txt-primary transition-colors">
+                              <MoreHorizontal size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {activeTab === "pending" && accountsPage.content.map((row: any) => {
+                    const sentAtStr = row.createdAt
+                      ? new Date(row.createdAt).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" }) + " " + new Date(row.createdAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", hour12: false })
+                      : "—";
+
+                    return (
+                      <tr key={row.id} className="hover:bg-main/30 transition-colors group">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-ds-xl bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                              <Building2 size={18} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold line-clamp-1">{row.fullName || "—"}</p>
+                              <p className="text-[10px] font-medium text-txt-muted">ACC-{row.id}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="text-sm font-bold">{row.fullName || "—"}</p>
+                            <p className="text-[10px] text-txt-muted">Đại diện</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-xs font-medium text-txt-secondary">{sentAtStr}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <VerificationBadge status={row.verificationStatus} />
+                        </td>
+                        <td className="px-6 py-4">
+                          <PriorityBadge priority="High" />
+                        </td>
+                        <td className="px-6 py-4">
+                          <button
+                            className="px-4 py-1.5 text-[10px] font-bold text-white bg-primary hover:bg-primary-hover rounded-ds-lg transition-all shadow-sm"
+                            onClick={() => navigateToDetail(row)}
+                          >
+                            {t("view_details")}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {activeTab === "restricted" && accountsPage.content.map((row: any) => {
+                    const avatar = row.fullName ? row.fullName.substring(0, 2).toUpperCase() : "US";
+                    const isOrg = row.role === "ORGANIZER";
+                    const restrictedFromStr = row.lastActive
+                      ? new Date(row.lastActive).toLocaleDateString("vi-VN")
+                      : "—";
+
+                    return (
+                      <tr key={row.id} className="hover:bg-main/30 transition-colors group">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold ${isOrg ? "bg-primary/10 text-primary" : "bg-sky-500/10 text-sky-600"
+                              }`}>
+                              {avatar}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold line-clamp-1">{row.fullName || "—"}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-[10px] font-medium text-txt-muted">ACC-{row.id}</p>
+                                <div className={`px-1.5 py-0.5 rounded-ds-md text-[8px] font-bold border ${isOrg ? "bg-primary/5 text-primary border-primary/10" : "bg-sky-500/5 text-sky-600 border-sky-500/10"
+                                  }`}>
+                                  {isOrg ? t("type_organizer") : t("type_buyer")}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-xs font-medium text-txt-secondary max-w-[250px] leading-relaxed">
+                            Nghi vấn hành vi gian lận tài khoản
+                          </p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <RestrictionBadge type="Login" />
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-xs font-medium text-txt-muted">{restrictedFromStr}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <button
+                            className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-ds-lg hover:bg-main transition-all shadow-sm"
+                            onClick={() => navigateToDetail(row)}
+                          >
+                            {t("view_details")}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </>
+              )}
             </tbody>
           </table>
         </div>
 
         {/* Footer / Pagination */}
-        <div className="px-6 py-4 bg-main/30 border-t border-border flex items-center justify-between">
-          <p className="text-xs text-txt-muted">
-            {t("pagination_info", { start: 1, end: 8, total: "24,182" })}
-          </p>
-          <div className="flex items-center gap-1">
-            <PaginationButton disabled icon={<ChevronLeft size={16} />} />
-            <PaginationButton active label="1" />
-            <PaginationButton label="2" />
-            <PaginationButton label="3" />
-            <span className="px-2 text-txt-muted/30">...</span>
-            <PaginationButton label="412" />
-            <PaginationButton icon={<ChevronRight size={16} />} />
+        {!isLoading && accountsPage && accountsPage.totalPages > 0 && (
+          <div className="px-6 py-4 bg-main/30 border-t border-border flex items-center justify-between">
+            <p className="text-xs text-txt-muted">
+              {t("pagination_info", { start: startElement, end: endElement, total: totalElements.toLocaleString() })}
+            </p>
+            <div className="flex items-center gap-1">
+              <PaginationButton
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                icon={<ChevronLeft size={16} />}
+              />
+              {Array.from({ length: accountsPage.totalPages }).map((_, index) => {
+                const pageNum = index + 1;
+                if (pageNum === 1 || pageNum === accountsPage.totalPages || Math.abs(pageNum - currentPage) <= 2) {
+                  return (
+                    <PaginationButton
+                      key={pageNum}
+                      active={pageNum === currentPage}
+                      label={pageNum.toString()}
+                      onClick={() => setCurrentPage(pageNum)}
+                    />
+                  );
+                }
+                if (pageNum === 2 || pageNum === accountsPage.totalPages - 1) {
+                  return <span key={pageNum} className="px-2 text-txt-muted/30">...</span>;
+                }
+                return null;
+              })}
+              <PaginationButton
+                disabled={currentPage === accountsPage.totalPages}
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, accountsPage.totalPages))}
+                icon={<ChevronRight size={16} />}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -712,7 +551,7 @@ function FilterSelect({ label, value }: any) {
 
 function VerificationBadge({ status }: { status: string }) {
   const t = useTranslations("Admin");
-  if (status === "Verified") {
+  if (status === "VERIFIED") {
     return (
       <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-ds-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px] font-black">
         <CheckCircle2 size={10} />
@@ -720,7 +559,7 @@ function VerificationBadge({ status }: { status: string }) {
       </div>
     );
   }
-  if (status === "Pending") {
+  if (status === "PENDING") {
     return (
       <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-ds-lg bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[10px] font-black">
         <Clock size={10} />
