@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { EVENT_DETAIL } from "@/src/features/organizer/fixtures/eventDetail";
 import { OrganizerStatusBadge } from "../common/OrganizerStatusBadge";
+import { useTranslations } from "next-intl";
 
 type EventDetailLayoutProps = {
   children: ReactNode;
@@ -21,6 +22,7 @@ export function EventDetailLayout({ children }: EventDetailLayoutProps) {
   const locale = (params?.locale as string) ?? "vi";
   const eventId = (params?.eventId as string) ?? EVENT_DETAIL.id;
   const basePath = `/${locale}/organizer/events/${eventId}`;
+  const t = useTranslations("Organizer.EventDetail.Layout");
 
   return (
     <div className="flex flex-col gap-6">
@@ -29,11 +31,11 @@ export function EventDetailLayout({ children }: EventDetailLayoutProps) {
           <div className="flex min-w-0 items-center gap-4">
             <div className="min-w-0">
               <div className="mb-1 flex items-center gap-2 text-xs uppercase tracking-wide text-text-muted">
-                Event workspace
+                {t("workspace")}
                 <OrganizerStatusBadge tone={EVENT_DETAIL.statusTone}>
                   {EVENT_DETAIL.status}
                 </OrganizerStatusBadge>
-                <span>ID #{eventId}</span>
+                <span>{t("id")} #{eventId}</span>
               </div>
               <h1 className="truncate text-2xl font-semibold text-text-primary">
                 {EVENT_DETAIL.title}
@@ -44,14 +46,14 @@ export function EventDetailLayout({ children }: EventDetailLayoutProps) {
           <div className="flex items-center gap-2">
             <button className="flex items-center gap-2 rounded-ds-md border border-border-default bg-transparent px-3 py-2 text-sm text-text-primary transition-colors hover:bg-bg-elevated">
               <ExternalLink size={15} />
-              Mở trang public
+              {t("open_public_page")}
             </button>
             <Link
               href={`${basePath}/edit`}
               className="flex items-center gap-2 rounded-ds-md border border-action-brand-bg-hover bg-action-brand-bg-default px-3 py-2 text-sm font-medium text-action-brand-text-default transition-colors hover:bg-action-brand-bg-hover"
             >
               <Pencil size={15} />
-              Chỉnh sửa sự kiện
+              {t("edit_event")}
             </Link>
           </div>
         </div>
@@ -66,7 +68,7 @@ export function EventDetailLayout({ children }: EventDetailLayoutProps) {
             {EVENT_DETAIL.venue}
           </span>
           <span>{EVENT_DETAIL.categoryName}</span>
-          <span>{EVENT_DETAIL.sold} / {EVENT_DETAIL.capacity} vé</span>
+          <span>{EVENT_DETAIL.sold} / {EVENT_DETAIL.capacity} {t("tickets")}</span>
           <span>{EVENT_DETAIL.settlementStatus}</span>
         </div>
       </section>

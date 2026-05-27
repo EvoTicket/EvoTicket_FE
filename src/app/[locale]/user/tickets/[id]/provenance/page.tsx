@@ -8,7 +8,7 @@ import { useParams } from "next/navigation";
 import api from "@/src/lib/axios";
 
 interface ProvenanceData {
-    ticket: {
+    ticketInfo: {
         eventName: string;
         eventDate: string;
         eventTime: string;
@@ -88,8 +88,8 @@ export default function ProvenancePage() {
     };
 
     const openExplorer = () => {
-        if (data?.blockchain.contractAddress && data?.ticket.tokenId) {
-            const tokenIdNum = data.ticket.tokenId.replace("#", "");
+        if (data?.blockchain.contractAddress && data?.ticketInfo.tokenId) {
+            const tokenIdNum = data.ticketInfo.tokenId.replace("#", "");
             window.open(
                 `https://amoy.polygonscan.com/nft/${data.blockchain.contractAddress}/${tokenIdNum}`,
                 "_blank"
@@ -97,7 +97,16 @@ export default function ProvenancePage() {
         }
     };
 
+    // const truncateHash = (hash: string) => {
+    //     if (!hash) return "—";
+    //     if (hash.length <= 12) return hash;
+    //     return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
+    // };
+
     const openTxExplorer = (txHash: string) => {
+        console.log('----------------------------------------------------------------------------------------------------------');
+        console.log(txHash);
+        console.log('----------------------------------------------------------------------------------------------------------');
         window.open(`https://amoy.polygonscan.com/tx/${txHash}`, "_blank");
     };
 
@@ -206,31 +215,31 @@ export default function ProvenancePage() {
 
             {/* Ticket Info Card */}
             <div className="bg-bg-surface border border-border-default rounded-xl p-6 mb-8">
-                <h2 className="text-xl font-bold text-text-primary mb-1">{data.ticket.eventName}</h2>
+                <h2 className="text-xl font-bold text-text-primary mb-1">{data.ticketInfo.eventName}</h2>
                 <div className="text-sm text-text-secondary mb-6">
-                    <p>{data.ticket.eventTime} - {data.ticket.eventDate}</p>
-                    <p>{data.ticket.venue}</p>
+                    <p>{data.ticketInfo.eventTime} - {data.ticketInfo.eventDate}</p>
+                    <p>{data.ticketInfo.venue}</p>
                 </div>
 
                 <div className="border-t border-border-default pt-4 flex flex-wrap gap-x-6 gap-y-3 text-xs md:text-sm items-center justify-between">
                     <div>
                         <span className="text-text-muted">{t("ticket_type")}: </span>
-                        <span className="font-semibold text-text-primary">{data.ticket.ticketType}</span>
+                        <span className="font-semibold text-text-primary">{data.ticketInfo.ticketType}</span>
                     </div>
                     <div>
                         <span className="text-text-muted">{t("seat")}: </span>
-                        <span className="font-semibold text-text-primary">{data.ticket.seat}</span>
+                        <span className="font-semibold text-text-primary">{data.ticketInfo.seat}</span>
                     </div>
                     <div>
                         <span className="text-text-muted">{t("ticket_code")}: </span>
-                        <span className="font-semibold text-text-primary">{data.ticket.ticketCode}</span>
+                        <span className="font-semibold text-text-primary">{data.ticketInfo.ticketCode}</span>
                     </div>
                     <div>
                         <span className="text-text-muted">{t("token_id")}: </span>
-                        <span className="font-semibold text-text-primary">{data.ticket.tokenId}</span>
+                        <span className="font-semibold text-text-primary">{data.ticketInfo.tokenId}</span>
                     </div>
                     <div className="bg-bg-inverse text-text-inverse px-2 py-1 rounded text-xs font-semibold">
-                        {data.ticket.status}
+                        {data.ticketInfo.status}
                     </div>
                 </div>
 
@@ -255,7 +264,7 @@ export default function ProvenancePage() {
                             <div className="font-medium text-right text-text-primary">{data.blockchain.network}</div>
 
                             <div className="text-text-muted">{t("token_id")}</div>
-                            <div className="font-medium text-right text-text-primary">{data.ticket.tokenId}</div>
+                            <div className="font-medium text-right text-text-primary">{data.ticketInfo.tokenId}</div>
 
                             <div className="text-text-muted">{t("on_chain_status")}</div>
                             <div className="font-medium text-right text-text-primary">{t(data.blockchain.onChainStatus)}</div>
@@ -274,7 +283,7 @@ export default function ProvenancePage() {
 
                         <div className="flex flex-wrap gap-3">
                             <button
-                                onClick={() => copyToClipboard(data.ticket.tokenId)}
+                                onClick={() => copyToClipboard(data.ticketInfo.tokenId)}
                                 className="flex items-center gap-1.5 px-3 py-1.5 border border-border-default rounded-md text-xs font-medium text-text-primary hover:bg-secondary transition-colors"
                             >
                                 <Copy size={14} /> {t("copy_token_id")}
@@ -300,16 +309,16 @@ export default function ProvenancePage() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm max-w-full">
                             <div className="text-text-muted">{t("original_price")}</div>
-                            <div className="font-medium text-right text-text-primary">{data.ticket.originalPrice}</div>
+                            <div className="font-medium text-right text-text-primary">{data.ticketInfo.originalPrice}</div>
 
                             <div className="text-text-muted">{t("ticket_state")}</div>
-                            <div className="font-medium text-right text-text-primary">{data.ticket.status}</div>
+                            <div className="font-medium text-right text-text-primary">{data.ticketInfo.status}</div>
 
                             <div className="text-text-muted">{t("mint_state")}</div>
-                            <div className="font-medium text-right text-text-primary">{data.ticket.mintStatus}</div>
+                            <div className="font-medium text-right text-text-primary">{data.ticketInfo.mintStatus}</div>
 
                             <div className="text-text-muted">{t("check_in_status")}</div>
-                            <div className="font-medium text-right text-text-primary">{t(data.ticket.checkInStatus)}</div>
+                            <div className="font-medium text-right text-text-primary">{t(data.ticketInfo.checkInStatus)}</div>
                         </div>
                     </div>
 
@@ -403,16 +412,53 @@ export default function ProvenancePage() {
                                             </>
                                         )}
 
-                                        {(item.type === "RESOLD" || item.type === "USED") && (
+                                        {(item.type === "RESOLD" || item.type === "USED" || item.type === "CHECKED_IN") && (
                                             <div className="border border-border-default rounded p-3 bg-bg-page">
                                                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 text-[11px]">
-                                                    <div className="sm:col-span-3 text-text-muted">{t("status")}:</div>
-                                                    <div className="sm:col-span-9 font-medium">{item.details.status ? t(item.details.status) : ""}</div>
+                                                    {/* <div className="sm:col-span-3 text-text-muted">{t("status")}:</div>
+                                                    <div className="sm:col-span-9 font-medium">{item.details.status ? t(item.details.status) : ""}</div> */}
+                                                    <div className="sm:col-span-3 text-text-muted">{t("token_id")}:</div>
+                                                    <div className="sm:col-span-9 font-medium">{item.details.tokenId || data.ticketInfo.tokenId || "—"}</div>
+                                                    <div className="sm:col-span-3 text-text-muted">{t("tx_label")}:</div>
+                                                    <div className="sm:col-span-9 font-medium font-mono text-[10px]">
+                                                        {item.details.txHash ? (
+                                                            <button
+                                                                onClick={() => openTxExplorer(item.details.txHash)}
+                                                                className="text-button-primary-bg-default hover:underline"
+                                                            >
+                                                                {truncateHash(item.details.txHash)}
+                                                            </button>
+                                                        ) : "—"}
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
 
-                                        {item.type !== "OWNERSHIP_ASSIGNED" && item.type !== "TRANSFERRED" && (
+                                        {item.type === "WITHDRAWN" && (
+                                            <div className="border border-border-default rounded p-3 bg-bg-page">
+                                                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 text-[11px]">
+                                                    <div className="sm:col-span-3 text-text-muted">{t("token_id")}:</div>
+                                                    <div className="sm:col-span-9 font-medium">{item.details.tokenId || data.ticketInfo.tokenId || "—"}</div>
+                                                    <div className="sm:col-span-3 text-text-muted">{t("from_wallet")}:</div>
+                                                    <div className="sm:col-span-9 font-medium font-mono text-[10px]">{item.details.fromWallet || "—"}</div>
+                                                    <div className="sm:col-span-3 text-text-muted">{t("to_wallet")}:</div>
+                                                    <div className="sm:col-span-9 font-medium font-mono text-[10px]">{item.details.toWallet || "—"}</div>
+                                                    <div className="sm:col-span-3 text-text-muted">{t("tx_label")}:</div>
+                                                    <div className="sm:col-span-9 font-medium font-mono text-[10px]">
+                                                        {item.details.txHash ? (
+                                                            <button
+                                                                onClick={() => openTxExplorer(item.details.txHash)}
+                                                                className="text-button-primary-bg-default hover:underline"
+                                                            >
+                                                                {truncateHash(item.details.txHash)}
+                                                            </button>
+                                                        ) : "—"}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {item.type !== "OWNERSHIP_ASSIGNED" && item.type !== "TRANSFERRED" && item.type !== "WITHDRAWN" && item.type !== "CHECKED_IN" && item.type !== "USED" && item.type !== "ISSUED" && (
                                             <button onClick={() => openTxExplorer(item.details.txHash)} className="mt-2 text-xs font-medium text-text-secondary hover:text-text-primary underline underline-offset-2 w-full text-left">
                                                 {t("blockchain_details")}
                                             </button>
@@ -436,13 +482,13 @@ export default function ProvenancePage() {
                             <div className="font-medium text-text-primary text-right">{t("yes")}</div>
 
                             <div className="text-text-muted">{t("token_id")}</div>
-                            <div className="font-medium text-text-primary text-right">{data.ticket.tokenId}</div>
+                            <div className="font-medium text-text-primary text-right">{data.ticketInfo.tokenId}</div>
 
                             <div className="text-text-muted">{t("current_owner")}</div>
                             <div className="font-medium text-text-primary text-right">{t("your_account")}</div>
 
                             <div className="text-text-muted">{t("ticket_state")}</div>
-                            <div className="font-medium text-text-primary text-right">{data.ticket.status}</div>
+                            <div className="font-medium text-text-primary text-right">{data.ticketInfo.status}</div>
 
                             <div className="text-text-muted">{t("history")}</div>
                             <div className="font-medium text-text-primary text-right">{t("milestones", { count: data.history.length })}</div>
@@ -469,11 +515,17 @@ export default function ProvenancePage() {
                                     {t("back_to_ticket")}
                                 </button>
                             </Link>
-                            <Link href={`/${locale}/user/tickets/${id}/resell`}>
-                                <button className="w-full bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2.5 rounded-lg text-sm font-medium transition-colors active:scale-[0.98]">
+                            {data.ticketInfo.status === "VALID" ? (
+                                <Link href={`/${locale}/user/tickets/${id}/resell`}>
+                                    <button className="w-full bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2.5 rounded-lg text-sm font-medium transition-colors active:scale-[0.98]">
+                                        {t("resell_ticket")}
+                                    </button>
+                                </Link>
+                            ) : (
+                                <button disabled className="w-full bg-bg-subtle border border-border-default text-text-muted px-4 py-2.5 rounded-lg text-sm font-medium cursor-not-allowed">
                                     {t("resell_ticket")}
                                 </button>
-                            </Link>
+                            )}
                             <button className="w-full bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-secondary px-4 py-2.5 rounded-lg text-sm font-medium transition-colors active:scale-[0.98]">
                                 {t("contact_support")}
                             </button>

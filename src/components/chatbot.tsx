@@ -9,6 +9,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
+import { store } from "@/src/store";
 
 interface ChatMessage {
     id: number;
@@ -21,6 +23,7 @@ interface ChatMessage {
 const PDF_PLACEHOLDER = "https://img.freepik.com/premium-vector/modern-flat-design-of-pdf-file-icon-for-web_599062-7115.jpg?w=2000";
 
 export function ChatBot() {
+    const pathname = usePathname();
     const t = useTranslations("Chatbot");
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -30,6 +33,16 @@ export function ChatBot() {
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const targetTextRef = useRef("");
+    const currentTextRef = useRef("");
+    const streamFinishedRef = useRef(false);
+    const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (typingTimerRef.current) clearInterval(typingTimerRef.current);
+        };
+    }, []);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -93,47 +106,115 @@ export function ChatBot() {
         setSelectedFiles([]);
 
         setIsLoading(true);
+        let accumulatedMessage = "";
+
+        targetTextRef.current = "";
+        currentTextRef.current = "";
+        streamFinishedRef.current = false;
+        if (typingTimerRef.current) {
+            clearInterval(typingTimerRef.current);
+            typingTimerRef.current = null;
+        }
 
         try {
-            const formData = new FormData();
-            formData.append("question", messageToSend);
-            filesToSend.forEach((file) => {
-                formData.append("files", file);
-            });
-            formData.append("useRag", "false");
+            const token = store.getState().auth.token;
+            const url = `${process.env.NEXT_PUBLIC_API_GATEWAY_BE || ""}/inventory-service/api/chatbot/stream-ask?question=${encodeURIComponent(messageToSend)}&useRag=false`;
 
-            // Use axios (api) instead of fetch, as we don't need streaming anymore
-            const response = await api.post("/inventory-service/api/chatbot/ask", formData, {
+            const response = await fetch(url, {
+                method: "GET",
                 headers: {
-                    "Content-Type": "multipart/form-data",
+                    "Authorization": token ? `Bearer ${token}` : "",
                 },
             });
 
-            if (response.data && response.data.status === 200) {
-                const answer = response.data.data.answer;
-                // Clean the response message (remove internal session info)
-                const cleanAnswer = answer ? answer.replace(/\n\n\[Thông tin phiên: .*\]/g, "") : "";
+            if (!response.ok) {
+                throw new Error("Failed to start chat stream");
+            }
 
-                const assistantMessage: ChatMessage = {
-                    id: Date.now(),
-                    message: cleanAnswer,
-                    images: [],
-                    senderType: "ASSISTANT",
-                    createdAt: new Date().toISOString(),
-                };
-                setMessages((prev) => [...prev, assistantMessage]);
-            } else {
-                throw new Error("Failed to get response from chatbot");
+            const reader = response.body?.getReader();
+            const decoder = new TextDecoder("utf-8");
+
+            if (!reader) {
+                throw new Error("Response body is not readable");
+            }
+
+            const assistantMessageId = Date.now();
+            const assistantMessage: ChatMessage = {
+                id: assistantMessageId,
+                message: "",
+                images: [],
+                senderType: "ASSISTANT",
+                createdAt: new Date().toISOString(),
+            };
+            setMessages((prev) => [...prev, assistantMessage]);
+
+            // Start typing timer
+            typingTimerRef.current = setInterval(() => {
+                const target = targetTextRef.current;
+                let current = currentTextRef.current;
+                if (current.length < target.length) {
+                    const diff = target.length - current.length;
+                    const step = diff > 30 ? Math.ceil(diff / 5) : 1;
+                    const nextText = current + target.substring(current.length, current.length + step);
+                    currentTextRef.current = nextText;
+                    setMessages((prev) =>
+                        prev.map((msg) =>
+                            msg.id === assistantMessageId
+                                ? { ...msg, message: nextText }
+                                : msg
+                        )
+                    );
+                } else if (streamFinishedRef.current) {
+                    if (typingTimerRef.current) {
+                        clearInterval(typingTimerRef.current);
+                        typingTimerRef.current = null;
+                    }
+                }
+            }, 15);
+
+            let buffer = "";
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                let boundary = buffer.indexOf("\n\n");
+                while (boundary !== -1) {
+                    const message = buffer.slice(0, boundary);
+                    buffer = buffer.slice(boundary + 2);
+
+                    const lines = message.split("\n");
+                    const dataLines: string[] = [];
+                    for (const line of lines) {
+                        if (line.startsWith("data:")) {
+                            let dataVal = line.slice(5);
+                            if (dataVal.startsWith(" ")) {
+                                dataVal = dataVal.slice(1);
+                            }
+                            dataLines.push(dataVal);
+                        }
+                    }
+                    if (dataLines.length > 0) {
+                        accumulatedMessage += dataLines.join("\n");
+                    }
+
+                    boundary = buffer.indexOf("\n\n");
+                }
+
+                const cleanAnswer = accumulatedMessage ? accumulatedMessage.replace(/\n\n\[Thông tin phiên: .*\]/g, "") : "";
+                targetTextRef.current = cleanAnswer;
             }
         } catch (error: any) {
-            if (error.response?.status === 500) {
-                toast.error(t("error_generic"));
-            } else {
+            if (!accumulatedMessage) {
                 toast.error(t("error_send_failed"));
+                console.error("Failed to send message", error);
+            } else {
+                console.log("Chat stream connection ended:", error.message || error);
             }
-            console.error("Failed to send message", error);
         } finally {
             setIsLoading(false);
+            streamFinishedRef.current = true;
         }
     };
 
@@ -153,6 +234,10 @@ export function ChatBot() {
     const isImageFile = (url: string) => {
         return /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url);
     };
+
+    if (!pathname || !pathname.match(/^\/[^/]+\/user(\/|$)/)) {
+        return null;
+    }
 
     return (
         <>
@@ -175,7 +260,7 @@ export function ChatBot() {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="fixed bottom-24 right-6 z-50 w-[450px] h-[600px] bg-bg-page border border-border-default rounded-ds-lg shadow-2xl flex flex-col">
+                <div className="fixed bottom-24 right-6 z-50 w-[calc(100vw-48px)] sm:w-[450px] h-[600px] max-h-[calc(100vh-120px)] bg-bg-page border border-border-default rounded-ds-lg shadow-2xl flex flex-col">
                     {/* Header */}
                     <div className="bg-button-primary-bg-defaultext-button-primary-text-default p-4 rounded-t-lg flex items-center justify-between">
                         <div className="flex items-center gap-2">

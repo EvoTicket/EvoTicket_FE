@@ -20,6 +20,7 @@ import { EventKpiGrid } from "@/src/features/organizer/components/event-detail/E
 import { EventSectionPanel } from "@/src/features/organizer/components/event-detail/EventSectionPanel";
 import { OrganizerDataTable } from "@/src/features/organizer/components/common/OrganizerDataTable";
 import { useTokenColors } from "@/src/features/organizer/hooks/useTokenColor";
+import { useTranslations } from "next-intl";
 
 const CHART_COLORS = {
   brand: "--color-action-brand-bg-default",
@@ -33,13 +34,14 @@ const CHART_COLORS = {
 
 export default function EventAnalyticsPage() {
   const colors = useTokenColors(CHART_COLORS);
+  const t = useTranslations("Organizer.EventDetail.Analytics");
 
   return (
     <div className="flex flex-col gap-6">
       <EventKpiGrid metrics={OVERVIEW_METRICS.slice(0, 4)} />
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-        <EventSectionPanel title="Doanh thu theo thời gian" subtitle="Đơn vị: triệu VND">
+        <EventSectionPanel title={t("revenue_chart_title")} subtitle={t("revenue_chart_subtitle")}>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={ANALYTICS_SERIES}>
@@ -53,7 +55,7 @@ export default function EventAnalyticsPage() {
           </div>
         </EventSectionPanel>
 
-        <EventSectionPanel title="Ticket velocity" subtitle="Số vé bán theo ngày">
+        <EventSectionPanel title={t("velocity_chart_title")} subtitle={t("velocity_chart_subtitle")}>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={ANALYTICS_SERIES}>
@@ -68,14 +70,14 @@ export default function EventAnalyticsPage() {
         </EventSectionPanel>
       </div>
 
-      <EventSectionPanel title="Occupancy theo khu vực" subtitle="Theo dõi lấp đầy từng zone">
+      <EventSectionPanel title={t("occupancy_title")} subtitle={t("occupancy_subtitle")}>
         <OrganizerDataTable
           state="loaded"
           rows={ANALYTICS_ZONES}
           columns={[
-            { key: "zone", label: "Zone" },
-            { key: "sold", label: "Đã bán" },
-            { key: "fillRate", label: "Lấp đầy", align: "right" },
+            { key: "zone", label: t("col_zone") },
+            { key: "sold", label: t("col_sold") },
+            { key: "fillRate", label: t("col_fill"), align: "right" },
           ]}
         />
       </EventSectionPanel>

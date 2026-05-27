@@ -133,14 +133,24 @@ export function ChangeShowtimeModal({ isOpen, onClose, event, selectedShowtimeId
                                             <div className="text-txt-primary">{t("main_hall")}</div>
                                         </div>
                                         <button
-                                            className={`mt-6 px-6 py-2.5 rounded-button-radius text-sm font-semibold max-w-fit transition-colors shadow-sm ${isTempSelected ? 'bg-secondary text-txt-muted cursor-not-allowed border border-border' : 'bg-transparent hover:bg-secondary text-txt-primary border border-border'}`}
+                                            className={`mt-6 px-6 py-2.5 rounded-button-radius text-sm font-semibold max-w-fit transition-colors shadow-sm ${
+                                                isTempSelected && st.showtimeId === selectedShowtimeId
+                                                    ? 'bg-secondary text-txt-muted cursor-not-allowed border border-border'
+                                                    : isTempSelected
+                                                        ? 'bg-primary text-button-primary-text-default cursor-not-allowed border border-primary'
+                                                        : 'bg-transparent hover:bg-secondary text-txt-primary border border-border'
+                                            }`}
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 setTempShowtimeId(st.showtimeId);
                                             }}
                                             disabled={isTempSelected}
                                         >
-                                            {isTempSelected ? t("selecting_showtime") : t("select_this_showtime")}
+                                            {isTempSelected && st.showtimeId === selectedShowtimeId
+                                                ? t("selected_showtime")
+                                                : isTempSelected
+                                                    ? t("selecting_showtime")
+                                                    : t("select_this_showtime")}
                                         </button>
                                     </div>
                                 )}

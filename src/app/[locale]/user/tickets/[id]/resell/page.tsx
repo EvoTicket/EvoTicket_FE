@@ -7,7 +7,7 @@ import { ChevronRight, Loader2, AlertCircle, CreditCard, User, Check, X } from "
 import { toast } from "react-toastify";
 import { useTranslations } from "next-intl";
 import api from "@/src/lib/axios";
-import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 
 interface TicketDetail {
     ticketAssetId: number;
@@ -37,6 +37,8 @@ interface TicketDetail {
     qrAvailable: boolean;
     canResell: boolean;
     resaleBlockedReason: string | null;
+    platformFeeRate: number;
+    priceCapRate?: number;
 }
 
 export default function ResellTicketPage() {
@@ -49,6 +51,8 @@ export default function ResellTicketPage() {
     const [error, setError] = useState<string | null>(null);
     const [desiredPrice, setDesiredPrice] = useState("");
     const router = useRouter();
+
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
     // Bank Account Setup States
     const [bankList, setBankList] = useState<any[]>([]);
@@ -151,7 +155,7 @@ export default function ResellTicketPage() {
         }
     }, [id, t]);
 
-    const handleResellSubmit = async () => {
+    const executeResell = async () => {
         if (!ticket || currentPriceNum <= 0) return;
 
         try {
@@ -183,7 +187,12 @@ export default function ResellTicketPage() {
             console.error("Resale submit error:", err);
         } finally {
             setIsSubmitting(false);
+            setIsConfirmModalOpen(false);
         }
+    };
+
+    const handleResellSubmit = () => {
+        setIsConfirmModalOpen(true);
     };
 
     const handleBankSubmit = async () => {
@@ -212,7 +221,7 @@ export default function ResellTicketPage() {
                 toast.success(locale === "vi" ? "Liên kết tài khoản ngân hàng thành công!" : "Linked bank account successfully!");
                 setIsBankSetupOpen(false);
                 // Immediately call resale submission for a frictionless UX!
-                void handleResellSubmit();
+                void executeResell();
             } else {
                 toast.error(response.data?.message || (locale === "vi" ? "Không thể liên kết ngân hàng" : "Failed to link bank"));
             }
@@ -281,8 +290,9 @@ export default function ResellTicketPage() {
     if (!ticket) return null;
 
     const currentPriceNum = parseInt(desiredPrice.replace(/\D/g, "")) || 0;
-    const priceCap = Math.floor(ticket.originalPrice * 1.1);
-    const feeRate = 0.02;
+    const capRate = ticket.priceCapRate ?? 1.1;
+    const priceCap = Math.floor(ticket.originalPrice * capRate);
+    const feeRate = ticket.platformFeeRate ?? 0.02;
     const calculatedFee = Math.floor(currentPriceNum * feeRate);
     const netReceived = Math.max(0, currentPriceNum - calculatedFee);
 
@@ -331,7 +341,7 @@ export default function ResellTicketPage() {
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content Area */}
                     <div className="lg:col-span-2 w-full space-y-6">
                         {/* Block 1: Thông tin vé */}
@@ -404,7 +414,7 @@ export default function ResellTicketPage() {
                                 </div>
                                 <div className="flex justify-between items-center text-[12px] text-text-muted mt-4 pt-4 border-t border-border-default">
                                     <span>{t("price_cap_rule")}</span>
-                                    <span>{t("price_cap_value")}</span>
+                                    <span>{t("price_cap_value", { rate: (capRate * 100).toFixed(0) })}</span>
                                 </div>
                             </div>
 
@@ -468,7 +478,7 @@ export default function ResellTicketPage() {
 
                     {/* Right Column / Sidebar */}
                     <div className="lg:col-span-1">
-                        <div className="sticky top-6 border border-border-default rounded-ds-xl p-6 shadow-sm bg-bg-surface">
+                        <div className="sticky top-28 border border-border-default rounded-ds-xl p-6 shadow-sm bg-bg-surface">
                             <h3 className="font-bold text-[15px] text-text-primary mb-6">{t("sidebar_title")}</h3>
 
                             <div className="mb-5">
@@ -683,6 +693,88 @@ export default function ResellTicketPage() {
                     </div>
                 </div>
             )}
+
+            {/* Confirmation Modal */}
+            <Transition appear show={isConfirmModalOpen} as={React.Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={() => setIsConfirmModalOpen(false)}>
+                    <TransitionChild
+                        as={React.Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+                    </TransitionChild>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                            <TransitionChild
+                                as={React.Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-bg-surface p-6 text-left align-middle shadow-xl transition-all border border-border-default">
+                                    <DialogTitle
+                                        as="h3"
+                                        className="text-lg font-bold leading-6 text-text-primary mb-4"
+                                    >
+                                        {locale === 'vi' ? 'Xác nhận niêm yết vé' : 'Confirm Ticket Listing'}
+                                    </DialogTitle>
+                                    <div className="mt-2">
+                                        <p className="text-sm text-text-secondary mb-4">
+                                            {locale === 'vi' 
+                                                ? 'Bạn có chắc chắn muốn niêm yết vé này trên chợ vé bán lại không? Khi niêm yết thành công, vé của bạn sẽ tạm thời bị khóa cho đến khi được bán hoặc bạn hủy niêm yết.' 
+                                                : 'Are you sure you want to list this ticket on the resale marketplace? Once listed successfully, your ticket will be temporarily locked until sold or unlisted.'}
+                                        </p>
+                                        <div className="bg-bg-subtle p-3 rounded-lg border border-border-default space-y-2 text-sm mb-6">
+                                            <div className="flex justify-between">
+                                                <span className="text-text-secondary">{t("desired_price_label", { defaultMessage: "Giá bán:" })}</span>
+                                                <span className="font-bold text-text-primary">{formatVND(currentPriceNum)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-text-secondary">{t("total_received_est", { defaultMessage: "Thực nhận ước tính:" })}</span>
+                                                <span className="font-bold text-text-primary">{formatVND(netReceived)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 flex gap-3 justify-end">
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 border border-border-default rounded-lg text-sm font-semibold text-text-secondary hover:bg-bg-subtle transition-colors"
+                                            onClick={() => setIsConfirmModalOpen(false)}
+                                        >
+                                            {locale === 'vi' ? 'Hủy bỏ' : 'Cancel'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2 min-w-[120px]"
+                                            onClick={executeResell}
+                                            disabled={isSubmitting}
+                                        >
+                                            {isSubmitting ? (
+                                                <>
+                                                    <Loader2 size={16} className="animate-spin" />
+                                                    {t("btn_processing", { defaultMessage: "Đang xử lý..." })}
+                                                </>
+                                            ) : (
+                                                locale === 'vi' ? 'Xác nhận niêm yết' : 'Confirm Listing'
+                                            )}
+                                        </button>
+                                    </div>
+                                </DialogPanel>
+                            </TransitionChild>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
         </div>
     );
 }

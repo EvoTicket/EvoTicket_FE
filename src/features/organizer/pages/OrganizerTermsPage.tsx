@@ -23,19 +23,20 @@ import {
 } from "@/src/features/organizer/components/hub/OrganizerPolicySection";
 import type { StatusTone } from "@/src/features/organizer/constants/organizerStatusMapping";
 import type { LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 /* ── Sidebar sections ────────────────────────────────────── */
 
-const SECTIONS: { id: string; label: string; icon: LucideIcon }[] = [
-  { id: "overview", label: "Tổng quan", icon: Info },
-  { id: "content", label: "Quy tắc nội dung & hình ảnh", icon: ImageIcon },
-  { id: "create", label: "Quy tắc tạo sự kiện", icon: CalendarCheck },
-  { id: "ticket", label: "Vé & resale", icon: Ticket },
-  { id: "checkin", label: "Check-in & checker", icon: ScanLine },
-  { id: "payout", label: "Thanh toán & đối soát", icon: Wallet },
-  { id: "responsibility", label: "Trách nhiệm ban tổ chức", icon: FileText },
-  { id: "violation", label: "Vi phạm & xử lý", icon: ShieldAlert },
-  { id: "support", label: "Hỗ trợ", icon: LifeBuoy },
+const SECTIONS: { id: string; key: string; icon: LucideIcon }[] = [
+  { id: "overview", key: "overview", icon: Info },
+  { id: "content", key: "content", icon: ImageIcon },
+  { id: "create", key: "create", icon: CalendarCheck },
+  { id: "ticket", key: "ticket", icon: Ticket },
+  { id: "checkin", key: "checkin", icon: ScanLine },
+  { id: "payout", key: "payout", icon: Wallet },
+  { id: "responsibility", key: "responsibility", icon: FileText },
+  { id: "violation", key: "violation", icon: ShieldAlert },
+  { id: "support", key: "support", icon: LifeBuoy },
 ];
 
 /* ── Highlight cards ─────────────────────────────────────── */
@@ -103,6 +104,7 @@ function SupportCard({
 /* ── Main page ───────────────────────────────────────────── */
 
 export default function TermsPage() {
+  const t = useTranslations("Organizer.Terms");
   const [active, setActive] = useState("overview");
   const [ack, setAck] = useState(true);
 
@@ -119,20 +121,19 @@ export default function TermsPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="m-0 text-2xl font-semibold text-[var(--color-text-primary)]">
-            Điều khoản &amp; Quy định cho Ban tổ chức
+            {t("title")}
           </h1>
           <p className="mt-1 text-[13px] text-[var(--color-text-muted)]">
-            Các quy tắc nội dung, vận hành và thanh toán khi tạo và quản lý
-            sự kiện trên EvoTicket
+            {t("subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <OrganizerStatusBadge tone="info">
-            v2026.04 · Cập nhật 12/04/2026
+            {t("version_info")}
           </OrganizerStatusBadge>
           <button className="flex items-center gap-2 rounded-ds-md border border-[var(--color-border-default)] bg-transparent px-3 py-2 text-[13px] text-[var(--color-text-primary)]">
             <Download size={13} />
-            Tải PDF
+            {t("download_pdf")}
           </button>
         </div>
       </div>
@@ -145,12 +146,10 @@ export default function TermsPage() {
         />
         <div className="flex flex-col gap-1">
           <span className="text-sm font-semibold text-[var(--color-feedback-warning-text)]">
-            Đọc kỹ trước khi công bố sự kiện
+            {t("warning_title")}
           </span>
           <span className="text-[13px] leading-relaxed text-[var(--color-text-secondary)]">
-            Một số vi phạm có thể dẫn đến từ chối duyệt, gỡ sự kiện hoặc tạm
-            ngưng thanh toán đối soát. Ban tổ chức nên rà soát nội dung, cấu
-            hình vé và thông tin thanh toán trước khi submit.
+            {t("warning_desc")}
           </span>
         </div>
       </div>
@@ -160,32 +159,32 @@ export default function TermsPage() {
         <HighlightCard
           icon={FileText}
           tone="brand"
-          label="Nội dung"
-          desc="Trung thực, đúng quyền lợi vé"
+          label={t("highlights.content")}
+          desc={t("highlights.content_desc")}
         />
         <HighlightCard
           icon={ImageIcon}
           tone="accent"
-          label="Hình ảnh"
-          desc="Đúng chuẩn, không phản cảm"
+          label={t("highlights.image")}
+          desc={t("highlights.image_desc")}
         />
         <HighlightCard
           icon={Ticket}
           tone="info"
-          label="Vé & resale"
-          desc="Tuân thủ chính sách nền tảng"
+          label={t("highlights.ticket")}
+          desc={t("highlights.ticket_desc")}
         />
         <HighlightCard
           icon={ScanLine}
           tone="success"
-          label="Check-in"
-          desc="Checker đúng phân công"
+          label={t("highlights.checkin")}
+          desc={t("highlights.checkin_desc")}
         />
         <HighlightCard
           icon={Wallet}
           tone="warning"
-          label="Đối soát"
-          desc="Payout chính xác, đúng hạn"
+          label={t("highlights.payout")}
+          desc={t("highlights.payout_desc")}
         />
       </div>
 
@@ -195,7 +194,7 @@ export default function TermsPage() {
         <aside className="sticky top-6 self-start h-fit">
           <div className="flex flex-col gap-1 rounded-ds-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] p-3">
             <div className="px-2 py-1.5 text-[11px] uppercase tracking-wide text-[var(--color-text-muted)]">
-              Mục lục
+              {t("toc")}
             </div>
             {SECTIONS.map((s) => {
               const Icon = s.icon;
@@ -217,7 +216,7 @@ export default function TermsPage() {
                         : "text-[var(--color-icon-muted)]"
                     }
                   />
-                  {s.label}
+                  {t(`sections.${s.key}`)}
                 </button>
               );
             })}
@@ -229,287 +228,247 @@ export default function TermsPage() {
           {/* A. Overview */}
           <OrganizerPolicySection
             id="overview"
-            title="A. Tổng quan"
-            subtitle="Phạm vi công cụ và trách nhiệm sử dụng"
-            tag={{ tone: "info", label: "Bắt buộc đọc" }}
+            title={t("content.a.title")}
+            subtitle={t("content.a.subtitle")}
+            tag={{ tone: "info", label: t("content.a.tag") }}
           >
             <p className="text-[13.5px] leading-relaxed text-[var(--color-text-secondary)]">
-              EvoTicket cung cấp cho Ban tổ chức công cụ tạo sự kiện, bán vé,
-              báo cáo doanh thu, quản lý resale, và điều phối checker tại
-              gate. Ban tổ chức chỉ được quản lý các sự kiện thuộc quyền sở
-              hữu hoặc được phân quyền trong tổ chức của mình.
+              {t("content.a.desc")}
             </p>
-            <OrganizerPolicyRule tone="brand" title="Phạm vi quản lý">
-              Mỗi tài khoản Ban tổ chức chỉ thao tác trên sự kiện thuộc
-              workspace của tổ chức đó. Việc truy cập sự kiện ngoài phạm vi là
-              vi phạm điều khoản sử dụng.
+            <OrganizerPolicyRule tone="brand" title={t("content.a.r1_title")}>
+              {t("content.a.r1_desc")}
             </OrganizerPolicyRule>
           </OrganizerPolicySection>
 
           {/* B. Content rules */}
           <OrganizerPolicySection
             id="content"
-            title="B. Quy tắc nội dung & hình ảnh"
-            subtitle="Chuẩn hoá nội dung hiển thị công khai trên EvoTicket"
+            title={t("content.b.title")}
+            subtitle={t("content.b.subtitle")}
           >
             <OrganizerPolicyRule
               tone="error"
-              title="Không đưa thông tin liên hệ trái quy định"
+              title={t("content.b.r1_title")}
             >
-              Banner, poster và mô tả không được chứa số điện thoại, email,
-              hay link ngoài nhằm lôi kéo giao dịch ngoài hệ thống.
+              {t("content.b.r1_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="error"
-              title="Không dùng hình ảnh sai chuẩn, phản cảm, gây hiểu lầm"
+              title={t("content.b.r2_title")}
             >
-              Hình ảnh phải phù hợp quy chuẩn cộng đồng, không xâm phạm bản
-              quyền và không giả mạo thương hiệu khác.
+              {t("content.b.r2_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="warning"
-              title="Poster / cover đúng kích thước"
+              title={t("content.b.r3_title")}
             >
-              Ảnh cover và poster phải đúng tỉ lệ hiển thị của EvoTicket,
-              không để chi tiết quan trọng nằm trong vùng bị crop.
+              {t("content.b.r3_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="warning"
-              title="Mô tả trung thực về quyền lợi vé"
+              title={t("content.b.r4_title")}
             >
-              Nội dung mô tả vé phải phản ánh chính xác quyền lợi thực tế.
-              Không mô tả mơ hồ gây hiểu lầm về hạng vé, khu vực, hoặc trải
-              nghiệm đi kèm.
+              {t("content.b.r4_desc")}
             </OrganizerPolicyRule>
           </OrganizerPolicySection>
 
           {/* C. Event creation rules */}
           <OrganizerPolicySection
             id="create"
-            title="C. Quy tắc tạo sự kiện"
-            subtitle="Các trường bắt buộc và điều kiện hợp lệ"
+            title={t("content.c.title")}
+            subtitle={t("content.c.subtitle")}
           >
             <OrganizerPolicyRule
               tone="brand"
-              title="Dữ liệu sự kiện phải đầy đủ"
+              title={t("content.c.r1_title")}
             >
-              Tên, mô tả, loại sự kiện, hình thức (Offline / Online / Hybrid),
-              và thời gian phải được khai báo đầy đủ trước khi submit duyệt.
+              {t("content.c.r1_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="brand"
-              title="Thời gian, địa điểm, loại vé phải hợp lệ"
+              title={t("content.c.r2_title")}
             >
-              Giờ bắt đầu không được trước thời điểm hiện tại. Loại vé phải có
-              giá, số lượng, và khung thời gian mở bán rõ ràng.
+              {t("content.c.r2_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="info"
-              title="Seat map phải đúng nếu sự kiện dùng sơ đồ ghế"
+              title={t("content.c.r3_title")}
             >
-              Khi sự kiện sử dụng seat map, mỗi ghế phải được gán zone và loại
-              vé tương ứng. Ghế bị block phải được đánh dấu rõ ràng.
+              {t("content.c.r3_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="error"
-              title="Hệ thống có thể từ chối publish nếu thiếu cấu hình bắt buộc"
+              title={t("content.c.r4_title")}
             >
-              Các sự kiện thiếu thông tin thanh toán, thiếu loại vé hợp lệ
-              hoặc có nội dung vi phạm sẽ không được đưa lên public.
+              {t("content.c.r4_desc")}
             </OrganizerPolicyRule>
           </OrganizerPolicySection>
 
           {/* D. Tickets & resale */}
           <OrganizerPolicySection
             id="ticket"
-            title="D. Vé & resale"
-            subtitle="Cấu hình vé và ràng buộc thị trường thứ cấp"
-            tag={{ tone: "accent", label: "Blockchain" }}
+            title={t("content.d.title")}
+            subtitle={t("content.d.subtitle")}
+            tag={{ tone: "accent", label: t("content.d.tag") }}
           >
             <OrganizerPolicyRule
               tone="brand"
-              title="Organizer cấu hình loại vé và seat map"
+              title={t("content.d.r1_title")}
             >
-              Ban tổ chức tự cấu hình loại vé, số lượng, quyền lợi, và gán
-              ghế nếu cần. Thay đổi sau khi mở bán có thể bị giới hạn.
+              {t("content.d.r1_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="info"
-              title="Resale chịu ràng buộc chính sách nền tảng"
+              title={t("content.d.r2_title")}
             >
-              EvoTicket áp dụng chính sách resale chung. Một số hạng vé có
-              thể bị cấm resale hoặc giới hạn số lần sang nhượng.
+              {t("content.d.r2_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="warning"
-              title="Max resale price và royalty fee"
+              title={t("content.d.r3_title")}
             >
-              Giá bán lại tối đa và tỉ lệ royalty là cấu hình quan trọng, ảnh
-              hưởng đến doanh thu thứ cấp của Ban tổ chức. Cần cấu hình trước
-              khi mở bán.
+              {t("content.d.r3_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="error"
-              title="Vé đang bị khóa resale"
+              title={t("content.d.r4_title")}
             >
-              Vé ở trạng thái{" "}
-              <code className="text-[var(--color-badge-accent-text)]">
-                locked
-              </code>{" "}
-              không thể giao dịch thứ cấp. Tình trạng này thường do transfer,
-              xác minh, hoặc khoá vận hành.
+              {t("content.d.r4_desc")}
             </OrganizerPolicyRule>
           </OrganizerPolicySection>
 
           {/* E. Check-in & checker */}
           <OrganizerPolicySection
             id="checkin"
-            title="E. Check-in & checker"
-            subtitle="Trách nhiệm gate và chế độ offline"
+            title={t("content.e.title")}
+            subtitle={t("content.e.subtitle")}
           >
             <OrganizerPolicyRule
               tone="brand"
-              title="Quản lý checker thuộc event của mình"
+              title={t("content.e.r1_title")}
             >
-              Ban tổ chức có trách nhiệm phân công, thu hồi và giám sát
-              checker. Danh sách checker được audit trong báo cáo đối soát.
+              {t("content.e.r1_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="info"
-              title="Checker chỉ thao tác trên event/gate được phân công"
+              title={t("content.e.r2_title")}
             >
-              Checker không có quyền check-in cho sự kiện khác hoặc gate không
-              được gán.
+              {t("content.e.r2_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="success"
-              title="Check-in online & offline"
+              title={t("content.e.r3_title")}
             >
-              Ứng dụng checker hoạt động được khi offline và sẽ đồng bộ lại
-              khi có mạng. Dữ liệu xung đột được xử lý theo quy tắc nền
-              tảng.
+              {t("content.e.r3_desc")}
             </OrganizerPolicyRule>
           </OrganizerPolicySection>
 
           {/* F. Payout */}
           <OrganizerPolicySection
             id="payout"
-            title="F. Thanh toán & đối soát"
-            subtitle="Quy trình payout và yêu cầu dữ liệu"
+            title={t("content.f.title")}
+            subtitle={t("content.f.subtitle")}
           >
             <OrganizerPolicyRule
               tone="brand"
-              title="Payout theo thông tin thanh toán đã cung cấp"
+              title={t("content.f.r1_title")}
             >
-              Ban tổ chức phải khai báo đúng chủ tài khoản, ngân hàng, và số
-              tài khoản nhận payout.
+              {t("content.f.r1_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="warning"
-              title="Dữ liệu payout sai có thể làm chậm đối soát"
+              title={t("content.f.r2_title")}
             >
-              Thông tin không khớp giữa pháp nhân và tài khoản nhận tiền có
-              thể dẫn đến hold payout cho đến khi xác minh lại.
+              {t("content.f.r2_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="info"
-              title="Export phục vụ audit"
+              title={t("content.f.r3_title")}
             >
-              Ban tổ chức có thể xuất báo cáo doanh thu, check-in, resale, và
-              danh sách người mua phục vụ mục đích audit cơ bản.
+              {t("content.f.r3_desc")}
             </OrganizerPolicyRule>
           </OrganizerPolicySection>
 
           {/* G. Responsibilities */}
           <OrganizerPolicySection
             id="responsibility"
-            title="G. Trách nhiệm ban tổ chức"
-            subtitle="Các cam kết khi sử dụng nền tảng"
+            title={t("content.g.title")}
+            subtitle={t("content.g.subtitle")}
           >
             <OrganizerPolicyRule
               tone="brand"
-              title="Tổ chức sự kiện đúng như mô tả"
+              title={t("content.g.r1_title")}
             >
-              Ban tổ chức đảm bảo sự kiện diễn ra đúng thời gian, địa điểm,
-              nội dung đã công bố cho người mua vé.
+              {t("content.g.r1_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="brand"
-              title="Xử lý khiếu nại của người mua"
+              title={t("content.g.r2_title")}
             >
-              Mọi khiếu nại liên quan đến trải nghiệm tại sự kiện là trách
-              nhiệm của Ban tổ chức, trong phạm vi chính sách nền tảng cho
-              phép.
+              {t("content.g.r2_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="info"
-              title="Bảo mật dữ liệu người mua"
+              title={t("content.g.r3_title")}
             >
-              Dữ liệu người mua chỉ được sử dụng cho mục đích vận hành sự
-              kiện. Không được chia sẻ, bán, hoặc dùng cho mục đích ngoài phạm
-              vi.
+              {t("content.g.r3_desc")}
             </OrganizerPolicyRule>
           </OrganizerPolicySection>
 
           {/* H. Violations */}
           <OrganizerPolicySection
             id="violation"
-            title="H. Vi phạm & xử lý"
-            subtitle="Các mức xử lý tuỳ vào mức độ vi phạm"
-            tag={{ tone: "error", label: "Quan trọng" }}
+            title={t("content.h.title")}
+            subtitle={t("content.h.subtitle")}
+            tag={{ tone: "error", label: t("content.h.tag") }}
           >
             <OrganizerPolicyRule
               tone="warning"
-              title="Từ chối duyệt sự kiện"
+              title={t("content.h.r1_title")}
             >
-              Event không đạt yêu cầu nội dung hoặc cấu hình sẽ bị trả lại
-              trạng thái draft kèm lý do chi tiết.
+              {t("content.h.r1_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="error"
-              title="Gỡ hoặc tạm khoá bán"
+              title={t("content.h.r2_title")}
             >
-              Event phát hiện vi phạm sau khi publish có thể bị khoá bán hoặc
-              gỡ khỏi trang public.
+              {t("content.h.r2_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="error"
-              title="Giữ payout để rà soát"
+              title={t("content.h.r3_title")}
             >
-              Các giao dịch nghi vấn hoặc khiếu nại lớn có thể dẫn đến việc
-              giữ payout tạm thời cho đến khi hoàn tất rà soát.
+              {t("content.h.r3_desc")}
             </OrganizerPolicyRule>
             <OrganizerPolicyRule
               tone="error"
-              title="Xử lý hành vi gian lận"
+              title={t("content.h.r4_title")}
             >
-              Gian lận resale, gian lận checker, hoặc nội dung sai lệch sẽ bị
-              xử lý theo chính sách nền tảng, bao gồm đình chỉ tài khoản tổ
-              chức.
+              {t("content.h.r4_desc")}
             </OrganizerPolicyRule>
           </OrganizerPolicySection>
 
           {/* I. Support */}
           <OrganizerPolicySection
             id="support"
-            title="I. Hỗ trợ"
-            subtitle="Liên hệ khi cần giải thích thêm về chính sách"
+            title={t("content.i.title")}
+            subtitle={t("content.i.subtitle")}
           >
             <div className="grid grid-cols-3 gap-3">
               <SupportCard
                 icon={<Mail size={16} />}
-                label="Liên hệ hỗ trợ"
-                desc="support@evoticket.vn · 24/7"
+                label={t("content.i.contact_support")}
+                desc={t("content.i.contact_desc")}
               />
               <SupportCard
                 icon={<HelpCircle size={16} />}
-                label="Xem câu hỏi thường gặp"
-                desc="Trung tâm hỗ trợ Ban tổ chức"
+                label={t("content.i.faq")}
+                desc={t("content.i.faq_desc")}
               />
               <SupportCard
                 icon={<Download size={16} />}
-                label="Tải quy định dạng PDF"
-                desc="Phiên bản ký số v2026.04"
+                label={t("content.i.download")}
+                desc={t("content.i.download_desc")}
               />
             </div>
           </OrganizerPolicySection>
@@ -529,20 +488,20 @@ export default function TermsPage() {
                   htmlFor="ack"
                   className="text-sm font-medium text-[var(--color-text-primary)]"
                 >
-                  Tôi đã đọc và hiểu quy định dành cho ban tổ chức
+                  {t("ack")}
                 </label>
                 <div className="flex items-center gap-2">
                   <OrganizerStatusBadge tone="success">
-                    Đã xác nhận
+                    {t("ack_status")}
                   </OrganizerStatusBadge>
                   <span className="text-xs text-[var(--color-text-muted)]">
-                    Lần cuối: 12/04/2026 · 14:22 bởi Nguyễn Lê Hoàng Phúc
+                    {t("ack_meta")}
                   </span>
                 </div>
               </div>
             </div>
             <button className="flex items-center gap-2 rounded-ds-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3.5 py-2 text-[13px] font-medium text-[var(--color-action-brand-text-default)]">
-              Xem quy định khi tạo sự kiện
+              {t("view_guidelines")}
             </button>
           </div>
         </div>

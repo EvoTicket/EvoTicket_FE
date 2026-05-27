@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useParams, usePathname } from "next/navigation";
 import {
     LayoutDashboard,
@@ -46,13 +47,22 @@ export function AdminSidebar() {
         <aside className="w-[280px] bg-surface border-r border-border min-h-screen flex flex-col fixed h-full z-20 transition-colors duration-300">
             {/* Logo Section */}
             <div className="p-6 flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary rounded-ds-lg flex items-center justify-center shadow-lg shadow-primary/20">
-                    <span className="text-white font-bold text-xl">ET</span>
-                </div>
-                <div>
-                    <h1 className="text-sm font-bold text-txt-primary leading-tight">EvoTicket</h1>
-                    <p className="text-[10px] text-txt-muted font-medium uppercase tracking-wider">{t("header.admin_platform")}</p>
-                </div>
+                <Image
+                    src="/evoticket-logo/light/light-primary=horizontal-logo.svg"
+                    alt="EvoTicket Admin"
+                    width={140}
+                    height={32}
+                    className="object-contain dark:hidden"
+                    priority
+                />
+                <Image
+                    src="/evoticket-logo/dark/dark-primary=horizontal-logo.svg"
+                    alt="EvoTicket Admin"
+                    width={140}
+                    height={32}
+                    className="object-contain hidden dark:block"
+                    priority
+                />
             </div>
 
             {/* Navigation Section */}

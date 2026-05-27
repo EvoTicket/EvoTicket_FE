@@ -1,15 +1,18 @@
 import { redirect } from 'next/navigation';
 import { locales, LocaleType } from '../../i18n/request';
 
-type Props = { params: { locale: string } };
+type Props = {
+  params: Promise<{
+    locale: string;
+  }>;
+};
 
-export default function LocalePage({ params }: Props) {
-  const locale = params?.locale as LocaleType;
+export default async function LocalePage({ params }: Props) {
+  const { locale } = await params;
 
-  if (!locales.includes(locale)) {
-    redirect('/'); // nếu locale invalid → quay về root
+  if (!locales.includes(locale as LocaleType)) {
+    redirect("/");
   }
 
-  // Redirect thẳng tới homepage
   redirect(`/${locale}/user/homepage`);
 }

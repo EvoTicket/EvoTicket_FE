@@ -25,6 +25,15 @@ export interface AddressInfo {
   wardName?: string | null;
 }
 
+export interface BankInfoResponse {
+  id: number;
+  profileName?: string | null;
+  bankCode?: string | null;
+  bankName?: string | null;
+  bankAccountNumber?: string | null;
+  bankOwnerName?: string | null;
+}
+
 export interface OrganizationProfileResponse {
   id: number;
   userId: number;
@@ -45,6 +54,7 @@ export interface OrganizationProfileResponse {
   verifiedAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
+  bankInfos?: BankInfoResponse[] | null;
 }
 
 export interface OrganizerDashboardMetricsResponse {
@@ -187,7 +197,7 @@ export type OrganizerEventStatus =
   | "COMPLETED"
   | "CANCELLED";
 
-export type OrganizerApprovalStatus = "PENDING" | "ACCEPTED" | "REJECTED";
+export type OrganizerApprovalStatus = "PENDING_REVIEW" | "PUBLISHED" | "REJECTED";
 
 export type OrganizerEventSort =
   | "PRICE_ASC"
@@ -272,6 +282,17 @@ export interface CreateEventRequest {
   checkers?: number;
   category: EventCategory;
   showtimes: CreateShowtimeRequest[];
+  shortDescription?: string;
+  checkInInstruction?: string;
+  allowResale?: boolean;
+  allowMultipleTicketTypesPerOrder?: boolean;
+  bankInfoId?: number;
+  postPurchaseInstruction?: string;
+  contactPhone?: string;
+  entryGateInstruction?: string;
+  reconciliationNote?: string;
+  allowDiscountCode?: boolean;
+  contactEmail?: string;
 }
 
 export interface UpdateShowtimeRequest {
@@ -335,4 +356,58 @@ export interface FileUploadResponse {
   width?: number;
   height?: number;
   resourceType?: string;
+}
+
+export interface AccountBankInfoResponse {
+  accountName: string;
+  bankName: string;
+  accountNumber: string;
+}
+
+export interface AccountOwnerInfo {
+  fullName: string;
+  email: string;
+  phone: string;
+  employeeCode: string;
+  twoFactorEnabled: boolean;
+  lastPasswordChangeAt: string;
+  activeSessions: number;
+}
+
+export interface OrganizerAccountProfileResponse {
+  id: number;
+  userId: number;
+  organizationName: string;
+  organizationType: string;
+  status: string;
+  verificationLevel: string;
+  joinedAt: string;
+  primaryContactName: string;
+  logoUrl: string;
+  coverUrl: string;
+  website: string;
+  supportEmail: string;
+  supportPhone: string;
+  shortDescription: string;
+  publicBio: string;
+  businessType: string;
+  taxCode: string;
+  taxVerified: boolean;
+  billingAddress: string;
+  ownerInfo: AccountOwnerInfo;
+  payoutInfo: AccountBankInfoResponse[];
+}
+
+/** Export report request payload */
+export interface ExportReportRequest {
+  /** File format */
+  format: "CSV" | "XLSX" | "PDF";
+  /** Number of days to include in the report */
+  days: number;
+  /** Data sections to export */
+  sections: Array<"summary" | "revenue" | "tickets" | "checkin" | "resale">;
+  /** Column separator — CSV only */
+  separator?: "," | ";" | "\t";
+  /** Whether to include column headers — CSV and XLSX */
+  includeHeaders?: boolean;
 }

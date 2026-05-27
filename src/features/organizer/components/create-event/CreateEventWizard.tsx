@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { categoryApi } from "@/src/features/organizer/api/categoryApi";
 import { locationApi } from "@/src/features/organizer/api/locationApi";
 import { organizerEventApi } from "@/src/features/organizer/api/organizerEventApi";
+import { organizationApi } from "@/src/features/organizer/api/organizationApi";
 import type {
     BaseResponse,
     CreateEventMultipartPayload,
@@ -24,6 +25,7 @@ import { CreateEventStep3Settings } from "./CreateEventStep3Settings";
 import { CreateEventStep4Settlement } from "./CreateEventStep4Settlement";
 import { CreateEventStep5Review } from "./CreateEventStep5Review";
 import { CheckCircle2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
     getStepProgress,
     validateCreateEvent,
@@ -90,7 +92,8 @@ function buildCreateEventPayload(state: ReturnType<typeof useCreateEventWizard>[
 
     const event: CreateEventRequest = {
         eventName: state.eventName.trim(),
-        introduction: state.shortDescription.trim(),
+        shortDescription: state.shortDescription.trim(),
+        introduction: state.tagline?.trim() || state.shortDescription.trim(),
         description: state.detailedDescription.trim(),
         venue: state.venue.trim(),
         wardCode: state.wardCode,
@@ -104,12 +107,124 @@ function buildCreateEventPayload(state: ReturnType<typeof useCreateEventWizard>[
         longitude: state.longitude,
         category: state.category,
         showtimes,
+
+        checkInInstruction: state.checkinReminder?.trim(),
+        postPurchaseInstruction: state.postPurchaseNotes?.trim(),
+        entryGateInstruction: state.gateNotes?.trim(),
+        reconciliationNote: state.reconciliationNotes?.trim(),
+
+        allowResale: state.allowResale,
+        allowMultipleTicketTypesPerOrder: state.allowMultipleTicketTypes,
+        allowDiscountCode: state.allowVouchers,
+
+        contactEmail: state.organizerEmail?.trim(),
+        contactPhone: state.organizerPhone?.trim(),
+        bankInfoId: state.selectedProfileId ?? 0,
     };
 
     return {
         event,
         bannerImage: state.bannerImage ?? state.bannerFile,
         thumbnailImage: state.thumbnailImage ?? state.thumbnailFile,
+    };
+}
+
+function buildDraftStepPayload(step: number, state: ReturnType<typeof useCreateEventWizard>["formData"]) {
+    if (step === 1) {
+        return {
+            event: {
+                shortDescription: state.shortDescription.trim(),
+                eventName: state.eventName.trim(),
+                wardCode: state.wardCode,
+                latitude: state.latitude,
+                longitude: state.longitude,
+                venue: state.venue.trim(),
+                eventType: state.eventType,
+                address: state.address.trim(),
+                introduction: state.tagline?.trim() || state.shortDescription.trim(),
+                description: state.detailedDescription.trim(),
+                provinceCode: state.provinceCode,
+                category: state.category
+            },
+            bannerImage: state.bannerImage ?? state.bannerFile,
+            thumbnailImage: state.thumbnailImage ?? state.thumbnailFile,
+            // seatMapImage: undefined
+        };
+    }
+
+    if (step === 2) {
+        const totalSeats = Math.max(1, state.ticketTypes.reduce((sum, ticket) => sum + ticket.quantityTotal, 0));
+        const showtimes = state.showtimes.map((showtime) => {
+            const ticketTypes = state.ticketTypes
+                .filter((ticket) => ticket.showtimeId === showtime.id)
+                .map((ticket) => ({
+                    typeName: ticket.typeName.trim(),
+                    description: ticket.description.trim() || undefined,
+                    price: ticket.price,
+                    quantityTotal: ticket.quantityTotal,
+                    minPurchase: ticket.minPurchase,
+                    maxPurchase: ticket.maxPurchase,
+                    saleStartDate: toLocalDateTime(ticket.saleStartDate),
+                    saleEndDate: toLocalDateTime(ticket.saleEndDate),
+                }));
+
+            return {
+                startDatetime: toLocalDateTime(showtime.startDatetime),
+                endDatetime: toLocalDateTime(showtime.endDatetime),
+                venue: state.venue.trim(),
+                address: state.address.trim(),
+                wardCode: state.wardCode,
+                provinceCode: state.provinceCode,
+                ticketTypes,
+            };
+        });
+
+        return {
+            event: {
+                showtimes,
+                totalSeats
+            },
+            // bannerImage: undefined,
+            // thumbnailImage: undefined,
+            seatMapImage: state.seatMapImage
+        };
+    }
+
+    if (step === 3) {
+        return {
+            // event: {
+            allowMultipleTicketTypesPerOrder: state.allowMultipleTicketTypes,
+            allowDiscountCode: state.allowVouchers,
+            allowResale: state.allowResale,
+            maxResalePricePercentage: state.resaleMaxPriceCap,
+            organizerRoyaltyFeePercentage: state.royaltyFee,
+            postPurchaseInstruction: state.postPurchaseNotes?.trim(),
+            checkInInstruction: state.checkinReminder?.trim(),
+            entryGateInstruction: state.gateNotes?.trim()
+            // },
+            // bannerImage: undefined,
+            // thumbnailImage: undefined,
+            // seatMapImage: undefined
+        };
+    }
+
+    if (step === 4) {
+        return {
+            // event: {
+            bankInfoId: state.selectedProfileId ?? 0,
+            reconciliationNote: state.reconciliationNotes?.trim()
+            // },
+            // bannerImage: undefined,
+            // thumbnailImage: undefined,
+            // seatMapImage: undefined
+        };
+    }
+
+    // For other steps, fallback to the full payload or whatever is appropriate
+    const fullPayload = buildCreateEventPayload(state);
+    return {
+        ...fullPayload,
+        seatMapImage: state.seatMapImage
     };
 }
 
@@ -133,31 +248,33 @@ function getCreateEventErrorMessage(error: unknown) {
 function RightPanelChecklist({
     draftProgress,
     items,
+    t
 }: {
     draftProgress: number;
     items: ChecklistItem[];
+    t: any;
 }) {
     return (
-        <div className="bg-bg-surface border border-border-default rounded-ds-xl p-5 shadow-sm sticky top-24">
+        <div className="bg-bg-surface border border-border-default rounded-ds-xl p-5 shadow-sm sticky top-45">
             <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-text-primary">Tiến độ bước hiện tại</h3>
+                <h3 className="font-bold text-text-primary">{t("progress_title")}</h3>
                 <span className="font-bold text-action-brand-text-default">{draftProgress}%</span>
             </div>
-            
+
             <div className="w-full bg-bg-subtle h-2 rounded-full mb-6 overflow-hidden">
-                <div 
-                    className="bg-action-brand-bg-default h-full transition-all duration-500 ease-out" 
-                    style={{ width: `${draftProgress}%` }} 
+                <div
+                    className="bg-action-brand-bg-default h-full transition-all duration-500 ease-out"
+                    style={{ width: `${draftProgress}%` }}
                 />
             </div>
 
             <div className="space-y-3">
-                <h4 className="text-sm font-bold text-text-primary mb-2">Thông tin tối thiểu</h4>
+                <h4 className="text-sm font-bold text-text-primary mb-2">{t("minimum_info")}</h4>
                 {items.map((item) => (
                     <div key={item.label} className="flex items-center gap-2 text-sm">
-                        <CheckCircle2 
-                            size={16} 
-                            className={item.checked ? "text-feedback-success-text shrink-0" : "text-border-strong shrink-0"} 
+                        <CheckCircle2
+                            size={16}
+                            className={item.checked ? "text-feedback-success-text shrink-0" : "text-border-strong shrink-0"}
                         />
                         <span className={item.checked ? "text-text-primary" : "text-text-muted"}>
                             {item.label}
@@ -170,8 +287,13 @@ function RightPanelChecklist({
 }
 
 export default function CreateEventPage() {
+    const t = useTranslations("CreateEvent.Wizard");
+    const tValidation = useTranslations("CreateEvent");
     const router = useRouter();
     const params = useParams();
+    const searchParams = useSearchParams();
+    const draftId = searchParams?.get("draftId");
+
     const wizard = useCreateEventWizard();
     const [stepErrors, setStepErrors] = useState<Partial<Record<CreateEventStep, StepErrors>>>({});
 
@@ -245,14 +367,114 @@ export default function CreateEventPage() {
         setWardState({ loading: false, error: null });
     }, []);
 
+    const loadOrganization = useCallback(async () => {
+        try {
+            const orgInfo = await organizationApi.getMe();
+            wizard.updateField("organizerName", orgInfo.organizationName || "");
+            wizard.updateField("organizerEmail", orgInfo.businessEmail || orgInfo.userEmail || "");
+            wizard.updateField("organizerPhone", orgInfo.businessPhone || "");
+
+            if (orgInfo.bankInfos && orgInfo.bankInfos.length > 0) {
+                wizard.updateField("bankInfos", orgInfo.bankInfos);
+                wizard.updateField("selectedProfileId", orgInfo.bankInfos[0].id);
+            }
+        } catch (error) {
+            console.error("Failed to load organization info", error);
+        }
+    }, [wizard.updateField]);
+
+    const isNew = searchParams?.get("isNew") === "true";
+
+    const { setFormData, setStep } = wizard;
+
+    const loadDraft = useCallback(async () => {
+        if (!draftId || isNew) return;
+        try {
+            const draft = await organizerEventApi.getDraft(draftId);
+            if (draft) {
+                // Populate draft data into the form using functional update
+                setFormData(prev => {
+                    const nextState = { ...prev };
+                    if (draft.eventName) nextState.eventName = draft.eventName;
+                    if (draft.description) nextState.detailedDescription = draft.description;
+                    if (draft.shortDescription) nextState.shortDescription = draft.shortDescription;
+                    if (draft.introduction) nextState.tagline = draft.introduction;
+                    if (draft.venue) nextState.venue = draft.venue;
+                    if (draft.address) nextState.address = draft.address;
+                    if (draft.category) nextState.category = draft.category;
+                    if (draft.bannerImage) nextState.bannerPreview = draft.bannerImage;
+                    if (draft.thumbnailImage) nextState.thumbnailPreview = draft.thumbnailImage;
+                    if (draft.seatMapImage) nextState.seatMapPreview = draft.seatMapImage;
+                    if (draft.totalSeats) { /* Total seats is derived */ }
+
+                    // Showtimes and tickets
+                    if (draft.showtimes && draft.showtimes.length > 0) {
+                        nextState.showtimes = draft.showtimes.map((st: any) => ({
+                            id: String(st.showtimeId),
+                            name: `Suất diễn ${st.showtimeId}`,
+                            startDatetime: st.startDatetime || "",
+                            endDatetime: st.endDatetime || ""
+                        }));
+
+                        const tickets: any[] = [];
+                        draft.showtimes.forEach((st: any) => {
+                            if (st.ticketTypes) {
+                                st.ticketTypes.forEach((t: any) => {
+                                    tickets.push({
+                                        id: String(t.ticketTypeId),
+                                        showtimeId: String(t.showtimeId),
+                                        typeName: t.typeName || "",
+                                        description: t.description || "",
+                                        price: t.price || 0,
+                                        isFree: t.price === 0,
+                                        quantityTotal: t.quantityAvailable || 0,
+                                        minPurchase: t.minPurchase || 1,
+                                        maxPurchase: t.maxPurchase || 10,
+                                        saleStartDate: t.saleStartDate || "",
+                                        saleEndDate: t.saleEndDate || "",
+                                        status: t.ticketTypeStatus || "AVAILABLE"
+                                    });
+                                });
+                            }
+                        });
+                        if (tickets.length > 0) nextState.ticketTypes = tickets;
+                    }
+
+                    // Settings
+                    if (draft.allowMultipleTicketTypesPerOrder !== null) nextState.allowMultipleTicketTypes = draft.allowMultipleTicketTypesPerOrder;
+                    if (draft.allowDiscountCode !== null) nextState.allowVouchers = draft.allowDiscountCode;
+                    if (draft.allowResale !== null) nextState.allowResale = draft.allowResale;
+                    if (draft.maxResalePricePercentage !== null) nextState.resaleMaxPriceCap = draft.maxResalePricePercentage;
+                    if (draft.organizerRoyaltyFeePercentage !== null) nextState.royaltyFee = draft.organizerRoyaltyFeePercentage;
+                    if (draft.postPurchaseInstruction) nextState.postPurchaseNotes = draft.postPurchaseInstruction;
+                    if (draft.checkInInstruction) nextState.checkinReminder = draft.checkInInstruction;
+                    if (draft.entryGateInstruction) nextState.gateNotes = draft.entryGateInstruction;
+                    if (draft.reconciliationNote) nextState.reconciliationNotes = draft.reconciliationNote;
+                    if (draft.bankInfoId) nextState.selectedProfileId = draft.bankInfoId;
+
+                    return nextState;
+                });
+
+                if (draft.currentStep && draft.currentStep >= 0 && draft.currentStep <= 5) {
+                    setStep(draft.currentStep + 1);
+                }
+            }
+        } catch (error) {
+            console.error("Failed to load draft", error);
+            toast.error(tValidation("toast_draft_load_failed"));
+        }
+    }, [draftId, isNew, setFormData, setStep]);
+
     useEffect(() => {
         const timer = window.setTimeout(() => {
             void loadCategories();
             void loadProvinces();
+            void loadOrganization();
+            void loadDraft();
         }, 0);
 
         return () => window.clearTimeout(timer);
-    }, [loadCategories, loadProvinces]);
+    }, [loadCategories, loadProvinces, loadOrganization, loadDraft]);
 
     useEffect(() => {
         const timer = window.setTimeout(() => {
@@ -297,18 +519,47 @@ export default function CreateEventPage() {
         }, 0);
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
         const currentStep = wizard.step as CreateEventStep;
         const validation = validateStep(currentStep, wizard.formData);
 
         if (Object.keys(validation.errors).length > 0) {
             setStepErrors(prev => ({ ...prev, [currentStep]: validation.errors }));
-            toast.error("Vui lòng kiểm tra các trường bắt buộc hoặc chưa hợp lệ.");
+            toast.error(tValidation("toast_invalid_fields"));
             scrollToField(validation.firstInvalidField);
             return;
         }
 
         setStepErrors(prev => ({ ...prev, [currentStep]: {} }));
+
+        // Save draft step before moving to next
+        if (draftId) {
+            try {
+                // If it's step 1, we might need to send formData with images, but our API allows any
+                // Let's just build the payload and send it.
+                // The API expects the step data. We'll send the full payload for simplicity
+                // since the backend probably just extracts what it needs or updates the whole draft.
+                const payload = buildDraftStepPayload(currentStep, wizard.formData);
+
+                if (currentStep === 3 || currentStep === 4) {
+                    // Step 3 & 4: send plain JSON (no FormData, no files)
+                    await organizerEventApi.updateDraftStep(draftId, currentStep, payload);
+                } else {
+                    // Step 1 & 2: send multipart/form-data with files
+                    const formData = new FormData();
+                    formData.append("event", new Blob([JSON.stringify(payload.event)], { type: "application/json" }));
+                    if (payload.bannerImage) formData.append("bannerImage", payload.bannerImage);
+                    if (payload.thumbnailImage) formData.append("thumbnailImage", payload.thumbnailImage);
+                    if (payload.seatMapImage) formData.append("seatMapImage", payload.seatMapImage);
+                    await organizerEventApi.updateDraftStep(draftId, currentStep, formData);
+                }
+            } catch (error) {
+                console.error("Failed to update draft step", error);
+                // We can choose to block or continue. Let's continue for now but maybe show a warning.
+                toast.warning("Lưu nháp không thành công, nhưng bạn vẫn có thể tiếp tục.");
+            }
+        }
+
         wizard.nextStep();
         window.scrollTo(0, 0);
     };
@@ -318,7 +569,7 @@ export default function CreateEventPage() {
         if (validation.firstInvalidStep) {
             setStepErrors(prev => ({ ...prev, ...validation.stepErrors }));
             wizard.setStep(validation.firstInvalidStep);
-            toast.error("Vui lòng hoàn tất tất cả các bước trước khi gửi duyệt.");
+            toast.error(tValidation("toast_incomplete"));
             window.setTimeout(() => scrollToField(validation.firstInvalidField), 0);
             return;
         }
@@ -326,67 +577,96 @@ export default function CreateEventPage() {
         try {
             const created = await wizard.submitForm(async (state) => {
                 const payload = buildCreateEventPayload(state);
+
+                if (draftId) {
+                    // Publish the draft
+                    return organizerEventApi.publishDraft(draftId);
+                }
+
                 return organizerEventApi.createEvent(payload);
             });
 
             if (!created) {
-                toast.error("Backend chưa xác nhận tạo sự kiện thành công. Vui lòng thử lại.");
+                toast.error(tValidation("toast_backend_unconfirmed"));
                 return;
             }
 
-            toast.success("Tạo sự kiện thành công. Danh sách sự kiện đang được làm mới.");
+            toast.success(tValidation("toast_success"));
             const locale = typeof params.locale === "string" ? params.locale : "vi";
             router.replace(`/${locale}/organizer/center?refresh=${Date.now()}`);
             router.refresh();
         } catch (error) {
-            console.error("Failed to create organizer event", error);
+            console.error("Failed to submit event draft", error);
             toast.error(getCreateEventErrorMessage(error));
         }
     };
 
-    const handleSaveDraft = () => {
-        toast.success("Đã lưu bản nháp thành công!");
+    const handleSaveDraft = async () => {
+        if (draftId) {
+            try {
+                const currentStep = wizard.step as CreateEventStep;
+                const payload = buildDraftStepPayload(currentStep, wizard.formData);
+
+                if (currentStep === 3 || currentStep === 4) {
+                    await organizerEventApi.updateDraftStep(draftId, currentStep, payload);
+                } else {
+                    const formData = new FormData();
+                    formData.append("event", new Blob([JSON.stringify(payload.event)], { type: "application/json" }));
+                    if (payload.bannerImage) formData.append("bannerImage", payload.bannerImage);
+                    if (payload.thumbnailImage) formData.append("thumbnailImage", payload.thumbnailImage);
+                    if (payload.seatMapImage) formData.append("seatMapImage", payload.seatMapImage);
+                    await organizerEventApi.updateDraftStep(draftId, currentStep, formData);
+                }
+
+                toast.success(tValidation("toast_draft_saved"));
+            } catch (error) {
+                console.error("Failed to save draft", error);
+                toast.error(tValidation("toast_draft_save_failed"));
+            }
+        } else {
+            toast.success(tValidation("toast_draft_saved"));
+        }
     };
 
     const getChecklistItems = (): ChecklistItem[] => {
         if (wizard.step === 1) {
             return [
-                { label: "Poster & cover", checked: !!wizard.formData.thumbnailPreview && !!wizard.formData.bannerPreview },
-                { label: "Tên sự kiện", checked: !!wizard.formData.eventName },
-                { label: "Hình thức Offline", checked: wizard.formData.eventType === "OFFLINE" },
-                { label: "Thể loại", checked: !!wizard.formData.category },
-                { label: "Địa điểm", checked: !!wizard.formData.venue && wizard.formData.provinceCode !== 0 && wizard.formData.wardCode !== 0 && !!wizard.formData.address },
-                { label: "Mô tả", checked: !!wizard.formData.shortDescription && !!wizard.formData.detailedDescription },
-                { label: "Liên hệ BTC hợp lệ", checked: Object.keys(validateStep(1, wizard.formData).errors).filter(key => key === "organizerEmail" || key === "organizerPhone").length === 0 },
+                { label: t("checklist.poster_cover"), checked: !!wizard.formData.thumbnailPreview && !!wizard.formData.bannerPreview },
+                { label: t("checklist.event_name"), checked: !!wizard.formData.eventName },
+                { label: t("checklist.offline_format"), checked: wizard.formData.eventType === "OFFLINE" },
+                { label: t("checklist.category"), checked: !!wizard.formData.category },
+                { label: t("checklist.location"), checked: !!wizard.formData.venue && wizard.formData.provinceCode !== 0 && wizard.formData.wardCode !== 0 && !!wizard.formData.address },
+                { label: t("checklist.description"), checked: !!wizard.formData.shortDescription && !!wizard.formData.detailedDescription },
+                { label: t("checklist.organizer_contact"), checked: Object.keys(validateStep(1, wizard.formData).errors).filter(key => key === "organizerEmail" || key === "organizerPhone").length === 0 },
             ];
         }
         if (wizard.step === 2) {
             return [
-                { label: "Có suất diễn", checked: wizard.formData.showtimes.length > 0 },
-                { label: "Lịch suất diễn hợp lệ", checked: wizard.formData.showtimes.every(item => item.startDatetime && item.endDatetime && new Date(item.endDatetime) > new Date(item.startDatetime)) },
-                { label: "Mỗi suất diễn có vé", checked: wizard.formData.showtimes.every(item => wizard.formData.ticketTypes.some(ticket => ticket.showtimeId === item.id)) },
-                { label: "Loại vé hợp lệ", checked: Object.keys(validateStep(2, wizard.formData).errors).length === 0 },
+                { label: t("checklist.has_showtime"), checked: wizard.formData.showtimes.length > 0 },
+                { label: t("checklist.valid_showtime"), checked: wizard.formData.showtimes.every(item => item.startDatetime && item.endDatetime && new Date(item.endDatetime) > new Date(item.startDatetime)) },
+                { label: t("checklist.showtime_has_ticket"), checked: wizard.formData.showtimes.every(item => wizard.formData.ticketTypes.some(ticket => ticket.showtimeId === item.id)) },
+                { label: t("checklist.valid_tickets"), checked: Object.keys(validateStep(2, wizard.formData).errors).length === 0 },
             ];
         }
         if (wizard.step === 3) {
             return [
-                { label: "Slug hợp lệ nếu nhập", checked: Object.keys(validateStep(3, wizard.formData).errors).filter(key => key === "urlSlug").length === 0 },
-                { label: "Quy tắc bán vé", checked: true },
-                { label: "Chính sách resale", checked: true },
-                { label: "Cổng sẽ cấu hình sau", checked: true },
+                { label: t("checklist.valid_slug"), checked: Object.keys(validateStep(3, wizard.formData).errors).filter(key => key === "urlSlug").length === 0 },
+                { label: t("checklist.ticket_rules"), checked: true },
+                { label: t("checklist.resale_policy"), checked: true },
+                { label: t("checklist.gate_config"), checked: true },
             ];
         }
         if (wizard.step === 4) {
             return [
-                { label: "Hồ sơ đối soát sau duyệt", checked: true },
-                { label: "Ghi chú đối soát", checked: true },
+                { label: t("checklist.settlement_profile"), checked: true },
+                { label: t("checklist.settlement_notes"), checked: true },
             ];
         }
         return [
-            { label: "Thông tin sự kiện", checked: Object.keys(validateStep(1, wizard.formData).errors).length === 0 },
-            { label: "Suất diễn & vé", checked: Object.keys(validateStep(2, wizard.formData).errors).length === 0 },
-            { label: "Cài đặt", checked: Object.keys(validateStep(3, wizard.formData).errors).length === 0 },
-            { label: "Thanh toán", checked: Object.keys(validateStep(4, wizard.formData).errors).length === 0 },
+            { label: t("checklist.info_step"), checked: Object.keys(validateStep(1, wizard.formData).errors).length === 0 },
+            { label: t("checklist.showtime_step"), checked: Object.keys(validateStep(2, wizard.formData).errors).length === 0 },
+            { label: t("checklist.settings_step"), checked: Object.keys(validateStep(3, wizard.formData).errors).length === 0 },
+            { label: t("checklist.payment_step"), checked: Object.keys(validateStep(4, wizard.formData).errors).length === 0 },
         ];
     };
 
@@ -429,11 +709,11 @@ export default function CreateEventPage() {
 
     const getStepInfo = () => {
         switch (wizard.step) {
-            case 1: return { title: "Thông tin sự kiện", desc: "Nhập các thông tin cơ bản giúp khán giả hiểu về sự kiện của bạn." };
-            case 2: return { title: "Suất diễn & Loại vé", desc: "Cấu hình lịch diễn và các loại vé mở bán." };
-            case 3: return { title: "Cài đặt & Phân phối", desc: "Thiết lập quyền riêng tư, quy tắc mua vé và tính năng resale." };
-            case 4: return { title: "Hồ sơ đối soát", desc: "Chọn hồ sơ pháp lý và tài khoản nhận tiền thanh toán." };
-            case 5: return { title: "Kiểm tra trước khi gửi", desc: "Xác nhận lại toàn bộ thông tin trước khi gửi duyệt." };
+            case 1: return { title: t("step1_title"), desc: t("step1_desc") };
+            case 2: return { title: t("step2_title"), desc: t("step2_desc") };
+            case 3: return { title: t("step3_title"), desc: t("step3_desc") };
+            case 4: return { title: t("step4_title"), desc: t("step4_desc") };
+            case 5: return { title: t("step5_title"), desc: t("step5_desc") };
             default: return { title: "", desc: "" };
         }
     };
@@ -450,7 +730,7 @@ export default function CreateEventPage() {
             onSubmit={handleSubmit}
             onSaveDraft={handleSaveDraft}
             isSubmitting={wizard.isSubmitting}
-            rightPanel={<RightPanelChecklist draftProgress={currentStepProgress} items={checklistItems} />}
+            rightPanel={<RightPanelChecklist draftProgress={currentStepProgress} items={checklistItems} t={t} />}
         >
             {getStepContent()}
         </CreateEventWizardShell>

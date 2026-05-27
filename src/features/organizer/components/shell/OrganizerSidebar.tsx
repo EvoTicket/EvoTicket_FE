@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useParams, usePathname } from "next/navigation";
 import {
     ArrowLeft,
@@ -20,8 +21,10 @@ import {
     User,
 } from "lucide-react";
 import { EVENT_NAV_ITEMS } from "@/src/features/organizer/constants/organizerRoutes";
+import { useTranslations } from "next-intl";
 
 export function OrganizerSidebar() {
+    const t = useTranslations("Organizer.Sidebar");
     const params = useParams();
     const pathname = usePathname();
     const pathSegments = pathname.split("/").filter(Boolean);
@@ -56,18 +59,37 @@ export function OrganizerSidebar() {
     };
 
     return (
-        <aside className="dark w-[280px] bg-navbar-sidebar-bg border-r border-navbar-sidebar-border min-h-screen flex flex-col fixed h-full z-10">
+        <aside className="w-[280px] bg-navbar-sidebar-bg border-r border-navbar-sidebar-border min-h-screen flex flex-col fixed h-full z-10">
             {/* Logo/Brand */}
-            <div className="p-6 border-b border-navbar-sidebar-border">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-action-brand-bg-default/10 rounded-ds-lg flex items-center justify-center">
-                        <span className="text-action-brand-bg-default font-bold text-xl">E</span>
-                    </div>
-                    <div>
-                        <h1 className="text-lg font-bold text-navbar-sidebar-text-active leading-tight">EvoTicket</h1>
-                        <p className="text-xs text-navbar-sidebar-text-default">Organizer Workspace</p>
-                    </div>
-                </div>
+            <div className="p-6 ">
+                {/* <Link href={`/${locale}/organizer/center`} className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+                    <Image 
+                        src="/evoticket-logo/dark/dark-primary=horizontal-logo.svg" 
+                        alt="EvoTicket Organizer" 
+                        width={140} 
+                        height={32} 
+                        className="object-contain" 
+                        priority 
+                    />
+                </Link> */}
+                <Link href={`/${locale}/organizer/center`} className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+                    <Image
+                        src="/evoticket-logo/light/light-primary=horizontal-logo.svg"
+                        alt="EvoTicket"
+                        width={150}
+                        height={36}
+                        className="object-contain dark:hidden"
+                        priority
+                    />
+                    <Image
+                        src="/evoticket-logo/dark/dark-primary=horizontal-logo.svg"
+                        alt="EvoTicket"
+                        width={150}
+                        height={36}
+                        className="object-contain hidden dark:block"
+                        priority
+                    />
+                </Link>
             </div>
 
             <div className="flex-1 overflow-y-auto flex flex-col">
@@ -80,11 +102,11 @@ export function OrganizerSidebar() {
                                 className="mb-5 flex items-center gap-3 rounded-ds-lg border border-navbar-sidebar-border px-4 py-3 text-sm font-medium text-navbar-sidebar-text-default transition-colors hover:bg-navbar-sidebar-item-bg-hover hover:text-navbar-sidebar-text-active"
                             >
                                 <ArrowLeft size={18} />
-                                <span>Sự kiện của tôi</span>
+                                <span>{t("myEvents")}</span>
                             </Link>
 
                             <div className="text-xs font-bold text-navbar-sidebar-text-default mb-4 px-4 uppercase tracking-wider">
-                                Event workspace
+                                {t("eventWorkspace")}
                             </div>
                             <nav className="space-y-1">
                                 {EVENT_NAV_ITEMS.map((item) => {
@@ -109,7 +131,7 @@ export function OrganizerSidebar() {
                                                         : "text-navbar-sidebar-icon-default"
                                                 }
                                             />
-                                            <span>{item.label}</span>
+                                            <span>{t(`events.${item.key}`)}</span>
                                         </Link>
                                     );
                                 })}
@@ -118,7 +140,7 @@ export function OrganizerSidebar() {
                     ) : (
                         <>
                             <div className="text-xs font-bold text-navbar-sidebar-text-default mb-4 px-4 uppercase tracking-wider">
-                                Workspace
+                                {t("workspace")}
                             </div>
                             <nav className="space-y-1">
                                 <Link
@@ -129,7 +151,7 @@ export function OrganizerSidebar() {
                                         }`}
                                 >
                                     <Calendar size={15} />
-                                    <span>Sự kiện của tôi</span>
+                                    <span>{t("myEvents")}</span>
                                 </Link>
                                 <Link
                                     href={`/${locale}/organizer/reports`}
@@ -139,7 +161,7 @@ export function OrganizerSidebar() {
                                         }`}
                                 >
                                     <BarChart2 size={20} />
-                                    <span>Quản lý báo cáo</span>
+                                    <span>{t("manageReports")}</span>
                                 </Link>
                                 <Link
                                     href={`/${locale}/organizer/terms`}
@@ -149,7 +171,7 @@ export function OrganizerSidebar() {
                                         }`}
                                 >
                                     <FileText size={20} />
-                                    <span>Điều khoản cho Ban tổ chức</span>
+                                    <span>{t("organizerTerms")}</span>
                                 </Link>
                                 <Link
                                     href={`/${locale}/organizer/account`}
@@ -159,7 +181,7 @@ export function OrganizerSidebar() {
                                         }`}
                                 >
                                     <User size={20} />
-                                    <span>Tài khoản</span>
+                                    <span>{t("account")}</span>
                                 </Link>
                             </nav>
                         </>
@@ -169,10 +191,10 @@ export function OrganizerSidebar() {
                 <div className="mt-auto p-6">
                     {/* Pro Organizer Banner */}
                     <div className="bg-navbar-sidebar-item-bg-hover border border-navbar-sidebar-border rounded-ds-xl p-4">
-                        <div className="text-xs font-bold text-action-brand-bg-default mb-1 uppercase">Pro Organizer</div>
-                        <div className="text-sm text-navbar-sidebar-text-active mb-3">Bạn đang dùng gói Growth</div>
+                        <div className="text-xs font-bold text-action-brand-bg-default mb-1 uppercase">{t("proOrganizer")}</div>
+                        <div className="text-sm text-navbar-sidebar-text-active mb-3">{t("growthPlan")}</div>
                         <button className="w-full py-2 bg-navbar-sidebar-item-bg-default border border-navbar-sidebar-border hover:bg-navbar-sidebar-item-bg-hover text-navbar-sidebar-text-active text-sm rounded-ds-lg transition-colors">
-                            Nâng cấp gói
+                            {t("upgradePlan")}
                         </button>
                     </div>
                 </div>

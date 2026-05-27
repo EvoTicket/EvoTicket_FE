@@ -5,8 +5,8 @@ const config = {
   darkMode: "class",
   content: [
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/[locale]/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/features/**/*.{js,ts,jsx,tsx,mdx}",
     "./messages/**/*.{json,js,ts}",
     "node_modules/shadcn-ui/dist/**/*.js"
   ],
@@ -38,6 +38,10 @@ const config = {
         'seat-radius': figmaTheme.seat.radius,
         'status-pill-radius': figmaTheme['status-pill'].radius,
       }
+    },
+    fontFamily: {
+      // sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+      camaro: ["var(--font-camaro)", "var(--font-sans)", "system-ui", "sans-serif"],
     },
   },
   plugins: [
