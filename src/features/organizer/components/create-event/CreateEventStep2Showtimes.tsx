@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AlertCircle, Calendar, Edit3, LayoutGrid, Plus, Ticket, Trash2, Upload, X } from "lucide-react";
 import { CreateEventState, ShowtimeInput, TicketTypeInput } from "./useCreateEventWizard";
 import { getStep2Warnings, validateStep2, type StepErrors } from "./createEventValidation";
@@ -92,11 +92,17 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
     const [editingTicketId, setEditingTicketId] = useState<string | null>(null);
     const [ticketDraft, setTicketDraft] = useState<Partial<TicketTypeInput>>(initialTicketForm);
     const [ticketDraftErrors, setTicketDraftErrors] = useState<StepErrors>({});
+    const [localErrors, setLocalErrors] = useState<StepErrors>({});
+
+    const errorsString = JSON.stringify(errors || {});
+    useEffect(() => {
+        setLocalErrors(JSON.parse(errorsString));
+    }, [errorsString]);
 
     const activeShowtime = formData.showtimes.find((showtime) => showtime.id === selectedShowtimeId) || formData.showtimes[0];
     const activeTickets = formData.ticketTypes.filter((ticket) => ticket.showtimeId === activeShowtime?.id);
     const warningMessages = getStep2Warnings(formData);
-    const mergedErrors = { ...errors, ...ticketDraftErrors };
+    const mergedErrors = { ...localErrors, ...ticketDraftErrors };
 
     const getTicketFieldKey = (field: keyof TicketTypeInput) => `ticket-${editingTicketId ?? "draft"}-${field}`;
 
@@ -136,13 +142,63 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
         if (selectedShowtimeId === id) {
             setSelectedShowtimeId(nextShowtimes[0].id);
         }
+
+        const startKey = `showtime-${id}-startDatetime`;
+        const endKey = `showtime-${id}-endDatetime`;
+        const ticketGroupKey = `showtime-${id}-tickets`;
+        setLocalErrors((prev) => {
+            const next = { ...prev };
+            delete next[startKey];
+            delete next[endKey];
+            delete next[ticketGroupKey];
+            return next;
+        });
     };
 
     const handleUpdateShowtime = (id: string, field: keyof ShowtimeInput, value: string) => {
-        updateField(
-            "showtimes",
-            formData.showtimes.map((showtime) => showtime.id === id ? { ...showtime, [field]: value } : showtime),
+        const nextShowtimes = formData.showtimes.map((showtime) =>
+            showtime.id === id ? { ...showtime, [field]: value } : showtime
         );
+        updateField("showtimes", nextShowtimes);
+
+        // Real-time error clearance or update if errors are currently displayed
+        const startKey = `showtime-${id}-startDatetime`;
+        const endKey = `showtime-${id}-endDatetime`;
+        if (localErrors[startKey] || localErrors[endKey]) {
+            const nextState = { ...formData, showtimes: nextShowtimes };
+            const validation = validateStep2(nextState);
+            setLocalErrors((prev) => ({
+                ...prev,
+                [startKey]: validation.errors[startKey],
+                [endKey]: validation.errors[endKey],
+            }));
+        }
+    };
+
+    const handleDoneEditingShowtime = (id: string) => {
+        const validation = validateStep2(formData);
+        const startKey = `showtime-${id}-startDatetime`;
+        const endKey = `showtime-${id}-endDatetime`;
+
+        const startError = validation.errors[startKey];
+        const endError = validation.errors[endKey];
+
+        if (startError || endError) {
+            setLocalErrors((prev) => ({
+                ...prev,
+                [startKey]: startError,
+                [endKey]: endError,
+            }));
+            return;
+        }
+
+        setLocalErrors((prev) => {
+            const next = { ...prev };
+            delete next[startKey];
+            delete next[endKey];
+            return next;
+        });
+        setEditingShowtimeId(null);
     };
 
     const resetTicketEditor = () => {
@@ -373,9 +429,9 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                     <div className="space-y-3">
                         {formData.showtimes.map((showtime) => {
                             const isSelected = selectedShowtimeId === showtime.id;
-                            const isEditing = editingShowtimeId === showtime.id || Object.keys(errors).some((key) => key.startsWith(`showtime-${showtime.id}-`));
+                            const isEditing = editingShowtimeId === showtime.id || Object.keys(localErrors).some((key) => key.startsWith(`showtime-${showtime.id}-`));
                             const ticketCount = formData.ticketTypes.filter((ticket) => ticket.showtimeId === showtime.id).length;
-                            const hasError = Object.keys(errors).some((key) => key.startsWith(`showtime-${showtime.id}-`));
+                            const hasError = Object.keys(localErrors).some((key) => key.startsWith(`showtime-${showtime.id}-`));
 
                             if (isEditing) {
                                 return (
@@ -473,7 +529,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                                             type="button"
                                             onClick={(event) => {
                                                 event.stopPropagation();
-                                                setEditingShowtimeId(null);
+                                                handleDoneEditingShowtime(showtime.id);
                                             }}
                                             className="w-full mt-3 py-1.5 bg-action-brand-bg-default hover:bg-action-brand-bg-hover text-action-brand-text-default rounded-ds-lg text-xs font-bold transition-colors text-center cursor-pointer"
                                         >
@@ -567,7 +623,7 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                                 {editingTicketId ? t("edit_ticket_title") : t("add_ticket_title")}
                             </h4>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 items-start">
                                 <div>
                                     <label className="block text-xs font-medium mb-1 text-text-secondary">{t("ticket_name_label")}</label>
                                     <input
@@ -580,19 +636,19 @@ export function CreateEventStep2Showtimes({ formData, updateField, errors = {} }
                                     />
                                     {renderError(getTicketFieldKey("typeName"))}
                                 </div>
-                                <div className="flex items-end mb-1 gap-4">
-                                    <div className="flex-1">
-                                        <label className="block text-xs font-medium mb-1 text-text-secondary">{t("ticket_price_label")}</label>
-                                        <input
-                                            type="number"
-                                            value={ticketDraft.price}
-                                            onChange={(event) => setTicketDraft({ ...ticketDraft, price: Number(event.target.value) })}
-                                            data-field={getTicketFieldKey("price")}
-                                            className={fieldClass(getTicketFieldKey("price"))}
-                                        />
-                                        {renderError(getTicketFieldKey("price"))}
-                                    </div>
-                                    <label className="flex items-center gap-2 pb-2 cursor-pointer">
+                                <div>
+                                    <label className="block text-xs font-medium mb-1 text-text-secondary">{t("ticket_price_label")}</label>
+                                    <input
+                                        type="number"
+                                        value={ticketDraft.price}
+                                        onChange={(event) => setTicketDraft({ ...ticketDraft, price: Number(event.target.value) })}
+                                        data-field={getTicketFieldKey("price")}
+                                        className={fieldClass(getTicketFieldKey("price"))}
+                                    />
+                                    {renderError(getTicketFieldKey("price"))}
+                                </div>
+                                <div className="pt-0 md:pt-6">
+                                    <label className="flex items-center gap-2 py-2.5 cursor-pointer">
                                         <input
                                             type="checkbox"
                                             checked={ticketDraft.isFree}

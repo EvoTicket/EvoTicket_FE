@@ -199,34 +199,63 @@ export function CreateEventStep3Settings({ formData, updateField, errors = {} }:
                             <span className={`w-12 h-6 rounded-full relative transition-colors ${formData.allowResale ? "bg-action-brand-bg-default" : "bg-border-default"}`}>
                                 <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-bg-surface transition-transform ${formData.allowResale ? "translate-x-6" : ""}`} />
                             </span>
-                            <input type="checkbox" className="sr-only" checked={formData.allowResale} onChange={(event) => updateField("allowResale", event.target.checked)} />
+                            <input
+                                type="checkbox"
+                                className="sr-only"
+                                checked={formData.allowResale}
+                                onChange={(event) => {
+                                    const checked = event.target.checked;
+                                    updateField("allowResale", checked);
+                                    if (!checked) {
+                                        updateField("resaleMaxPriceCap", "");
+                                        updateField("royaltyFee", "");
+                                    } else {
+                                        updateField("resaleMaxPriceCap", 120);
+                                        updateField("royaltyFee", 5);
+                                    }
+                                }}
+                            />
                         </label>
                     </div>
-
+ 
                     {formData.allowResale && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-action-brand-bg-default/30 bg-action-brand-bg-default/5 rounded-ds-xl">
-                            <div>
-                                <label className="block text-xs font-medium mb-1 text-text-secondary">{t("max_resale_price")}</label>
-                                <div className="flex items-center bg-bg-surface border border-border-default rounded-ds-lg px-3 py-2">
-                                    <input
-                                        type="number"
-                                        value={formData.resaleMaxPriceCap}
-                                        onChange={(event) => updateField("resaleMaxPriceCap", Number(event.target.value))}
-                                        className="w-full bg-transparent outline-none text-sm"
-                                    />
-                                    <span className="text-text-muted">%</span>
+                        <div className="space-y-2 p-4 border border-action-brand-bg-default/30 bg-action-brand-bg-default/5 rounded-ds-xl">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div data-field="resaleMaxPriceCap">
+                                    <label className="block text-xs font-medium mb-1 text-text-secondary">{t("max_resale_price")}</label>
+                                    <div className={`flex items-center bg-bg-surface border rounded-ds-lg px-3 py-2 ${
+                                        mergedErrors.resaleMaxPriceCap ? "border-feedback-error-border focus-within:border-feedback-error-border" : "border-border-default focus-within:border-field-border-focus"
+                                    }`}>
+                                        <input
+                                            type="number"
+                                            value={formData.resaleMaxPriceCap}
+                                            onChange={(event) => {
+                                                const val = event.target.value;
+                                                updateField("resaleMaxPriceCap", val === "" ? "" : Number(val));
+                                            }}
+                                            className="w-full bg-transparent outline-none text-sm"
+                                        />
+                                        <span className="text-text-muted">%</span>
+                                    </div>
+                                    {renderError("resaleMaxPriceCap")}
                                 </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium mb-1 text-text-secondary">{t("royalty_fee")}</label>
-                                <div className="flex items-center bg-bg-surface border border-border-default rounded-ds-lg px-3 py-2">
-                                    <input
-                                        type="number"
-                                        value={formData.royaltyFee}
-                                        onChange={(event) => updateField("royaltyFee", Number(event.target.value))}
-                                        className="w-full bg-transparent outline-none text-sm"
-                                    />
-                                    <span className="text-text-muted">%</span>
+                                <div data-field="royaltyFee">
+                                    <label className="block text-xs font-medium mb-1 text-text-secondary">{t("royalty_fee")}</label>
+                                    <div className={`flex items-center bg-bg-surface border rounded-ds-lg px-3 py-2 ${
+                                        mergedErrors.royaltyFee ? "border-feedback-error-border focus-within:border-feedback-error-border" : "border-border-default focus-within:border-field-border-focus"
+                                    }`}>
+                                        <input
+                                            type="number"
+                                            value={formData.royaltyFee}
+                                            onChange={(event) => {
+                                                const val = event.target.value;
+                                                updateField("royaltyFee", val === "" ? "" : Number(val));
+                                            }}
+                                            className="w-full bg-transparent outline-none text-sm"
+                                        />
+                                        <span className="text-text-muted">%</span>
+                                    </div>
+                                    {renderError("royaltyFee")}
                                 </div>
                             </div>
                         </div>

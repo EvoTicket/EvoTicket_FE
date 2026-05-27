@@ -23,6 +23,8 @@ export interface AddressInfo {
   fullAddress?: string | null;
   provinceName?: string | null;
   wardName?: string | null;
+  provinceCode?: number | null;
+  wardCode?: number | null;
 }
 
 export interface BankInfoResponse {
@@ -160,6 +162,7 @@ export interface EventResponse {
     logoUrl?: string | null;
     businessPhone?: string | null;
     businessEmail?: string | null;
+    addressInfo?: AddressInfo | null;
   } | null;
   description?: string | null;
   venue?: string | null;
@@ -285,6 +288,8 @@ export interface CreateEventRequest {
   shortDescription?: string;
   checkInInstruction?: string;
   allowResale?: boolean;
+  maxResalePricePercentage?: number | null;
+  organizerRoyaltyFeePercentage?: number | null;
   allowMultipleTicketTypesPerOrder?: boolean;
   bankInfoId?: number;
   postPurchaseInstruction?: string;
@@ -319,6 +324,9 @@ export interface UpdateEventRequest {
   category?: EventCategory;
   latitude?: number;
   longitude?: number;
+  allowResale?: boolean;
+  maxResalePricePercentage?: number | null;
+  organizerRoyaltyFeePercentage?: number | null;
   showtimes?: UpdateShowtimeRequest[];
 }
 
@@ -359,6 +367,7 @@ export interface FileUploadResponse {
 }
 
 export interface AccountBankInfoResponse {
+  id?: number;
   accountName: string;
   bankName: string;
   accountNumber: string;

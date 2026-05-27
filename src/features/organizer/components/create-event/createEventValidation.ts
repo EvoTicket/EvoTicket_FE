@@ -234,12 +234,35 @@ export function validateStep3(state: CreateEventState): StepValidationResult {
         }
     });
 
+    // ── Resale configuration ───────────────────────────────────────────
+    if (state.allowResale) {
+        if (state.resaleMaxPriceCap === "" || state.resaleMaxPriceCap === undefined || state.resaleMaxPriceCap === null) {
+            errors.resaleMaxPriceCap = "Validation.price_cap_min";
+            fieldOrder.push("resaleMaxPriceCap");
+        } else if (Number(state.resaleMaxPriceCap) < 100) {
+            errors.resaleMaxPriceCap = "Validation.price_cap_min";
+            fieldOrder.push("resaleMaxPriceCap");
+        }
+
+        if (state.royaltyFee === "" || state.royaltyFee === undefined || state.royaltyFee === null) {
+            errors.royaltyFee = "Validation.royalty_range";
+            fieldOrder.push("royaltyFee");
+        } else if (Number(state.royaltyFee) < 0 || Number(state.royaltyFee) > 50) {
+            errors.royaltyFee = "Validation.royalty_range";
+            fieldOrder.push("royaltyFee");
+        }
+    }
+
     return result(errors, fieldOrder);
 }
 
 export function validateStep4(state: CreateEventState): StepValidationResult {
     const errors: StepErrors = {};
     const fieldOrder = ["selectedProfileId"];
+
+    if (state.selectedProfileId === null || state.selectedProfileId === undefined) {
+        errors.selectedProfileId = "Validation.profile_req";
+    }
 
     return result(errors, fieldOrder);
 }
@@ -355,7 +378,11 @@ export function getStepProgress(step: CreateEventStep, state: CreateEventState) 
         ]);
     }
 
-    if (step === 4) return 100;
+    if (step === 4) {
+        return count([
+            state.selectedProfileId !== null && state.selectedProfileId !== undefined
+        ]);
+    }
 
     return [validateStep1, validateStep2, validateStep3, validateStep4].every(
         (validator) => Object.keys(validator(state).errors).length === 0,

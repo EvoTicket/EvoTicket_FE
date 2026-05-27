@@ -111,7 +111,7 @@ export const organizerEventApi = {
       formData.append("thumbnailImage", payload.thumbnailImage);
     }
 
-    const response = await api.post<BaseResponse<boolean>>(
+    const response = await api.post<BaseResponse<any>>(
       "/inventory-service/api/events",
       formData,
       {
@@ -123,7 +123,13 @@ export const organizerEventApi = {
       }
     );
 
-    return response.data?.data === true;
+    return (
+      response.data?.data === true ||
+      response.status === 200 ||
+      response.status === 201 ||
+      response.data?.status === 0 ||
+      response.data?.status === 200
+    );
   },
 
   async getCurrentDrafts(): Promise<{ count: number }> {
@@ -152,25 +158,43 @@ export const organizerEventApi = {
 
     // Check if data is already FormData (e.g. from step 1 with files)
     if (data instanceof FormData) {
-      const response = await api.put<BaseResponse<boolean>>(
+      const response = await api.put<BaseResponse<any>>(
         `/inventory-service/api/events/${id}/draft/step-${step}`,
         data,
         { headers: { "Content-Type": undefined } }
       );
-      return response.data?.data === true;
+      return (
+        response.data?.data === true ||
+        response.status === 200 ||
+        response.status === 201 ||
+        response.data?.status === 0 ||
+        response.data?.status === 200
+      );
     }
 
-    const response = await api.put<BaseResponse<boolean>>(
+    const response = await api.put<BaseResponse<any>>(
       `/inventory-service/api/events/${id}/draft/step-${step}`,
       data
     );
-    return response.data?.data === true;
+    return (
+      response.data?.data === true ||
+      response.status === 200 ||
+      response.status === 201 ||
+      response.data?.status === 0 ||
+      response.data?.status === 200
+    );
   },
 
   async publishDraft(id: number | string): Promise<boolean> {
-    const response = await api.post<BaseResponse<boolean>>(
+    const response = await api.post<BaseResponse<any>>(
       `/inventory-service/api/events/${id}/publish`
     );
-    return response.data?.data === true;
+    return (
+      response.data?.data === true ||
+      response.status === 200 ||
+      response.status === 201 ||
+      response.data?.status === 0 ||
+      response.data?.status === 200
+    );
   }
 };

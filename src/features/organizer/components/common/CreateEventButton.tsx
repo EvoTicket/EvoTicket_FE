@@ -69,9 +69,9 @@ export function CreateEventButton({ children, className, onDraftSelect }: Create
             window.dispatchEvent(new CustomEvent("switchTab", { detail: "draft" }));
 
             // Also softly update the URL for consistency
-            window.history.pushState(null, "", `/${locale}/organizer/events/center?tab=draft`);
+            window.history.pushState(null, "", `/${locale}/organizer/center?tab=draft`);
         } else {
-            router.push(`/${locale}/organizer/events/center?tab=draft`);
+            router.push(`/${locale}/organizer/center?tab=draft`);
         }
     };
 
