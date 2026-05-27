@@ -71,7 +71,7 @@ export default function AdminModerationPage() {
     setLoading(true);
     try {
       // Map status
-      let approvalStatuses: string[] = ["PENDING_REVIEW", "REJECTED"];
+      let approvalStatuses: string[] = [];
       if (filters.status === "Chờ duyệt") {
         approvalStatuses = ["PENDING_REVIEW"];
       } else if (filters.status === "Từ chối") {
