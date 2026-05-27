@@ -75,4 +75,11 @@ export const adminEventsApi = {
     );
     return response.data;
   },
+
+  async getEventDetail(eventId: number): Promise<any> {
+    const response = await api.get<{ data: any }>(
+      `/inventory-service/api/admin/events/${eventId}`
+    );
+    return response.data.data;
+  },
 };
