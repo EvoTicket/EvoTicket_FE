@@ -304,7 +304,7 @@ export default function AdminAccountsPage() {
                   {activeTab === "all" && accountsPage.content.map((row: any) => {
                     const avatar = row.fullName ? row.fullName.substring(0, 2).toUpperCase() : "US";
                     const isOrg = row.role === "ORGANIZER";
-                    const lastActiveStr = row.lastActive 
+                    const lastActiveStr = row.lastActive
                       ? new Date(row.lastActive).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" }) + " " + new Date(row.lastActive).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", hour12: false })
                       : "—";
 
@@ -312,9 +312,8 @@ export default function AdminAccountsPage() {
                       <tr key={row.id} className="hover:bg-main/30 transition-colors group">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold ${
-                              isOrg ? "bg-primary/10 text-primary" : "bg-sky-500/10 text-sky-600"
-                            }`}>
+                            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold ${isOrg ? "bg-primary/10 text-primary" : "bg-sky-500/10 text-sky-600"
+                              }`}>
                               {avatar}
                             </div>
                             <div>
@@ -324,9 +323,8 @@ export default function AdminAccountsPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-ds-lg text-[10px] font-bold border ${
-                            isOrg ? "bg-primary/10 text-primary border-primary/20" : "bg-sky-500/10 text-sky-600 border-sky-500/20"
-                          }`}>
+                          <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-ds-lg text-[10px] font-bold border ${isOrg ? "bg-primary/10 text-primary border-primary/20" : "bg-sky-500/10 text-sky-600 border-sky-500/20"
+                            }`}>
                             {isOrg ? <Building2 size={12} /> : <User size={12} />}
                             {isOrg ? t("type_organizer") : t("type_buyer")}
                           </div>
@@ -343,7 +341,7 @@ export default function AdminAccountsPage() {
                         <td className="px-6 py-4 whitespace-nowrap"><span className="text-xs font-medium text-txt-muted">{lastActiveStr}</span></td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            <button 
+                            <button
                               className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-ds-lg hover:bg-main transition-all shadow-sm"
                               onClick={() => navigateToDetail(row)}
                             >
@@ -391,7 +389,7 @@ export default function AdminAccountsPage() {
                           <PriorityBadge priority="High" />
                         </td>
                         <td className="px-6 py-4">
-                          <button 
+                          <button
                             className="px-4 py-1.5 text-[10px] font-bold text-white bg-primary hover:bg-primary-hover rounded-ds-lg transition-all shadow-sm"
                             onClick={() => navigateToDetail(row)}
                           >
@@ -404,7 +402,7 @@ export default function AdminAccountsPage() {
                   {activeTab === "restricted" && accountsPage.content.map((row: any) => {
                     const avatar = row.fullName ? row.fullName.substring(0, 2).toUpperCase() : "US";
                     const isOrg = row.role === "ORGANIZER";
-                    const restrictedFromStr = row.lastActive 
+                    const restrictedFromStr = row.lastActive
                       ? new Date(row.lastActive).toLocaleDateString("vi-VN")
                       : "—";
 
@@ -412,18 +410,16 @@ export default function AdminAccountsPage() {
                       <tr key={row.id} className="hover:bg-main/30 transition-colors group">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                              isOrg ? "bg-primary/10 text-primary" : "bg-sky-500/10 text-sky-600"
-                            }`}>
+                            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold ${isOrg ? "bg-primary/10 text-primary" : "bg-sky-500/10 text-sky-600"
+                              }`}>
                               {avatar}
                             </div>
                             <div>
                               <p className="text-sm font-bold line-clamp-1">{row.fullName || "—"}</p>
                               <div className="flex items-center gap-2">
                                 <p className="text-[10px] font-medium text-txt-muted">ACC-{row.id}</p>
-                                <div className={`px-1.5 py-0.5 rounded-ds-md text-[8px] font-bold border ${
-                                  isOrg ? "bg-primary/5 text-primary border-primary/10" : "bg-sky-500/5 text-sky-600 border-sky-500/10"
-                                }`}>
+                                <div className={`px-1.5 py-0.5 rounded-ds-md text-[8px] font-bold border ${isOrg ? "bg-primary/5 text-primary border-primary/10" : "bg-sky-500/5 text-sky-600 border-sky-500/10"
+                                  }`}>
                                   {isOrg ? t("type_organizer") : t("type_buyer")}
                                 </div>
                               </div>
@@ -442,7 +438,7 @@ export default function AdminAccountsPage() {
                           <span className="text-xs font-medium text-txt-muted">{restrictedFromStr}</span>
                         </td>
                         <td className="px-6 py-4">
-                          <button 
+                          <button
                             className="px-3 py-1.5 text-[10px] font-bold bg-surface border border-border rounded-ds-lg hover:bg-main transition-all shadow-sm"
                             onClick={() => navigateToDetail(row)}
                           >
@@ -465,10 +461,10 @@ export default function AdminAccountsPage() {
               {t("pagination_info", { start: startElement, end: endElement, total: totalElements.toLocaleString() })}
             </p>
             <div className="flex items-center gap-1">
-              <PaginationButton 
-                disabled={currentPage === 1} 
+              <PaginationButton
+                disabled={currentPage === 1}
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                icon={<ChevronLeft size={16} />} 
+                icon={<ChevronLeft size={16} />}
               />
               {Array.from({ length: accountsPage.totalPages }).map((_, index) => {
                 const pageNum = index + 1;
@@ -487,10 +483,10 @@ export default function AdminAccountsPage() {
                 }
                 return null;
               })}
-              <PaginationButton 
-                disabled={currentPage === accountsPage.totalPages} 
+              <PaginationButton
+                disabled={currentPage === accountsPage.totalPages}
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, accountsPage.totalPages))}
-                icon={<ChevronRight size={16} />} 
+                icon={<ChevronRight size={16} />}
               />
             </div>
           </div>
@@ -555,7 +551,7 @@ function FilterSelect({ label, value }: any) {
 
 function VerificationBadge({ status }: { status: string }) {
   const t = useTranslations("Admin");
-  if (status === "Verified") {
+  if (status === "VERIFIED") {
     return (
       <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-ds-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px] font-black">
         <CheckCircle2 size={10} />
@@ -563,7 +559,7 @@ function VerificationBadge({ status }: { status: string }) {
       </div>
     );
   }
-  if (status === "Pending") {
+  if (status === "PENDING") {
     return (
       <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-ds-lg bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[10px] font-black">
         <Clock size={10} />
