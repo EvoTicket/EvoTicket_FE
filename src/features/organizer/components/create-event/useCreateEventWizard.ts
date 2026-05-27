@@ -95,8 +95,8 @@ export interface CreateEventState {
     allowMultipleTicketTypes: boolean;
     allowVouchers: boolean;
     allowResale: boolean;
-    resaleMaxPriceCap: number;
-    royaltyFee: number;
+    resaleMaxPriceCap: number | "";
+    royaltyFee: number | "";
     allowExternalWallets: boolean;
     totalGates: number;
     expectedCheckers: number;
@@ -156,8 +156,8 @@ const initialState: CreateEventState = {
     allowMultipleTicketTypes: false,
     allowVouchers: false,
     allowResale: false,
-    resaleMaxPriceCap: 120,
-    royaltyFee: 5,
+    resaleMaxPriceCap: "",
+    royaltyFee: "",
     allowExternalWallets: false,
     totalGates: 1,
     expectedCheckers: 1,

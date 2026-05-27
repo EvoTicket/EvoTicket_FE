@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
+import api from "@/src/lib/axios";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { categoryApi } from "@/src/features/organizer/api/categoryApi";
@@ -114,6 +115,8 @@ function buildCreateEventPayload(state: ReturnType<typeof useCreateEventWizard>[
         reconciliationNote: state.reconciliationNotes?.trim(),
 
         allowResale: state.allowResale,
+        maxResalePricePercentage: state.allowResale && state.resaleMaxPriceCap !== "" ? Number(state.resaleMaxPriceCap) : null,
+        organizerRoyaltyFeePercentage: state.allowResale && state.royaltyFee !== "" ? Number(state.royaltyFee) : null,
         allowMultipleTicketTypesPerOrder: state.allowMultipleTicketTypes,
         allowDiscountCode: state.allowVouchers,
 
@@ -196,8 +199,8 @@ function buildDraftStepPayload(step: number, state: ReturnType<typeof useCreateE
             allowMultipleTicketTypesPerOrder: state.allowMultipleTicketTypes,
             allowDiscountCode: state.allowVouchers,
             allowResale: state.allowResale,
-            maxResalePricePercentage: state.resaleMaxPriceCap,
-            organizerRoyaltyFeePercentage: state.royaltyFee,
+            maxResalePricePercentage: state.allowResale && state.resaleMaxPriceCap !== "" ? Number(state.resaleMaxPriceCap) : null,
+            organizerRoyaltyFeePercentage: state.allowResale && state.royaltyFee !== "" ? Number(state.royaltyFee) : null,
             postPurchaseInstruction: state.postPurchaseNotes?.trim(),
             checkInInstruction: state.checkinReminder?.trim(),
             entryGateInstruction: state.gateNotes?.trim()
@@ -328,7 +331,10 @@ export default function CreateEventPage() {
 
         try {
             const nextProvinces = await locationApi.getProvinces();
-            setProvinces(Array.isArray(nextProvinces) ? nextProvinces : []);
+            const list = Array.isArray(nextProvinces) ? nextProvinces : [];
+            setProvinces(list);
+            setProvinceState({ loading: false, error: null });
+            return list;
         } catch (error) {
             console.error("Failed to load provinces", error);
             setProvinces([]);
@@ -336,10 +342,8 @@ export default function CreateEventPage() {
                 loading: false,
                 error: "Không thể tải danh sách tỉnh/thành.",
             });
-            return;
+            return [];
         }
-
-        setProvinceState({ loading: false, error: null });
     }, []);
 
     const loadWards = useCallback(async (provinceCode: number) => {
@@ -367,114 +371,236 @@ export default function CreateEventPage() {
         setWardState({ loading: false, error: null });
     }, []);
 
-    const loadOrganization = useCallback(async () => {
-        try {
-            const orgInfo = await organizationApi.getMe();
-            wizard.updateField("organizerName", orgInfo.organizationName || "");
-            wizard.updateField("organizerEmail", orgInfo.businessEmail || orgInfo.userEmail || "");
-            wizard.updateField("organizerPhone", orgInfo.businessPhone || "");
-
-            if (orgInfo.bankInfos && orgInfo.bankInfos.length > 0) {
-                wizard.updateField("bankInfos", orgInfo.bankInfos);
-                wizard.updateField("selectedProfileId", orgInfo.bankInfos[0].id);
-            }
-        } catch (error) {
-            console.error("Failed to load organization info", error);
-        }
-    }, [wizard.updateField]);
-
     const isNew = searchParams?.get("isNew") === "true";
-
     const { setFormData, setStep } = wizard;
 
-    const loadDraft = useCallback(async () => {
-        if (!draftId || isNew) return;
-        try {
-            const draft = await organizerEventApi.getDraft(draftId);
-            if (draft) {
-                // Populate draft data into the form using functional update
-                setFormData(prev => {
-                    const nextState = { ...prev };
-                    if (draft.eventName) nextState.eventName = draft.eventName;
-                    if (draft.description) nextState.detailedDescription = draft.description;
-                    if (draft.shortDescription) nextState.shortDescription = draft.shortDescription;
-                    if (draft.introduction) nextState.tagline = draft.introduction;
-                    if (draft.venue) nextState.venue = draft.venue;
-                    if (draft.address) nextState.address = draft.address;
-                    if (draft.category) nextState.category = draft.category;
-                    if (draft.bannerImage) nextState.bannerPreview = draft.bannerImage;
-                    if (draft.thumbnailImage) nextState.thumbnailPreview = draft.thumbnailImage;
-                    if (draft.seatMapImage) nextState.seatMapPreview = draft.seatMapImage;
-                    if (draft.totalSeats) { /* Total seats is derived */ }
-
-                    // Showtimes and tickets
-                    if (draft.showtimes && draft.showtimes.length > 0) {
-                        nextState.showtimes = draft.showtimes.map((st: any) => ({
-                            id: String(st.showtimeId),
-                            name: `Suất diễn ${st.showtimeId}`,
-                            startDatetime: st.startDatetime || "",
-                            endDatetime: st.endDatetime || ""
-                        }));
-
-                        const tickets: any[] = [];
-                        draft.showtimes.forEach((st: any) => {
-                            if (st.ticketTypes) {
-                                st.ticketTypes.forEach((t: any) => {
-                                    tickets.push({
-                                        id: String(t.ticketTypeId),
-                                        showtimeId: String(t.showtimeId),
-                                        typeName: t.typeName || "",
-                                        description: t.description || "",
-                                        price: t.price || 0,
-                                        isFree: t.price === 0,
-                                        quantityTotal: t.quantityAvailable || 0,
-                                        minPurchase: t.minPurchase || 1,
-                                        maxPurchase: t.maxPurchase || 10,
-                                        saleStartDate: t.saleStartDate || "",
-                                        saleEndDate: t.saleEndDate || "",
-                                        status: t.ticketTypeStatus || "AVAILABLE"
-                                    });
-                                });
-                            }
-                        });
-                        if (tickets.length > 0) nextState.ticketTypes = tickets;
-                    }
-
-                    // Settings
-                    if (draft.allowMultipleTicketTypesPerOrder !== null) nextState.allowMultipleTicketTypes = draft.allowMultipleTicketTypesPerOrder;
-                    if (draft.allowDiscountCode !== null) nextState.allowVouchers = draft.allowDiscountCode;
-                    if (draft.allowResale !== null) nextState.allowResale = draft.allowResale;
-                    if (draft.maxResalePricePercentage !== null) nextState.resaleMaxPriceCap = draft.maxResalePricePercentage;
-                    if (draft.organizerRoyaltyFeePercentage !== null) nextState.royaltyFee = draft.organizerRoyaltyFeePercentage;
-                    if (draft.postPurchaseInstruction) nextState.postPurchaseNotes = draft.postPurchaseInstruction;
-                    if (draft.checkInInstruction) nextState.checkinReminder = draft.checkInInstruction;
-                    if (draft.entryGateInstruction) nextState.gateNotes = draft.entryGateInstruction;
-                    if (draft.reconciliationNote) nextState.reconciliationNotes = draft.reconciliationNote;
-                    if (draft.bankInfoId) nextState.selectedProfileId = draft.bankInfoId;
-
-                    return nextState;
-                });
-
-                if (draft.currentStep && draft.currentStep >= 0 && draft.currentStep <= 5) {
-                    setStep(draft.currentStep + 1);
-                }
-            }
-        } catch (error) {
-            console.error("Failed to load draft", error);
-            toast.error(tValidation("toast_draft_load_failed"));
-        }
-    }, [draftId, isNew, setFormData, setStep]);
-
     useEffect(() => {
+        let isMounted = true;
+        const initialize = async () => {
+            try {
+                // 1. Load Categories and Provinces
+                const [_, fetchedProvinces] = await Promise.all([loadCategories(), loadProvinces()]);
+                
+                // 2. Load Organization Info
+                let orgBankInfos: any[] = [];
+                let defaultBankId: number | null = null;
+                let orgName = "";
+                let orgEmail = "";
+                let orgPhone = "";
+
+                try {
+                    const orgInfo = await organizationApi.getMe();
+                    orgName = orgInfo.organizationName || "";
+                    orgEmail = orgInfo.businessEmail || orgInfo.userEmail || "";
+                    orgPhone = orgInfo.businessPhone || "";
+                    if (orgInfo.bankInfos && orgInfo.bankInfos.length > 0) {
+                        orgBankInfos = orgInfo.bankInfos;
+                        defaultBankId = orgInfo.bankInfos[0].id;
+                    } else {
+                        // Fallback organization profile
+                        try {
+                            const [orgRes, banksRes] = await Promise.allSettled([
+                                api.get("/iam-service/api/organizations/me"),
+                                api.get("/inventory-service/api/banks")
+                            ]);
+                            let userData: any = null;
+                            let bankList: any[] = [];
+                            if (orgRes.status === "fulfilled" && orgRes.value.data?.data) {
+                                userData = orgRes.value.data.data;
+                            }
+                            if (banksRes.status === "fulfilled" && banksRes.value.data?.data) {
+                                bankList = banksRes.value.data.data;
+                            }
+                            if (userData) {
+                                if (!orgName) orgName = userData.organizationName || "";
+                                if (!orgEmail) orgEmail = userData.businessEmail || userData.userEmail || "";
+                                if (!orgPhone) orgPhone = userData.businessPhone || "";
+                                if (userData.bankInfos && userData.bankInfos.length > 0) {
+                                    orgBankInfos = userData.bankInfos;
+                                    defaultBankId = userData.bankInfos[0].id;
+                                }
+                            }
+                        } catch (fallbackErr) {
+                            console.error("Failed to load organization fallback", fallbackErr);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Failed to load organization info", error);
+                }
+
+                // 3. Set the base state from organization
+                if (isMounted) {
+                    setFormData(prev => ({
+                        ...prev,
+                        organizerName: orgName || prev.organizerName,
+                        organizerEmail: orgEmail || prev.organizerEmail,
+                        organizerPhone: orgPhone || prev.organizerPhone,
+                        bankInfos: orgBankInfos.length > 0 ? orgBankInfos : prev.bankInfos,
+                        selectedProfileId: defaultBankId !== null ? defaultBankId : prev.selectedProfileId
+                    }));
+                }
+
+                // 4. Load Draft if editing
+                if (draftId && !isNew) {
+                    try {
+                        const draft = await organizerEventApi.getDraft(draftId);
+                        if (draft && isMounted) {
+                            // Resolve province code
+                            const resolvedProvinceCode = draft.provinceCode || draft.orgInternalResponse?.addressInfo?.provinceCode;
+                            let resolvedProvinceName = "";
+                            let resolvedWardCode = 0;
+                            let resolvedWardName = "";
+                            let resolvedAddress = "";
+
+                            if (resolvedProvinceCode) {
+                                const matchedP = fetchedProvinces.find((p: any) => p.code === Number(resolvedProvinceCode));
+                                if (matchedP) {
+                                    resolvedProvinceName = matchedP.name;
+                                }
+
+                                // Load wards and resolve ward code and name
+                                try {
+                                    const nextWards = await locationApi.getWards(Number(resolvedProvinceCode));
+                                    const fetchedWards = Array.isArray(nextWards) ? nextWards : [];
+                                    setWards(fetchedWards);
+
+                                    const targetWardCode = draft.wardCode || draft.orgInternalResponse?.addressInfo?.wardCode;
+                                    if (targetWardCode) {
+                                        resolvedWardCode = Number(targetWardCode);
+                                        const matchedW = fetchedWards.find((w: any) => w.code === resolvedWardCode);
+                                        if (matchedW) {
+                                            resolvedWardName = matchedW.name;
+                                        }
+                                    }
+                                } catch (wErr) {
+                                    console.error("Failed to load wards during draft resolution", wErr);
+                                }
+
+                                // Resolve address details: prioritize draft.detailAddress, then draft.address, then organization fullAddress
+                                if (draft.provinceCode) {
+                                    resolvedAddress = draft.detailAddress || draft.address || "";
+                                } else {
+                                    resolvedAddress = draft.orgInternalResponse?.addressInfo?.fullAddress || "";
+                                }
+                            }
+
+                            setFormData(prev => {
+                                const nextState = { ...prev };
+                                if (draft.eventName) nextState.eventName = draft.eventName;
+                                if (draft.description) nextState.detailedDescription = draft.description;
+                                if (draft.shortDescription) nextState.shortDescription = draft.shortDescription;
+                                if (draft.introduction) nextState.tagline = draft.introduction;
+                                if (draft.venue) nextState.venue = draft.venue;
+                                
+                                if (resolvedProvinceCode) nextState.provinceCode = Number(resolvedProvinceCode);
+                                if (resolvedProvinceName) nextState.provinceName = resolvedProvinceName;
+                                if (resolvedWardCode) nextState.wardCode = resolvedWardCode;
+                                if (resolvedWardName) nextState.wardName = resolvedWardName;
+                                if (resolvedAddress) nextState.address = resolvedAddress;
+
+                                if (draft.latitude !== undefined && draft.latitude !== null) {
+                                    nextState.latitude = Number(draft.latitude);
+                                }
+                                if (draft.longitude !== undefined && draft.longitude !== null) {
+                                    nextState.longitude = Number(draft.longitude);
+                                }
+
+                                if (draft.orgInternalResponse) {
+                                    nextState.organizerName = draft.orgInternalResponse.organizationName || "";
+                                    nextState.organizerEmail = draft.orgInternalResponse.businessEmail || "";
+                                    nextState.organizerPhone = draft.orgInternalResponse.businessPhone || "";
+                                }
+
+                                if (draft.category) nextState.category = draft.category;
+                                if (draft.bannerImage) nextState.bannerPreview = draft.bannerImage;
+                                if (draft.thumbnailImage) nextState.thumbnailPreview = draft.thumbnailImage;
+                                if (draft.seatMapImage) nextState.seatMapPreview = draft.seatMapImage;
+
+                                // Showtimes and tickets
+                                if (draft.showtimes && draft.showtimes.length > 0) {
+                                    nextState.showtimes = draft.showtimes.map((st: any) => ({
+                                        id: String(st.showtimeId),
+                                        name: `Suất diễn ${st.showtimeId}`,
+                                        startDatetime: st.startDatetime || "",
+                                        endDatetime: st.endDatetime || ""
+                                    }));
+
+                                    const tickets: any[] = [];
+                                    draft.showtimes.forEach((st: any) => {
+                                        if (st.ticketTypes) {
+                                            st.ticketTypes.forEach((t: any) => {
+                                                tickets.push({
+                                                    id: String(t.ticketTypeId),
+                                                    showtimeId: String(t.showtimeId),
+                                                    typeName: t.typeName || "",
+                                                    description: t.description || "",
+                                                    price: t.price || 0,
+                                                    isFree: t.price === 0,
+                                                    quantityTotal: t.quantityAvailable || 0,
+                                                    minPurchase: t.minPurchase || 1,
+                                                    maxPurchase: t.maxPurchase || 10,
+                                                    saleStartDate: t.saleStartDate || "",
+                                                    saleEndDate: t.saleEndDate || "",
+                                                    status: t.ticketTypeStatus || "AVAILABLE"
+                                                });
+                                            });
+                                        }
+                                    });
+                                    if (tickets.length > 0) nextState.ticketTypes = tickets;
+                                }
+
+                                // Settings
+                                if (draft.allowMultipleTicketTypesPerOrder !== null) nextState.allowMultipleTicketTypes = draft.allowMultipleTicketTypesPerOrder;
+                                if (draft.allowDiscountCode !== null) nextState.allowVouchers = draft.allowDiscountCode;
+                                if (draft.allowResale !== null && draft.allowResale !== undefined) {
+                                    nextState.allowResale = draft.allowResale;
+                                    if (!draft.allowResale) {
+                                        nextState.resaleMaxPriceCap = "";
+                                        nextState.royaltyFee = "";
+                                    } else {
+                                        nextState.resaleMaxPriceCap = draft.maxResalePricePercentage !== null && draft.maxResalePricePercentage !== undefined ? draft.maxResalePricePercentage : "";
+                                        nextState.royaltyFee = draft.organizerRoyaltyFeePercentage !== null && draft.organizerRoyaltyFeePercentage !== undefined ? draft.organizerRoyaltyFeePercentage : "";
+                                    }
+                                }
+                                if (draft.postPurchaseInstruction) nextState.postPurchaseNotes = draft.postPurchaseInstruction;
+                                if (draft.checkInInstruction) nextState.checkinReminder = draft.checkInInstruction;
+                                if (draft.entryGateInstruction) nextState.gateNotes = draft.entryGateInstruction;
+                                if (draft.reconciliationNote) nextState.reconciliationNotes = draft.reconciliationNote;
+                                
+                                // Map bankInfoId correctly (even if it is 0)
+                                if (draft.bankInfoId !== undefined && draft.bankInfoId !== null) {
+                                    nextState.selectedProfileId = draft.bankInfoId;
+                                }
+
+                                return nextState;
+                            });
+
+                            if (draft.currentStep && draft.currentStep >= 0 && draft.currentStep < 5) {
+                                setStep(draft.currentStep + 1);
+                            }
+                            if (draft.currentStep && draft.currentStep >= 5) {
+                                setStep(5);
+                            }
+                        }
+                    } catch (error) {
+                        console.error("Failed to load draft", error);
+                        toast.error(tValidation("toast_draft_load_failed"));
+                    }
+                }
+            } catch (err) {
+                console.error("Failed initialization", err);
+            }
+        };
+
         const timer = window.setTimeout(() => {
-            void loadCategories();
-            void loadProvinces();
-            void loadOrganization();
-            void loadDraft();
+            void initialize();
         }, 0);
 
-        return () => window.clearTimeout(timer);
-    }, [loadCategories, loadProvinces, loadOrganization, loadDraft]);
+        return () => {
+            isMounted = false;
+            window.clearTimeout(timer);
+        };
+    }, [draftId, isNew, loadCategories, loadProvinces, setFormData, setStep]);
 
     useEffect(() => {
         const timer = window.setTimeout(() => {
@@ -652,8 +778,8 @@ export default function CreateEventPage() {
             return [
                 { label: t("checklist.valid_slug"), checked: Object.keys(validateStep(3, wizard.formData).errors).filter(key => key === "urlSlug").length === 0 },
                 { label: t("checklist.ticket_rules"), checked: true },
-                { label: t("checklist.resale_policy"), checked: true },
-                { label: t("checklist.gate_config"), checked: true },
+                { label: t("checklist.resale_policy"), checked: Object.keys(validateStep(3, wizard.formData).errors).filter(key => key === "resaleMaxPriceCap" || key === "royaltyFee").length === 0 },
+                { label: t("checklist.gate_config"), checked: Object.keys(validateStep(3, wizard.formData).errors).filter(key => key === "totalGates" || key === "expectedCheckers" || key.startsWith("gate")).length === 0 },
             ];
         }
         if (wizard.step === 4) {
@@ -701,7 +827,7 @@ export default function CreateEventPage() {
             );
             case 2: return <CreateEventStep2Showtimes formData={wizard.formData} updateField={wizard.updateField} errors={stepErrors[2]} />;
             case 3: return <CreateEventStep3Settings formData={wizard.formData} updateField={wizard.updateField} errors={stepErrors[3]} />;
-            case 4: return <CreateEventStep4Settlement formData={wizard.formData} updateField={wizard.updateField} />;
+            case 4: return <CreateEventStep4Settlement formData={wizard.formData} updateField={wizard.updateField} errors={stepErrors[4]} />;
             case 5: return <CreateEventStep5Review formData={wizard.formData} setStep={wizard.setStep} errors={stepErrors[5]} />;
             default: return null;
         }

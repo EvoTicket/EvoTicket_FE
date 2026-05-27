@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   Mail, Phone, Lock, ShieldCheck, Building2, Globe, Landmark,
   Users, Camera, ExternalLink, CreditCard, KeyRound, LogOut, Pencil,
+  Trash2, Plus, X, Loader2, Check
 } from "lucide-react";
 import Image from "next/image";
 import { OrganizerStatusBadge } from "@/src/features/organizer/components/common/OrganizerStatusBadge";
@@ -11,6 +12,10 @@ import type { StatusTone } from "@/src/features/organizer/constants/organizerSta
 import { organizationApi } from "@/src/features/organizer/api/organizationApi";
 import type { OrganizerAccountProfileResponse } from "@/src/features/organizer/types/api";
 import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
+import api from "@/src/lib/axios";
+import { toast } from "react-toastify";
+import { Combobox, ComboboxInput, ComboboxButton, ComboboxOption, ComboboxOptions } from "@headlessui/react";
 
 /* ── Local helpers ───────────────────────────────────────── */
 
@@ -144,9 +149,28 @@ function HistoryItem({ icon, label, time, meta, tone = "neutral" }: {
 
 export default function AccountPage() {
   const t = useTranslations("Organizer.Account");
+  const params = useParams();
+  const locale = typeof params.locale === "string" ? params.locale : "vi";
+
   const [profile, setProfile] = useState<OrganizerAccountProfileResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Add payment modal states
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [bankList, setBankList] = useState<any[]>([]);
+  const [profileName, setProfileName] = useState("");
+  const [bankCode, setBankCode] = useState("");
+  const [bankAccountNumber, setBankAccountNumber] = useState("");
+  const [bankOwnerName, setBankOwnerName] = useState("");
+  const [isFetchingOwner, setIsFetchingOwner] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Delete payment states
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [bankToDelete, setBankToDelete] = useState<any | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const loadProfile = useCallback(async () => {
     setIsLoading(true);
@@ -165,6 +189,135 @@ export default function AccountPage() {
   useEffect(() => {
     void loadProfile();
   }, [loadProfile]);
+
+  // Fetch bank list when modal opens
+  useEffect(() => {
+    if (isAddModalOpen) {
+      const fetchBanks = async () => {
+        try {
+          const res = await api.get("/inventory-service/api/banks");
+          if (res.data?.data) {
+            setBankList(res.data.data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch bank list", err);
+        }
+      };
+      fetchBanks();
+    }
+  }, [isAddModalOpen]);
+
+  // Fetch bank owner name automatically
+  useEffect(() => {
+    if (!bankCode || !bankAccountNumber || bankAccountNumber.length < 6) {
+      setBankOwnerName("");
+      return;
+    }
+
+    const fetchOwner = async () => {
+      setIsFetchingOwner(true);
+      try {
+        const response = await api.get(
+          `/inventory-service/api/banks/owner-name?bankCode=${bankCode}&bankAccountNumber=${bankAccountNumber}`
+        );
+        let ownerName = "";
+        if (response.data) {
+          if (typeof response.data === "string") {
+            ownerName = response.data;
+          } else if (response.data.ownerName) {
+            ownerName = response.data.ownerName;
+          } else if (response.data.data) {
+            if (typeof response.data.data === "string") {
+              ownerName = response.data.data;
+            } else if (response.data.data.ownerName) {
+              ownerName = response.data.data.ownerName;
+            }
+          }
+        }
+
+        if (ownerName) {
+          setBankOwnerName(ownerName.toUpperCase());
+        } else {
+          setBankOwnerName("");
+        }
+      } catch (err) {
+        console.error("Failed to fetch bank owner name", err);
+        setBankOwnerName("");
+      } finally {
+        setIsFetchingOwner(false);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      fetchOwner();
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [bankCode, bankAccountNumber]);
+
+  const handleAddPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profileName || !bankCode || !bankAccountNumber || !bankOwnerName) {
+      toast.warning(locale === "vi" ? "Vui lòng điền đầy đủ và chính xác thông tin tài khoản." : "Please fill in all account details correctly.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const selectedBank = bankList.find(b => b.code === bankCode);
+      const bankName = selectedBank ? (selectedBank.shortName || selectedBank.name) : bankCode;
+
+      const payload = {
+        profileName,
+        bankCode,
+        bankName,
+        bankAccountNumber,
+        bankOwnerName
+      };
+
+      const response = await api.post("/iam-service/api/organizations/bank-info", payload);
+      if (response.status === 200 || response.data?.status === 0 || response.status === 201) {
+        toast.success(locale === "vi" ? "Thêm tài khoản ngân hàng thành công!" : "Bank account added successfully!");
+        
+        // Refresh the profile info
+        await loadProfile();
+
+        // Reset fields
+        setProfileName("");
+        setBankCode("");
+        setBankAccountNumber("");
+        setBankOwnerName("");
+        setIsAddModalOpen(false);
+      }
+    } catch (err) {
+      console.error("Failed to add bank info", err);
+      toast.error(locale === "vi" ? "Thêm tài khoản ngân hàng thất bại!" : "Failed to add bank account!");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeletePayment = async () => {
+    if (!bankToDelete) return;
+    setIsDeleting(true);
+    try {
+      const response = await api.delete(`/iam-service/api/organizations/bank-info/${bankToDelete.id}`);
+      if (response.status === 200 || response.data?.status === 0 || response.status === 204) {
+        toast.success(locale === "vi" ? "Xóa tài khoản ngân hàng thành công!" : "Bank account deleted successfully!");
+        
+        // Refresh the profile info
+        await loadProfile();
+
+        setIsDeleteModalOpen(false);
+        setBankToDelete(null);
+      }
+    } catch (err) {
+      console.error("Failed to delete bank info", err);
+      toast.error(locale === "vi" ? "Xóa tài khoản ngân hàng thất bại!" : "Failed to delete bank account!");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -313,7 +466,20 @@ export default function AccountPage() {
                           <Landmark size={13} className="text-[var(--color-icon-muted)]" />
                           {bank.bankName}
                         </span>
-                        <OrganizerStatusBadge tone="success">{t("active")}</OrganizerStatusBadge>
+                        <div className="flex items-center gap-2">
+                          <OrganizerStatusBadge tone="success">{t("active")}</OrganizerStatusBadge>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setBankToDelete(bank);
+                              setIsDeleteModalOpen(true);
+                            }}
+                            className="p-1 text-red-500 hover:bg-red-500/10 rounded transition-colors cursor-pointer flex items-center justify-center"
+                            title={locale === "vi" ? "Xóa tài khoản" : "Delete account"}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
                       </div>
                       <div className="flex flex-col gap-0.5 text-[11px] text-[var(--color-text-secondary)]">
                         <span>Chủ TK: <span className="font-medium text-[var(--color-text-primary)]">{bank.accountName}</span></span>
@@ -330,8 +496,13 @@ export default function AccountPage() {
             </div>
           </div>
           <div className="flex items-center justify-end pt-2 border-t border-[var(--color-border-subtle)] mt-2">
-            <button className="flex items-center gap-2 rounded-ds-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3 py-2 text-[13px] font-medium text-[var(--color-action-brand-text-default)]">
-              <CreditCard size={13} />{t("update_payout")}
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center gap-2 rounded-ds-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-3 py-2 text-[13px] font-medium text-[var(--color-action-brand-text-default)] cursor-pointer"
+            >
+              <Plus size={13} />
+              {locale === "vi" ? "Thêm tài khoản nhận tiền" : "Add payout account"}
             </button>
           </div>
         </Panel>
@@ -358,6 +529,228 @@ export default function AccountPage() {
           <button className="rounded-ds-md border border-[var(--color-action-brand-bg-hover)] bg-[var(--color-action-brand-bg-default)] px-4 py-2 text-[13px] font-medium text-[var(--color-action-brand-text-default)]">{t("save_changes")}</button>
         </div>
       </div>
+
+      {/* Add Payout Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-ds-2xl max-w-md w-full p-6 relative shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] transition-colors cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+
+            <h3 className="text-lg font-bold text-[var(--color-text-primary)] mb-4 flex items-center gap-2">
+              <Landmark size={20} className="text-[var(--color-action-brand-bg-default)]" />
+              {locale === "vi" ? "Thêm tài khoản thụ hưởng" : "Add Settlement Account"}
+            </h3>
+
+            <form onSubmit={handleAddPayment} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--color-text-primary)]">
+                  {locale === "vi" ? "Tên gợi nhớ" : "Profile Name"} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder={locale === "vi" ? "Ví dụ: Tài khoản chính, BIDV cá nhân..." : "e.g. Primary Account, Personal BIDV..."}
+                  value={profileName}
+                  onChange={e => setProfileName(e.target.value)}
+                  className="w-full p-2.5 border border-[var(--color-border-default)] rounded-ds-lg bg-[var(--color-bg-elevated)] focus:border-[var(--color-action-brand-bg-hover)] outline-none text-sm text-[var(--color-text-primary)]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--color-text-primary)]">
+                  {locale === "vi" ? "Ngân hàng" : "Bank"} <span className="text-red-500">*</span>
+                </label>
+                <Combobox
+                  value={bankCode}
+                  onChange={(val) => {
+                    setBankCode(val || "");
+                    setSearchQuery("");
+                  }}
+                >
+                  <div className="relative">
+                    <div className="relative w-full cursor-default overflow-hidden rounded-ds-lg border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] text-left focus:outline-none text-sm">
+                      <ComboboxInput
+                        className="w-full border-none py-2.5 pl-3 pr-10 text-sm leading-5 text-[var(--color-text-primary)] bg-transparent focus:ring-0 outline-none"
+                        displayValue={(code: string) => {
+                          const bank = bankList.find((b) => b.code === code);
+                          return bank ? `${bank.shortName || bank.name} (${bank.code})` : "";
+                        }}
+                        placeholder={locale === "vi" ? "Tìm kiếm ngân hàng..." : "Search bank..."}
+                        onChange={(event) => setSearchQuery(event.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.stopPropagation();
+                          }
+                        }}
+                      />
+                      <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-[var(--color-text-secondary)]"><path d="m6 9 6 6 6-6"/></svg>
+                      </ComboboxButton>
+                    </div>
+                    <ComboboxOptions className="absolute mt-1 max-h-60 w-full overflow-auto rounded-ds-md bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-50">
+                      {(() => {
+                        const filteredBanks = searchQuery === ""
+                          ? bankList
+                          : bankList.filter((bank) => {
+                            const query = searchQuery.toLowerCase().trim();
+                            return (
+                              (bank.name ?? "").toLowerCase().includes(query) ||
+                              (bank.shortName ?? "").toLowerCase().includes(query) ||
+                              (bank.code ?? "").toLowerCase().includes(query)
+                            );
+                          });
+
+                        if (filteredBanks.length === 0 && searchQuery !== "") {
+                          return (
+                            <div className="relative cursor-default select-none py-2 px-4 text-[var(--color-text-secondary)]">
+                              {locale === "vi" ? "Không tìm thấy ngân hàng." : "No banks found."}
+                            </div>
+                          );
+                        }
+
+                        return filteredBanks.map((bank) => (
+                          <ComboboxOption
+                            key={bank.id}
+                            value={bank.code}
+                            className={({ active }) =>
+                              `relative cursor-default select-none py-2 pl-10 pr-4 text-sm ${active ? "bg-[var(--color-action-brand-bg-default)] text-white" : "text-[var(--color-text-primary)]"
+                              }`
+                            }
+                          >
+                            {({ selected, active }) => (
+                              <>
+                                <span className={`block truncate ${selected ? "font-medium" : "font-normal"}`}>
+                                  {bank.shortName || bank.name} ({bank.code})
+                                </span>
+                                {selected ? (
+                                  <span
+                                    className={`absolute inset-y-0 left-0 flex items-center pl-3 ${active ? "text-white" : "text-[var(--color-action-brand-bg-default)]"
+                                    }`}
+                                  >
+                                    <Check className="h-4 w-4" aria-hidden="true" />
+                                  </span>
+                                ) : null}
+                              </>
+                            )}
+                          </ComboboxOption>
+                        ));
+                      })()}
+                    </ComboboxOptions>
+                  </div>
+                </Combobox>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--color-text-primary)]">
+                  {locale === "vi" ? "Số tài khoản" : "Account Number"} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder={locale === "vi" ? "Nhập số tài khoản ngân hàng" : "Enter bank account number"}
+                  value={bankAccountNumber}
+                  onChange={e => setBankAccountNumber(e.target.value.replace(/\D/g, ""))}
+                  className="w-full p-2.5 border border-[var(--color-border-default)] rounded-ds-lg bg-[var(--color-bg-elevated)] focus:border-[var(--color-action-brand-bg-hover)] outline-none text-sm text-[var(--color-text-primary)]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1 text-[var(--color-text-primary)]">
+                  {locale === "vi" ? "Tên chủ tài khoản" : "Account Owner Name"}
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    readOnly
+                    placeholder={
+                      isFetchingOwner
+                        ? (locale === "vi" ? "Đang xác thực..." : "Validating...")
+                        : (locale === "vi" ? "Tự động điền khi nhập đủ số tài khoản" : "Auto-filled based on account number")
+                    }
+                    value={bankOwnerName}
+                    className="w-full p-2.5 pr-10 border border-[var(--color-border-default)] rounded-ds-lg bg-[var(--color-bg-elevated)] outline-none text-sm text-[var(--color-text-primary)] font-bold uppercase cursor-not-allowed select-none"
+                  />
+                  {isFetchingOwner && (
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                      <Loader2 className="animate-spin h-4 w-4 text-[var(--color-action-brand-bg-default)]" />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="px-4 py-2 border border-[var(--color-border-default)] rounded-ds-lg text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)] cursor-pointer"
+                >
+                  {locale === "vi" ? "Hủy" : "Cancel"}
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving || !bankOwnerName}
+                  className="px-4 py-2 bg-[var(--color-action-brand-bg-default)] hover:bg-[var(--color-action-brand-bg-hover)] disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-ds-lg text-sm font-medium flex items-center gap-1.5 cursor-pointer animate-pulse-subtle"
+                >
+                  {isSaving && <Loader2 className="animate-spin h-4 w-4" />}
+                  {locale === "vi" ? "Thêm" : "Add"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Payout Confirmation Modal */}
+      {isDeleteModalOpen && bankToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-ds-2xl max-w-md w-full p-6 relative shadow-2xl text-center">
+            <button
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] transition-colors cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+
+            <h3 className="text-lg font-bold text-[var(--color-text-primary)]">
+              {locale === "vi" ? "Xác nhận xóa tài khoản nhận tiền" : "Confirm Payout Account Deletion"}
+            </h3>
+            <p className="text-sm text-[var(--color-text-secondary)] mt-2">
+              {locale === "vi"
+                ? `Bạn có chắc chắn muốn xóa tài khoản ngân hàng ${bankToDelete.bankName} (Số TK: ${bankToDelete.accountNumber}) không?`
+                : `Are you sure you want to delete payout account ${bankToDelete.bankName} (Acc No: ${bankToDelete.accountNumber})?`}
+            </p>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="flex-1 py-2.5 border border-[var(--color-border-default)] rounded-ds-lg text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)] cursor-pointer"
+              >
+                {locale === "vi" ? "Hủy" : "Cancel"}
+              </button>
+              <button
+                type="button"
+                onClick={handleDeletePayment}
+                disabled={isDeleting}
+                className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-ds-lg text-sm font-medium flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                {isDeleting && <Loader2 className="animate-spin h-4 w-4" />}
+                {locale === "vi" ? "Xác nhận" : "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

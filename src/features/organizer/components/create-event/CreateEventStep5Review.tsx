@@ -17,8 +17,11 @@ function formatShowtimeDate(startDatetime: string, locale: string) {
 export function CreateEventStep5Review({ formData, setStep, errors = {} }: Props) {
     const locale = useLocale();
     const t = useTranslations("CreateEvent.Step5");
+    const tStep4 = useTranslations("CreateEvent.Step4");
     const tValidation = useTranslations("CreateEvent.Validation");
     const totalTickets = formData.ticketTypes.reduce((acc, t) => acc + t.quantityTotal, 0);
+
+    const selectedBankInfo = formData.bankInfos?.find(b => b.id === formData.selectedProfileId);
 
     return (
         <div className="space-y-6">
@@ -202,13 +205,14 @@ export function CreateEventStep5Review({ formData, setStep, errors = {} }: Props
                         <button type="button" onClick={() => setStep(4)} className="text-action-brand-text-default text-xs font-medium hover:underline">{t("edit")}</button>
                     </div>
                     <div className="p-4 flex-1">
-                        {formData.selectedProfileId ? (
+                        {selectedBankInfo ? (
                             <div className="bg-bg-subtle p-3 rounded-ds-lg border border-border-default">
                                 <span className="block text-xs text-text-muted mb-1">{t("selected_profile")}</span>
-                                <div className="font-bold text-text-primary text-sm mb-1">{t("default_profile_name")}</div>
+                                <div className="font-bold text-text-primary text-sm mb-1">{selectedBankInfo.profileName || selectedBankInfo.bankName}</div>
                                 <div className="text-xs text-text-secondary mt-2 grid grid-cols-1 gap-y-1">
-                                    <div><span className="text-text-muted">{t("bank")}</span> Vietcombank</div>
-                                    <div><span className="text-text-muted">{t("account_no")}</span> 0071000898989</div>
+                                    <div><span className="text-text-muted">{t("bank")}</span> {selectedBankInfo.bankName}</div>
+                                    <div><span className="text-text-muted">{t("account_no")}</span> {selectedBankInfo.bankAccountNumber}</div>
+                                    <div><span className="text-text-muted">{tStep4("account_name")}</span> {selectedBankInfo.bankOwnerName}</div>
                                 </div>
                             </div>
                         ) : (

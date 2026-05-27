@@ -56,7 +56,7 @@ export default async function LocaleLayout({ children, params }: Props) {
               defaultTheme="dark"
               enableSystem
             >
-              <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
+              <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "google-client-id-placeholder"}>
                 {children}
               </GoogleOAuthProvider>
               <ToastContainer />
