@@ -3,10 +3,21 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Facebook, Youtube, Twitter, Instagram, Linkedin, Mail, Phone, Clock } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+
+import { getFooterLegalDocs, getLegalHref, getLegalMeta } from "@/src/lib/legal/registry";
 
 export function Footer() {
+  const locale = useLocale();
   const t = useTranslations("Footer");
+  const legalLinks = getFooterLegalDocs().map((slug) => {
+    const meta = getLegalMeta(slug);
+
+    return {
+      href: getLegalHref(locale, slug),
+      label: meta.shortTitle,
+    };
+  });
 
 
   return (
@@ -60,9 +71,21 @@ export function Footer() {
           <div>
             <h3 className="font-bold text-text-primary uppercase mb-4 text-xs tracking-wider">{t("help")}</h3>
             <ul className="space-y-2.5">
-              {[t('help_center'), t('faq'), t('privacy_policy'), t('terms_of_use'), t('refund_policy'), t('dispute_resolution')].map((item, index) => (
+              {[t('help_center'), t('faq')].map((item, index) => (
                 <li key={index}>
                   <Link href="#" className="hover:text-primary transition-colors">{item}</Link>
+                </li>
+              ))}
+              {legalLinks.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary transition-colors"
+                  >
+                    {item.label}
+                  </Link>
                 </li>
               ))}
             </ul>
