@@ -45,6 +45,7 @@ const config = {
     },
   },
   plugins: [
+    require("@tailwindcss/typography")
   ],
 }
 
