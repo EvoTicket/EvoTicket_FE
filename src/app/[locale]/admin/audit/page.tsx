@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
   History,
   Search,
@@ -23,31 +23,96 @@ import {
   Tag
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { auditMockData } from "../datamockadmin/mockdata_audit";
+import { adminAuditApi, AdminAuditDashboardResponse, AuditLogDto } from "@/src/lib/api/adminAuditApi";
 
 export default function AdminAuditPage() {
   const t = useTranslations("Admin");
   const [activeTab, setActiveTab] = useState("all");
-  const [selectedLog, setSelectedLog] = useState<any>(null);
+  const [searchVal, setSearchVal] = useState("");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [data, setData] = useState<AdminAuditDashboardResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedLog, setSelectedLog] = useState<AuditLogDto | null>(null);
 
-  // Filter logic based on activeTab
-  const filteredLogs = useMemo(() => {
-    let logs = auditMockData.logs;
-    if (activeTab === "sensitive") {
-      return logs.filter(log => log.sensitive);
-    }
-    if (activeTab === "config") {
-      return logs.filter(log => log.module === "System Config");
-    }
-    return logs;
-  }, [activeTab]);
+  // Debounce search input to avoid hitting backend on every keystroke
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearch(searchVal);
+      setPage(1); // Reset page index on search change
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchVal]);
 
-  // Set initial selected log if none selected
-  useMemo(() => {
-    if (!selectedLog && filteredLogs.length > 0) {
-      setSelectedLog(filteredLogs[0]);
-    }
-  }, [filteredLogs, selectedLog]);
+  // Load audit dashboard data from backend API
+  useEffect(() => {
+    let isMounted = true;
+    const fetchAuditLogs = async () => {
+      setLoading(true);
+      try {
+        const response = await adminAuditApi.getAuditDashboard({
+          tab: activeTab,
+          search: search || undefined,
+          page,
+          size: pageSize,
+        });
+
+        if (isMounted) {
+          setData(response);
+          setError(null);
+          
+          const logsList = response.logs.content;
+          if (logsList.length > 0) {
+            // Re-select currently selected log if it exists in the new list, otherwise select first item
+            const found = logsList.find(log => log.id === selectedLog?.id);
+            if (found) {
+              setSelectedLog(found);
+            } else {
+              setSelectedLog(logsList[0]);
+            }
+          } else {
+            setSelectedLog(null);
+          }
+        }
+      } catch (err: any) {
+        if (isMounted) {
+          console.error("Error fetching audit logs:", err);
+          setError("Không thể tải danh sách nhật ký hệ thống.");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchAuditLogs();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeTab, search, page, pageSize]);
+
+  // Tab shift clears search and page index back to 1
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setSearchVal("");
+    setSearch("");
+    setPage(1);
+  };
+
+  const statsList = data?.stats || [
+    { label: "total_logs", value: "0", sub: "logs_30d", color: "indigo" },
+    { label: "sensitive_actions", value: "0", sub: "require_mfa", color: "rose" },
+    { label: "failed_actions", value: "0", sub: "failed_rate_low", color: "rose" },
+    { label: "system_changes", value: "0", sub: "changes_applied", color: "amber" }
+  ];
+
+  const logsList = data?.logs.content || [];
+  const totalPages = data?.logs.totalPages || 0;
+  const totalElements = data?.logs.totalElements || 0;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -73,7 +138,7 @@ export default function AdminAuditPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {auditMockData.stats.map((stat, i) => (
+        {statsList.map((stat, i) => (
           <StatsCard key={i} icon={
             stat.label === "total_logs" ? <History size={20} /> :
               stat.label === "sensitive_actions" ? <ShieldAlert size={20} /> :
@@ -97,9 +162,9 @@ export default function AdminAuditPage() {
             {/* Tabs & Search */}
             <div className="flex items-center justify-between border-b border-border px-6">
               <div className="flex items-center">
-                <TabItem active={activeTab === "all"} onClick={() => setActiveTab("all")} label={t("tab_all_logs")} />
-                <TabItem active={activeTab === "sensitive"} onClick={() => setActiveTab("sensitive")} label={t("tab_sensitive")} />
-                <TabItem active={activeTab === "config"} onClick={() => setActiveTab("config")} label={t("tab_config")} />
+                <TabItem active={activeTab === "all"} onClick={() => handleTabChange("all")} label={t("tab_all_logs")} />
+                <TabItem active={activeTab === "sensitive"} onClick={() => handleTabChange("sensitive")} label={t("tab_sensitive")} />
+                <TabItem active={activeTab === "config"} onClick={() => handleTabChange("config")} label={t("tab_config")} />
               </div>
             </div>
 
@@ -107,7 +172,13 @@ export default function AdminAuditPage() {
             <div className="p-4 flex flex-wrap items-center gap-3 border-b border-border bg-surface transition-colors">
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-txt-muted" size={16} />
-                <input type="text" placeholder={t("search_logs_placeholder")} className="w-full pl-10 pr-4 py-2 bg-main border border-border rounded-ds-xl text-xs outline-none focus:bg-surface focus:border-primary text-txt-primary placeholder:text-txt-muted transition-all" />
+                <input
+                  type="text"
+                  value={searchVal}
+                  onChange={(e) => setSearchVal(e.target.value)}
+                  placeholder={t("search_logs_placeholder")}
+                  className="w-full pl-10 pr-4 py-2 bg-main border border-border rounded-ds-xl text-xs outline-none focus:bg-surface focus:border-primary text-txt-primary placeholder:text-txt-muted transition-all"
+                />
               </div>
               <FilterSelect label={t("filter_module")} value={t("common.all")} />
               <FilterSelect label={t("filter_severity")} value={t("common.all")} />
@@ -128,49 +199,100 @@ export default function AdminAuditPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {filteredLogs.map((log) => (
-                    <tr
-                      key={log.id}
-                      onClick={() => setSelectedLog(log)}
-                      className={`hover:bg-main/30 transition-all cursor-pointer group ${selectedLog?.id === log.id ? 'bg-primary/5' : ''}`}
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-[10px] font-medium text-txt-muted">{log.timestamp}</td>
-                      <td className="px-6 py-4">
-                        <div className="min-w-[100px]">
-                          <p className="text-[11px] font-bold text-txt-primary">{log.actor}</p>
-                          <p className="text-[9px] text-txt-muted font-medium">{log.role}</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-bold text-txt-secondary">{log.action}</span>
-                          {log.sensitive && <Lock size={12} className="text-amber-500" />}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-[11px] font-medium text-txt-muted line-clamp-1">{log.target}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <SeverityBadge level={log.severity} />
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <ResultBadge result={log.result} />
-                          <ChevronRight size={14} className={`text-txt-muted/30 transition-transform ${selectedLog?.id === log.id ? 'translate-x-1 text-primary' : 'group-hover:translate-x-1'}`} />
+                  {loading ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-20 text-xs font-bold text-txt-muted">
+                        <div className="flex items-center justify-center gap-2">
+                          <Clock size={16} className="animate-spin text-primary" />
+                          <span>Đang tải dữ liệu...</span>
                         </div>
                       </td>
                     </tr>
-                  ))}
-                  {filteredLogs.length === 0 && (
+                  ) : error ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-20 text-xs font-bold text-rose-500">
+                        {error}
+                      </td>
+                    </tr>
+                  ) : logsList.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="px-6 py-20 text-center text-xs font-bold text-txt-muted italic">
                         {t("common.no_data")}
                       </td>
                     </tr>
+                  ) : (
+                    logsList.map((log) => (
+                      <tr
+                        key={log.id}
+                        onClick={() => setSelectedLog(log)}
+                        className={`hover:bg-main/30 transition-all cursor-pointer group ${selectedLog?.id === log.id ? 'bg-primary/5' : ''}`}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-[10px] font-medium text-txt-muted">{log.timestamp}</td>
+                        <td className="px-6 py-4">
+                          <div className="min-w-[100px]">
+                            <p className="text-[11px] font-bold text-txt-primary">{log.actor}</p>
+                            <p className="text-[9px] text-txt-muted font-medium">{log.role}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-bold text-txt-secondary">{log.action}</span>
+                            {log.sensitive && <Lock size={12} className="text-amber-500" />}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-[11px] font-medium text-txt-muted line-clamp-1">{log.target}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <SeverityBadge level={log.severity} />
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <ResultBadge result={log.result} />
+                            <ChevronRight size={14} className={`text-txt-muted/30 transition-transform ${selectedLog?.id === log.id ? 'translate-x-1 text-primary' : 'group-hover:translate-x-1'}`} />
+                          </div>
+                        </td>
+                      </tr>
+                    ))
                   )}
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Controls */}
+            {totalElements > 0 && (
+              <div className="px-6 py-4 bg-main/30 border-t border-border flex items-center justify-between">
+                <p className="text-[10px] font-medium text-txt-muted uppercase tracking-widest">
+                  Hiển thị {totalElements > 0 ? (page - 1) * pageSize + 1 : 0}-{Math.min(page * pageSize, totalElements)} trên tổng {totalElements}
+                </p>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setPage(prev => Math.max(1, prev - 1))}
+                    disabled={page === 1}
+                    className={`w-8 h-8 flex items-center justify-center rounded-ds-lg transition-all ${page === 1 ? "text-txt-muted/30 cursor-not-allowed" : "text-txt-muted hover:bg-main"}`}
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+                    <PaginationButton
+                      key={pageNum}
+                      active={page === pageNum}
+                      label={pageNum.toString()}
+                      onClick={() => setPage(pageNum)}
+                    />
+                  ))}
+
+                  <button
+                    onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={page === totalPages}
+                    className={`w-8 h-8 flex items-center justify-center rounded-ds-lg transition-all ${page === totalPages ? "text-txt-muted/30 cursor-not-allowed" : "text-txt-muted hover:bg-main"}`}
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -180,10 +302,7 @@ export default function AdminAuditPage() {
             <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm sticky top-[104px] animate-in slide-in-from-right-4 duration-300 transition-colors">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-txt-primary">{selectedLog.action}</h3>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-ds-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px] font-black">
-                  <CheckCircle2 size={12} />
-                  {t("common.result.success").toUpperCase()}
-                </div>
+                <DetailResultBadge result={selectedLog.result} />
               </div>
 
               <div className="flex flex-wrap gap-2 mb-8">
@@ -313,6 +432,36 @@ function ResultBadge({ result }: { result: string }) {
   );
 }
 
+function DetailResultBadge({ result }: { result: string }) {
+  const t = useTranslations("Admin");
+  const styles: any = {
+    "Success": "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    "Partial": "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    "Failed": "bg-rose-500/10 text-rose-600 border-rose-500/20",
+  };
+
+  return (
+    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-ds-lg text-[10px] font-black border uppercase ${styles[result] || styles["Failed"]}`}>
+      {result === "Success" ? <CheckCircle2 size={12} /> : result === "Partial" ? <Info size={12} /> : <XCircle size={12} />}
+      {t(`common.result.${result.toLowerCase()}`).toUpperCase()}
+    </div>
+  );
+}
+
+function PaginationButton({ active, label, onClick }: any) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-8 h-8 flex items-center justify-center rounded-ds-xl text-[11px] font-black transition-all ${active
+        ? "bg-primary text-white shadow-lg shadow-primary/30 scale-105"
+        : "text-txt-muted bg-surface border border-border hover:bg-main"
+        }`}
+    >
+      {label}
+    </button>
+  );
+}
+
 function DetailRow({ icon, label, value, sub }: any) {
   return (
     <div className="flex gap-4">
@@ -328,6 +477,7 @@ function DetailRow({ icon, label, value, sub }: any) {
   );
 }
 
+// SVG helper icons
 function HashIcon({ size, className }: any) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>

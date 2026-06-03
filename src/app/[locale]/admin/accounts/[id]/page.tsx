@@ -24,7 +24,8 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { adminAccountsApi, type AccountDetailResponse } from "@/src/lib/api/adminAccountsApi";
 
 /**
  * Interfaces for Account Detail Data
@@ -197,13 +198,82 @@ export default function AccountDetailPage() {
   const router = useRouter();
   const { id: paramId } = useParams();
   const [activeTab, setActiveTab] = useState("profile");
+  const [account, setAccount] = useState<AccountDetailResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // In real implementation, this would be a fetch based on paramId
-  const account = { ...accountDetailMock, id: (paramId as string) || accountDetailMock.id };
+  useEffect(() => {
+    if (!paramId) return;
+    const fetchDetail = async () => {
+      try {
+        setIsLoading(true);
+        const data = await adminAccountsApi.getAccountDetail(paramId as string);
+        setAccount(data);
+        setError(null);
+      } catch (err: any) {
+        console.error("Failed to fetch account details:", err);
+        setError("Không thể tải thông tin chi tiết tài khoản.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDetail();
+  }, [paramId]);
 
   const handleBack = () => {
     router.back();
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error || !account) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <p className="text-rose-500 font-bold">{error || "Không tìm thấy dữ liệu tài khoản."}</p>
+        <button onClick={handleBack} className="px-4 py-2 border border-border rounded-ds-xl text-xs font-bold hover:bg-main">
+          Quay lại
+        </button>
+      </div>
+    );
+  }
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "Active":
+        return {
+          label: t("status_active") || "Active",
+          classes: "bg-emerald-500/10 text-emerald-600 border border-emerald-500/10"
+        };
+      case "Pending Approval":
+        return {
+          label: t("status_pending_approval") || "Pending Approval",
+          classes: "bg-amber-500/10 text-amber-600 border border-amber-500/10"
+        };
+      case "Restricted":
+        return {
+          label: t("status_restricted") || "Restricted",
+          classes: "bg-rose-500/10 text-rose-600 border border-rose-500/10"
+        };
+      case "Suspended":
+        return {
+          label: t("status_suspended") || "Suspended",
+          classes: "bg-rose-500/10 text-rose-600 border border-rose-500/10"
+        };
+      default:
+        return {
+          label: status,
+          classes: "bg-surface text-txt-muted border border-border"
+        };
+    }
+  };
+
+  const statusInfo = getStatusBadge(account.status);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
@@ -227,10 +297,10 @@ export default function AccountDetailPage() {
               <h1 className="text-2xl font-black text-txt-primary tracking-tight">{account.name}</h1>
               <div className="flex items-center gap-2 mt-1">
                 <span className="px-2 py-0.5 rounded-ds-md bg-primary/10 text-primary text-[10px] font-bold border border-primary/10">
-                  {t("type_organizer")}
+                  {account.type === "Organizer" ? t("type_organizer") : t("type_buyer")}
                 </span>
-                <span className="px-2 py-0.5 rounded-ds-md bg-amber-500/10 text-amber-600 text-[10px] font-bold border border-amber-500/10">
-                  {t("status_pending_approval")}
+                <span className={`px-2 py-0.5 rounded-ds-md text-[10px] font-bold ${statusInfo.classes}`}>
+                  {statusInfo.label}
                 </span>
                 <span className="text-[10px] font-medium text-txt-muted">
                   ID: {account.id} · Đăng ký {account.registeredDate}
@@ -310,70 +380,84 @@ export default function AccountDetailPage() {
                     <h4 className="text-sm font-bold text-txt-primary mb-4 flex items-center gap-2">
                       Hồ sơ tài liệu đã nộp
                     </h4>
-                    <div className="bg-main/30 rounded-ds-2xl border border-border overflow-hidden">
-                      <table className="w-full text-left border-collapse">
-                        <tbody className="divide-y divide-border">
-                          {account.documents.map((doc, idx) => (
-                            <tr key={idx} className="hover:bg-main/50 transition-colors">
-                              <td className="px-6 py-4">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-ds-lg bg-surface border border-border flex items-center justify-center text-txt-muted">
-                                    <FileText size={16} />
+                    {account.documents && account.documents.length > 0 ? (
+                      <div className="bg-main/30 rounded-ds-2xl border border-border overflow-hidden">
+                        <table className="w-full text-left border-collapse">
+                          <tbody className="divide-y divide-border">
+                            {account.documents.map((doc, idx) => (
+                              <tr key={idx} className="hover:bg-main/50 transition-colors">
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-ds-lg bg-surface border border-border flex items-center justify-center text-txt-muted">
+                                      <FileText size={16} />
+                                    </div>
+                                    <span className="text-xs font-bold text-txt-primary">{doc.name}</span>
                                   </div>
-                                  <span className="text-xs font-bold text-txt-primary">{doc.name}</span>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4">
-                                <StatusBadge status={doc.status} />
-                              </td>
-                              <td className="px-6 py-4 text-right">
-                                <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-lg border border-border bg-surface text-[10px] font-bold text-txt-primary hover:bg-main transition-all">
-                                  <ExternalLink size={12} />
-                                  Xem
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <StatusBadge status={doc.status} />
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                  <button
+                                    onClick={() => doc.url && window.open(doc.url, "_blank")}
+                                    disabled={!doc.url}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-lg border border-border bg-surface text-[10px] font-bold text-txt-primary hover:bg-main transition-all disabled:opacity-50"
+                                  >
+                                    <ExternalLink size={12} />
+                                    Xem
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-txt-muted">Không có tài liệu nào được tải lên.</p>
+                    )}
                   </div>
 
                   {/* Payout Account */}
                   <div>
                     <h4 className="text-sm font-bold text-txt-primary mb-4">Tài khoản thanh toán</h4>
-                    <div className="p-4 bg-surface border border-border rounded-ds-2xl flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-ds-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
-                          <CreditCard size={20} />
+                    {account.payoutAccount ? (
+                      <div className="p-4 bg-surface border border-border rounded-ds-2xl flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-ds-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                            <CreditCard size={20} />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-txt-primary">
+                              {account.payoutAccount.bank} - {account.payoutAccount.accountNumber}
+                            </p>
+                            <p className="text-[10px] text-txt-muted uppercase font-medium">
+                              Chủ tài khoản: {account.payoutAccount.accountName}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-xs font-bold text-txt-primary">
-                            {account.payoutAccount.bank} - {account.payoutAccount.accountNumber}
-                          </p>
-                          <p className="text-[10px] text-txt-muted uppercase font-medium">
-                            Chủ tài khoản: {account.payoutAccount.accountName}
-                          </p>
-                        </div>
+                        <span className="px-2 py-1 rounded-ds-md bg-amber-500/5 text-amber-600 text-[8px] font-black border border-amber-500/10">
+                          {account.payoutAccount.status.toUpperCase()}
+                        </span>
                       </div>
-                      <span className="px-2 py-1 rounded-ds-md bg-amber-500/5 text-amber-600 text-[8px] font-black border border-amber-500/10">
-                        {account.payoutAccount.status.toUpperCase()}
-                      </span>
-                    </div>
+                    ) : (
+                      <p className="text-xs text-txt-muted">Chưa cấu hình tài khoản thanh toán</p>
+                    )}
                   </div>
 
                   {/* Internal Warning */}
-                  <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-ds-2xl">
-                    <div className="flex gap-3">
-                      <AlertTriangle size={18} className="text-amber-600 shrink-0" />
-                      <div>
-                        <p className="text-xs font-bold text-amber-700">Ghi chú xác minh nội bộ</p>
-                        <p className="text-[11px] text-amber-600/80 mt-1 leading-relaxed">
-                          Tổ chức cần cập nhật bản hợp đồng tài khoản thanh toán có công chứng trước khi phê duyệt cho phép phát hành vé.
-                        </p>
+                  {account.type === "Organizer" && (
+                    <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-ds-2xl">
+                      <div className="flex gap-3">
+                        <AlertTriangle size={18} className="text-amber-600 shrink-0" />
+                        <div>
+                          <p className="text-xs font-bold text-amber-700">Ghi chú xác minh nội bộ</p>
+                          <p className="text-[11px] text-amber-600/80 mt-1 leading-relaxed">
+                            {account.adminContext?.internalNote || "Tổ chức chưa có ghi chú xác minh nào từ quản trị viên."}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 

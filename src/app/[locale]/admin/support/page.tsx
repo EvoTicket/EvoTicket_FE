@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Search,
@@ -27,14 +27,63 @@ import {
   ChevronDown as ChevronDownIcon
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import { supportMockData } from "../datamockadmin/mockdata_support";
-
-
+import { adminSupportApi, type AdminSupportDashboardResponse } from "@/src/lib/api/adminSupportApi";
 
 export default function AdminSupportPage() {
   const t = useTranslations("Admin");
   const locale = useLocale();
   const [activeTab, setActiveTab] = useState("transactions");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [data, setData] = useState<AdminSupportDashboardResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch support dashboard data
+  useEffect(() => {
+    let active = true;
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await adminSupportApi.getSupportDashboard({
+          tab: activeTab,
+          search: searchKeyword,
+          page: currentPage,
+          size: 10,
+        });
+        if (active) {
+          setData(res);
+        }
+      } catch (err: any) {
+        if (active) {
+          setError(err?.response?.data?.message || err?.message || "Internal Server Error");
+        }
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchData();
+    return () => {
+      active = false;
+    };
+  }, [activeTab, searchKeyword, currentPage]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearchKeyword(searchQuery);
+    setCurrentPage(1);
+  };
+
+  const handleRecentSearchClick = (tag: string) => {
+    setSearchQuery(tag);
+    setSearchKeyword(tag);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -57,25 +106,31 @@ export default function AdminSupportPage() {
           <Zap size={14} className="text-amber-500" />
           {t("quick_search_label")}
         </div>
-        <div className="flex gap-3">
+        <form onSubmit={handleSearchSubmit} className="flex gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-txt-muted" size={18} />
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t("quick_search_placeholder")}
               className="w-full pl-12 pr-4 py-3.5 bg-main border border-border rounded-ds-2xl text-sm focus:bg-surface focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all text-txt-primary placeholder:text-txt-muted"
             />
           </div>
-          <button className="bg-primary hover:bg-primary-hover text-white px-8 py-3.5 rounded-ds-2xl font-bold shadow-lg shadow-primary/20 transition-all flex items-center gap-2">
+          <button type="submit" className="bg-primary hover:bg-primary-hover text-white px-8 py-3.5 rounded-ds-2xl font-bold shadow-lg shadow-primary/20 transition-all flex items-center gap-2">
             <Search size={18} />
             {t("btn_search")}
           </button>
-        </div>
+        </form>
         <div className="flex items-center gap-3">
           <span className="text-[10px] font-bold text-txt-muted uppercase">{t("recent_searches")}:</span>
           <div className="flex gap-2">
             {["ORD-220411", "TIX-998120", "anh.nh@gmail.com", "+84 909 442 118", "Anh Trai Say Hi"].map((tag) => (
-              <span key={tag} className="px-2.5 py-1 bg-main text-txt-muted text-[10px] font-bold rounded-ds-lg border border-border cursor-pointer hover:bg-main/80 transition-colors">
+              <span
+                key={tag}
+                onClick={() => handleRecentSearchClick(tag)}
+                className="px-2.5 py-1 bg-main text-txt-muted text-[10px] font-bold rounded-ds-lg border border-border cursor-pointer hover:bg-main/80 transition-colors"
+              >
                 {tag}
               </span>
             ))}
@@ -85,22 +140,28 @@ export default function AdminSupportPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {(supportMockData.stats as any)[activeTab].map((stat: any, idx: number) => {
-          const iconMap: Record<string, any> = {
-            FileText, CreditCard, Ticket, AlertCircle, ShieldCheck, CheckCircle2, Zap, MessageSquare, Clock
-          };
-          const Icon = iconMap[stat.icon as string] || AlertCircle;
+        {isLoading && !data ? (
+          Array.from({ length: 4 }).map((_, idx) => (
+            <div key={idx} className="bg-surface border border-border rounded-ds-2xl p-5 shadow-sm animate-pulse h-[80px]" />
+          ))
+        ) : (
+          (data?.stats as any)?.[activeTab]?.map((stat: any, idx: number) => {
+            const iconMap: Record<string, any> = {
+              FileText, CreditCard, Ticket, AlertCircle, ShieldCheck, CheckCircle2, Zap, MessageSquare, Clock
+            };
+            const Icon = iconMap[stat.icon as string] || AlertCircle;
 
-          return (
-            <StatsCard
-              key={idx}
-              icon={<Icon size={20} />}
-              label={stat.label}
-              value={stat.value}
-              color={stat.color}
-            />
-          );
-        })}
+            return (
+              <StatsCard
+                key={idx}
+                icon={<Icon size={20} />}
+                label={stat.label}
+                value={stat.value}
+                color={stat.color}
+              />
+            );
+          })
+        )}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
@@ -110,19 +171,19 @@ export default function AdminSupportPage() {
             <div className="flex items-center border-b border-border px-6">
               <TabItem
                 active={activeTab === "transactions"}
-                onClick={() => setActiveTab("transactions")}
+                onClick={() => { setActiveTab("transactions"); setCurrentPage(1); }}
                 label={t("tab_transactions")}
                 icon={<CreditCard size={16} />}
               />
               <TabItem
                 active={activeTab === "tickets"}
-                onClick={() => setActiveTab("tickets")}
+                onClick={() => { setActiveTab("tickets"); setCurrentPage(1); }}
                 label={t("tab_tickets")}
                 icon={<Ticket size={16} />}
               />
               <TabItem
                 active={activeTab === "cases"}
-                onClick={() => setActiveTab("cases")}
+                onClick={() => { setActiveTab("cases"); setCurrentPage(1); }}
                 label={t("tab_support_cases")}
                 icon={<MessageSquare size={16} />}
               />
@@ -206,119 +267,168 @@ export default function AdminSupportPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {activeTab === "transactions" && supportMockData.transactions.map((row) => (
-                    <tr key={row.id} className="hover:bg-main/30 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <FileText size={14} className="text-txt-muted/30" />
-                          <span className="text-xs font-bold text-txt-secondary">{row.id}</span>
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={10} className="px-6 py-12 text-center text-txt-muted">
+                        <div className="flex flex-col items-center gap-2 justify-center">
+                          <span className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
+                          <span>Đang tải dữ liệu...</span>
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="min-w-[140px]">
-                          <p className="text-[11px] font-bold text-txt-primary">{row.buyer}</p>
-                          <p className="text-[10px] text-txt-muted">{row.email}</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-[11px] font-medium text-txt-secondary line-clamp-1">{row.event}</p>
-                      </td>
-                      <td className="px-6 py-4 font-black text-txt-primary text-xs">
-                        {row.amount}
-                      </td>
-                      <td className="px-6 py-4">
-                        <PaymentBadge status={row.payment} />
-                      </td>
-                      <td className="px-6 py-4">
-                        <MintBadge status={row.mint} />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-[10px] font-medium text-txt-muted">
-                        {row.updatedAt}
-                      </td>
-                      <td className="px-6 py-4">
-                        <Link href={`/${locale}/admin/support/${row.id}`} className="px-3 py-1.5 bg-surface border border-border rounded-ds-lg text-[10px] font-bold text-txt-primary hover:bg-main transition-all shadow-sm flex items-center gap-1 w-fit">
-                          {t("support_sub.view_detail")}
-                        </Link>
                       </td>
                     </tr>
-                  ))}
+                  ) : error ? (
+                    <tr>
+                      <td colSpan={10} className="px-6 py-12 text-center text-rose-500 font-medium">
+                        Lỗi: {error}
+                      </td>
+                    </tr>
+                  ) : (
+                    <>
+                      {activeTab === "transactions" && (
+                        !data?.transactions?.content || data.transactions.content.length === 0 ? (
+                          <tr>
+                            <td colSpan={10} className="px-6 py-8 text-center text-txt-muted text-xs">
+                              Không tìm thấy giao dịch nào.
+                            </td>
+                          </tr>
+                        ) : (
+                          data.transactions.content.map((row) => (
+                            <tr key={row.id} className="hover:bg-main/30 transition-colors">
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-2">
+                                  <FileText size={14} className="text-txt-muted/30" />
+                                  <span className="text-xs font-bold text-txt-secondary">{row.id}</span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="min-w-[140px]">
+                                  <p className="text-[11px] font-bold text-txt-primary">{row.buyer}</p>
+                                  <p className="text-[10px] text-txt-muted">{row.email}</p>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <p className="text-[11px] font-medium text-txt-secondary line-clamp-1">{row.event}</p>
+                              </td>
+                              <td className="px-6 py-4 font-black text-txt-primary text-xs">
+                                {row.amount}
+                              </td>
+                              <td className="px-6 py-4">
+                                <PaymentBadge status={row.payment} />
+                              </td>
+                              <td className="px-6 py-4">
+                                <MintBadge status={row.mint} />
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-[10px] font-medium text-txt-muted">
+                                {row.updatedAt}
+                              </td>
+                              <td className="px-6 py-4">
+                                <Link href={`/${locale}/admin/support/${row.id}`} className="px-3 py-1.5 bg-surface border border-border rounded-ds-lg text-[10px] font-bold text-txt-primary hover:bg-main transition-all shadow-sm flex items-center gap-1 w-fit">
+                                  {t("support_sub.view_detail")}
+                                </Link>
+                              </td>
+                            </tr>
+                          ))
+                        )
+                      )}
 
-                  {activeTab === "tickets" && supportMockData.tickets.map((row) => (
-                    <tr key={row.id} className="hover:bg-main/30 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <Ticket size={14} className="text-txt-muted/30" />
-                          <span className="text-xs font-bold text-txt-secondary">{row.id}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="min-w-[140px]">
-                          <p className="text-[11px] font-bold text-txt-primary">{row.owner}</p>
-                          <p className="text-[10px] text-txt-muted">{row.ownerType}</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-[11px] font-medium text-txt-secondary line-clamp-1">{row.event}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-[11px] font-bold text-txt-primary">{row.tier}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <AccessBadge status={row.access} />
-                      </td>
-                      <td className="px-6 py-4">
-                        <CheckInBadge status={row.checkin} />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-[10px] font-medium text-txt-muted">
-                        {row.activity}
-                      </td>
-                      <td className="px-6 py-4">
-                        <Link href={`/${locale}/admin/support/${row.id}`} className="px-3 py-1.5 bg-surface border border-border rounded-ds-lg text-[10px] font-bold text-txt-primary hover:bg-main transition-all shadow-sm flex items-center gap-1 w-fit">
-                          {t("support_sub.view_detail")}
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
+                      {activeTab === "tickets" && (
+                        !data?.tickets?.content || data.tickets.content.length === 0 ? (
+                          <tr>
+                            <td colSpan={10} className="px-6 py-8 text-center text-txt-muted text-xs">
+                              Không tìm thấy vé nào.
+                            </td>
+                          </tr>
+                        ) : (
+                          data.tickets.content.map((row) => (
+                            <tr key={row.id} className="hover:bg-main/30 transition-colors">
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-2">
+                                  <Ticket size={14} className="text-txt-muted/30" />
+                                  <span className="text-xs font-bold text-txt-secondary">{row.id}</span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="min-w-[140px]">
+                                  <p className="text-[11px] font-bold text-txt-primary">{row.owner}</p>
+                                  <p className="text-[10px] text-txt-muted">{row.ownerType}</p>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <p className="text-[11px] font-medium text-txt-secondary line-clamp-1">{row.event}</p>
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className="text-[11px] font-bold text-txt-primary">{row.tier}</span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <AccessBadge status={row.access} />
+                              </td>
+                              <td className="px-6 py-4">
+                                <CheckInBadge status={row.checkin} />
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-[10px] font-medium text-txt-muted">
+                                {row.activity}
+                              </td>
+                              <td className="px-6 py-4">
+                                <Link href={`/${locale}/admin/support/${row.id}`} className="px-3 py-1.5 bg-surface border border-border rounded-ds-lg text-[10px] font-bold text-txt-primary hover:bg-main transition-all shadow-sm flex items-center gap-1 w-fit">
+                                  {t("support_sub.view_detail")}
+                                </Link>
+                              </td>
+                            </tr>
+                          ))
+                        )
+                      )}
 
-                  {activeTab === "cases" && supportMockData.cases.map((row) => (
-                    <tr key={row.id} className="hover:bg-main/30 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <MessageSquare size={14} className="text-txt-muted/30" />
-                          <span className="text-xs font-bold text-txt-secondary">{row.id}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-[11px] font-bold text-txt-primary line-clamp-1">{row.subject}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="min-w-[120px]">
-                          <p className="text-[11px] font-bold text-txt-primary">{row.user}</p>
-                          <p className="text-[10px] text-txt-muted">{row.email}</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-[11px] font-medium text-txt-secondary line-clamp-1">{row.event}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <PriorityBadge level={row.priority} />
-                      </td>
-                      <td className="px-6 py-4">
-                        <CaseStatusBadge status={row.status} />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-[11px] font-bold text-indigo-600">
-                        {row.assignee}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-[10px] font-medium text-txt-muted">
-                        {row.updatedAt}
-                      </td>
-                      <td className="px-6 py-4">
-                        <Link href={`/${locale}/admin/support/${row.id}`} className="px-3 py-1.5 bg-surface border border-border rounded-ds-lg text-[10px] font-bold text-txt-primary hover:bg-main transition-all shadow-sm flex items-center gap-1 w-fit">
-                          {t("support_sub.view_detail")}
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
+                      {activeTab === "cases" && (
+                        !data?.cases?.content || data.cases.content.length === 0 ? (
+                          <tr>
+                            <td colSpan={10} className="px-6 py-8 text-center text-txt-muted text-xs">
+                              Không tìm thấy case hỗ trợ nào.
+                            </td>
+                          </tr>
+                        ) : (
+                          data.cases.content.map((row) => (
+                            <tr key={row.id} className="hover:bg-main/30 transition-colors">
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-2">
+                                  <MessageSquare size={14} className="text-txt-muted/30" />
+                                  <span className="text-xs font-bold text-txt-secondary">{row.id}</span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <p className="text-[11px] font-bold text-txt-primary line-clamp-1">{row.subject}</p>
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="min-w-[120px]">
+                                  <p className="text-[11px] font-bold text-txt-primary">{row.user}</p>
+                                  <p className="text-[10px] text-txt-muted">{row.email}</p>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <p className="text-[11px] font-medium text-txt-secondary line-clamp-1">{row.event}</p>
+                              </td>
+                              <td className="px-6 py-4">
+                                <PriorityBadge level={row.priority} />
+                              </td>
+                              <td className="px-6 py-4">
+                                <CaseStatusBadge status={row.status} />
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-[11px] font-bold text-indigo-600">
+                                {row.assignee}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-[10px] font-medium text-txt-muted">
+                                {row.updatedAt}
+                              </td>
+                              <td className="px-6 py-4">
+                                <Link href={`/${locale}/admin/support/${row.id}`} className="px-3 py-1.5 bg-surface border border-border rounded-ds-lg text-[10px] font-bold text-txt-primary hover:bg-main transition-all shadow-sm flex items-center gap-1 w-fit">
+                                  {t("support_sub.view_detail")}
+                                </Link>
+                              </td>
+                            </tr>
+                          ))
+                        )
+                      )}
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -326,17 +436,56 @@ export default function AdminSupportPage() {
             {/* Pagination */}
             <div className="px-6 py-4 bg-main/30 border-t border-border flex items-center justify-between">
               <p className="text-xs text-txt-muted">
-                {activeTab === "transactions" && t("support_sub.pagination_showing", { start: 1, end: 7, total: "2,184" })}
-                {activeTab === "tickets" && t("support_sub.pagination_showing", { start: 1, end: 6, total: "6,028" })}
-                {activeTab === "cases" && t("support_sub.pagination_showing", { start: 1, end: 6, total: "318" })}
+                {activeTab === "transactions" && data?.transactions && t("support_sub.pagination_showing", {
+                  start: data.transactions.number * data.transactions.size + 1,
+                  end: Math.min((data.transactions.number + 1) * data.transactions.size, data.transactions.totalElements),
+                  total: data.transactions.totalElements.toLocaleString()
+                })}
+                {activeTab === "tickets" && data?.tickets && t("support_sub.pagination_showing", {
+                  start: data.tickets.number * data.tickets.size + 1,
+                  end: Math.min((data.tickets.number + 1) * data.tickets.size, data.tickets.totalElements),
+                  total: data.tickets.totalElements.toLocaleString()
+                })}
+                {activeTab === "cases" && data?.cases && t("support_sub.pagination_showing", {
+                  start: data.cases.number * data.cases.size + 1,
+                  end: Math.min((data.cases.number + 1) * data.cases.size, data.cases.totalElements),
+                  total: data.cases.totalElements.toLocaleString()
+                })}
               </p>
               <div className="flex items-center gap-1">
-                <PaginationButton disabled icon={<ChevronLeft size={16} />} />
-                <PaginationButton active label="1" />
-                <PaginationButton label="2" />
-                <PaginationButton label="3" />
-                <span className="px-2 text-txt-muted/30">...</span>
-                <PaginationButton icon={<ChevronRight size={16} />} />
+                <PaginationButton
+                  disabled={currentPage <= 1 || isLoading}
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  icon={<ChevronLeft size={16} />}
+                />
+                
+                {(() => {
+                  const pageInfo = activeTab === "transactions" ? data?.transactions : activeTab === "tickets" ? data?.tickets : data?.cases;
+                  if (!pageInfo) return null;
+                  
+                  const totalPages = pageInfo.totalPages;
+                  const pages = [];
+                  for (let i = 1; i <= totalPages; i++) {
+                    pages.push(
+                      <PaginationButton
+                        key={i}
+                        active={currentPage === i}
+                        onClick={() => setCurrentPage(i)}
+                        label={i.toString()}
+                      />
+                    );
+                  }
+                  return pages;
+                })()}
+
+                <PaginationButton
+                  disabled={(() => {
+                    const pageInfo = activeTab === "transactions" ? data?.transactions : activeTab === "tickets" ? data?.tickets : data?.cases;
+                    return !pageInfo || currentPage >= pageInfo.totalPages || isLoading;
+                  })()}
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  icon={<ChevronRight size={16} />}
+                />
               </div>
             </div>
           </div>

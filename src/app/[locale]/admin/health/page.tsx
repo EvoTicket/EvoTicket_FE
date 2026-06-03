@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Activity,
   Zap,
@@ -36,12 +36,47 @@ import {
   Area
 } from "recharts";
 import { useTranslations } from "next-intl";
-import { healthMockData } from "../datamockadmin/mockdata_health";
+import { adminHealthApi, type AdminHealthDashboardResponse } from "@/src/lib/api/adminHealthApi";
 
 export default function AdminHealthPage() {
   const t = useTranslations("Admin");
   const [timeRange, setTimeRange] = useState("1h");
   const [activeTab, setActiveTab] = useState("overview");
+  const [data, setData] = useState<AdminHealthDashboardResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await adminHealthApi.getHealthDashboard(timeRange);
+        if (active) {
+          setData(res);
+        }
+      } catch (err: any) {
+        if (active) {
+          setError(err?.response?.data?.message || err?.message || "Internal Server Error");
+        }
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchData();
+    return () => {
+      active = false;
+    };
+  }, [timeRange, refreshTrigger]);
+
+  const handleRefresh = () => {
+    setRefreshTrigger((prev) => prev + 1);
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -65,8 +100,11 @@ export default function AdminHealthPage() {
               </button>
             ))}
           </div>
-          <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-ds-xl font-bold shadow-lg shadow-primary/20 transition-all">
-            <RefreshCw size={18} />
+          <button
+            onClick={handleRefresh}
+            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-ds-xl font-bold shadow-lg shadow-primary/20 transition-all"
+          >
+            <RefreshCw size={18} className={isLoading ? "animate-spin" : ""} />
             <span>{t("btn_refresh")}</span>
           </button>
         </div>
@@ -77,36 +115,43 @@ export default function AdminHealthPage() {
         <StatusCard
           icon={<Activity size={20} />}
           label={t("platform_status")}
-          value={t("common.service_status.degraded")}
-          sub={t("common.health_sub.services_status", { warning: 2, down: 1 })}
-          color="amber"
+          value={isLoading && !data ? "..." : t(`common.service_status.${(data?.platformStatus || "Healthy").toLowerCase()}`)}
+          sub={t("common.health_sub.services_status", { 
+            warning: data?.services?.filter(s => s.status === 'Warning' || s.status === 'Degraded').length || 0, 
+            down: data?.services?.filter(s => s.status === 'Down').length || 0 
+          })}
+          color={data?.platformStatus === 'Down' || data?.platformStatus === 'Degraded' ? "rose" : data?.platformStatus === 'Warning' ? "amber" : "emerald"}
         />
         <StatusCard
           icon={<Zap size={20} />}
           label={t("api_latency_label")}
-          value="420 ms"
+          value={isLoading && !data ? "..." : data?.latency || "—"}
           sub={t("common.health_sub.latency_p95", { time: `15 ${t("common.minutes")}` })}
           color="rose"
         />
         <StatusCard
           icon={<AlertTriangle size={20} />}
           label={t("open_incidents")}
-          value="3"
-          sub={t("common.health_sub.incident_breakdown", { critical: 1, high: 1, medium: 1 })}
+          value={isLoading && !data ? "..." : String(data?.incidentsCount || 0)}
+          sub={t("common.health_sub.incident_breakdown", { 
+            critical: data?.incidents?.filter(i => i.severity === 'Critical').length || 0, 
+            high: data?.incidents?.filter(i => i.severity === 'High').length || 0, 
+            medium: data?.incidents?.filter(i => i.severity === 'Medium').length || 0 
+          })}
           color="rose"
         />
         <StatusCard
           icon={<Layers size={20} />}
           label={t("queue_backlog")}
-          value={`128 ${t("common.jobs")}`}
+          value={isLoading && !data ? "..." : data?.queueBacklog || "—"}
           sub={t("common.health_sub.mint_queue_slow")}
           color="amber"
         />
         <StatusCard
           icon={<ShieldCheck size={20} />}
           label={t("service_availability")}
-          value="98.7%"
-          sub={t("common.health_sub.availability_24h", { count: 8 })}
+          value={isLoading && !data ? "..." : data?.serviceAvailability || "—"}
+          sub={t("common.health_sub.availability_24h", { count: data?.services?.filter(s => s.status === 'Healthy').length || 0 })}
           color="emerald"
         />
       </div>
@@ -120,9 +165,9 @@ export default function AdminHealthPage() {
 
       {/* Tab Content */}
       <div className="animate-in fade-in duration-500">
-        {activeTab === "overview" && <OverviewTab t={t} />}
-        {activeTab === "services" && <ServicesTab t={t} />}
-        {activeTab === "alerts" && <AlertsTab t={t} />}
+        {activeTab === "overview" && <OverviewTab t={t} data={data} isLoading={isLoading} error={error} />}
+        {activeTab === "services" && <ServicesTab t={t} data={data} isLoading={isLoading} error={error} />}
+        {activeTab === "alerts" && <AlertsTab t={t} data={data} isLoading={isLoading} error={error} />}
       </div>
     </div>
   );
@@ -142,7 +187,24 @@ function TabButton({ active, onClick, label }: any) {
   );
 }
 
-function OverviewTab({ t }: any) {
+function OverviewTab({ t, data, isLoading, error }: any) {
+  if (isLoading && !data) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-txt-muted gap-2">
+        <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
+        <span>Đang tải thông tin tổng quan...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 text-center text-rose-500 font-medium bg-surface border border-border rounded-ds-3xl">
+        Lỗi: {error}
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Service Health Grid */}
@@ -155,7 +217,7 @@ function OverviewTab({ t }: any) {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {healthMockData.services.map((s, i) => (
+            {data?.services?.map((s: any, i: number) => (
               <ServiceItem key={i} name={s.name} status={s.status} latency={s.latency} lastCheck={s.lastCheck} />
             ))}
           </div>
@@ -170,9 +232,9 @@ function OverviewTab({ t }: any) {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <ChartSmall label={t("request_volume")} value="12.8k req/m" sub={t("common.health_sub.vs_last_hour", { percent: 6 })} data={healthMockData.perfData} dataKey="requests" color="#6366f1" />
-            <ChartSmall label={t("api_latency_label")} value="420 ms" sub={t("common.health_sub.p95_threshold", { ms: 350 })} data={healthMockData.perfData} dataKey="latency" color="#f59e0b" />
-            <ChartSmall label={t("error_rate")} value="0.12%" sub={t("common.health_sub.under_threshold_1h", { percent: 0.5 })} data={healthMockData.perfData} dataKey="errors" color="#f43f5e" />
+            <ChartSmall label={t("request_volume")} value="12.8k req/m" sub={t("common.health_sub.vs_last_hour", { percent: 6 })} data={data?.perfData} dataKey="requests" color="#6366f1" />
+            <ChartSmall label={t("api_latency_label")} value={data?.latency || "420 ms"} sub={t("common.health_sub.p95_threshold", { ms: 350 })} data={data?.perfData} dataKey="latency" color="#f59e0b" />
+            <ChartSmall label={t("error_rate")} value="0.12%" sub={t("common.health_sub.under_threshold_1h", { percent: 0.5 })} data={data?.perfData} dataKey="errors" color="#f43f5e" />
           </div>
         </div>
       </div>
@@ -187,7 +249,7 @@ function OverviewTab({ t }: any) {
             </div>
           </div>
           <div className="space-y-4">
-            {healthMockData.queues.map((q, i) => (
+            {data?.queues?.map((q: any, i: number) => (
               <QueueItem key={i} name={q.name} queued={q.queued} failed={q.failed} delayed={q.delayed} status={q.status} />
             ))}
           </div>
@@ -197,7 +259,24 @@ function OverviewTab({ t }: any) {
   );
 }
 
-function ServicesTab({ t }: any) {
+function ServicesTab({ t, data, isLoading, error }: any) {
+  if (isLoading && !data) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-txt-muted gap-2">
+        <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
+        <span>Đang tải thông tin dịch vụ...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 text-center text-rose-500 font-medium bg-surface border border-border rounded-ds-3xl">
+        Lỗi: {error}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Service Status Table */}
@@ -218,7 +297,7 @@ function ServicesTab({ t }: any) {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {healthMockData.services.map((s, i) => (
+              {data?.services?.map((s: any, i: number) => (
                 <tr key={i} className="hover:bg-main/30 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -258,7 +337,7 @@ function ServicesTab({ t }: any) {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {healthMockData.queues.map((q, i) => (
+              {data?.queues?.map((q: any, i: number) => (
                 <tr key={i} className="hover:bg-main/30 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -283,7 +362,32 @@ function ServicesTab({ t }: any) {
   );
 }
 
-function AlertsTab({ t }: any) {
+function AlertsTab({ t, data, isLoading, error }: any) {
+  const [selectedIncident, setSelectedIncident] = useState<any>(null);
+
+  useEffect(() => {
+    if (data?.incidents && data.incidents.length > 0) {
+      setSelectedIncident(data.incidents[0]);
+    }
+  }, [data]);
+
+  if (isLoading && !data) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-txt-muted gap-2">
+        <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
+        <span>Đang tải thông tin sự cố...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 text-center text-rose-500 font-medium bg-surface border border-border rounded-ds-3xl">
+        Lỗi: {error}
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Incident List */}
@@ -305,8 +409,14 @@ function AlertsTab({ t }: any) {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {healthMockData.incidents.map((inc, i) => (
-                <tr key={i} className="hover:bg-main/30 transition-colors group cursor-pointer">
+              {data?.incidents?.map((inc: any, i: number) => (
+                <tr
+                  key={i}
+                  onClick={() => setSelectedIncident(inc)}
+                  className={`hover:bg-main/30 transition-colors group cursor-pointer ${
+                    selectedIncident?.id === inc.id ? "bg-main/40" : ""
+                  }`}
+                >
                   <td className="px-6 py-4">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase border ${inc.severity === 'Critical' ? 'bg-rose-500/10 text-rose-600 border-rose-500/20' :
                         inc.severity === 'High' ? 'bg-orange-500/10 text-orange-600 border-orange-500/20' :
@@ -340,49 +450,61 @@ function AlertsTab({ t }: any) {
       </div>
 
       {/* Incident Details Sidebar */}
-      <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm h-fit space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Info size={18} className="text-indigo-500" />
-            <h3 className="text-lg font-bold text-txt-primary">Chi tiết sự cố</h3>
-          </div>
-          <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded-ds-lg text-[10px] font-black uppercase tracking-tighter">
-            Investigating
-          </span>
-        </div>
-
-        <div className="space-y-4">
-          <div className="p-3 bg-rose-500/5 border border-rose-500/10 rounded-ds-2xl">
-            <span className="text-[9px] font-black text-rose-600 uppercase border border-rose-500/20 px-1.5 py-0.5 rounded bg-rose-500/10">High</span>
-            <h4 className="text-sm font-black text-txt-primary mt-2">High latency on API Gateway</h4>
+      {selectedIncident && (
+        <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm h-fit space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Info size={18} className="text-indigo-500" />
+              <h3 className="text-lg font-bold text-txt-primary">Chi tiết sự cố</h3>
+            </div>
+            <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded-ds-lg text-[10px] font-black uppercase tracking-tighter">
+              {selectedIncident.status}
+            </span>
           </div>
 
-          <div className="space-y-3">
-            <DetailItem label="Nguồn" value="API Gateway" />
-            <DetailItem label="Bắt đầu" value="Hôm nay 14:22" />
-            <DetailItem label="Mã sự cố" value="INC-3041" />
-          </div>
+          <div className="space-y-4">
+            <div className="p-3 bg-rose-500/5 border border-rose-500/10 rounded-ds-2xl">
+              <span className={`text-[9px] font-black uppercase border px-1.5 py-0.5 rounded ${
+                selectedIncident.severity === 'Critical' ? 'bg-rose-500/10 text-rose-600 border-rose-500/20' :
+                selectedIncident.severity === 'High' ? 'bg-orange-500/10 text-orange-600 border-orange-500/20' :
+                'bg-amber-500/10 text-amber-600 border-amber-500/20'
+              }`}>{selectedIncident.severity}</span>
+              <h4 className="text-sm font-black text-txt-primary mt-2">{selectedIncident.title}</h4>
+            </div>
 
-          <div className="pt-4 border-t border-border">
-            <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">Tác động hiện tại</p>
-            <div className="p-3 bg-main rounded-ds-xl text-xs text-txt-secondary leading-relaxed">
-              Một số request mua vé bị chậm trên 800ms, ảnh hương ~6% người dùng.
+            <div className="space-y-3">
+              <DetailItem label="Nguồn" value={selectedIncident.source} />
+              <DetailItem label="Bắt đầu" value={selectedIncident.start} />
+              <DetailItem label="Mã sự cố" value={selectedIncident.id} />
+            </div>
+
+            <div className="pt-4 border-t border-border">
+              <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">Tác động hiện tại</p>
+              <div className="p-3 bg-main rounded-ds-xl text-xs text-txt-secondary leading-relaxed">
+                {selectedIncident.severity === 'Critical'
+                  ? "Hệ thống Relayer Web3 không thể tự động trả phí giao dịch blockchain. Cần nạp hoặc xử lý khẩn cấp."
+                  : selectedIncident.severity === 'High'
+                    ? "Một số request bị chậm trên 800ms, ảnh hưởng đến trải nghiệm mua vé."
+                    : "Hàng đợi đang có dấu hiệu ứ đọng nhẹ, hệ thống vẫn đang tự phục hồi."}
+              </div>
+            </div>
+
+            <div className="pt-4">
+              <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">Bước xử lý đề xuất</p>
+              <div className="p-3 bg-amber-500/5 border border-amber-500/10 rounded-ds-xl text-xs text-amber-700 font-medium leading-relaxed">
+                {selectedIncident.severity === 'Critical'
+                  ? "Chuyển gas khẩn cấp vào ví relayer hoặc kiểm tra cấu hình kết nối mạng RPC."
+                  : "Tăng số instance service hoặc kiểm tra lại chỉ mục của cơ sở dữ liệu."}
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <button className="flex-1 py-2.5 bg-indigo-600 text-white rounded-ds-xl text-xs font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all">Nhận xử lý</button>
+              <button className="px-4 py-2.5 bg-surface border border-border text-txt-primary rounded-ds-xl text-xs font-black hover:bg-main transition-all">Snooze</button>
             </div>
           </div>
-
-          <div className="pt-4">
-            <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">Bước xử lý đề xuất</p>
-            <div className="p-3 bg-amber-500/5 border border-amber-500/10 rounded-ds-xl text-xs text-amber-700 font-medium leading-relaxed">
-              Kiểm tra autoscaler và tăng số instance Gateway.
-            </div>
-          </div>
-
-          <div className="flex gap-2 pt-4">
-            <button className="flex-1 py-2.5 bg-indigo-600 text-white rounded-ds-xl text-xs font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all">Nhận xử lý</button>
-            <button className="px-4 py-2.5 bg-surface border border-border text-txt-primary rounded-ds-xl text-xs font-black hover:bg-main transition-all">Snooze</button>
-          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -397,7 +519,7 @@ function StatusBadge({ status }: any) {
   };
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-ds-lg text-[9px] font-black border uppercase ${colors[status]}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-ds-lg text-[9px] font-black border uppercase ${colors[status] || colors.Healthy}`}>
       <div className={`w-1 h-1 rounded-full ${status === 'Healthy' ? 'bg-emerald-500' : status === 'Down' ? 'bg-rose-500' : 'bg-amber-500'}`} />
       {status}
     </span>
@@ -423,7 +545,7 @@ function StatusCard({ icon, label, value, sub, color }: any) {
   return (
     <div className="bg-surface border border-border rounded-ds-2xl p-5 shadow-sm transition-colors">
       <div className="flex items-center gap-3 mb-3">
-        <div className={`w-9 h-9 rounded-ds-xl flex items-center justify-center ${colors[color]}`}>
+        <div className={`w-9 h-9 rounded-ds-xl flex items-center justify-center ${colors[color] || colors.emerald}`}>
           {icon}
         </div>
         <span className="text-[11px] font-bold text-txt-muted uppercase tracking-wider">{label}</span>
@@ -509,7 +631,7 @@ function ChartSmall({ label, value, sub, data, dataKey, color }: any) {
       </div>
       <div className="h-16 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
+          <AreaChart data={data || []}>
             <defs>
               <linearGradient id={`color-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={color} stopOpacity={0.1} />
