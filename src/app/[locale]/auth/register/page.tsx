@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from "@/src/store/hooks";
 import { setAppLoading, selectAppLoading } from "@/src/store/slices/appSlice";
 import { CustomDatePicker } from "@/src/components/ui/CustomDatePicker";
 import { isValidEmail, isValidPhone, isValidFullName } from "@/src/lib/validations";
+import { getLegalHref } from "@/src/lib/docs/registry";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -606,6 +607,25 @@ export default function RegisterPage() {
                 t('register_button')
               )}
             </button>
+            <p className="mt-4 text-[12px] text-txt-secondary text-center leading-relaxed px-2">
+              Bằng việc tạo tài khoản, tôi đồng ý với{" "}
+              <Link
+                href={getLegalHref(locale as string, "terms-of-use")}
+                target="_blank"
+                className="text-txt-primary hover:text-primary underline decoration-border underline-offset-4 transition-all font-semibold"
+              >
+                Điều khoản sử dụng
+              </Link>{" "}
+              và{" "}
+              <Link
+                href={getLegalHref(locale as string, "privacy-policy")}
+                target="_blank"
+                className="text-txt-primary hover:text-primary underline decoration-border underline-offset-4 transition-all font-semibold"
+              >
+                Chính sách bảo mật
+              </Link>{" "}
+              của EvoTicket.
+            </p>
           </div>
         </form>
 
