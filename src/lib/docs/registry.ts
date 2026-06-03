@@ -1,3 +1,31 @@
+/**
+ * @file src/lib/docs/registry.ts
+ *
+ * Registry trung tâm cho toàn bộ tài liệu MDX của EvoTicket:
+ *   - "legal"  : Điều khoản / chính sách (src/content/legal/<locale>/<slug>.mdx)
+ *   - "help"   : Trung tâm trợ giúp     (src/content/help/<locale>/<slug>.mdx)
+ *   - "about"  : Giới thiệu             (src/content/about/<locale>/index.mdx)
+ *
+ * Mỗi entry khai báo đủ: slug, type, contentPath, href helper, meta ngắn.
+ * Footer / breadcrumb / page đều lấy dữ liệu từ đây — không hardcode path.
+ */
+
+// ─── Shared types ──────────────────────────────────────────────────────────────
+
+export type DocType = "legal" | "help" | "about";
+
+/** Meta cơ bản dùng chung cho mọi loại tài liệu */
+export type DocMeta = {
+    title: string;
+    shortTitle: string;
+    description: string;
+    version: string;
+    effectiveDate: string;
+    lastUpdated: string;
+};
+
+// ─── Legal ─────────────────────────────────────────────────────────────────────
+
 export type LegalCategory =
     | "terms"
     | "privacy"
@@ -24,20 +52,39 @@ export type LegalFlow =
     | "help"
     | "dispute-resolution";
 
-export type LegalRegistryItem = {
-    title: string;
-    shortTitle: string;
-    description: string;
+export type LegalRegistryItem = DocMeta & {
+    type: "legal";
     category: LegalCategory;
-    version: string;
-    effectiveDate: string;
-    lastUpdated: string;
     requiredForFlow: LegalFlow[];
     footerPriority?: number;
 };
 
+// ─── Help ──────────────────────────────────────────────────────────────────────
+
+export type HelpCategory = "faq" | "help-center";
+
+export type HelpRegistryItem = DocMeta & {
+    type: "help";
+    category: HelpCategory;
+    footerPriority?: number;
+};
+
+// ─── About ─────────────────────────────────────────────────────────────────────
+
+export type AboutRegistryItem = DocMeta & {
+    type: "about";
+    footerPriority?: number;
+};
+
+// ─── Union ─────────────────────────────────────────────────────────────────────
+
+export type AnyRegistryItem = LegalRegistryItem | HelpRegistryItem | AboutRegistryItem;
+
+// ─── Registry entries ──────────────────────────────────────────────────────────
+
 export const legalRegistry = {
     "terms-of-use": {
+        type: "legal",
         title: "Điều khoản sử dụng EvoTicket",
         shortTitle: "Điều khoản sử dụng",
         description:
@@ -56,8 +103,8 @@ export const legalRegistry = {
         ],
         footerPriority: 2,
     },
-
     "privacy-policy": {
+        type: "legal",
         title: "Chính sách bảo mật và xử lý dữ liệu cá nhân",
         shortTitle: "Chính sách bảo mật",
         description:
@@ -77,8 +124,8 @@ export const legalRegistry = {
         ],
         footerPriority: 1,
     },
-
     "general-transaction-conditions": {
+        type: "legal",
         title: "Điều kiện giao dịch chung",
         shortTitle: "Điều kiện giao dịch chung",
         description:
@@ -90,8 +137,8 @@ export const legalRegistry = {
         requiredForFlow: ["primary-checkout", "resale-checkout", "payment"],
         footerPriority: 4,
     },
-
     "ticket-policy": {
+        type: "legal",
         title: "Chính sách vé",
         shortTitle: "Chính sách vé",
         description:
@@ -108,8 +155,8 @@ export const legalRegistry = {
         ],
         footerPriority: 5,
     },
-
     "payment-policy": {
+        type: "legal",
         title: "Chính sách thanh toán",
         shortTitle: "Chính sách thanh toán",
         description:
@@ -121,8 +168,8 @@ export const legalRegistry = {
         requiredForFlow: ["primary-checkout", "resale-checkout", "payment"],
         footerPriority: 6,
     },
-
     "refund-policy": {
+        type: "legal",
         title: "Chính sách hoàn tiền, hủy, hoãn và thay đổi sự kiện",
         shortTitle: "Chính sách hoàn tiền",
         description:
@@ -141,8 +188,8 @@ export const legalRegistry = {
         ],
         footerPriority: 3,
     },
-
     "dispute-resolution": {
+        type: "legal",
         title: "Cơ chế giải quyết tranh chấp và khiếu nại",
         shortTitle: "Giải quyết tranh chấp",
         description:
@@ -160,8 +207,8 @@ export const legalRegistry = {
         ],
         footerPriority: 7,
     },
-
     "resale-policy": {
+        type: "legal",
         title: "Chính sách bán lại và chuyển nhượng vé",
         shortTitle: "Chính sách bán lại vé",
         description:
@@ -173,8 +220,8 @@ export const legalRegistry = {
         requiredForFlow: ["resale-listing", "resale-checkout", "my-ticket"],
         footerPriority: 8,
     },
-
     "organizer-terms": {
+        type: "legal",
         title: "Điều khoản dành cho ban tổ chức",
         shortTitle: "Điều khoản ban tổ chức",
         description:
@@ -186,8 +233,8 @@ export const legalRegistry = {
         requiredForFlow: ["organizer-onboarding"],
         footerPriority: 9,
     },
-
     "ai-chatbot-policy": {
+        type: "legal",
         title: "Chính sách sử dụng AI chatbot",
         shortTitle: "Chính sách AI chatbot",
         description:
@@ -199,8 +246,8 @@ export const legalRegistry = {
         requiredForFlow: ["ai-chatbot", "help"],
         footerPriority: 10,
     },
-
     "blockchain-nft-policy": {
+        type: "legal",
         title: "Chính sách NFT, blockchain và tài sản số",
         shortTitle: "Chính sách NFT",
         description:
@@ -219,37 +266,120 @@ export const legalRegistry = {
     },
 } as const satisfies Record<string, LegalRegistryItem>;
 
+export const helpRegistry = {
+    "faq": {
+        type: "help",
+        title: "Câu hỏi thường gặp",
+        shortTitle: "Câu hỏi thường gặp (FAQ)",
+        description:
+            "Tổng hợp các câu hỏi và giải đáp phổ biến nhất từ người dùng EvoTicket.",
+        category: "faq",
+        version: "1.0.0",
+        effectiveDate: "2026-06-04",
+        lastUpdated: "2026-06-04",
+        footerPriority: 1,
+    },
+    "help-center": {
+        type: "help",
+        title: "Trung tâm trợ giúp",
+        shortTitle: "Trung tâm trợ giúp",
+        description:
+            "Hướng dẫn sử dụng, chính sách hỗ trợ và kênh liên hệ của EvoTicket.",
+        category: "help-center",
+        version: "1.0.0",
+        effectiveDate: "2026-06-04",
+        lastUpdated: "2026-06-04",
+        footerPriority: 2,
+    },
+} as const satisfies Record<string, HelpRegistryItem>;
+
+export const aboutRegistry = {
+    "about": {
+        type: "about",
+        title: "Giới thiệu EvoTicket",
+        shortTitle: "Về EvoTicket",
+        description:
+            "Câu chuyện, sứ mệnh và đội ngũ đứng sau nền tảng EvoTicket.",
+        version: "1.0.0",
+        effectiveDate: "2026-06-04",
+        lastUpdated: "2026-06-04",
+        footerPriority: 1,
+    },
+} as const satisfies Record<string, AboutRegistryItem>;
+
+// ─── Slug types ────────────────────────────────────────────────────────────────
+
 export type LegalSlug = keyof typeof legalRegistry;
+export type HelpSlug = keyof typeof helpRegistry;
+export type AboutSlug = keyof typeof aboutRegistry;
+export type AnyDocSlug = LegalSlug | HelpSlug | AboutSlug;
+
+// ─── Type guards ───────────────────────────────────────────────────────────────
 
 export function isLegalSlug(slug: string): slug is LegalSlug {
     return slug in legalRegistry;
 }
 
+export function isHelpSlug(slug: string): slug is HelpSlug {
+    return slug in helpRegistry;
+}
+
+export function isAboutSlug(slug: string): slug is AboutSlug {
+    return slug in aboutRegistry;
+}
+
+// ─── Meta accessors ────────────────────────────────────────────────────────────
+
+export function getLegalMeta(slug: LegalSlug): LegalRegistryItem {
+    return legalRegistry[slug];
+}
+
+export function getHelpMeta(slug: HelpSlug): HelpRegistryItem {
+    return helpRegistry[slug];
+}
+
+export function getAboutMeta(slug: AboutSlug): AboutRegistryItem {
+    return aboutRegistry[slug];
+}
+
+// ─── Slug lists ────────────────────────────────────────────────────────────────
+
 export function getAllLegalSlugs(): LegalSlug[] {
     return Object.keys(legalRegistry) as LegalSlug[];
 }
 
-export function getLegalMeta(slug: LegalSlug) {
-    return legalRegistry[slug];
+export function getAllHelpSlugs(): HelpSlug[] {
+    return Object.keys(helpRegistry) as HelpSlug[];
 }
 
-export function getLegalHref(locale: string, slug: LegalSlug) {
+// ─── Href helpers ──────────────────────────────────────────────────────────────
+
+/** /{locale}/legal/{slug} */
+export function getLegalHref(locale: string, slug: LegalSlug): string {
     return `/${locale}/legal/${slug}`;
 }
 
+/** /{locale}/help/{slug} */
+export function getHelpHref(locale: string, slug: HelpSlug): string {
+    return `/${locale}/help/${slug}`;
+}
+
+/** /{locale}/about */
+export function getAboutHref(locale: string): string {
+    return `/${locale}/about`;
+}
+
+// ─── Flow helpers (legal only) ─────────────────────────────────────────────────
+
 export function getLegalDocsForFlow(flow: LegalFlow): LegalSlug[] {
     return getAllLegalSlugs().filter((slug) => {
-        const requiredForFlow = legalRegistry[slug].requiredForFlow as readonly LegalFlow[];
-
-        return requiredForFlow.includes(flow);
+        const required = legalRegistry[slug].requiredForFlow as readonly LegalFlow[];
+        return required.includes(flow);
     });
 }
 
 export function getFooterLegalDocs(): LegalSlug[] {
     return getAllLegalSlugs().sort((a, b) => {
-        const priorityA = legalRegistry[a].footerPriority ?? 999;
-        const priorityB = legalRegistry[b].footerPriority ?? 999;
-
-        return priorityA - priorityB;
+        return (legalRegistry[a].footerPriority ?? 999) - (legalRegistry[b].footerPriority ?? 999);
     });
 }

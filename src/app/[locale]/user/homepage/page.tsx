@@ -310,7 +310,7 @@ export default function HomePage() {
                     <span className="relative z-10">{t('explore_now', { defaultMessage: 'Khám phá ngay' })}</span>
                   </Link>
                   <Link
-                    href={`/${locale}/user/policy`}
+                    href="/vi/legal/terms-of-use"
                     target="_blank"
                     rel="noopener noreferrer"
                     onMouseMove={(e) => {

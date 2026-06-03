@@ -7,8 +7,9 @@ import {
     getLegalMeta,
     isLegalSlug,
     type LegalSlug,
-} from "@/src/lib/legal/registry";
-import type { LegalDocMeta } from "@/src/lib/legal/get-legal-doc";
+    type AnyRegistryItem,
+} from "@/src/lib/docs/registry";
+import type { DocFrontmatter } from "@/src/lib/docs/get-doc";
 
 type TocItem = {
     id: string;
@@ -22,10 +23,13 @@ type RelatedPolicy = {
     description: string;
 };
 
-type LegalDocumentLayoutProps = {
+type ContentLayoutProps = {
     locale: string;
-    slug: LegalSlug;
-    meta: LegalDocMeta;
+    slug: string;
+    /** Frontmatter từ file MDX (có thể trống nếu chưa viết nội dung) */
+    meta: DocFrontmatter;
+    /** Meta đầy đủ từ registry — luôn có giá trị */
+    registryMeta: AnyRegistryItem;
     content: string;
     children: ReactNode;
 };
@@ -77,8 +81,8 @@ function buildToc(content: string): TocItem[] {
     return toc;
 }
 
-function getRelatedPolicies(meta: LegalDocMeta, currentSlug: LegalSlug): RelatedPolicy[] {
-    const relatedFromFrontmatter = meta.relatedPolicies?.filter(isLegalSlug) ?? [];
+function getRelatedPolicies(meta: DocFrontmatter, currentSlug: string): RelatedPolicy[] {
+    const relatedFromFrontmatter = (meta.relatedPolicies ?? []).filter(isLegalSlug);
     const relatedSlugs =
         relatedFromFrontmatter.length > 0
             ? relatedFromFrontmatter
@@ -167,58 +171,59 @@ function RelatedPoliciesCard({
     );
 }
 
-export function LegalDocumentLayout({
+export function ContentLayout({
     locale,
     slug,
     meta,
+    registryMeta,
     content,
     children,
-}: LegalDocumentLayoutProps) {
+}: ContentLayoutProps) {
     const toc = buildToc(content);
-    const relatedPolicies = getRelatedPolicies(meta, slug);
+    // Only show related policies for legal docs
+    const relatedPolicies = isLegalSlug(slug) ? getRelatedPolicies(meta, slug) : [];
+
+    // Prefer registry meta (always complete) over frontmatter
+    const displayTitle = registryMeta.title;
+    const displayDescription = registryMeta.description;
+    const displayVersion = meta.version ?? registryMeta.version;
+    const displayEffectiveDate = meta.effectiveDate ?? registryMeta.effectiveDate;
+    const displayLastUpdated = meta.lastUpdated ?? registryMeta.lastUpdated;
 
     return (
         <section className="mx-auto w-full max-w-[1440px] px-4 pb-12 pt-24 md:px-6 md:pb-16 md:pt-28 xl:px-8">
             <header className="mx-auto mb-6 max-w-4xl rounded-2xl border border-border bg-surface p-5 shadow-sm md:mb-8 md:p-7">
                 <p className="mb-3 text-xs font-bold uppercase tracking-wider text-text-muted">
-                    EvoTicket Legal Center
+                    EvoTicket
                 </p>
 
                 <h1 className="text-3xl font-bold tracking-tight text-text-primary md:text-4xl">
-                    {meta.title ?? "Chính sách EvoTicket"}
+                    {displayTitle}
                 </h1>
 
-                {meta.description ? (
-                    <p className="mt-4 max-w-3xl text-sm leading-7 text-text-secondary md:text-base">
-                        {meta.description}
-                    </p>
-                ) : null}
+                <p className="mt-4 max-w-3xl text-sm leading-7 text-text-secondary md:text-base">
+                    {displayDescription}
+                </p>
 
                 <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-3">
-                    {meta.version ? (
+                    {displayVersion && (
                         <div className="rounded-ds-lg border border-border-subtle bg-bg-surface px-3 py-2">
                             <dt className="text-xs text-text-muted">Phiên bản</dt>
-                            <dd className="mt-1 font-semibold text-text-primary">{meta.version}</dd>
+                            <dd className="mt-1 font-semibold text-text-primary">{displayVersion}</dd>
                         </div>
-                    ) : null}
-
-                    {meta.effectiveDate ? (
+                    )}
+                    {displayEffectiveDate && (
                         <div className="rounded-ds-lg border border-border-subtle bg-bg-surface px-3 py-2">
                             <dt className="text-xs text-text-muted">Ngày hiệu lực</dt>
-                            <dd className="mt-1 font-semibold text-text-primary">
-                                {meta.effectiveDate}
-                            </dd>
+                            <dd className="mt-1 font-semibold text-text-primary">{displayEffectiveDate}</dd>
                         </div>
-                    ) : null}
-
-                    {meta.lastUpdated ? (
+                    )}
+                    {displayLastUpdated && (
                         <div className="rounded-ds-lg border border-border-subtle bg-bg-surface px-3 py-2">
                             <dt className="text-xs text-text-muted">Cập nhật lần cuối</dt>
-                            <dd className="mt-1 font-semibold text-text-primary">
-                                {meta.lastUpdated}
-                            </dd>
+                            <dd className="mt-1 font-semibold text-text-primary">{displayLastUpdated}</dd>
                         </div>
-                    ) : null}
+                    )}
                 </dl>
             </header>
 
