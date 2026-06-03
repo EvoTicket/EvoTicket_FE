@@ -1,1 +1,89 @@
- 
+---
+title: "Chính sách NFT, blockchain và tài sản số"
+slug: "blockchain-nft-policy"
+description: "Quy định về vai trò của NFT, blockchain, custodial wallet, provenance, tokenId, transaction hash, chuyển quyền sở hữu và giới hạn trách nhiệm liên quan đến tài sản số trên EvoTicket."
+version: "1.0.0"
+effectiveDate: "2026-06-04"
+lastUpdated: "2026-06-04"
+legalCategory: "blockchain"
+documentType: "legal-policy"
+locale: "vi"
+status: "published"
+requiredForFlow:
+  - primary-checkout
+  - resale-checkout
+  - my-ticket
+  - resale-listing
+relatedPolicies:
+  - terms-of-use
+  - privacy-policy
+  - ticket-policy
+  - resale-policy
+  - refund-policy
+---
+
+# Chính sách NFT, blockchain và tài sản số
+
+Chính sách này mô tả vai trò của blockchain, NFT, tokenId, transaction hash, custodial wallet và provenance trong EvoTicket. Nội dung được viết theo Deep Research: blockchain/NFT là lớp kỹ thuật hỗ trợ định danh, truy vết và kiểm soát chuyển nhượng vé, không phải tài sản đầu tư, chứng khoán, cam kết sinh lời hoặc bảo chứng pháp lý tuyệt đối.
+
+## 1. Phạm vi áp dụng
+
+Chính sách này áp dụng cho vé điện tử hoặc TicketAsset có liên quan đến NFT, mint, transfer, provenance, transaction hash, tokenId, wallet address hoặc các dữ liệu blockchain khác nếu tính năng này được bật cho sự kiện hoặc flow tương ứng.
+
+## 2. Vai trò của NFT trong EvoTicket
+
+NFT trong EvoTicket, nếu được sử dụng, là cơ chế kỹ thuật giúp định danh vé, hỗ trợ truy vết lịch sử xử lý và hỗ trợ kiểm soát chuyển nhượng trong hệ thống.
+
+NFT không được hiểu là sản phẩm đầu tư, chứng khoán, công cụ tài chính, cam kết lợi nhuận hoặc bảo đảm giá trị thị trường.
+
+## 3. TicketAsset và vé điện tử
+
+Theo Deep Research, vé là digital asset nội bộ trước, còn mint blockchain có thể xử lý bất đồng bộ. Vì vậy, quyền sử dụng vé trong hệ thống có thể được xác lập trước khi NFT mint hoàn tất.
+
+Nếu TicketAsset hoặc vé điện tử đã được phát hành hợp lệ, lỗi mint chậm không mặc nhiên làm mất hiệu lực vé.
+
+## 4. Custodial wallet
+
+EvoTicket có thể vận hành ví kỹ thuật hoặc cơ chế lưu ký nội bộ để hỗ trợ người dùng sử dụng NFT ticket mà không phải tự thao tác trực tiếp với blockchain ở mọi bước.
+
+Nếu người dùng được hỗ trợ rút hoặc liên kết ví cá nhân trong tương lai, quyền và rủi ro liên quan cần được công bố trong flow cụ thể. Không nên tự suy luận rằng mọi vé đều có thể rút ra ví cá nhân bất cứ lúc nào nếu hệ thống chưa hỗ trợ rõ.
+
+## 5. TokenId, transaction hash và provenance
+
+TokenId, transaction hash và provenance là dữ liệu kỹ thuật có thể hỗ trợ truy vết lịch sử mint, transfer hoặc xử lý liên quan đến vé.
+
+Các dữ liệu này có thể được dùng cùng order logs, payment records, TicketAsset history, resale history và check-in logs để hỗ trợ đối soát hoặc tranh chấp.
+
+## 6. Mint bất đồng bộ
+
+Mint NFT có thể diễn ra sau khi payment thành công và vé điện tử đã được phát hành. Nếu mint lỗi hoặc chậm, EvoTicket có thể retry, đồng bộ lại hoặc áp dụng biện pháp kỹ thuật tương đương.
+
+Lỗi mint chỉ nên được xem xét như vấn đề ảnh hưởng quyền lợi khi nó làm người dùng mất khả năng sử dụng vé hoặc mất quyền lợi quan trọng theo thiết kế nền tảng.
+
+## 7. Transfer bất đồng bộ
+
+Khi resale hoặc chuyển nhượng được hỗ trợ, quyền sử dụng vé trong hệ thống và transfer blockchain có thể cần nhiều bước xử lý. Nếu transfer on-chain lỗi hoặc chậm, EvoTicket có thể tạm giữ trạng thái giao dịch để kiểm tra, retry, reverse hoặc xử lý thủ công.
+
+Người dùng không nên xem transaction hash riêng lẻ là kết luận cuối cùng nếu dữ liệu hệ thống, payment và TicketAsset chưa được đối soát.
+
+## 8. Check-in và dữ liệu on-chain
+
+Theo Deep Research, check-in không nên được mô tả như việc luôn gọi trực tiếp ownership on-chain tại thời điểm scan. Check-in dựa trên Dynamic QR, trạng thái vé, quyền sử dụng, dữ liệu đã đồng bộ, quyền checker/device và log hệ thống.
+
+Dữ liệu on-chain có thể được đồng bộ hoặc dùng để hỗ trợ provenance, nhưng không thay thế toàn bộ quy trình kiểm tra vé trong hệ thống.
+
+## 9. Tính công khai và bất biến
+
+Dữ liệu blockchain có thể công khai, phân tán và khó hoặc không thể xóa theo cách giống database truyền thống. EvoTicket không cam kết xóa được mọi dữ liệu đã ghi on-chain nếu blockchain có tính bất biến.
+
+Khi cần xử lý dữ liệu liên quan, EvoTicket có thể áp dụng biện pháp phù hợp trong phạm vi hệ thống off-chain hoặc cách hiển thị dữ liệu.
+
+## 10. Giới hạn trách nhiệm
+
+EvoTicket không cam kết blockchain loại bỏ hoàn toàn gian lận, tranh chấp, lỗi kỹ thuật, lỗi đồng bộ, lỗi ví, lỗi provider hoặc rủi ro bên thứ ba.
+
+Người dùng cần bảo vệ tài khoản, thiết bị, ví và thông tin xác thực. Người dùng không nên chia sẻ private key, seed phrase, OTP hoặc thông tin ví nhạy cảm cho bất kỳ ai.
+
+## 11. Không đầu tư và không sinh lời
+
+NFT ticket trên EvoTicket, nếu có, không được quảng bá hoặc sử dụng như tài sản đầu tư. EvoTicket không cam kết tăng giá, thanh khoản, lợi nhuận, thị trường thứ cấp ngoài hệ thống hoặc khả năng bán lại với giá cao hơn.

@@ -1,1 +1,88 @@
- 
+---
+title: "Chính sách thanh toán"
+slug: "payment-policy"
+description: "Quy định về phương thức thanh toán, xác nhận giao dịch, lỗi thanh toán, đối soát và trách nhiệm liên quan đến các cổng thanh toán được tích hợp trên EvoTicket."
+version: "1.0.0"
+effectiveDate: "2026-06-04"
+lastUpdated: "2026-06-04"
+legalCategory: "payment"
+documentType: "legal-policy"
+locale: "vi"
+status: "published"
+requiredForFlow:
+  - primary-checkout
+  - resale-checkout
+  - payment
+relatedPolicies:
+  - terms-of-use
+  - general-transaction-conditions
+  - ticket-policy
+  - refund-policy
+  - dispute-resolution
+---
+
+# Chính sách thanh toán
+
+Chính sách này mô tả nguyên tắc thanh toán, xác nhận giao dịch, lỗi thanh toán và đối soát trên EvoTicket. Theo Deep Research, EvoTicket tích hợp cổng thanh toán như một phần của flow đặt vé, không nên tự mô tả là đơn vị cung ứng dịch vụ trung gian thanh toán nếu chưa có căn cứ.
+
+## 1. Phạm vi áp dụng
+
+Chính sách này áp dụng cho thanh toán mua vé sơ cấp, thanh toán resale trong hệ thống nếu được hỗ trợ, phí nền tảng/phí dịch vụ nếu có, đối soát payment và các trường hợp bị trừ tiền nhưng chưa nhận vé.
+
+## 2. Phương thức thanh toán
+
+EvoTicket có thể hỗ trợ các phương thức thanh toán thông qua cổng thanh toán tích hợp. Phương thức cụ thể được hiển thị trong flow checkout tại thời điểm giao dịch.
+
+Người dùng cần thanh toán qua kênh chính thức được EvoTicket hiển thị. EvoTicket không bảo đảm xử lý giao dịch thanh toán được thực hiện ngoài flow chính thức.
+
+## 3. Tạo order và chuyển sang thanh toán
+
+Sau khi người mua chọn sự kiện, suất diễn, loại vé hoặc ghế, hệ thống có thể tạo order và giữ vé trong thời gian thanh toán. Order đang chờ thanh toán không đồng nghĩa vé đã được phát hành.
+
+Nếu người dùng không hoàn tất thanh toán trong thời gian hợp lệ, order có thể hết hạn và vé/ghế có thể được giải phóng.
+
+## 4. Xác nhận thanh toán
+
+Thanh toán được xem là thành công khi cổng thanh toán hoặc hệ thống liên quan gửi xác nhận hợp lệ và trạng thái được ghi nhận phù hợp trong EvoTicket. Sau đó, hệ thống mới tiếp tục flow phát hành vé điện tử hoặc TicketAsset.
+
+Ảnh chụp màn hình, thông báo từ ngân hàng hoặc trang quay lại sau thanh toán có thể hỗ trợ đối soát, nhưng không tự thay thế dữ liệu xác nhận trong hệ thống.
+
+## 5. Thanh toán lỗi hoặc bị hủy
+
+Thanh toán có thể không thành công do người dùng hủy giao dịch, order hết hạn, cổng thanh toán từ chối, lỗi mạng, lỗi ngân hàng, lỗi webhook hoặc sai lệch dữ liệu.
+
+Khi thanh toán lỗi, EvoTicket có thể không phát hành vé. Người dùng nên kiểm tra trạng thái order và chỉ thanh toán lại khi hệ thống cho phép hoặc theo hướng dẫn hỗ trợ.
+
+## 6. Bị trừ tiền nhưng chưa nhận vé
+
+Nếu người dùng bị trừ tiền nhưng chưa nhận vé, EvoTicket sẽ tiếp nhận yêu cầu và phối hợp đối soát với cổng thanh toán hoặc bên liên quan.
+
+Tùy kết quả xác minh, EvoTicket có thể:
+
+1. Cập nhật order và phát hành vé nếu giao dịch hợp lệ.
+2. Giữ yêu cầu ở trạng thái cần đối soát thêm nếu dữ liệu chưa khớp.
+3. Phối hợp xử lý hoàn tiền nếu giao dịch không thể hoàn tất.
+
+## 7. Payment thành công nhưng phát hành vé lỗi
+
+Nếu payment đã thành công nhưng phát hành vé lỗi, EvoTicket ưu tiên khắc phục để phát hành vé theo order đã thanh toán. Nếu không thể phát hành vé phù hợp, yêu cầu sẽ được xử lý theo Chính sách hoàn tiền.
+
+## 8. Phí thanh toán và phí dịch vụ
+
+Một giao dịch có thể bao gồm giá vé, phí nền tảng, phí thanh toán, phí dịch vụ hoặc phí khác nếu được công bố trong flow mua vé hoặc chính sách liên quan.
+
+Việc hoàn lại phí khi refund phụ thuộc vào chính sách sự kiện, điều kiện cổng thanh toán, lỗi được xác minh và quy định pháp luật áp dụng.
+
+## 9. Đối soát
+
+EvoTicket có thể sử dụng mã order, mã giao dịch, webhook, payment logs, trạng thái order, trạng thái TicketAsset và dữ liệu từ cổng thanh toán để đối soát.
+
+Người dùng khi gửi yêu cầu nên cung cấp mã order, thời điểm thanh toán, phương thức thanh toán, ảnh chụp giao dịch và thông tin liên hệ của tài khoản mua vé.
+
+## 10. Trách nhiệm các bên
+
+EvoTicket chịu trách nhiệm tiếp nhận và phối hợp xử lý trong phạm vi nền tảng. Payment Gateway chịu trách nhiệm trong phạm vi hạ tầng thanh toán và xác nhận giao dịch. Organizer phối hợp khi lỗi thanh toán liên quan đến phát hành vé, hủy/hoãn sự kiện hoặc hoàn tiền.
+
+## 11. Bảo mật thanh toán
+
+Người dùng không được chia sẻ mã OTP, mật khẩu, thông tin xác thực hoặc dữ liệu thanh toán nhạy cảm cho bất kỳ ai, kể cả qua chatbot. EvoTicket không yêu cầu người dùng cung cấp mật khẩu hoặc OTP qua kênh hỗ trợ.

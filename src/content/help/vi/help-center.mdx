@@ -1,1 +1,110 @@
- 
+---
+title: "Trung tâm trợ giúp EvoTicket"
+slug: "help-center"
+description: "Hướng dẫn người dùng mua vé, thanh toán, nhận vé, bán lại vé, check-in, gửi yêu cầu hoàn tiền, tranh chấp và sử dụng AI chatbot trên EvoTicket."
+version: "1.0.0"
+effectiveDate: "2026-06-04"
+lastUpdated: "2026-06-04"
+legalCategory: "help"
+documentType: "help-page"
+locale: "vi"
+status: "published"
+requiredForFlow:
+  - help
+  - primary-checkout
+  - resale-checkout
+  - my-ticket
+  - ai-chatbot
+---
+
+# Trung tâm trợ giúp EvoTicket
+
+Trung tâm trợ giúp này hướng dẫn các thao tác phổ biến trên EvoTicket theo đúng phạm vi sản phẩm được mô tả trong Deep Research: mua vé, thanh toán, nhận vé điện tử, quản lý My Tickets, resale trong hệ thống, Dynamic QR, check-in, refund, dispute và AI chatbot.
+
+## 1. Mua vé
+
+Quy trình mua vé thông thường:
+
+1. Xem danh sách sự kiện.
+2. Chọn sự kiện và suất diễn.
+3. Chọn loại vé hoặc ghế nếu sự kiện có sơ đồ ghế.
+4. Kiểm tra giá, phí nếu có và điều kiện tham dự.
+5. Tạo order và chuyển sang thanh toán.
+6. Chờ hệ thống xác nhận payment và phát hành vé điện tử.
+
+Nếu order hết hạn trước khi thanh toán thành công, vé hoặc ghế có thể được giải phóng.
+
+## 2. Thanh toán
+
+Người dùng nên thanh toán qua phương thức được hiển thị trong flow checkout. Sau khi thanh toán, trạng thái order cần được xác nhận trong hệ thống EvoTicket trước khi vé được phát hành.
+
+Nếu bị trừ tiền nhưng chưa nhận vé, hãy chuẩn bị:
+
+- Mã order.
+- Thời điểm thanh toán.
+- Phương thức thanh toán.
+- Ảnh chụp hoặc chứng từ giao dịch nếu có.
+- Email hoặc số điện thoại tài khoản mua vé.
+
+## 3. Nhận và quản lý vé
+
+Sau khi payment được xác nhận hợp lệ, EvoTicket phát hành TicketAsset hoặc vé điện tử. Người dùng có thể kiểm tra vé trong My Tickets hoặc khu vực tương đương.
+
+Nếu NFT/provenance được áp dụng, quá trình mint có thể chạy bất đồng bộ sau khi vé điện tử đã được phát hành.
+
+## 4. Dynamic QR và check-in
+
+Vé có thể sử dụng Dynamic QR để check-in. Người dùng cần bảo vệ QR và tài khoản, không chụp màn hình hoặc chia sẻ mã vé công khai.
+
+Check-in dựa trên QR, trạng thái vé, quyền sử dụng, quyền checker/device và log hệ thống. Không nên hiểu rằng mỗi lượt scan luôn xác minh trực tiếp ownership on-chain tại thời điểm quét.
+
+## 5. Vé bị khóa
+
+Vé có thể bị khóa khi:
+
+- Đang listing resale.
+- Đang được giữ cho giao dịch resale.
+- Có tranh chấp hoặc rủi ro bảo mật.
+- Cần đồng bộ lại trạng thái payment, ticket hoặc dữ liệu kỹ thuật.
+
+Nếu vé bị khóa không rõ lý do, hãy gửi yêu cầu hỗ trợ kèm mã order hoặc mã vé.
+
+## 6. Bán lại vé
+
+Nếu sự kiện và trạng thái vé cho phép, người dùng có thể listing vé trong hệ thống EvoTicket. Khi listing, QR có thể bị khóa để giảm rủi ro sử dụng song song.
+
+Giá resale có thể bị giới hạn theo price cap hoặc cấu hình sự kiện. Đây là quy tắc nền tảng, không nên hiểu là nghĩa vụ pháp lý riêng nếu chưa có căn cứ rõ.
+
+## 7. Hoàn tiền và sự kiện thay đổi
+
+Việc hoàn tiền phụ thuộc vào trạng thái giao dịch, trạng thái vé, trạng thái check-in, resale, xác nhận từ Organizer, cổng thanh toán và quy định pháp luật áp dụng.
+
+Các trường hợp thường cần gửi hỗ trợ:
+
+- Bị trừ tiền nhưng chưa nhận vé.
+- Thanh toán thành công nhưng phát hành vé lỗi.
+- Sự kiện bị hủy, hoãn hoặc thay đổi đáng kể.
+- Vé không check-in được do lỗi được xác minh từ hệ thống.
+
+## 8. Khiếu nại và tranh chấp
+
+Khi gửi khiếu nại, hãy cung cấp:
+
+- Mã order hoặc mã vé.
+- Tài khoản mua vé.
+- Tên sự kiện và suất diễn.
+- Mô tả sự cố.
+- Ảnh chụp lỗi hoặc chứng từ nếu có.
+- Thời điểm phát sinh.
+
+EvoTicket có thể dùng order logs, payment records, TicketAsset history, QR/check-in logs, resale history và dữ liệu blockchain nếu có để xác minh.
+
+## 9. AI chatbot
+
+AI chatbot hỗ trợ tra cứu thông tin và hướng dẫn sử dụng. Câu trả lời của AI không phải cam kết pháp lý, không thay thế chính sách chính thức và không phải kết luận xử lý khiếu nại.
+
+Không gửi mật khẩu, OTP, private key, seed phrase hoặc dữ liệu thanh toán nhạy cảm cho chatbot.
+
+## 10. Thông tin demo/project
+
+Một số nội dung hỗ trợ, thông tin pháp nhân, quy trình vận hành hoặc kênh liên hệ có thể là phiên bản phục vụ đồ án/demo project và cần được cập nhật trước khi vận hành thương mại chính thức.

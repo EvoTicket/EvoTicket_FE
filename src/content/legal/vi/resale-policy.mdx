@@ -1,1 +1,95 @@
- 
+---
+title: "Chính sách bán lại và chuyển nhượng vé"
+slug: "resale-policy"
+description: "Quy định về điều kiện đăng bán lại vé, giới hạn giá bán lại, khóa QR khi listing, chuyển quyền sở hữu, trách nhiệm của người bán/người mua và xử lý tranh chấp resale."
+version: "1.0.0"
+effectiveDate: "2026-06-04"
+lastUpdated: "2026-06-04"
+legalCategory: "resale"
+documentType: "legal-policy"
+locale: "vi"
+status: "published"
+requiredForFlow:
+  - resale-listing
+  - resale-checkout
+  - my-ticket
+relatedPolicies:
+  - terms-of-use
+  - general-transaction-conditions
+  - ticket-policy
+  - payment-policy
+  - refund-policy
+  - blockchain-nft-policy
+---
+
+# Chính sách bán lại và chuyển nhượng vé
+
+Chính sách này áp dụng cho việc niêm yết, mua lại và chuyển nhượng vé trong hệ thống EvoTicket khi tính năng resale được nền tảng và sự kiện cho phép. Nội dung bám theo Deep Research: resale là flow nội sàn, có thể có giới hạn giá, khóa QR khi listing và xử lý chuyển quyền nội bộ trước hoặc cùng với các bước blockchain nếu tính năng NFT được áp dụng.
+
+## 1. Phạm vi áp dụng
+
+Chính sách này áp dụng cho người bán vé, người mua vé resale, vé đủ điều kiện resale, listing resale, thanh toán resale, khóa QR, chuyển quyền sở hữu trong hệ thống và tranh chấp resale.
+
+## 2. Điều kiện bán lại
+
+Chỉ vé đang thuộc quyền sử dụng hợp lệ của người bán trong hệ thống và ở trạng thái cho phép resale mới được niêm yết. Vé có thể không được bán lại nếu đã check-in, đã hết hạn, đang tranh chấp, đang bị khóa, không được Organizer cho phép resale hoặc không đáp ứng điều kiện kỹ thuật của nền tảng.
+
+EvoTicket có quyền từ chối, tạm khóa hoặc gỡ listing nếu vé không đủ điều kiện hoặc listing có dấu hiệu vi phạm chính sách.
+
+## 3. Giới hạn giá bán lại
+
+Giá resale có thể bị giới hạn theo price cap hoặc cấu hình sự kiện nhằm hạn chế đầu cơ và bảo vệ tính công bằng của thị trường nội bộ.
+
+Theo Deep Research, chưa có căn cứ trực tiếp riêng để trình bày price cap vé NFT/resale event ticket như một nghĩa vụ pháp lý chắc chắn. Vì vậy, price cap trong EvoTicket được mô tả là quy tắc nền tảng và điều kiện giao dịch nội bộ.
+
+## 4. Khóa vé và QR khi listing
+
+Khi vé được listing resale, đang được giữ cho buyer resale hoặc đang trong quá trình chuyển quyền, EvoTicket có thể khóa vé hoặc QR để giảm rủi ro người bán vừa niêm yết vừa sử dụng vé.
+
+Trong thời gian bị khóa, vé có thể không check-in được cho đến khi listing bị hủy, hết hạn, rút xuống hoặc giao dịch resale hoàn tất.
+
+## 5. Thanh toán resale
+
+Người mua resale cần thanh toán qua flow chính thức của EvoTicket. Giao dịch resale chỉ tiếp tục xử lý chuyển quyền khi thanh toán được xác nhận hợp lệ trong hệ thống.
+
+Nếu payment resale thành công nhưng transfer kỹ thuật thất bại hoặc chậm, EvoTicket có thể tạm giữ trạng thái giao dịch để kiểm tra, retry, reverse hoặc áp dụng biện pháp xử lý tương đương.
+
+## 6. Chuyển quyền sở hữu
+
+Sau khi giao dịch resale hợp lệ, EvoTicket cập nhật quyền sử dụng vé trong hệ thống cho người mua resale. Nếu tính năng blockchain/NFT được áp dụng, transfer on-chain có thể được xử lý bất đồng bộ.
+
+Dữ liệu blockchain như tokenId hoặc transaction hash nếu có chỉ là dữ liệu kỹ thuật hỗ trợ provenance và kiểm soát chuyển nhượng, không phải bảo đảm tuyệt đối rằng mọi tranh chấp sẽ không phát sinh.
+
+## 7. Trách nhiệm của người bán
+
+Người bán có trách nhiệm:
+
+- Chỉ listing vé thuộc quyền sử dụng hợp lệ của mình.
+- Không bán cùng vé ngoài hệ thống trong khi đã listing trên EvoTicket.
+- Không chia sẻ QR hoặc cố sử dụng vé sau khi listing.
+- Cung cấp thông tin trung thực khi có tranh chấp.
+- Tuân thủ price cap, phí và điều kiện resale nếu được công bố.
+
+## 8. Trách nhiệm của người mua resale
+
+Người mua resale có trách nhiệm kiểm tra thông tin sự kiện, trạng thái listing, giá, phí, điều kiện tham dự và chính sách hoàn tiền trước khi thanh toán.
+
+Người mua resale chỉ nên thanh toán qua flow chính thức của EvoTicket. EvoTicket không bảo đảm quyền lợi cho giao dịch thanh toán ngoài hệ thống.
+
+## 9. Hủy listing
+
+Listing có thể bị hủy bởi người bán nếu hệ thống cho phép, bởi EvoTicket khi phát hiện rủi ro, hoặc theo điều kiện sự kiện. Khi listing bị hủy, EvoTicket có thể mở lại quyền sử dụng vé nếu vé vẫn đủ điều kiện.
+
+Không nên hiểu rằng người dùng có thể tự hủy vé hoặc hủy mọi giao dịch bất cứ lúc nào. Quyền hủy listing hoặc giao dịch phụ thuộc vào trạng thái hệ thống và chính sách áp dụng.
+
+## 10. Refund khi vé đã resale
+
+Nếu sự kiện bị hủy, hoãn hoặc thay đổi đáng kể sau khi resale hoàn tất, quyền lợi tham dự hoặc xử lý hoàn tiền thường được xem xét theo người nắm giữ hợp lệ hiện tại trong hệ thống tại thời điểm áp dụng chính sách, trừ khi chính sách sự kiện hoặc quyết định xử lý cụ thể quy định khác.
+
+Việc phân bổ khoản hoàn trả giữa seller resale, buyer resale, Organizer và nền tảng có thể cần đối soát theo từng trường hợp.
+
+## 11. Tranh chấp resale
+
+EvoTicket có thể sử dụng trạng thái vé, lịch sử listing, lịch sử thanh toán, log khóa QR, dữ liệu chuyển quyền và dữ liệu blockchain nếu có để xử lý tranh chấp.
+
+Giao dịch ngoài hệ thống EvoTicket có thể không được hỗ trợ do thiếu dữ liệu xác minh và không nằm trong flow resale chính thức.

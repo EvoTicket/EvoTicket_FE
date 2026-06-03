@@ -1,1 +1,117 @@
- 
+---
+title: "Cơ chế giải quyết tranh chấp và khiếu nại"
+slug: "dispute-resolution"
+description: "Mô tả quy trình tiếp nhận, phân loại, xử lý và phản hồi khiếu nại hoặc tranh chấp phát sinh giữa người mua, ban tổ chức, checker, cổng thanh toán và nền tảng EvoTicket."
+version: "1.0.0"
+effectiveDate: "2026-06-04"
+lastUpdated: "2026-06-04"
+legalCategory: "dispute"
+documentType: "legal-policy"
+locale: "vi"
+status: "published"
+requiredForFlow:
+  - primary-checkout
+  - resale-checkout
+  - my-ticket
+  - help
+  - dispute-resolution
+relatedPolicies:
+  - terms-of-use
+  - general-transaction-conditions
+  - ticket-policy
+  - payment-policy
+  - refund-policy
+  - resale-policy
+---
+
+# Cơ chế giải quyết tranh chấp và khiếu nại
+
+Cơ chế này mô tả cách EvoTicket tiếp nhận, phân loại, xác minh và phối hợp xử lý khiếu nại hoặc tranh chấp liên quan đến order, thanh toán, vé, check-in, resale, Organizer, AI chatbot và blockchain/NFT nếu có.
+
+## 1. Phạm vi áp dụng
+
+Cơ chế này áp dụng cho tranh chấp giữa người mua, Organizer, seller/buyer resale, checker, cổng thanh toán và EvoTicket trong phạm vi dữ liệu hoặc chức năng của nền tảng.
+
+## 2. Nguyên tắc xử lý
+
+EvoTicket ưu tiên xử lý tranh chấp bằng cách tiếp nhận thông tin, xác minh dữ liệu hệ thống, phối hợp với bên liên quan và đề xuất biện pháp phù hợp với chính sách đã công bố.
+
+Việc xử lý tranh chấp phụ thuộc vào bản chất vụ việc, trạng thái order, trạng thái thanh toán, trạng thái vé, log check-in, dữ liệu resale, thông tin từ Organizer, cổng thanh toán và quy định pháp luật áp dụng.
+
+## 3. Kênh tiếp nhận
+
+Người dùng có thể gửi yêu cầu qua kênh hỗ trợ được EvoTicket công bố trên nền tảng, Help Center hoặc khu vực tài khoản nếu có.
+
+Yêu cầu nên nêu rõ:
+
+- Mã order hoặc mã vé.
+- Email, số điện thoại hoặc tài khoản liên quan.
+- Tên sự kiện và suất diễn.
+- Nội dung khiếu nại hoặc tranh chấp.
+- Chứng từ thanh toán, ảnh chụp lỗi hoặc tài liệu liên quan nếu có.
+- Thời điểm phát sinh và yêu cầu xử lý cụ thể.
+
+## 4. Phân loại tranh chấp
+
+EvoTicket có thể phân loại yêu cầu theo nhóm:
+
+- Lỗi order hoặc giữ vé.
+- Thanh toán lỗi, bị trừ tiền nhưng chưa nhận vé hoặc cần đối soát.
+- Vé không hiển thị, QR lỗi, vé bị khóa hoặc trạng thái vé không đúng.
+- Check-in lỗi, check-in nhầm hoặc nghi ngờ sử dụng vé trái phép.
+- Sự kiện bị hủy, hoãn hoặc thay đổi đáng kể.
+- Resale lỗi, listing bị khóa, transfer chậm/lỗi hoặc tranh chấp giữa seller và buyer.
+- Nội dung sự kiện, thông tin Organizer hoặc điều kiện tham dự gây tranh chấp.
+- Câu trả lời AI chatbot gây hiểu nhầm hoặc cần xác minh lại.
+
+## 5. Nguồn dữ liệu xác minh
+
+EvoTicket có thể sử dụng các nguồn dữ liệu sau:
+
+- Order logs và trạng thái payment.
+- Webhook hoặc dữ liệu đối soát từ cổng thanh toán.
+- TicketAsset history, trạng thái vé và Dynamic QR.
+- qrVersion, check-in logs, checker/device liên quan.
+- Resale listing history và lịch sử chuyển quyền trong hệ thống.
+- Transaction hash, tokenId hoặc provenance nếu tính năng blockchain/NFT được áp dụng.
+- Chatbot/support logs nếu có lưu và có liên quan đến yêu cầu.
+- Thông tin, phản hồi hoặc chứng cứ từ Organizer.
+
+Blockchain data chỉ là nguồn dữ liệu kỹ thuật hỗ trợ truy vết, không phải bằng chứng pháp lý tuyệt đối.
+
+## 6. Quy trình xử lý
+
+Quy trình cơ bản gồm:
+
+1. Người dùng gửi yêu cầu và tài liệu liên quan.
+2. EvoTicket ghi nhận và phân loại yêu cầu.
+3. EvoTicket kiểm tra dữ liệu hệ thống và yêu cầu bổ sung thông tin nếu cần.
+4. EvoTicket phối hợp với Organizer, checker hoặc cổng thanh toán tùy bản chất vụ việc.
+5. EvoTicket phản hồi kết quả xử lý hoặc phương án tiếp theo.
+6. Nếu vụ việc chưa thể kết thúc, EvoTicket có thể tiếp tục đối soát hoặc chuyển sang bước tranh chấp nâng cao.
+
+## 7. Biện pháp tạm thời
+
+Trong quá trình xác minh, EvoTicket có thể tạm khóa tài khoản, vé, QR, listing resale, quyền check-in hoặc khoản xử lý liên quan nếu cần giảm rủi ro gian lận, sử dụng song song hoặc thất thoát dữ liệu.
+
+Biện pháp tạm thời không đồng nghĩa với kết luận cuối cùng về trách nhiệm của bất kỳ bên nào.
+
+## 8. Leo thang tranh chấp
+
+Nếu yêu cầu không thể giải quyết ở bước hỗ trợ ban đầu, EvoTicket có thể chuyển vụ việc sang nhóm xử lý chuyên sâu hơn, yêu cầu Organizer phản hồi, đối soát với cổng thanh toán hoặc áp dụng cơ chế giải quyết tranh chấp theo quy định pháp luật áp dụng.
+
+Các bên cần phối hợp trung thực, cung cấp chứng cứ và không làm sai lệch dữ liệu trong quá trình xử lý.
+
+## 9. Tranh chấp resale
+
+Với giao dịch resale, EvoTicket ưu tiên xem xét người nắm giữ hợp lệ hiện tại trong hệ thống, trạng thái listing, trạng thái thanh toán, trạng thái transfer và lịch sử khóa QR.
+
+Giao dịch ngoài hệ thống EvoTicket có thể không được hỗ trợ hoặc không đủ dữ liệu để xử lý.
+
+## 10. Tranh chấp check-in
+
+Với tranh chấp check-in, EvoTicket có thể xem xét mã vé, qrVersion, thời điểm scan, checker/device, trạng thái vé, log xử lý và dữ liệu liên quan. Không nên hiểu check-in là việc luôn xác minh trực tiếp ownership on-chain tại thời điểm quét.
+
+## 11. Giới hạn của AI chatbot trong tranh chấp
+
+Câu trả lời của AI chatbot chỉ có tính hỗ trợ thông tin và không phải kết luận giải quyết tranh chấp. Nếu chatbot trả lời khác với chính sách chính thức hoặc dữ liệu hệ thống đã xác minh, chính sách chính thức và dữ liệu hệ thống được ưu tiên.

@@ -1,1 +1,124 @@
- 
+---
+title: "Điều kiện giao dịch chung"
+slug: "general-transaction-conditions"
+description: "Quy định về điều kiện giao kết, xác nhận giao dịch, trách nhiệm của các bên, bằng chứng giao dịch và quy trình xử lý trong các giao dịch trên EvoTicket."
+version: "1.0.0"
+effectiveDate: "2026-06-04"
+lastUpdated: "2026-06-04"
+legalCategory: "transaction"
+documentType: "legal-policy"
+locale: "vi"
+status: "published"
+requiredForFlow:
+  - primary-checkout
+  - resale-checkout
+  - payment
+relatedPolicies:
+  - terms-of-use
+  - ticket-policy
+  - payment-policy
+  - refund-policy
+  - resale-policy
+  - dispute-resolution
+---
+
+# Điều kiện giao dịch chung
+
+Điều kiện giao dịch chung này mô tả nguyên tắc xác lập, xác nhận, thực hiện và xử lý giao dịch trên EvoTicket. Nội dung được xây dựng theo flow được mô tả trong Deep Research: người mua chọn sự kiện, chọn suất diễn/vé/ghế, hệ thống giữ vé, tạo order, thanh toán, sau đó phát hành TicketAsset hoặc vé điện tử khi thanh toán được xác nhận hợp lệ.
+
+## 1. Phạm vi áp dụng
+
+Điều kiện này áp dụng cho giao dịch mua vé sơ cấp, giao dịch resale trong hệ thống nếu được hỗ trợ, giao dịch thanh toán, phát hành vé điện tử, cập nhật TicketAsset, Dynamic QR, check-in và các xử lý liên quan đến order.
+
+Điều kiện này áp dụng cùng Điều khoản sử dụng, Chính sách thanh toán, Chính sách vé, Chính sách hoàn tiền, Chính sách bán lại vé và điều kiện riêng của từng sự kiện.
+
+## 2. Vai trò của các bên
+
+- **Buyer** là người tạo order, thanh toán, nhận vé và sử dụng vé theo điều kiện sự kiện.
+- **Organizer** là bên tạo, quản lý và chịu trách nhiệm chính về thông tin, việc tổ chức và điều kiện tham dự sự kiện.
+- **EvoTicket** là nền tảng kỹ thuật hỗ trợ phân phối, quản lý, thanh toán qua cổng tích hợp, phát hành vé điện tử, resale và check-in.
+- **Payment Gateway** là bên xử lý luồng thanh toán, xác nhận trạng thái giao dịch và hỗ trợ đối soát theo phạm vi tích hợp.
+
+Trong bối cảnh demo/project, EvoTicket không được hiểu là một pháp nhân thương mại đã đăng ký chính thức nếu thông tin đó chưa được công bố riêng.
+
+## 3. Điều kiện tạo giao dịch
+
+Người mua cần cung cấp thông tin chính xác và kiểm tra kỹ thông tin giao dịch trước khi xác nhận thanh toán. Thông tin cần kiểm tra gồm sự kiện, suất diễn, loại vé, ghế nếu có, số lượng, giá, phí nếu có và điều kiện tham dự.
+
+Giao dịch chỉ nên được thực hiện qua flow chính thức của EvoTicket. EvoTicket không bảo đảm cho giao dịch mua bán, chuyển nhượng hoặc thanh toán được thực hiện ngoài hệ thống.
+
+## 4. Giữ vé và thời hạn thanh toán
+
+Khi người mua chọn vé hoặc ghế, hệ thống có thể giữ vé trong thời gian thanh toán để giảm rủi ro bán trùng. Việc giữ vé không đồng nghĩa giao dịch đã hoàn tất.
+
+Nếu order hết hạn, thanh toán không thành công hoặc không được hệ thống xác nhận hợp lệ, vé hoặc ghế đang giữ có thể được giải phóng theo quy trình hệ thống.
+
+## 5. Xác nhận giao dịch
+
+Một giao dịch được xem là hoàn tất khi các điều kiện sau được ghi nhận phù hợp trong hệ thống:
+
+1. Order được tạo hợp lệ.
+2. Thanh toán được cổng thanh toán hoặc hệ thống liên quan xác nhận thành công.
+3. Trạng thái order được cập nhật phù hợp.
+4. TicketAsset hoặc vé điện tử được phát hành theo dữ liệu order.
+
+Thông báo từ ngân hàng, ảnh chụp màn hình hoặc trang quay lại sau thanh toán có thể là thông tin hỗ trợ, nhưng không tự thay thế dữ liệu xác nhận cuối cùng trong hệ thống EvoTicket.
+
+## 6. Trạng thái order, payment và ticket
+
+Trạng thái giao dịch có thể bao gồm các nhóm sau:
+
+- Order đang chờ thanh toán.
+- Order đã hết hạn hoặc bị hủy trước khi thanh toán thành công.
+- Payment đang chờ xác nhận.
+- Payment thành công nhưng cần đối soát nếu dữ liệu hệ thống chưa đồng bộ.
+- Vé đã phát hành.
+- Vé bị khóa, đang listing resale, đã check-in hoặc không còn đủ điều kiện sử dụng.
+
+Trong trường hợp dữ liệu giữa order, payment, ticket, resale hoặc blockchain không khớp, EvoTicket sẽ xem xét dữ liệu hệ thống, webhook thanh toán, lịch sử vé, log xử lý và các dữ liệu liên quan để xác minh.
+
+## 7. Bằng chứng giao dịch
+
+Các dữ liệu sau có thể được dùng để hỗ trợ xác minh giao dịch:
+
+- Mã order, mã giao dịch và trạng thái thanh toán.
+- Log tạo order, hết hạn order và cập nhật payment.
+- Lịch sử phát hành TicketAsset hoặc vé điện tử.
+- Lịch sử QR, qrVersion và check-in.
+- Lịch sử listing resale và chuyển quyền trong hệ thống.
+- Transaction hash, tokenId hoặc dữ liệu provenance nếu tính năng blockchain/NFT được áp dụng.
+- Trao đổi hỗ trợ, thông báo hệ thống và dữ liệu kỹ thuật liên quan.
+
+Dữ liệu blockchain nếu có chỉ là một nguồn chứng cứ kỹ thuật hỗ trợ truy vết, không phải bảo chứng pháp lý tuyệt đối.
+
+## 8. Trách nhiệm của người mua
+
+Người mua có trách nhiệm:
+
+- Kiểm tra thông tin giao dịch trước khi thanh toán.
+- Thanh toán qua phương thức được EvoTicket hỗ trợ.
+- Bảo vệ tài khoản, thiết bị, Dynamic QR và thông tin vé.
+- Không bán lại hoặc chuyển nhượng vé ngoài flow chính thức nếu muốn được nền tảng hỗ trợ.
+- Cung cấp thông tin cần thiết khi phát sinh lỗi, khiếu nại hoặc đối soát.
+
+## 9. Trách nhiệm của Organizer
+
+Organizer có trách nhiệm cung cấp thông tin sự kiện chính xác, cấu hình vé đúng, công bố điều kiện tham dự, phối hợp xử lý check-in, hoàn tiền, hủy/hoãn/thay đổi sự kiện và phản hồi tranh chấp trong phạm vi vận hành hợp lý.
+
+Nếu sự kiện bị hủy, hoãn hoặc thay đổi đáng kể, Organizer cần phối hợp với EvoTicket để công bố phương án xử lý cho người mua theo chính sách liên quan và quy định pháp luật áp dụng.
+
+## 10. Trách nhiệm của EvoTicket
+
+EvoTicket tiếp nhận, ghi nhận và xử lý giao dịch trong phạm vi nền tảng, bao gồm tạo order, tích hợp cổng thanh toán, phát hành vé điện tử, quản lý trạng thái vé, hỗ trợ Dynamic QR, hỗ trợ resale và cung cấp dữ liệu đối soát khi cần.
+
+EvoTicket không tự mô tả là đơn vị cung ứng dịch vụ trung gian thanh toán nếu thực tế chỉ tích hợp cổng thanh toán. Việc xử lý hoàn tiền hoặc đối soát có thể phụ thuộc vào cổng thanh toán, ngân hàng, Organizer và dữ liệu hệ thống.
+
+## 11. Lỗi giao dịch và đối soát
+
+Nếu thanh toán thành công nhưng hệ thống chưa phát hành vé, EvoTicket ưu tiên xác minh giao dịch và phát hành vé nếu giao dịch hợp lệ. Nếu không thể thực hiện giao dịch, EvoTicket sẽ phối hợp xử lý theo Chính sách hoàn tiền.
+
+Nếu NFT mint hoặc provenance bị lỗi/chậm sau khi vé đã phát hành hợp lệ, lỗi đó không mặc nhiên làm mất hiệu lực vé. EvoTicket sẽ ưu tiên retry, đồng bộ lại hoặc áp dụng biện pháp kỹ thuật tương đương.
+
+## 12. Thay đổi điều kiện giao dịch
+
+EvoTicket có thể cập nhật Điều kiện giao dịch chung để phản ánh thay đổi sản phẩm, flow thanh toán, flow vé, resale, check-in hoặc yêu cầu pháp luật áp dụng. Phiên bản mới sẽ được công bố trên nền tảng.

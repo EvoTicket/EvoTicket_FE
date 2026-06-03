@@ -1,1 +1,99 @@
- 
+---
+title: "Chính sách vé"
+slug: "ticket-policy"
+description: "Quy định về phát hành vé, trạng thái vé, Dynamic QR, quyền sử dụng vé, kiểm tra vé, check-in và trách nhiệm bảo quản mã vé."
+version: "1.0.0"
+effectiveDate: "2026-06-04"
+lastUpdated: "2026-06-04"
+legalCategory: "ticket"
+documentType: "legal-policy"
+locale: "vi"
+status: "published"
+requiredForFlow:
+  - primary-checkout
+  - resale-checkout
+  - my-ticket
+  - check-in
+relatedPolicies:
+  - terms-of-use
+  - general-transaction-conditions
+  - payment-policy
+  - refund-policy
+  - resale-policy
+  - blockchain-nft-policy
+---
+
+# Chính sách vé
+
+Chính sách này quy định cách EvoTicket phát hành, quản lý, kiểm tra và xử lý vé điện tử hoặc TicketAsset trong hệ thống. Nội dung bám theo Deep Research: vé được phát hành sau khi thanh toán được xác nhận, NFT/provenance nếu có có thể chạy bất đồng bộ, và check-in dựa trên Dynamic QR, trạng thái vé, qrVersion, quyền checker/device và log hệ thống.
+
+## 1. Phạm vi áp dụng
+
+Chính sách này áp dụng cho vé mua trực tiếp từ sự kiện trên EvoTicket, vé mua qua resale trong hệ thống nếu được hỗ trợ, TicketAsset, Dynamic QR, trạng thái check-in và các dữ liệu kỹ thuật liên quan đến quyền sử dụng vé.
+
+## 2. Phát hành vé
+
+Vé chỉ được phát hành khi order và payment được xác nhận hợp lệ trong hệ thống. Sau khi phát hành, người mua có thể quản lý vé trong My Tickets hoặc khu vực tương đương.
+
+Vé điện tử là bản ghi quyền sử dụng vé trong hệ thống EvoTicket. Nếu tính năng blockchain/NFT được áp dụng, mint NFT hoặc provenance có thể diễn ra sau khi vé điện tử đã được phát hành.
+
+## 3. Trạng thái vé
+
+Một vé có thể có các trạng thái vận hành khác nhau, bao gồm:
+
+- Đã phát hành.
+- Đang hoạt động và có thể sử dụng.
+- Đang bị khóa do resale, tranh chấp, rủi ro bảo mật hoặc kiểm tra hệ thống.
+- Đã check-in hoặc đã sử dụng.
+- Không đủ điều kiện sử dụng do hết hạn, bị hủy, bị thay thế hoặc có quyết định xử lý khác.
+
+Trạng thái hiển thị cho người dùng có thể được rút gọn để dễ hiểu, trong khi hệ thống nội bộ vẫn lưu thêm dữ liệu phục vụ đối soát và xử lý tranh chấp.
+
+## 4. Quyền sử dụng vé
+
+Người nắm giữ vé hợp lệ trong hệ thống có quyền sử dụng vé theo điều kiện sự kiện, trạng thái vé và quy trình check-in. Vé không tự động miễn trừ các điều kiện tham dự do Organizer hoặc địa điểm công bố hợp lệ.
+
+Organizer có thể áp dụng các yêu cầu như độ tuổi, giấy tờ tùy thân, quy định an ninh, thời gian mở cổng hoặc điều kiện riêng của sự kiện nếu các yêu cầu đó được công bố phù hợp.
+
+## 5. Dynamic QR
+
+EvoTicket có thể sử dụng Dynamic QR, qrVersion, trạng thái vé và log hệ thống để giảm rủi ro sao chép hoặc chia sẻ mã vé. QR có thể thay đổi theo thời gian hoặc theo trạng thái vé.
+
+Người dùng không nên chụp màn hình, chia sẻ, đăng công khai hoặc gửi QR cho người khác. Việc để lộ QR hoặc tài khoản có thể dẫn đến rủi ro mất quyền sử dụng vé.
+
+## 6. Check-in
+
+Check-in được thực hiện bằng cách kiểm tra QR, trạng thái vé, quyền sử dụng, quyền checker/device và các dữ liệu liên quan trong hệ thống. Theo Deep Research, không nên mô tả check-in như việc luôn gọi trực tiếp `ownerOf` on-chain tại thời điểm scan.
+
+Nếu vé được check-in hợp lệ, vé thường được xem là đã sử dụng. EvoTicket có thể ghi nhận log check-in để phục vụ vận hành, đối soát và giải quyết tranh chấp.
+
+## 7. Vé bị khóa
+
+Vé hoặc QR có thể bị khóa trong các trường hợp sau:
+
+- Vé đang được listing resale hoặc đang được giữ cho giao dịch resale.
+- Tài khoản hoặc vé có dấu hiệu bị lộ, gian lận hoặc tranh chấp.
+- Có yêu cầu kiểm tra từ Organizer, EvoTicket hoặc quy trình hỗ trợ.
+- Cần đồng bộ lại trạng thái vé, payment, TicketAsset hoặc dữ liệu kỹ thuật liên quan.
+
+Trong thời gian bị khóa, vé có thể không check-in được cho đến khi trạng thái được xử lý.
+
+## 8. Vé đã dùng
+
+Vé đã check-in hợp lệ thường không được hoàn tiền và không thể tiếp tục dùng cho lượt vào cổng khác, trừ trường hợp có lỗi được xác minh từ hệ thống, xử lý sai từ checker/Organizer/EvoTicket hoặc quyết định riêng theo từng trường hợp.
+
+Nếu người dùng cho rằng vé bị check-in trái phép, cần gửi yêu cầu hỗ trợ sớm với mã vé, mã order, thời điểm phát sinh và chứng cứ liên quan.
+
+## 9. Vé resale
+
+Vé chỉ được bán lại trong hệ thống nếu đủ điều kiện theo sự kiện và trạng thái vé. Khi listing resale, vé hoặc QR có thể bị khóa để giảm rủi ro người bán vừa niêm yết vừa sử dụng vé.
+
+Sau khi resale thành công, quyền sử dụng vé trong hệ thống sẽ được cập nhật theo flow chuyển quyền. Nếu transfer blockchain liên quan bị lỗi hoặc chậm, EvoTicket sẽ xem xét dữ liệu hệ thống và áp dụng biện pháp kỹ thuật phù hợp.
+
+## 10. NFT và provenance
+
+NFT, tokenId, transaction hash hoặc provenance nếu có chỉ là lớp kỹ thuật hỗ trợ định danh, truy vết và kiểm soát chuyển nhượng. Chúng không phải cam kết sinh lời, chứng khoán, tài sản đầu tư hoặc bảo chứng pháp lý tuyệt đối.
+
+## 11. Hỗ trợ về vé
+
+Người dùng cần liên hệ kênh hỗ trợ được công bố khi không thấy vé, QR không hiển thị, vé bị khóa không rõ lý do, check-in lỗi hoặc có nghi ngờ vé bị sử dụng sai. EvoTicket có thể yêu cầu mã order, mã vé, email/số điện thoại tài khoản và ảnh chụp lỗi để xác minh.
