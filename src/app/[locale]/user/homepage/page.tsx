@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { useEventFilters } from "@/src/hooks/useEventFilters";
 import { TICKET_AVAILABILITY_OPTIONS } from "@/src/constants/eventFilters";
 import { noInteraction } from "recharts/types/state/tooltipSlice";
+import HeroNeuralBackground from "@/src/components/home/HeroNeuralBackground";
 import HeroTicket3DLoader from "@/src/components/home/HeroTicket3DLoader";
 
 
@@ -245,28 +246,10 @@ export default function HomePage() {
         {/* === HERO SECTION === */}
         <div className="relative mb-32">
           <section
-            className="relative w-full min-h-[600px] flex items-center justify-between pb-8 overflow-hidden group/hero"
-            onMouseMove={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              e.currentTarget.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-              e.currentTarget.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
-            }}
+            className="relative w-full min-h-[600px] flex items-center justify-between pb-8 overflow-hidden"
           >
 
-            {/* Dynamic Animated Gradient Frame (Base - subtle) */}
-            <div className="absolute inset-0 w-full h-full z-0 bg-gradient-to-r from-blue-500 via-fuchsia-500 to-amber-500 bg-[length:400%_400%] animate-gradient opacity-15 dark:opacity-25 pointer-events-none blur-3xl"></div>
-
-            {/* Spotlight that follows mouse (Vibrant) */}
-            <div
-              className="absolute inset-0 w-full h-full z-0 bg-gradient-to-r from-blue-400 via-fuchsia-500 to-amber-400 bg-[length:400%_400%] animate-gradient opacity-0 group-hover/hero:opacity-80 transition-opacity duration-700 pointer-events-none blur-2xl"
-              style={{
-                WebkitMaskImage: `radial-gradient(circle 350px at var(--mouse-x, 50%) var(--mouse-y, 50%), black, transparent 80%)`,
-                maskImage: `radial-gradient(circle 350px at var(--mouse-x, 50%) var(--mouse-y, 50%), black, transparent 80%)`
-              }}
-            ></div>
-
-            {/* Base Background Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-bg-page/80 via-bg-page/60 to-bg-page/20 z-0"></div>
+            <HeroNeuralBackground />
 
             <div className="w-full px-[5%] mx-auto relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12 overflow-visible">
 

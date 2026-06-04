@@ -12,8 +12,9 @@ import {
   getHelpMeta,
   getAboutHref,
   getAboutMeta,
+  getFooterAboutDocs,
+  getFooterHelpDocs,
   type LegalSlug,
-  type HelpSlug,
 } from "@/src/lib/docs/registry";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -58,13 +59,13 @@ export function Footer() {
 
   // ── Cột 2: EvoTicket — about + help pages ────────────────────────────────────
   const evoticketLinks: FooterLink[] = [
-    {
+    ...getFooterAboutDocs().map((slug) => ({
       href: getAboutHref(locale),
-      label: getAboutMeta("about").shortTitle,
-    },
-    ...( ["faq", "help-center"] satisfies HelpSlug[] ).map((slug) => ({
+      label: getAboutMeta(slug, locale).shortTitle,
+    })),
+    ...getFooterHelpDocs().map((slug) => ({
       href: getHelpHref(locale, slug),
-      label: getHelpMeta(slug).shortTitle,
+      label: getHelpMeta(slug, locale).shortTitle,
     })),
   ];
 
@@ -81,7 +82,7 @@ export function Footer() {
 
   const legalLinks: FooterLink[] = legalSlugs.map((slug) => ({
     href: getLegalHref(locale, slug),
-    label: getLegalMeta(slug).shortTitle,
+    label: getLegalMeta(slug, locale).shortTitle,
   }));
 
   // ── Cột 4: Organizer (4 mục) ─────────────────────────────────────────────────
@@ -94,7 +95,7 @@ export function Footer() {
 
   const organizerLinks: FooterLink[] = organizerSlugs.map((slug) => ({
     href: getLegalHref(locale, slug),
-    label: getLegalMeta(slug).shortTitle,
+    label: getLegalMeta(slug, locale).shortTitle,
   }));
 
   return (
@@ -106,7 +107,7 @@ export function Footer() {
 
           {/* CỘT 1: LOGO, CONTACT & SOCIAL */}
           <div>
-            <Link href="/" className="flex flex-col gap-2 mb-4 group hover:opacity-90 transition-opacity">
+            <Link href={`/${locale}/user/homepage`} className="flex flex-col gap-2 mb-4 group hover:opacity-90 transition-opacity">
               <div className="flex items-center">
                 <Image
                   src="/evoticket-logo/light/light-primary=horizontal-logo.svg"

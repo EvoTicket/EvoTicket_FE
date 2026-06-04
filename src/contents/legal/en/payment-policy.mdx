@@ -1,0 +1,130 @@
+---
+title: "Payment Policy"
+slug: "payment-policy"
+description: "Rules on payment methods, transaction confirmation, payment errors, reconciliation and responsibilities related to payment gateways integrated with EvoTicket."
+version: "1.0.0"
+effectiveDate: "2026-06-04"
+lastUpdated: "2026-06-04"
+legalCategory: "payment"
+documentType: "legal-policy"
+locale: "en"
+status: "published"
+requiredForFlow:
+  - primary-checkout
+  - resale-checkout
+  - payment
+relatedPolicies:
+  - terms-of-use
+  - general-transaction-conditions
+  - ticket-policy
+  - refund-policy
+  - dispute-resolution
+---
+
+# Payment Policy
+
+This Payment Policy explains how payments are initiated, confirmed, reconciled and handled on EvoTicket for ticket purchases and eligible resale transactions.
+
+## 1. Scope
+
+This Policy applies to:
+
+- Primary ticket purchases.
+- In-platform resale purchases.
+- Payment links, QR payment flows, bank transfer-supported flows or other supported payment methods.
+- Payment confirmation, failure, timeout, reconciliation and refund coordination.
+
+## 2. Payment Methods
+
+Available payment methods may vary depending on event, user location, payment provider, currency, bank support and platform configuration.
+
+EvoTicket may integrate with third-party payment service providers. The user may be redirected to a payment page, banking application, QR payment screen or other supported payment interface.
+
+## 3. Payment Confirmation
+
+A payment is considered confirmed only when EvoTicket receives and records valid confirmation through the applicable system flow, such as a verified payment callback, webhook, reconciliation result or other reliable confirmation mechanism.
+
+A user's bank debit notification does not automatically mean that EvoTicket has completed the order. If the platform has not yet recorded confirmation, the order may remain pending until reconciliation is complete.
+
+## 4. Pending Payments
+
+A payment may remain pending due to:
+
+- Delay at the bank or payment provider.
+- Missing or delayed webhook/callback.
+- Incorrect payment content or transaction reference.
+- Order expiry during payment.
+- Network or provider incident.
+- Manual review for fraud or risk.
+
+Users should not repeat payment unless the platform clearly instructs them to do so.
+
+## 5. Failed or Expired Payments
+
+If payment fails or the order expires before payment confirmation, EvoTicket may release held tickets and cancel or expire the order.
+
+If the user was charged despite order expiry or failure, EvoTicket will verify the payment record and handle the case according to this Policy and the Refund and Event Change Policy.
+
+## 6. Charged but No Ticket Issued
+
+If the user is charged but no ticket is issued, the user should contact support and provide:
+
+- Order code.
+- Payment time.
+- Payment amount.
+- Payment method.
+- Bank or payment provider receipt.
+- Account email or phone number.
+
+EvoTicket will review payment records and may issue the ticket, correct the order, coordinate reversal or process refund support depending on the verified case.
+
+## 7. Fees
+
+The final amount shown at checkout may include ticket price, platform fee, payment processing fee, service fee or other event-specific charges where applicable.
+
+Fee refundability depends on the reason for refund, payment provider rules, event policy and applicable law. Any non-refundable fee should be disclosed before payment where required.
+
+## 8. Payment Providers
+
+Payment providers are responsible for their own payment infrastructure, payment authorization, bank connectivity and payment interfaces. EvoTicket is responsible for integrating and processing payment confirmation within its platform flow.
+
+Users may also be subject to the terms of their bank, wallet provider or payment service provider.
+
+## 9. Security
+
+Users should:
+
+- Pay only through official EvoTicket checkout pages or official payment links.
+- Verify the payment amount and recipient information.
+- Avoid sharing OTPs, passwords or banking credentials.
+- Keep receipts until ticket issuance is complete.
+- Report suspicious payment instructions immediately.
+
+## 10. Reconciliation
+
+EvoTicket may perform automatic or manual reconciliation with payment providers to address inconsistent states, including:
+
+- User charged but order pending.
+- Webhook received more than once.
+- Payment confirmed after order expiry.
+- Incorrect payment amount.
+- Duplicate payment attempt.
+- Payment marked successful by provider but not yet reflected in the platform.
+
+## 11. Refund Coordination
+
+Refund handling may involve EvoTicket, the organizer, the payment provider and the user's bank. The refund method and timing may depend on the payment method, provider rules and the nature of the refund case.
+
+## 12. Legal References
+
+This Policy may be interpreted together with:
+
+- Decree No. 52/2024/ND-CP on non-cash payments.
+- Law No. 20/2023/QH15 on Electronic Transactions.
+- Law No. 19/2023/QH15 on Protection of Consumers' Rights.
+- Decree No. 52/2013/ND-CP and Decree No. 85/2021/ND-CP on e-commerce.
+- The applicable rules of integrated payment service providers.
+
+## 13. Related Policies
+
+This Policy should be read together with the General Transaction Conditions, Ticket Policy, Refund and Event Change Policy and Dispute Resolution Policy.

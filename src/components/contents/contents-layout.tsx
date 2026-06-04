@@ -8,9 +8,8 @@ import {
     getLegalMeta,
     isLegalSlug,
     type LegalSlug,
-    type AnyRegistryItem,
 } from "@/src/lib/docs/registry";
-import type { DocFrontmatter } from "@/src/lib/docs/get-doc";
+import type { DocFrontmatter, LocalizedDocRegistryMeta } from "@/src/lib/docs/get-doc";
 
 type TocItem = {
     id: string;
@@ -30,7 +29,7 @@ type ContentLayoutProps = {
     /** Frontmatter từ file MDX (có thể trống nếu chưa viết nội dung) */
     meta: DocFrontmatter;
     /** Meta đầy đủ từ registry — luôn có giá trị */
-    registryMeta: AnyRegistryItem;
+    registryMeta: LocalizedDocRegistryMeta;
     content: string;
     children: ReactNode;
 };
@@ -82,7 +81,11 @@ function buildToc(content: string): TocItem[] {
     return toc;
 }
 
-function getRelatedPolicies(meta: DocFrontmatter, currentSlug: string): RelatedPolicy[] {
+function getRelatedPolicies(
+    locale: string,
+    meta: DocFrontmatter,
+    currentSlug: string
+): RelatedPolicy[] {
     const relatedFromFrontmatter = (meta.relatedPolicies ?? []).filter(isLegalSlug);
     const relatedSlugs =
         relatedFromFrontmatter.length > 0
@@ -92,7 +95,7 @@ function getRelatedPolicies(meta: DocFrontmatter, currentSlug: string): RelatedP
     return relatedSlugs
         .filter((slug) => slug !== currentSlug)
         .map((slug) => {
-            const item = getLegalMeta(slug);
+            const item = getLegalMeta(slug, locale);
 
             return {
                 slug,
@@ -182,7 +185,7 @@ export function ContentLayout({
 }: ContentLayoutProps) {
     const toc = buildToc(content);
     // Only show related policies for legal docs
-    const relatedPolicies = isLegalSlug(slug) ? getRelatedPolicies(meta, slug) : [];
+    const relatedPolicies = isLegalSlug(slug) ? getRelatedPolicies(locale, meta, slug) : [];
 
     // Prefer registry meta (always complete) over frontmatter
     const displayTitle = registryMeta.title;
