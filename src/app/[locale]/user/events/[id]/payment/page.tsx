@@ -11,6 +11,7 @@ import { ArrowLeft, Check, Loader2, XCircle } from "lucide-react";
 import { EventDetail } from "@/src/types/event";
 import { OdometerDigit } from "@/src/components/ui/odoMeterDigit";
 import { isValidEmail, isValidPhone, isValidFullName } from "@/src/lib/validations";
+import { getLegalHref } from "@/src/lib/docs/registry";
 import { toast } from "react-toastify";
 import { useAppSelector } from "@/src/store/hooks";
 import { selectUser } from "@/src/store/slices/authSlice";
@@ -654,7 +655,17 @@ export default function PaymentPage() {
                                         onChange={(e) => setAgreedToTerms(e.target.checked)}
                                         className="mt-0.5 w-4 h-4 accent-button-primary-bg-default shrink-0 cursor-pointer"
                                     />
-                                    <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors">{tp('confirm_terms')}</span>
+                                    <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors">
+                                        Tôi xác nhận đã đọc và đồng ý với{" "}
+                                        <Link href={getLegalHref(locale as string, "terms-of-use")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Điều khoản sử dụng</Link>,{" "}
+                                        <Link href={getLegalHref(locale as string, "general-transaction-conditions")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Điều kiện giao dịch chung</Link>,{" "}
+                                        <Link href={getLegalHref(locale as string, "ticket-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Chính sách vé</Link>,{" "}
+                                        <Link href={getLegalHref(locale as string, "payment-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Chính sách thanh toán</Link>,{" "}
+                                        <Link href={getLegalHref(locale as string, "refund-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Chính sách hoàn tiền</Link>,{" "}
+                                        <Link href={getLegalHref(locale as string, "privacy-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Chính sách bảo mật</Link> và{" "}
+                                        <Link href={getLegalHref(locale as string, "blockchain-nft-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Chính sách NFT/blockchain</Link>{" "}
+                                        của EvoTicket.
+                                    </span>
                                 </label>
                             </div>
                         </div>
@@ -724,12 +735,6 @@ export default function PaymentPage() {
                                         </span>
                                     </div>
                                 </div>
-
-                                <p className="text-[11px] text-text-muted mb-4">
-                                    {tp.rich('terms_agree_note', {
-                                        link: (chunks) => <Link href="#" className="text-button-primary-bg-default hover:underline">{chunks}</Link>
-                                    })}
-                                </p>
 
                                 <button
                                     className={`w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm mb-3 ${isCreatingOrder ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}

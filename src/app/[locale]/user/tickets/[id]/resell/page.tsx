@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { useTranslations } from "next-intl";
 import api from "@/src/lib/axios";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
+import { getLegalHref } from "@/src/lib/docs/registry";
 
 interface TicketDetail {
     ticketAssetId: number;
@@ -733,6 +734,9 @@ export default function ResellTicketPage() {
                                                 ? 'Bạn có chắc chắn muốn niêm yết vé này trên chợ vé bán lại không? Khi niêm yết thành công, vé của bạn sẽ tạm thời bị khóa cho đến khi được bán hoặc bạn hủy niêm yết.' 
                                                 : 'Are you sure you want to list this ticket on the resale marketplace? Once listed successfully, your ticket will be temporarily locked until sold or unlisted.'}
                                         </p>
+                                        <div className="bg-bg-subtle border border-border-default rounded-lg p-3 text-sm text-text-secondary mb-4">
+                                            Khi đăng bán vé, mã QR/vé có thể được khóa theo <Link href={getLegalHref(locale as string, "resale-policy")} target="_blank" className="text-button-primary-bg-default hover:underline font-medium">chính sách bán lại vé</Link> của EvoTicket.
+                                        </div>
                                         <div className="bg-bg-subtle p-3 rounded-lg border border-border-default space-y-2 text-sm mb-6">
                                             <div className="flex justify-between">
                                                 <span className="text-text-secondary">{t("desired_price_label", { defaultMessage: "Giá bán:" })}</span>
