@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MessageCircle, X, Send, Paperclip, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Menu, Plus, Trash2 } from "lucide-react";
 import api from "@/src/lib/axios";
 import { toast } from "react-toastify";
 import Image from "next/image";
@@ -20,6 +20,14 @@ interface ChatMessage {
     createdAt: string;
 }
 
+interface ChatConversation {
+    id: string;
+    userId: number;
+    title: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
 const PDF_PLACEHOLDER = "https://img.freepik.com/premium-vector/modern-flat-design-of-pdf-file-icon-for-web_599062-7115.jpg?w=2000";
 
 export function ChatBot() {
@@ -28,11 +36,13 @@ export function ChatBot() {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputMessage, setInputMessage] = useState("");
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+    const [conversations, setConversations] = useState<ChatConversation[]>([]);
+    const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isLoadingConversations, setIsLoadingConversations] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const targetTextRef = useRef("");
     const currentTextRef = useRef("");
     const streamFinishedRef = useRef(false);
@@ -53,28 +63,108 @@ export function ChatBot() {
     }, [messages]);
 
     useEffect(() => {
-        if (isOpen && messages.length === 0) {
-            fetchChatHistory();
-        } else if (isOpen && messages.length > 0) {
-            setTimeout(scrollToBottom, 100);
+        if (isOpen) {
+            fetchConversations();
         }
     }, [isOpen]);
 
-    const fetchChatHistory = async () => {
+    useEffect(() => {
+        if (isOpen && currentConversationId) {
+            fetchChatHistory(currentConversationId);
+        }
+    }, [currentConversationId, isOpen]);
 
+    const fetchConversations = async () => {
+        setIsLoadingConversations(true);
+        try {
+            const response = await api.get("/inventory-service/api/chatbot/conversations");
+            if (response.data && response.data.status === 200) {
+                const list = response.data.data;
+                setConversations(list);
+                
+                // If there's list, select the first one if we don't have a current one
+                if (list.length > 0) {
+                    if (!currentConversationId) {
+                        setCurrentConversationId(list[0].id);
+                    }
+                } else {
+                    // Create one if list is empty
+                    await handleCreateConversation();
+                }
+            }
+        } catch (error) {
+            console.error("Failed to fetch conversations", error);
+        } finally {
+            setIsLoadingConversations(false);
+        }
+    };
+
+    const handleCreateConversation = async () => {
+        try {
+            const response = await api.post("/inventory-service/api/chatbot/conversations");
+            if (response.data && response.data.status === 200) {
+                const newConv = response.data.data;
+                setConversations(prev => [newConv, ...prev]);
+                setCurrentConversationId(newConv.id);
+                setMessages([]); // clear message window for the new chat
+                return newConv.id;
+            }
+        } catch (error) {
+            console.error("Failed to create conversation", error);
+            toast.error("Failed to create new conversation");
+        }
+        return null;
+    };
+
+    const handleDeleteConversation = async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation(); // prevent selecting the conversation
+        if (!confirm("Bạn có chắc chắn muốn xóa cuộc trò chuyện này?")) return;
+        
+        try {
+            const response = await api.delete(`/inventory-service/api/chatbot/conversations/${id}`);
+            if (response.data && response.data.status === 200) {
+                setConversations(prev => prev.filter(c => c.id !== id));
+                if (currentConversationId === id) {
+                    // If deleted active conversation, switch to another one
+                    const remaining = conversations.filter(c => c.id !== id);
+                    if (remaining.length > 1) { // note: conversations state might be stale so we use remaining filter
+                        const nextConv = remaining.find(c => c.id !== id);
+                        if (nextConv) {
+                            setCurrentConversationId(nextConv.id);
+                        }
+                    } else {
+                        // Or create a new one
+                        await handleCreateConversation();
+                    }
+                }
+                toast.success("Đã xóa cuộc trò chuyện");
+            }
+        } catch (error) {
+            console.error("Failed to delete conversation", error);
+            toast.error("Không thể xóa cuộc trò chuyện");
+        }
+    };
+
+    const handleSelectConversation = (id: string) => {
+        setCurrentConversationId(id);
+        setIsSidebarOpen(false);
+    };
+
+    const fetchChatHistory = async (convId: string) => {
+        if (!convId) return;
         setIsLoadingHistory(true);
         try {
-            const response = await api.get("/inventory-service/api/chatbot/history");
+            const response = await api.get("/inventory-service/api/chatbot/history", {
+                params: { conversationId: convId }
+            });
 
             if (response.data && response.data.status === 200) {
-                // Map the new history format to ChatMessage interface
                 const historyMessages = response.data.data.map((msg: any, index: number) => ({
                     id: index,
-                    // Remove internal session info like [Thông tin phiên: userId=...]
                     message: msg.text ? msg.text.replace(/\n\n\[Thông tin phiên: .*\]/g, "") : "",
                     images: msg.media || [],
                     senderType: msg.messageType === "USER" ? "USER" : "ASSISTANT",
-                    createdAt: new Date().toISOString() // Fallback if history doesn't provide timestamp
+                    createdAt: new Date().toISOString()
                 }));
 
                 setMessages(historyMessages);
@@ -88,7 +178,13 @@ export function ChatBot() {
     };
 
     const handleSendMessage = async () => {
-        if (!inputMessage.trim() && selectedFiles.length === 0) return;
+        if (!inputMessage.trim()) return;
+
+        let activeConvId = currentConversationId;
+        if (!activeConvId) {
+            activeConvId = await handleCreateConversation();
+            if (!activeConvId) return;
+        }
 
         const userMessage: ChatMessage = {
             id: Date.now(),
@@ -101,9 +197,7 @@ export function ChatBot() {
         setMessages((prev) => [...prev, userMessage]);
 
         const messageToSend = inputMessage;
-        const filesToSend = [...selectedFiles];
         setInputMessage("");
-        setSelectedFiles([]);
 
         setIsLoading(true);
         let accumulatedMessage = "";
@@ -118,7 +212,7 @@ export function ChatBot() {
 
         try {
             const token = store.getState().auth.token;
-            const url = `${process.env.NEXT_PUBLIC_API_GATEWAY_BE || ""}/inventory-service/api/chatbot/stream-ask?question=${encodeURIComponent(messageToSend)}&useRag=false`;
+            const url = `${process.env.NEXT_PUBLIC_API_GATEWAY_BE || ""}/inventory-service/api/chatbot/stream-ask?question=${encodeURIComponent(messageToSend)}&conversationId=${activeConvId}`;
 
             const response = await fetch(url, {
                 method: "GET",
@@ -215,12 +309,7 @@ export function ChatBot() {
         } finally {
             setIsLoading(false);
             streamFinishedRef.current = true;
-        }
-    };
-
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setSelectedFiles(Array.from(e.target.files));
+            fetchConversations();
         }
     };
 
@@ -260,23 +349,111 @@ export function ChatBot() {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="fixed bottom-24 right-6 z-50 w-[calc(100vw-48px)] sm:w-[450px] h-[600px] max-h-[calc(100vh-120px)] bg-bg-page border border-border-default rounded-ds-lg shadow-2xl flex flex-col">
-                    {/* Header */}
-                    <div className="bg-button-primary-bg-default text-button-primary-text-default p-4 rounded-t-lg flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <MessageCircle size={20} />
-                            <h3 className="font-semibold">{t("header_title")}</h3>
+                <div className="fixed bottom-24 right-6 z-50 w-[calc(100vw-48px)] sm:w-[450px] h-[600px] max-h-[calc(100vh-120px)] bg-bg-page border border-border-default rounded-ds-lg shadow-2xl flex flex-col relative overflow-hidden">
+                    {/* Sidebar Drawer */}
+                    {isSidebarOpen && (
+                        <div 
+                            className="absolute inset-0 bg-black/40 z-30 transition-opacity duration-300 animate-fade-in"
+                            onClick={() => setIsSidebarOpen(false)}
+                        />
+                    )}
+                    <div className={`absolute top-0 left-0 h-full w-[280px] bg-bg-surface border-r border-border-default z-40 flex flex-col transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+                        {/* Sidebar Header */}
+                        <div className="p-4 border-b border-border-default flex items-center justify-between bg-bg-page">
+                            <h4 className="font-bold text-text-primary text-sm flex items-center gap-2">
+                                <MessageCircle size={16} />
+                                {t("conversations_title") || "Hội thoại gần đây"}
+                            </h4>
+                            <button 
+                                onClick={() => setIsSidebarOpen(false)}
+                                className="text-text-secondary hover:text-text-primary rounded p-1 transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
                         </div>
-                        <button
-                            onClick={() => setIsOpen(false)}
-                            className="hover:bg-white/20 rounded p-1 transition-colors"
-                        >
-                            <X size={20} />
-                        </button>
+
+                        {/* New Chat Button */}
+                        <div className="p-3">
+                            <button
+                                onClick={() => {
+                                    handleCreateConversation();
+                                    setIsSidebarOpen(false);
+                                }}
+                                className="w-full flex items-center justify-center gap-2 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default text-xs font-bold py-2 px-3 rounded-ds-lg transition-colors cursor-pointer"
+                            >
+                                <Plus size={14} />
+                                {t("new_chat_btn") || "Cuộc trò chuyện mới"}
+                            </button>
+                        </div>
+
+                        {/* Conversations List */}
+                        <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-1">
+                            {isLoadingConversations ? (
+                                <div className="flex items-center justify-center py-8">
+                                    <Loader2 className="animate-spin text-primary" size={24} />
+                                </div>
+                            ) : conversations.length === 0 ? (
+                                <div className="text-center text-xs text-text-muted py-8">
+                                    {t("no_conversations") || "Chưa có cuộc trò chuyện nào"}
+                                </div>
+                            ) : (
+                                conversations.map((conv) => (
+                                    <div
+                                        key={conv.id}
+                                        onClick={() => handleSelectConversation(conv.id)}
+                                        className={`group flex items-center justify-between p-2.5 rounded-ds-lg cursor-pointer text-xs transition-colors ${
+                                            currentConversationId === conv.id
+                                                ? "bg-primary/10 text-primary font-semibold border border-primary/20"
+                                                : "hover:bg-secondary text-text-secondary hover:text-text-primary border border-transparent"
+                                        }`}
+                                    >
+                                        <span className="truncate flex-1 pr-2">{conv.title}</span>
+                                        <button
+                                            onClick={(e) => handleDeleteConversation(e, conv.id)}
+                                            className="opacity-0 group-hover:opacity-100 text-text-muted hover:text-error p-1 rounded hover:bg-bg-page transition-all shrink-0 cursor-pointer"
+                                            title={t("delete_chat") || "Xóa cuộc trò chuyện"}
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Header */}
+                    <div className="bg-button-primary-bg-default text-button-primary-text-default p-4 rounded-t-lg flex items-center justify-between z-20">
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setIsSidebarOpen(true)}
+                                className="hover:bg-white/20 rounded p-1 transition-colors -ml-1 cursor-pointer"
+                                title={t("history_tooltip") || "Lịch sử cuộc trò chuyện"}
+                            >
+                                <Menu size={20} />
+                            </button>
+                            <h3 className="font-semibold truncate max-w-[200px] sm:max-w-[250px]">
+                                {conversations.find(c => c.id === currentConversationId)?.title || t("header_title")}
+                            </h3>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={handleCreateConversation}
+                                className="hover:bg-white/20 rounded p-1 transition-colors cursor-pointer"
+                                title={t("new_chat_btn") || "Cuộc trò chuyện mới"}
+                            >
+                                <Plus size={20} />
+                            </button>
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="hover:bg-white/20 rounded p-1 transition-colors cursor-pointer"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 	bg-bg-surface">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-bg-surface">
                         {isLoadingHistory ? (
                             <div className="flex items-center justify-center h-full">
                                 <Loader2 className="animate-spin text-primary" size={32} />
@@ -422,54 +599,19 @@ export function ChatBot() {
 
                     {/* Input */}
                     <div className="p-4 border-t border-border-default bg-bg-page">
-                        {selectedFiles.length > 0 && (
-                            <div className="mb-2 flex flex-wrap gap-2">
-                                {selectedFiles.map((file, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="bg-secondary text-text-primary text-xs px-2 py-1 rounded flex items-center gap-1"
-                                    >
-                                        <Paperclip size={12} />
-                                        <span className="max-w-[100px] truncate">{file.name}</span>
-                                        <button
-                                            onClick={() =>
-                                                setSelectedFiles((prev) => prev.filter((_, i) => i !== idx))
-                                            }
-                                            className="hover:text-error"
-                                        >
-                                            <X size={12} />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
                         <div className="flex gap-2">
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handleFileSelect}
-                                multiple
-                                className="hidden"
-                            />
-                            <button
-                                onClick={() => fileInputRef.current?.click()}
-                                className="p-2 hover:bg-secondary rounded-ds-lg transition-colors text-text-secondary"
-                                disabled={isLoading}
-                            >
-                                <Paperclip size={20} />
-                            </button>
                             <input
                                 type="text"
                                 value={inputMessage}
                                 onChange={(e) => setInputMessage(e.target.value)}
                                 onKeyPress={handleKeyPress}
                                 placeholder={t("input_placeholder")}
-                                className="flex-1 px-3 py-2 border border-border-default rounded-ds-lg focus:outline-none focus:ring-2 focus:ring-primary 	bg-bg-surface text-text-primary"
+                                className="flex-1 px-3 py-2 border border-border-default rounded-ds-lg focus:outline-none focus:ring-2 focus:ring-primary bg-bg-surface text-text-primary"
                                 disabled={isLoading}
                             />
                             <button
                                 onClick={handleSendMessage}
-                                disabled={!inputMessage.trim() && selectedFiles.length === 0}
+                                disabled={!inputMessage.trim()}
                                 className="bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2 rounded-ds-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
                                 <Send size={20} />
