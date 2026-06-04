@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Database,
   Search,
@@ -9,38 +9,130 @@ import {
   Info,
   CheckCircle2,
   Clock,
-  AlertCircle,
   FileText,
-  Settings,
   MoreHorizontal,
   LayoutGrid,
-  History,
-  Activity,
   Edit3,
-  Save,
   Trash2,
   XCircle,
   Hash,
   User,
-  Filter,
   Tag,
-  ArrowLeftRight,
-  ShieldCheck,
-  TrendingUp,
-  BarChart2,
   AlertTriangle,
-  RotateCcw
+  Upload,
+  X,
+  RefreshCw,
+  Loader2,
+  Brain,
+  FilePlus2,
+  ShieldAlert,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { aikbMockData } from "../datamockadmin/mockdata_aikb";
+import { adminKbApi, KbItemDto } from "@/src/lib/api/adminKbApi";
+import { toast } from "react-toastify";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Main Page
+// ─────────────────────────────────────────────────────────────────────────────
 export default function AdminAIKBPage() {
   const t = useTranslations("Admin");
-  const [activeTab, setActiveTab] = useState("items");
-  const [selectedId, setSelectedId] = useState("KB-1042");
+
+  // ── Data state ──────────────────────────────────────────────────────────────
+  const [items, setItems] = useState<KbItemDto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedSource, setSelectedSource] = useState<string | null>(null);
+
+  // ── Filter/Search ────────────────────────────────────────────────────────
+  const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const selectedItem = aikbMockData.kbItems.find(item => item.id === selectedId);
+  // ── Upload modal ─────────────────────────────────────────────────────────
+  const [showUpload, setShowUpload] = useState(false);
+
+  // ── Action states ─────────────────────────────────────────────────────────
+  const [deletingSource, setDeletingSource] = useState<string | null>(null);
+  const [togglingSource, setTogglingSource] = useState<string | null>(null);
+
+  // ── Derived ──────────────────────────────────────────────────────────────
+  const selectedItem = items.find((i) => i.source === selectedSource) ?? null;
+
+  const filteredItems = items.filter((item) => {
+    const matchSearch =
+      !search ||
+      item.title.toLowerCase().includes(search.toLowerCase()) ||
+      item.source.toLowerCase().includes(search.toLowerCase()) ||
+      item.category?.toLowerCase().includes(search.toLowerCase());
+    const matchStatus =
+      statusFilter === "all" || item.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
+
+  const totalPublished = items.filter((i) => i.status === "Published").length;
+  const totalDraft = items.filter(
+    (i) => i.status === "Draft"
+  ).length;
+
+  // ── Load data ────────────────────────────────────────────────────────────
+  const fetchItems = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await adminKbApi.listItems();
+      setItems(data);
+      if (data.length > 0 && !selectedSource) {
+        setSelectedSource(data[0].source);
+      }
+    } catch (err: any) {
+      console.error("KB fetch error:", err);
+      setError("Không thể tải danh sách KB. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems]);
+
+  // ── Delete ───────────────────────────────────────────────────────────────
+  const handleDelete = async (source: string, title: string) => {
+    if (!window.confirm(`Xóa KB item "${title}"?\nThao tác này sẽ xóa toàn bộ chunks trong VectorStore và không thể hoàn tác.`)) return;
+    setDeletingSource(source);
+    try {
+      await adminKbApi.deleteItem(source);
+      toast.success(`Đã xóa "${title}" khỏi Knowledge Base`);
+      if (selectedSource === source) setSelectedSource(null);
+      await fetchItems();
+    } catch {
+      toast.error("Xóa KB item thất bại");
+    } finally {
+      setDeletingSource(null);
+    }
+  };
+
+  // ── Toggle status ────────────────────────────────────────────────────────
+  const handleToggleStatus = async (item: KbItemDto) => {
+    const newStatus = item.status === "Published" ? "Draft" : "Published";
+    setTogglingSource(item.source);
+    try {
+      await adminKbApi.updateStatus(item.source, newStatus as "Published" | "Draft");
+      toast.success(`"${item.title}" → ${newStatus}`);
+      await fetchItems();
+    } catch {
+      toast.error("Cập nhật trạng thái thất bại");
+    } finally {
+      setTogglingSource(null);
+    }
+  };
+
+  // ── After successful upload ───────────────────────────────────────────────
+  const handleIngestSuccess = async (newItem: KbItemDto) => {
+    setShowUpload(false);
+    await fetchItems();
+    setSelectedSource(newItem.source);
+    toast.success(`✓ Đã nạp "${newItem.title}" — ${newItem.chunkCount} chunks`);
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -51,429 +143,578 @@ export default function AdminAIKBPage() {
           <h1 className="text-3xl font-extrabold text-txt-primary tracking-tight">{t("aikb_title")}</h1>
           <p className="text-sm text-txt-secondary mt-1">{t("aikb_subtitle")}</p>
         </div>
-        <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-ds-xl font-bold shadow-lg shadow-primary/20 transition-all">
-          <Plus size={18} />
-          <span>{t("btn_add_kb_item")}</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={fetchItems}
+            disabled={loading}
+            className="w-10 h-10 flex items-center justify-center rounded-ds-xl border border-border bg-surface hover:bg-main text-txt-muted hover:text-txt-primary transition-all shadow-sm"
+            title="Làm mới"
+          >
+            {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+          </button>
+          <button
+            onClick={() => setShowUpload(true)}
+            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-ds-xl font-bold shadow-lg shadow-primary/20 transition-all"
+          >
+            <FilePlus2 size={18} />
+            <span>{t("btn_add_kb_item")}</span>
+          </button>
+        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard icon={<Database size={20} />} label={t("total_kb_items")} value="126" sub={t("aikb_sub.platform_total")} color="gray" />
-        <StatsCard icon={<CheckCircle2 size={20} />} label={t("published_items")} value="102" sub={t("aikb_sub.serving_ai")} color="emerald" />
-        <StatsCard icon={<Clock size={20} />} label={t("draft_review_items")} value="14" sub={t("aikb_sub.not_active")} color="amber" />
-        <StatsCard icon={<AlertCircle size={20} />} label={t("low_confidence_topics")} value="10" sub={t("aikb_sub.improve_content")} color="rose" />
+      {/* Stats Grid — 3 cards only */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StatsCard
+          icon={<Database size={20} />}
+          label={t("total_kb_items")}
+          value={String(items.length)}
+          sub={t("aikb_sub.platform_total")}
+          color="gray"
+        />
+        <StatsCard
+          icon={<CheckCircle2 size={20} />}
+          label={t("published_items")}
+          value={String(totalPublished)}
+          sub={t("aikb_sub.serving_ai")}
+          color="emerald"
+        />
+        <StatsCard
+          icon={<Clock size={20} />}
+          label={t("draft_review_items")}
+          value={String(totalDraft)}
+          sub={t("aikb_sub.not_active")}
+          color="amber"
+        />
       </div>
 
       {/* Info Banner */}
-      <div className="bg-primary/10 border border-primary/20 rounded-ds-2xl p-4 flex gap-4 items-center shadow-sm">
-        <div className="w-8 h-8 rounded-ds-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-          <Info size={18} />
+      <div className="bg-primary/10 border border-primary/20 rounded-ds-2xl p-4 flex gap-4 items-start shadow-sm">
+        <div className="w-8 h-8 rounded-ds-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0 mt-0.5">
+          <Brain size={16} />
         </div>
         <div className="min-w-0">
-          <h4 className="text-[10px] font-black text-primary uppercase tracking-widest mb-0.5">{t("ai_content_convention")}</h4>
+          <h4 className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">{t("ai_content_convention")}</h4>
           <p className="text-[11px] text-primary/80 font-medium leading-relaxed italic">
             {t.rich("aikb_sub.convention_desc", {
               0: (chunks) => <span className="font-bold">{chunks}</span>,
               1: (chunks) => <span className="font-bold">{chunks}</span>,
               2: (chunks) => <span className="font-bold">{chunks}</span>,
-              3: (chunks) => <span className="font-bold">{chunks}</span>
+              3: (chunks) => <span className="font-bold">{chunks}</span>,
             })}
+          </p>
+          <p className="text-[10px] text-primary/60 font-medium mt-2 flex items-center gap-1.5">
+            <ShieldAlert size={11} />
+            Upload cùng <code className="font-mono font-black">source</code> sẽ xóa chunks cũ và nạp lại — không bao giờ có conflict.
           </p>
         </div>
       </div>
 
-      {/* Tabs & Search Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center bg-surface border border-border rounded-ds-2xl p-1 shadow-sm">
-          <TabButton active={activeTab === "items"} onClick={() => setActiveTab("items")} icon={<LayoutGrid size={14} />} label={t("tab_kb_items")} />
-          <TabButton active={activeTab === "review"} onClick={() => setActiveTab("review")} icon={<History size={14} />} label={t("tab_review_version")} />
-          <TabButton active={activeTab === "quality"} onClick={() => setActiveTab("quality")} icon={<Activity size={14} />} label={t("tab_usage_quality")} />
+      {/* Search & Filter */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[260px]">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-txt-muted" size={16} />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t("aikb_sub.search_placeholder")}
+            className="w-full pl-10 pr-4 py-2 bg-surface border border-border rounded-ds-xl text-xs outline-none focus:border-primary shadow-sm text-txt-primary placeholder:text-txt-muted transition-all"
+          />
         </div>
-
-        {activeTab === "items" && (
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-txt-muted" size={16} />
-              <input type="text" placeholder={t("aikb_sub.search_placeholder")} className="pl-10 pr-4 py-2 bg-surface border border-border rounded-ds-xl text-xs outline-none focus:border-primary shadow-sm min-w-[280px] text-txt-primary placeholder:text-txt-muted" />
-            </div>
-            <div className="flex items-center bg-surface border border-border rounded-ds-xl p-1 shadow-sm text-[10px] font-bold">
-              {["all", "Published", "Draft", "Needs Review", "Disabled"].map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setStatusFilter(f)}
-                  className={`px-3 py-1 rounded-ds-lg transition-all ${statusFilter === f ? "bg-main text-txt-primary" : "text-txt-muted hover:text-txt-secondary uppercase"}`}
-                >
-                  {f === 'all' ? t("common.all") : f}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {activeTab === "items" && <KBItemsTab selectedId={selectedId} setSelectedId={setSelectedId} t={t} selectedItem={selectedItem} />}
-      {activeTab === "review" && <ReviewTab t={t} />}
-      {activeTab === "quality" && <QualityTab t={t} />}
-    </div>
-  );
-}
-
-// Sub-component: KB Items Tab
-function KBItemsTab({ selectedId, setSelectedId, t, selectedItem }: any) {
-  return (
-    <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-      {/* Left Column - KB Table */}
-      <div className="xl:col-span-8 bg-surface border border-border rounded-ds-3xl shadow-sm overflow-hidden transition-colors duration-300">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-main/50 border-b border-border">
-              <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_title")}</th>
-              <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_category")}</th>
-              <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_source")}</th>
-              <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_status")}</th>
-              <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_updated")}</th>
-              <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_editor")}</th>
-              <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest text-right">Action</th>
-              <th className="px-6 py-4"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {aikbMockData.kbItems.map((item) => (
-              <tr
-                key={item.id}
-                onClick={() => setSelectedId(item.id)}
-                className={`hover:bg-main/50 transition-all cursor-pointer group ${selectedId === item.id ? 'bg-primary/5' : ''}`}
-              >
-                <td className="px-6 py-4">
-                  <div className="min-w-[180px]">
-                    <p className="text-xs font-bold text-txt-primary group-hover:text-primary transition-colors">{item.title}</p>
-                    <p className="text-[10px] text-txt-muted font-medium mt-0.5">{item.id}</p>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2.5 py-1 rounded-ds-lg bg-primary/10 text-primary text-[10px] font-bold border border-primary/20">
-                    {item.category}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-[11px] font-medium text-txt-muted italic">
-                  {item.source}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <StatusBadge status={item.status} />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-[10px] font-medium text-txt-muted">
-                  {item.updatedAt.split(' ')[0]}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-[11px] font-bold text-txt-primary">
-                  {item.editor}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right">
-                  <button className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest">{item.action}</button>
-                </td>
-                <td className="px-6 py-4">
-                  <ChevronRight size={14} className={`text-txt-muted/30 transition-transform ${selectedId === item.id ? 'translate-x-1 text-primary' : 'group-hover:translate-x-1'}`} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Right Column - Detail Preview */}
-      <div className="xl:col-span-4 space-y-6 sticky top-[104px]">
-        {selectedItem ? (
-          <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm animate-in slide-in-from-right-4 duration-300 transition-colors">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-txt-primary">{selectedItem.title}</h3>
-              <MoreHorizontal size={18} className="text-txt-muted cursor-pointer hover:text-txt-primary" />
-            </div>
-
-            <div className="flex flex-wrap gap-2 mb-8">
-              <StatusBadge status={selectedItem.status} />
-              <span className="px-2.5 py-1 rounded-ds-lg bg-main text-txt-secondary text-[10px] font-bold border border-border">
-                {selectedItem.category}
-              </span>
-              {selectedItem.version && (
-                <span className="px-2.5 py-1 rounded-ds-lg bg-primary/10 text-primary text-[10px] font-black border border-primary/20">
-                  {selectedItem.version}
-                </span>
-              )}
-            </div>
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 gap-5">
-                <DetailRow icon={<Hash size={16} />} label={t("kb_id")} value={selectedItem.id} />
-                <DetailRow icon={<FileText size={16} />} label={t("col_source")} value={selectedItem.sourceFile || "Manual entry"} />
-                <DetailRow icon={<User size={16} />} label={t("col_editor")} value={selectedItem.editor} />
-                <DetailRow icon={<Clock size={16} />} label={t("col_updated")} value={selectedItem.updatedAt} />
-              </div>
-
-              <div className="pt-6 border-t border-border">
-                <p className="text-[10px] font-black text-txt-muted uppercase tracking-widest mb-3">{t("kb_summary")}</p>
-                <div className="bg-main border border-border rounded-ds-2xl p-4">
-                  <p className="text-xs text-txt-secondary font-medium leading-relaxed italic">
-                    "{selectedItem.summary || t("aikb_sub.no_summary")}"
-                  </p>
-                </div>
-              </div>
-
-              {selectedItem.versionNote && (
-                <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-2xl p-4">
-                  <div className="flex items-center gap-2 mb-2 text-amber-600">
-                    <Tag size={14} />
-                    <p className="text-[10px] font-black uppercase tracking-widest">{t("version_note")}</p>
-                  </div>
-                  <p className="text-xs text-amber-600/80 font-medium">{selectedItem.versionNote}</p>
-                </div>
-              )}
-
-              <div className="pt-6 border-t border-border space-y-4">
-                <p className="text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("admin_actions")}</p>
-                <textarea
-                  placeholder={t("aikb_sub.internal_note_placeholder")}
-                  className="w-full p-4 bg-main border border-border rounded-ds-2xl text-xs outline-none focus:bg-surface focus:border-primary transition-all min-h-[100px] text-txt-primary placeholder:text-txt-muted"
-                />
-                <div className="grid grid-cols-3 gap-3">
-                  <ActionButton icon={<Edit3 size={14} />} label={t("btn_edit_content")} color="indigo" />
-                  <ActionButton icon={<Save size={14} />} label={t("btn_save_note")} color="gray" />
-                  <ActionButton icon={<XCircle size={14} />} label={t("btn_disable")} color="rose" />
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-surface border border-border rounded-ds-3xl p-12 text-center transition-colors">
-            <Database size={48} className="mx-auto text-txt-muted/10 mb-4" />
-            <p className="text-sm font-bold text-txt-muted">{t("aikb_sub.select_to_view")}</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// Sub-component: Review & Version Tab
-function ReviewTab({ t }: any) {
-  return (
-    <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-      {/* Left Column - Version History */}
-      <div className="xl:col-span-8 bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-6">
-        <div className="flex items-center gap-2 mb-2">
-          <History size={18} className="text-primary" />
-          <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">
-            {t("version_history")} - <span className="text-primary">Chính sách hoàn tiền</span>
-          </h3>
-          <span className="ml-auto text-[10px] font-medium text-txt-muted italic">Đang phục vụ AI: v3</span>
-        </div>
-
-        <div className="space-y-4 relative before:absolute before:left-5 before:top-4 before:bottom-4 before:w-px before:bg-border">
-          {aikbMockData.versions.map((v, i) => (
-            <div key={i} className="flex gap-6 group relative">
-              <div className={`w-10 h-10 rounded-ds-xl flex items-center justify-center border-4 border-surface z-10 flex-shrink-0 transition-colors ${v.isServing ? 'bg-primary text-white' : 'bg-main text-txt-muted'}`}>
-                <Edit3 size={16} />
-              </div>
-              <div className="flex-1 bg-main/30 border border-border rounded-ds-2xl p-4 group-hover:bg-main transition-colors">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-sm font-black text-txt-primary">{v.v}</span>
-                  <StatusBadge status={v.status} />
-                  {v.isServing && <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[8px] font-black uppercase">Đang phục vụ</span>}
-                </div>
-                <p className="text-xs text-txt-secondary font-medium mb-4 leading-relaxed italic">"{v.desc}"</p>
-                <div className="flex items-center flex-wrap gap-x-6 gap-y-2 text-[10px]">
-                  <div className="flex items-center gap-1.5 text-txt-primary font-bold">
-                    <User size={12} className="text-txt-muted" /> {v.author}
-                  </div>
-                  <div className="flex items-center gap-1.5 text-txt-muted font-medium">
-                    <Clock size={12} /> {v.date}
-                  </div>
-                  <div className="text-primary font-black uppercase tracking-widest">{v.stats}</div>
-                </div>
-                {/* <div className="flex gap-2 mt-4">
-                  <button className="px-4 py-1.5 bg-surface border border-border rounded-ds-lg text-[10px] font-black hover:bg-main transition-all">Xem chi tiết</button>
-                  {i > 0 && <button className="px-4 py-1.5 bg-surface border border-border rounded-ds-lg text-[10px] font-black hover:bg-main transition-all flex items-center gap-1">
-                    <RotateCcw size={10} /> Rollback
-                  </button>}
-                </div> */}
-              </div>
-            </div>
+        <div className="flex items-center bg-surface border border-border rounded-ds-xl p-1 shadow-sm text-[10px] font-bold">
+          {["all", "Published", "Draft"].map((f) => (
+            <button
+              key={f}
+              onClick={() => setStatusFilter(f)}
+              className={`px-3 py-1.5 rounded-ds-lg transition-all uppercase ${
+                statusFilter === f
+                  ? "bg-main text-txt-primary shadow-sm"
+                  : "text-txt-muted hover:text-txt-secondary"
+              }`}
+            >
+              {f === "all" ? t("common.all") : f}
+            </button>
           ))}
         </div>
       </div>
 
-      {/* Right Column - Diff Comparison */}
-      <div className="xl:col-span-4 bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-6 sticky top-[104px]">
-        <div className="flex items-center gap-2 mb-2">
-          <ArrowLeftRight size={18} className="text-indigo-500" />
-          <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">So sánh thay đổi (v3 vs v2)</h3>
-        </div>
-
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest">Cũ</p>
-            <div className="p-4 bg-rose-500/5 border border-rose-500/10 rounded-ds-2xl text-xs text-rose-700/80 font-medium leading-relaxed italic line-through decoration-rose-500/30">
-              {aikbMockData.comparison.old}
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Mới</p>
-            <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-ds-2xl text-xs text-emerald-700 font-bold leading-relaxed italic">
-              {aikbMockData.comparison.new}
-            </div>
-          </div>
-        </div>
-
-        <div className="p-4 bg-main border border-border rounded-ds-2xl flex gap-3">
-          <Info size={16} className="text-txt-muted flex-shrink-0" />
-          <p className="text-[10px] text-txt-muted font-medium leading-relaxed italic">
-            {aikbMockData.comparison.stats}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Sub-component: Usage & Quality Tab
-function QualityTab({ t }: any) {
-  const data = aikbMockData.usageStats;
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Most Used Topics */}
-        <div className="lg:col-span-7 bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
-          <div className="flex items-center gap-2 mb-8">
-            <TrendingUp size={18} className="text-primary" />
-            <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">Topic được dùng nhiều nhất</h3>
-          </div>
-          <div className="space-y-6">
-            {data.mostUsed.map((item, i) => (
-              <UsageBar key={i} topic={item.topic} usage={item.usage} percentage={item.percentage} />
-            ))}
-          </div>
-        </div>
-
-        {/* High Fallback Topics */}
-        <div className="lg:col-span-5 bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
-          <div className="flex items-center gap-2 mb-8">
-            <AlertTriangle size={18} className="text-amber-500" />
-            <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">Topic dùng nhiều fallback</h3>
-          </div>
-          <div className="space-y-3">
-            {data.highFallback.map((item, i) => (
-              <div key={i} className="flex items-center justify-between p-4 bg-main rounded-ds-2xl border border-border group hover:bg-main/80 cursor-pointer transition-all">
-                <span className="text-xs font-bold text-txt-primary">{item.topic}</span>
-                <span className="px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 border border-rose-500/20 text-[9px] font-black">{item.count} fallback</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Low Confidence Table */}
-        <div className="lg:col-span-8 bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm h-fit">
-          <div className="p-6 border-b border-border flex items-center gap-2">
-            <ShieldCheck size={18} className="text-rose-500" />
-            <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">Topic confidence thấp</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-main/50 border-b border-border">
-                  <th className="px-6 py-4 text-[9px] font-black text-txt-muted uppercase tracking-widest">Topic</th>
-                  <th className="px-6 py-4 text-[9px] font-black text-txt-muted uppercase tracking-widest">Confidence</th>
-                  <th className="px-6 py-4 text-[9px] font-black text-txt-muted uppercase tracking-widest text-center">Fallback (7N)</th>
-                  <th className="px-6 py-4"></th>
+      {/* Main Content */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+        {/* Left — KB Table */}
+        <div className="xl:col-span-8 bg-surface border border-border rounded-ds-3xl shadow-sm overflow-hidden transition-colors">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-main/50 border-b border-border">
+                <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_title")}</th>
+                <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_category")}</th>
+                <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Chunks</th>
+                <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_status")}</th>
+                <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_updated")}</th>
+                <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest text-right">Actions</th>
+                <th className="px-4 py-4" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="py-20 text-center">
+                    <div className="flex flex-col items-center gap-3 text-txt-muted">
+                      <Loader2 size={24} className="animate-spin text-primary" />
+                      <span className="text-xs font-bold">Đang tải Knowledge Base...</span>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {data.lowConfidence.map((item, i) => (
-                  <tr key={i} className="hover:bg-main/50 transition-colors">
-                    <td className="px-6 py-4 text-xs font-bold text-txt-primary">{item.topic}</td>
-                    <td className="px-6 py-4 min-w-[140px]">
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 h-1 bg-main rounded-full overflow-hidden border border-border">
-                          <div className={`h-full rounded-full ${item.confidence < 50 ? 'bg-rose-500' : 'bg-amber-500'}`} style={{ width: `${item.confidence}%` }}></div>
-                        </div>
-                        <span className="text-[10px] font-black text-txt-primary">{item.confidence}%</span>
+              ) : error ? (
+                <tr>
+                  <td colSpan={7} className="py-20 text-center text-xs font-bold text-rose-500">
+                    <div className="flex flex-col items-center gap-3">
+                      <AlertTriangle size={24} />
+                      <span>{error}</span>
+                      <button onClick={fetchItems} className="text-primary underline font-bold text-xs">Thử lại</button>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredItems.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-20 text-center">
+                    <div className="flex flex-col items-center gap-4 text-txt-muted">
+                      <Database size={40} className="opacity-20" />
+                      <p className="text-xs font-bold">
+                        {items.length === 0 ? "Chưa có KB item nào. Nhấn \"+ Thêm KB\" để bắt đầu." : "Không tìm thấy kết quả phù hợp."}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredItems.map((item) => (
+                  <tr
+                    key={item.source}
+                    onClick={() => setSelectedSource(item.source)}
+                    className={`hover:bg-main/50 transition-all cursor-pointer group ${
+                      selectedSource === item.source ? "bg-primary/5" : ""
+                    }`}
+                  >
+                    <td className="px-6 py-4">
+                      <div className="min-w-[160px]">
+                        <p className="text-xs font-bold text-txt-primary group-hover:text-primary transition-colors">{item.title}</p>
+                        <p className="text-[10px] text-txt-muted font-mono mt-0.5 opacity-70">{item.source}</p>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center text-xs font-bold text-txt-secondary">{item.fallback}</td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest">Đánh dấu cải thiện</button>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-2.5 py-1 rounded-ds-lg bg-primary/10 text-primary text-[10px] font-bold border border-primary/20">
+                        {item.category || "General"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-[11px] font-black text-txt-primary">{item.chunkCount ?? "—"}</span>
+                      <span className="text-[9px] text-txt-muted ml-1">chunks</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <StatusBadge status={item.status} />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-[10px] font-medium text-txt-muted">
+                      {item.updatedAt ? new Date(item.updatedAt).toLocaleDateString("vi-VN") : "—"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleToggleStatus(item)}
+                          disabled={togglingSource === item.source}
+                          className="text-[9px] font-black text-txt-muted hover:text-primary uppercase tracking-widest border border-border rounded-ds-lg px-2.5 py-1 hover:border-primary/40 hover:bg-primary/5 transition-all disabled:opacity-40"
+                          title={item.status === "Published" ? "Chuyển sang Draft" : "Publish"}
+                        >
+                          {togglingSource === item.source ? (
+                            <Loader2 size={10} className="animate-spin" />
+                          ) : item.status === "Published" ? "Draft" : "Publish"}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item.source, item.title)}
+                          disabled={deletingSource === item.source}
+                          className="w-7 h-7 flex items-center justify-center rounded-ds-lg text-txt-muted/30 hover:text-rose-500 hover:bg-rose-500/10 transition-all disabled:opacity-40"
+                          title="Xóa KB item"
+                        >
+                          {deletingSource === item.source ? (
+                            <Loader2 size={12} className="animate-spin text-rose-500" />
+                          ) : (
+                            <Trash2 size={13} />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <ChevronRight
+                        size={14}
+                        className={`text-txt-muted/30 transition-transform ${
+                          selectedSource === item.source ? "translate-x-1 text-primary" : "group-hover:translate-x-1"
+                        }`}
+                      />
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {/* Recently Updated Poor Performance */}
-        <div className="lg:col-span-4 bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-6">
-          <div className="flex items-center gap-2 mb-2">
-            <BarChart2 size={18} className="text-txt-muted" />
-            <h3 className="text-sm font-black text-txt-primary uppercase tracking-widest">Mới cập nhật nhưng tín hiệu kém</h3>
-          </div>
-          <div className="space-y-6">
-            {data.poorPerformance.map((item, i) => (
-              <div key={i} className="space-y-2 group cursor-pointer">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-txt-primary group-hover:text-primary transition-colors">{item.topic}</span>
-                  <span className="text-[9px] font-black text-rose-500">{item.confidence}%</span>
+        {/* Right — Detail Panel */}
+        <div className="xl:col-span-4 sticky top-[104px] space-y-4">
+          {selectedItem ? (
+            <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm animate-in slide-in-from-right-4 duration-300 transition-colors">
+              {/* Header */}
+              <div className="flex items-start justify-between gap-3 mb-5">
+                <div className="min-w-0">
+                  <h3 className="text-base font-black text-txt-primary leading-snug">{selectedItem.title}</h3>
+                  <p className="text-[10px] font-mono text-txt-muted mt-0.5 opacity-70">{selectedItem.source}</p>
                 </div>
-                <div className="flex items-center justify-between text-[9px] font-medium text-txt-muted">
-                  <span>Cập nhật: {item.updated}</span>
-                </div>
-                <div className="h-1 w-full bg-main rounded-full overflow-hidden border border-border">
-                  <div className="h-full bg-rose-500/50 group-hover:bg-rose-500 transition-colors" style={{ width: `${item.confidence}%` }}></div>
-                </div>
+                <StatusBadge status={selectedItem.status} />
               </div>
-            ))}
+
+              {/* Category pill */}
+              {selectedItem.category && (
+                <div className="mb-6">
+                  <span className="px-3 py-1 rounded-ds-lg bg-primary/10 text-primary text-[10px] font-bold border border-primary/20">
+                    {selectedItem.category}
+                  </span>
+                </div>
+              )}
+
+              {/* Details */}
+              <div className="space-y-4">
+                <DetailRow icon={<Hash size={14} />} label="Source slug" value={selectedItem.source} mono />
+                <DetailRow icon={<FileText size={14} />} label="File nguồn" value={selectedItem.filename || "Manual entry"} />
+                <DetailRow
+                  icon={<Database size={14} />}
+                  label="Vector chunks"
+                  value={`${selectedItem.chunkCount ?? 0} chunks trong VectorStore`}
+                />
+                <DetailRow icon={<User size={14} />} label={t("col_editor")} value={selectedItem.updatedBy || "—"} />
+                <DetailRow
+                  icon={<Clock size={14} />}
+                  label={t("col_updated")}
+                  value={selectedItem.updatedAt ? new Date(selectedItem.updatedAt).toLocaleString("vi-VN") : "—"}
+                />
+              </div>
+
+              {/* Ingest info box */}
+              <div className="mt-6 p-4 bg-primary/5 border border-primary/10 rounded-ds-2xl flex gap-3">
+                <Info size={14} className="text-primary flex-shrink-0 mt-0.5" />
+                <p className="text-[10px] text-primary/80 font-medium leading-relaxed">
+                  Để cập nhật nội dung, upload file mới với source <span className="font-mono font-black">"{selectedItem.source}"</span>.
+                  Hệ thống sẽ tự động xóa {selectedItem.chunkCount} chunks cũ và nạp lại — không bao giờ có conflict.
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="mt-6 pt-5 border-t border-border grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setShowUpload(true)}
+                  className="flex items-center justify-center gap-2 py-2.5 rounded-ds-xl border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 transition-all text-[11px] font-black"
+                >
+                  <Upload size={14} />
+                  Re-ingest
+                </button>
+                <button
+                  onClick={() => handleDelete(selectedItem.source, selectedItem.title)}
+                  disabled={deletingSource === selectedItem.source}
+                  className="flex items-center justify-center gap-2 py-2.5 rounded-ds-xl border border-rose-500/20 bg-rose-500/5 text-rose-600 hover:bg-rose-500/10 transition-all text-[11px] font-black disabled:opacity-40"
+                >
+                  {deletingSource === selectedItem.source ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Trash2 size={14} />
+                  )}
+                  Xóa
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-surface border border-border rounded-ds-3xl p-12 text-center transition-colors">
+              <div className="w-16 h-16 rounded-ds-2xl bg-main flex items-center justify-center text-txt-muted/20 mx-auto mb-4">
+                <Database size={32} />
+              </div>
+              <p className="text-xs font-bold text-txt-muted">{t("aikb_sub.select_to_view")}</p>
+              <p className="text-[10px] text-txt-muted/60 mt-1">Chọn một KB item để xem chi tiết</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Upload Modal */}
+      {showUpload && (
+        <IngestModal
+          existingSources={items.map((i) => i.source)}
+          onClose={() => setShowUpload(false)}
+          onSuccess={handleIngestSuccess}
+          prefillSource={selectedSource ?? undefined}
+        />
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// IngestModal — Upload + Conflict Warning
+// ─────────────────────────────────────────────────────────────────────────────
+const KB_CATEGORIES = ["Policy", "FAQ", "Guide", "Payment", "Check-in", "Organizer", "Blockchain", "General"];
+
+function IngestModal({
+  existingSources,
+  onClose,
+  onSuccess,
+  prefillSource,
+}: {
+  existingSources: string[];
+  onClose: () => void;
+  onSuccess: (item: KbItemDto) => void;
+  prefillSource?: string;
+}) {
+  const [file, setFile] = useState<File | null>(null);
+  const [source, setSource] = useState(prefillSource ?? "");
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("Policy");
+  const [status, setStatus] = useState<"Published" | "Draft">("Published");
+  const [submitting, setSubmitting] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const sourceExists = source.trim() !== "" && existingSources.includes(source.trim());
+  const isReingest = sourceExists;
+
+  const canSubmit = file && source.trim() && title.trim();
+
+  const handleFile = (f: File) => setFile(f);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) handleFile(f);
+  };
+
+  const handleSubmit = async () => {
+    if (!canSubmit) return;
+    setSubmitting(true);
+    try {
+      const result = await adminKbApi.ingestFile(file!, source.trim(), title.trim(), category, status);
+      onSuccess(result);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Ingest thất bại. Vui lòng thử lại.";
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Close on backdrop click
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).id === "kb-modal-backdrop") onClose();
+  };
+
+  return (
+    <div
+      id="kb-modal-backdrop"
+      onClick={handleBackdropClick}
+      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+    >
+      <div className="bg-surface border border-border rounded-ds-3xl shadow-2xl w-full max-w-lg animate-in zoom-in-95 duration-200">
+        {/* Modal Header */}
+        <div className="flex items-center justify-between p-6 border-b border-border">
+          <div>
+            <h2 className="text-base font-black text-txt-primary">
+              {isReingest ? "Re-ingest KB Item" : "Thêm KB Item"}
+            </h2>
+            <p className="text-[11px] text-txt-muted mt-0.5">
+              {isReingest
+                ? "Nội dung cũ sẽ bị xóa và thay thế hoàn toàn"
+                : "Upload file để nạp kiến thức mới cho AI"}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-ds-lg text-txt-muted hover:bg-main hover:text-txt-primary transition-all"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-5">
+          {/* Replace Warning */}
+          {isReingest && (
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-2xl p-4 flex gap-3">
+              <AlertTriangle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[11px] font-black text-amber-700 dark:text-amber-500 mb-1">
+                  Source <span className="font-mono">"{source}"</span> đã tồn tại
+                </p>
+                <p className="text-[10px] text-amber-600/80 leading-relaxed">
+                  Upload sẽ xóa toàn bộ chunks cũ và nạp lại từ file mới. AI sẽ chỉ thấy phiên bản mới nhất — không có conflict.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* File Drop Zone */}
+          <div
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={handleDrop}
+            onClick={() => inputRef.current?.click()}
+            className={`border-2 border-dashed rounded-ds-2xl p-8 text-center cursor-pointer transition-all ${
+              dragOver
+                ? "border-primary bg-primary/10"
+                : file
+                ? "border-emerald-500/50 bg-emerald-500/5"
+                : "border-border hover:border-primary/50 hover:bg-primary/5"
+            }`}
+          >
+            <input
+              ref={inputRef}
+              type="file"
+              accept=".pdf,.docx,.doc,.txt,.md,.csv"
+              className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+            />
+            {file ? (
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-10 h-10 rounded-ds-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+                  <FileText size={20} />
+                </div>
+                <p className="text-xs font-bold text-emerald-600">{file.name}</p>
+                <p className="text-[10px] text-txt-muted">{(file.size / 1024).toFixed(1)} KB</p>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setFile(null); }}
+                  className="text-[10px] font-bold text-rose-500 hover:underline mt-1"
+                >
+                  Xóa file
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2 text-txt-muted">
+                <div className="w-10 h-10 rounded-ds-xl bg-main border border-border flex items-center justify-center">
+                  <Upload size={18} />
+                </div>
+                <p className="text-xs font-bold">Kéo thả hoặc click để chọn file</p>
+                <p className="text-[10px]">PDF, DOCX, TXT, MD, CSV — tối đa 20MB</p>
+              </div>
+            )}
+          </div>
+
+          {/* Source */}
+          <div>
+            <label className="text-[10px] font-black text-txt-muted uppercase tracking-widest block mb-1.5">
+              Source Slug <span className="text-rose-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={source}
+              onChange={(e) => setSource(e.target.value.toLowerCase().replace(/\s+/g, "_"))}
+              placeholder="vd: fee_policy, checkin_guide"
+              className={`w-full px-4 py-2.5 rounded-ds-xl border text-xs font-mono outline-none transition-all bg-main text-txt-primary placeholder:text-txt-muted ${
+                sourceExists ? "border-amber-500/50 focus:border-amber-500" : "border-border focus:border-primary"
+              }`}
+            />
+            <p className="text-[10px] text-txt-muted mt-1">
+              Slug cố định, dùng để định danh. Cùng slug = replace thay vì duplicate.
+            </p>
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className="text-[10px] font-black text-txt-muted uppercase tracking-widest block mb-1.5">
+              Tên hiển thị <span className="text-rose-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="vd: Chính sách phí giao dịch"
+              className="w-full px-4 py-2.5 rounded-ds-xl border border-border focus:border-primary text-xs outline-none transition-all bg-main text-txt-primary placeholder:text-txt-muted"
+            />
+          </div>
+
+          {/* Category + Status */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-[10px] font-black text-txt-muted uppercase tracking-widest block mb-1.5">Category</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-ds-xl border border-border focus:border-primary text-xs outline-none bg-main text-txt-primary"
+              >
+                {KB_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-txt-muted uppercase tracking-widest block mb-1.5">Status</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as "Published" | "Draft")}
+                className="w-full px-4 py-2.5 rounded-ds-xl border border-border focus:border-primary text-xs outline-none bg-main text-txt-primary"
+              >
+                <option value="Published">Published — AI sẽ dùng ngay</option>
+                <option value="Draft">Draft — lưu nhưng chưa dùng</option>
+              </select>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
 
-// Atomic UI Components
-function UsageBar({ topic, usage, percentage }: any) {
-  return (
-    <div className="space-y-2 group cursor-pointer">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-bold text-txt-primary group-hover:text-primary transition-colors">{topic}</span>
-        <div className="flex items-center gap-1 text-[10px] font-bold text-txt-muted uppercase tracking-widest">
-          {usage} lượt dùng <TrendingUp size={10} className="text-emerald-500" />
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 px-6 pb-6 pt-2">
+          <button
+            onClick={onClose}
+            disabled={submitting}
+            className="px-5 py-2.5 rounded-ds-xl border border-border text-txt-muted hover:bg-main text-xs font-bold transition-all"
+          >
+            Hủy
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!canSubmit || submitting}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-ds-xl text-xs font-black transition-all shadow-lg ${
+              isReingest
+                ? "bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/20"
+                : "bg-primary hover:bg-primary-hover text-white shadow-primary/20"
+            } disabled:opacity-40 disabled:cursor-not-allowed`}
+          >
+            {submitting ? (
+              <>
+                <Loader2 size={14} className="animate-spin" />
+                Đang nạp...
+              </>
+            ) : (
+              <>
+                <Upload size={14} />
+                {isReingest ? "Xóa cũ & Re-ingest" : "Ingest vào KB"}
+              </>
+            )}
+          </button>
         </div>
       </div>
-      <div className="h-1.5 w-full bg-main rounded-full overflow-hidden border border-border shadow-inner">
-        <div
-          className="h-full bg-primary/40 group-hover:bg-primary transition-all duration-500"
-          style={{ width: `${percentage}%` }}
-        ></div>
-      </div>
     </div>
   );
 }
 
-function StatsCard({ icon, label, value, sub, color }: any) {
-  const colors: any = {
+// ─────────────────────────────────────────────────────────────────────────────
+// Atomic UI Components
+// ─────────────────────────────────────────────────────────────────────────────
+function StatsCard({ icon, label, value, sub, color }: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  sub: string;
+  color: string;
+}) {
+  const colors: Record<string, string> = {
     indigo: "bg-primary/10 text-primary",
     emerald: "bg-emerald-500/10 text-emerald-600",
     amber: "bg-amber-500/10 text-amber-600",
     rose: "bg-rose-500/10 text-rose-600",
     gray: "bg-main text-txt-muted",
   };
-
   return (
     <div className="bg-surface border border-border rounded-ds-2xl p-5 shadow-sm transition-colors">
       <div className="flex items-center gap-3 mb-3">
-        <div className={`w-9 h-9 rounded-ds-xl flex items-center justify-center ${colors[color]}`}>
-          {icon}
-        </div>
+        <div className={`w-9 h-9 rounded-ds-xl flex items-center justify-center ${colors[color]}`}>{icon}</div>
         <span className="text-[10px] font-bold text-txt-muted uppercase tracking-widest">{label}</span>
       </div>
       <p className="text-xl font-black text-txt-primary tracking-tight mb-1">{value}</p>
@@ -482,67 +723,33 @@ function StatsCard({ icon, label, value, sub, color }: any) {
   );
 }
 
-function TabButton({ active, onClick, icon, label }: any) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-2 px-6 py-2 text-xs font-bold rounded-ds-xl transition-all ${active ? "bg-main text-primary shadow-sm border border-border" : "text-txt-muted hover:text-txt-secondary"
-        }`}
-    >
-      {icon}
-      {label}
-    </button>
-  );
-}
-
 function StatusBadge({ status }: { status: string }) {
-  const t = useTranslations("Admin");
-  const styles: any = {
-    "Published": "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-    "Needs Review": "bg-amber-500/10 text-amber-600 border-amber-500/20",
-    "Draft": "bg-primary/10 text-primary border-primary/20",
-    "Disabled": "bg-main text-txt-muted border-border",
+  const styles: Record<string, string> = {
+    Published: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    Draft: "bg-primary/10 text-primary border-primary/20",
   };
-
-  const labels: any = {
-    "Published": t("kb_status_published"),
-    "Needs Review": t("kb_status_needs_review"),
-    "Draft": t("kb_status_draft"),
-    "Disabled": t("kb_status_disabled"),
-  };
-
   return (
-    <div className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-black border uppercase ${styles[status] || styles["Draft"]}`}>
-      {labels[status] || status}
+    <div className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-black border uppercase ${styles[status] ?? "bg-main text-txt-muted border-border"}`}>
+      {status}
     </div>
   );
 }
 
-function DetailRow({ icon, label, value }: any) {
+function DetailRow({ icon, label, value, mono }: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  mono?: boolean;
+}) {
   return (
-    <div className="flex items-start gap-4">
-      <div className="w-8 h-8 rounded-ds-lg bg-main border border-border flex items-center justify-center text-txt-muted flex-shrink-0">
+    <div className="flex items-start gap-3">
+      <div className="w-7 h-7 rounded-ds-lg bg-main border border-border flex items-center justify-center text-txt-muted flex-shrink-0">
         {icon}
       </div>
       <div className="min-w-0">
         <p className="text-[9px] font-black text-txt-muted uppercase tracking-widest mb-0.5">{label}</p>
-        <p className="text-xs font-bold text-txt-primary break-all">{value}</p>
+        <p className={`text-xs font-bold text-txt-primary break-all ${mono ? "font-mono" : ""}`}>{value}</p>
       </div>
     </div>
-  );
-}
-
-function ActionButton({ icon, label, color }: any) {
-  const colors: any = {
-    indigo: "text-primary hover:bg-primary/10 border-primary/20 bg-primary/5",
-    gray: "text-txt-muted hover:bg-main border-border bg-main/50",
-    rose: "text-rose-600 hover:bg-rose-500/10 border-rose-500/20 bg-rose-500/5",
-  };
-
-  return (
-    <button className={`flex flex-col items-center justify-center gap-2 p-3 rounded-ds-2xl border transition-all ${colors[color]}`}>
-      {icon}
-      <span className="text-[8px] font-black uppercase tracking-wider">{label}</span>
-    </button>
   );
 }
