@@ -307,7 +307,7 @@ export default function HomePage() {
                     className="group relative overflow-hidden w-full sm:w-auto bg-button-primary-bg-default text-button-primary-text-default font-bold py-4 px-10 rounded-ds-lg shadow-lg shadow-primary/30 text-center cursor-pointer"
                   >
                     <span className="absolute w-[250%] aspect-square bg-button-accent-bg-hover rounded-full transition-transform duration-900 ease-out -translate-x-1/2 -translate-y-1/2 scale-0 group-hover:scale-100 z-0" style={{ top: 'var(--y, 50%)', left: 'var(--x, 50%)' }}></span>
-                    <span className="relative z-10">{t('explore_now', { defaultMessage: 'Khám phá ngay' })}</span>
+                    <span className="relative z-10">{t('explore_resale_marketplace', { defaultMessage: 'Khám phá Chợ vé bán lại' })}</span>
                   </Link>
                   <Link
                     href="/vi/legal/terms-of-use"

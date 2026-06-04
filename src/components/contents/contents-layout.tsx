@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { TocLink } from "@/src/components/contents/toc-link";
 import {
     getAllLegalSlugs,
     getLegalHref,
@@ -117,7 +118,7 @@ function TocCard({ items, compact = false }: { items: TocItem[]; compact?: boole
 
             <div className={compact ? "mt-3 grid gap-2 sm:grid-cols-2" : "mt-3 space-y-1"}>
                 {items.map((item) => (
-                    <a
+                    <TocLink
                         key={item.id}
                         href={`#${item.id}`}
                         className={[
@@ -127,7 +128,7 @@ function TocCard({ items, compact = false }: { items: TocItem[]; compact?: boole
                         ].join(" ")}
                     >
                         {item.title}
-                    </a>
+                    </TocLink>
                 ))}
             </div>
         </nav>

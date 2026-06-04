@@ -19,92 +19,131 @@ requiredForFlow:
 
 # Trung tâm trợ giúp EvoTicket
 
-Trung tâm trợ giúp này hướng dẫn các thao tác phổ biến trên EvoTicket theo đúng phạm vi sản phẩm được mô tả trong Deep Research: mua vé, thanh toán, nhận vé điện tử, quản lý My Tickets, resale trong hệ thống, Dynamic QR, check-in, refund, dispute và AI chatbot.
+Trung tâm trợ giúp cung cấp hướng dẫn sử dụng EvoTicket theo từng nhu cầu: tạo tài khoản, mua vé, thanh toán, nhận vé, sử dụng Dynamic QR, bán lại vé, check-in, gửi yêu cầu hỗ trợ và xử lý tranh chấp.
 
-## 1. Mua vé
+## 1. Bắt đầu sử dụng EvoTicket
 
-Quy trình mua vé thông thường:
+### 1.1. Tạo tài khoản
 
-1. Xem danh sách sự kiện.
-2. Chọn sự kiện và suất diễn.
-3. Chọn loại vé hoặc ghế nếu sự kiện có sơ đồ ghế.
-4. Kiểm tra giá, phí nếu có và điều kiện tham dự.
-5. Tạo order và chuyển sang thanh toán.
-6. Chờ hệ thống xác nhận payment và phát hành vé điện tử.
+1. Chọn **Đăng ký** hoặc **Tạo tài khoản**.
+2. Nhập thông tin được yêu cầu.
+3. Đọc và đồng ý với [Điều khoản sử dụng](/vi/legal/terms-of-use) và [Chính sách bảo mật](/vi/legal/privacy-policy).
+4. Hoàn tất xác thực tài khoản theo hướng dẫn trên màn hình.
 
-Nếu order hết hạn trước khi thanh toán thành công, vé hoặc ghế có thể được giải phóng.
+Người dùng chịu trách nhiệm bảo mật thông tin đăng nhập và không chia sẻ tài khoản cho người khác sử dụng trong các giao dịch vé.
 
-## 2. Thanh toán
+### 1.2. Tìm kiếm sự kiện
 
-Người dùng nên thanh toán qua phương thức được hiển thị trong flow checkout. Sau khi thanh toán, trạng thái order cần được xác nhận trong hệ thống EvoTicket trước khi vé được phát hành.
+Người dùng có thể tìm sự kiện theo tên, địa điểm, thời gian, loại sự kiện hoặc trạng thái còn vé. Khi xem chi tiết sự kiện, hãy kiểm tra kỹ:
 
-Nếu bị trừ tiền nhưng chưa nhận vé, hãy chuẩn bị:
+- Tên sự kiện.
+- Thời gian và địa điểm.
+- Ban tổ chức.
+- Loại vé, khu vực ghế hoặc suất diễn.
+- Giá vé, phí và chính sách áp dụng.
+- Điều kiện check-in, hoàn tiền hoặc bán lại vé.
 
-- Mã order.
-- Thời điểm thanh toán.
-- Phương thức thanh toán.
-- Ảnh chụp hoặc chứng từ giao dịch nếu có.
-- Email hoặc số điện thoại tài khoản mua vé.
+## 2. Mua vé và thanh toán
 
-## 3. Nhận và quản lý vé
+### 2.1. Quy trình mua vé
 
-Sau khi payment được xác nhận hợp lệ, EvoTicket phát hành TicketAsset hoặc vé điện tử. Người dùng có thể kiểm tra vé trong My Tickets hoặc khu vực tương đương.
+1. Chọn sự kiện và suất diễn.
+2. Chọn loại vé hoặc ghế.
+3. Kiểm tra thông tin đơn hàng.
+4. Đọc các chính sách được dẫn tại bước thanh toán.
+5. Thanh toán qua phương thức được EvoTicket hỗ trợ.
+6. Chờ hệ thống xác nhận thanh toán và phát hành vé.
 
-Nếu NFT/provenance được áp dụng, quá trình mint có thể chạy bất đồng bộ sau khi vé điện tử đã được phát hành.
+Order chỉ được xem là hoàn tất khi EvoTicket nhận được xác nhận thanh toán hợp lệ theo flow hệ thống. Chi tiết được quy định tại [Điều kiện giao dịch chung](/vi/legal/general-transaction-conditions) và [Chính sách thanh toán](/vi/legal/payment-policy).
 
-## 4. Dynamic QR và check-in
+### 2.2. Nếu thanh toán lỗi
 
-Vé có thể sử dụng Dynamic QR để check-in. Người dùng cần bảo vệ QR và tài khoản, không chụp màn hình hoặc chia sẻ mã vé công khai.
+Nếu bạn đã thanh toán nhưng chưa nhận được vé, hãy thực hiện:
 
-Check-in dựa trên QR, trạng thái vé, quyền sử dụng, quyền checker/device và log hệ thống. Không nên hiểu rằng mỗi lượt scan luôn xác minh trực tiếp ownership on-chain tại thời điểm quét.
+1. Kiểm tra trạng thái đơn hàng trong tài khoản.
+2. Kiểm tra biến động tài khoản ngân hàng hoặc ví thanh toán.
+3. Lưu lại mã giao dịch, ảnh chụp biên lai hoặc thông báo từ ngân hàng/cổng thanh toán.
+4. Gửi yêu cầu hỗ trợ kèm mã order và chứng từ thanh toán.
 
-## 5. Vé bị khóa
+Trường hợp thanh toán thành công nhưng hệ thống chưa cấp vé sẽ được xử lý theo [Chính sách thanh toán](/vi/legal/payment-policy) và [Chính sách hoàn tiền](/vi/legal/refund-policy).
 
-Vé có thể bị khóa khi:
+## 3. Nhận vé và sử dụng vé
 
-- Đang listing resale.
-- Đang được giữ cho giao dịch resale.
-- Có tranh chấp hoặc rủi ro bảo mật.
-- Cần đồng bộ lại trạng thái payment, ticket hoặc dữ liệu kỹ thuật.
+Sau khi thanh toán được xác nhận, vé được hiển thị trong khu vực vé của tài khoản. Mỗi vé có thể bao gồm:
 
-Nếu vé bị khóa không rõ lý do, hãy gửi yêu cầu hỗ trợ kèm mã order hoặc mã vé.
+- Thông tin sự kiện.
+- Suất diễn, loại vé hoặc vị trí ghế.
+- Trạng thái vé.
+- Mã QR động hoặc phương thức xác thực tương ứng.
+- Thông tin truy vết kỹ thuật nếu sự kiện sử dụng NFT/blockchain.
 
-## 6. Bán lại vé
+Không chia sẻ ảnh chụp màn hình QR, mã vé hoặc thông tin tài khoản cho người khác. QR có thể thay đổi theo phiên, thời gian hoặc trạng thái vé.
 
-Nếu sự kiện và trạng thái vé cho phép, người dùng có thể listing vé trong hệ thống EvoTicket. Khi listing, QR có thể bị khóa để giảm rủi ro sử dụng song song.
+## 4. Check-in tại sự kiện
 
-Giá resale có thể bị giới hạn theo price cap hoặc cấu hình sự kiện. Đây là quy tắc nền tảng, không nên hiểu là nghĩa vụ pháp lý riêng nếu chưa có căn cứ rõ.
+Khi đến sự kiện:
 
-## 7. Hoàn tiền và sự kiện thay đổi
+1. Mở vé trong tài khoản EvoTicket.
+2. Hiển thị mã QR động cho checker.
+3. Đợi hệ thống xác nhận trạng thái vé.
+4. Chỉ sử dụng vé một lần cho lượt check-in hợp lệ, trừ khi sự kiện công bố cơ chế khác.
 
-Việc hoàn tiền phụ thuộc vào trạng thái giao dịch, trạng thái vé, trạng thái check-in, resale, xác nhận từ Organizer, cổng thanh toán và quy định pháp luật áp dụng.
+Nếu QR bị từ chối, hãy liên hệ quầy hỗ trợ của ban tổ chức hoặc gửi yêu cầu hỗ trợ trên EvoTicket. Hãy chuẩn bị mã order, email tài khoản, giấy tờ xác minh nếu được yêu cầu và ảnh chụp thông báo lỗi.
 
-Các trường hợp thường cần gửi hỗ trợ:
+## 5. Bán lại hoặc chuyển nhượng vé
 
-- Bị trừ tiền nhưng chưa nhận vé.
-- Thanh toán thành công nhưng phát hành vé lỗi.
-- Sự kiện bị hủy, hoãn hoặc thay đổi đáng kể.
-- Vé không check-in được do lỗi được xác minh từ hệ thống.
+Nếu sự kiện cho phép resale, người sở hữu vé hợp lệ có thể đăng bán vé trong hệ thống. Trong thời gian listing hoặc giao dịch resale, vé hoặc QR có thể bị khóa để tránh sử dụng song song.
 
-## 8. Khiếu nại và tranh chấp
+Trước khi đăng bán hoặc mua vé resale, vui lòng đọc:
 
-Khi gửi khiếu nại, hãy cung cấp:
+- [Chính sách bán lại và chuyển nhượng vé](/vi/legal/resale-policy)
+- [Chính sách vé](/vi/legal/ticket-policy)
+- [Chính sách thanh toán](/vi/legal/payment-policy)
+- [Chính sách hoàn tiền](/vi/legal/refund-policy)
+
+EvoTicket không khuyến khích và không bảo đảm an toàn cho giao dịch mua bán vé ngoài hệ thống.
+
+## 6. Hoàn tiền, hủy, hoãn hoặc thay đổi sự kiện
+
+Các yêu cầu hoàn tiền hoặc xử lý sự kiện bị hủy, hoãn, đổi địa điểm, đổi thời gian hoặc thay đổi nội dung quan trọng được xem xét theo từng trường hợp.
+
+Khi gửi yêu cầu, hãy cung cấp:
 
 - Mã order hoặc mã vé.
-- Tài khoản mua vé.
 - Tên sự kiện và suất diễn.
-- Mô tả sự cố.
-- Ảnh chụp lỗi hoặc chứng từ nếu có.
-- Thời điểm phát sinh.
+- Lý do yêu cầu.
+- Chứng từ thanh toán hoặc thông báo lỗi nếu có.
+- Ảnh chụp màn hình liên quan.
 
-EvoTicket có thể dùng order logs, payment records, TicketAsset history, QR/check-in logs, resale history và dữ liệu blockchain nếu có để xác minh.
+Chi tiết được quy định tại [Chính sách hoàn tiền, hủy, hoãn và thay đổi sự kiện](/vi/legal/refund-policy).
 
-## 9. AI chatbot
+## 7. Khiếu nại và tranh chấp
 
-AI chatbot hỗ trợ tra cứu thông tin và hướng dẫn sử dụng. Câu trả lời của AI không phải cam kết pháp lý, không thay thế chính sách chính thức và không phải kết luận xử lý khiếu nại.
+EvoTicket tiếp nhận khiếu nại liên quan đến thanh toán, cấp vé, check-in, resale, dữ liệu tài khoản, AI chatbot và thông tin sự kiện.
 
-Không gửi mật khẩu, OTP, private key, seed phrase hoặc dữ liệu thanh toán nhạy cảm cho chatbot.
+Quy trình xử lý cơ bản:
 
-## 10. Thông tin demo/project
+1. Người dùng gửi yêu cầu qua kênh hỗ trợ chính thức.
+2. EvoTicket xác nhận tiếp nhận.
+3. EvoTicket phân loại vụ việc và thu thập dữ liệu liên quan.
+4. EvoTicket phối hợp với ban tổ chức, checker hoặc đối tác thanh toán khi cần.
+5. EvoTicket phản hồi kết quả hoặc hướng xử lý tiếp theo.
 
-Một số nội dung hỗ trợ, thông tin pháp nhân, quy trình vận hành hoặc kênh liên hệ có thể là phiên bản phục vụ đồ án/demo project và cần được cập nhật trước khi vận hành thương mại chính thức.
+Xem thêm [Cơ chế giải quyết tranh chấp và khiếu nại](/vi/legal/dispute-resolution).
+
+## 8. AI chatbot
+
+AI chatbot hỗ trợ trả lời câu hỏi về sự kiện, cách sử dụng nền tảng, chính sách và quy trình cơ bản. Câu trả lời của AI có tính hỗ trợ thông tin, không thay thế thông báo chính thức, quyết định xử lý khiếu nại hoặc cam kết pháp lý của EvoTicket và ban tổ chức.
+
+Khi câu hỏi liên quan đến hoàn tiền, tranh chấp, lỗi thanh toán, lỗi check-in hoặc thông tin có ảnh hưởng đến quyền lợi người dùng, bạn nên gửi yêu cầu hỗ trợ chính thức để được ghi nhận và xử lý.
+
+## 9. Chính sách thường dùng
+
+- [Điều khoản sử dụng](/vi/legal/terms-of-use)
+- [Chính sách bảo mật](/vi/legal/privacy-policy)
+- [Điều kiện giao dịch chung](/vi/legal/general-transaction-conditions)
+- [Chính sách vé](/vi/legal/ticket-policy)
+- [Chính sách thanh toán](/vi/legal/payment-policy)
+- [Chính sách hoàn tiền](/vi/legal/refund-policy)
+- [Chính sách bán lại vé](/vi/legal/resale-policy)
+- [Cơ chế giải quyết tranh chấp](/vi/legal/dispute-resolution)

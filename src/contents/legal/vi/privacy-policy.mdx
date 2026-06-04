@@ -28,113 +28,213 @@ relatedPolicies:
 
 # Chính sách bảo mật và xử lý dữ liệu cá nhân
 
-Chính sách này mô tả cách EvoTicket thu thập, sử dụng, lưu trữ, bảo vệ và chia sẻ dữ liệu cá nhân hoặc dữ liệu liên quan đến người dùng khi sử dụng nền tảng. Chính sách được áp dụng cho các hoạt động như tạo tài khoản, đặt vé, thanh toán, quản lý vé, bán lại vé, check-in, sử dụng AI chatbot, tương tác với Organizer và các tính năng blockchain/NFT nếu có.
+Chính sách này mô tả cách EvoTicket thu thập, sử dụng, lưu trữ, bảo vệ, chia sẻ và xử lý dữ liệu cá nhân khi người dùng truy cập hoặc sử dụng nền tảng. Chính sách áp dụng cho người mua vé, ban tổ chức, checker, người dùng AI chatbot, người gửi yêu cầu hỗ trợ và các cá nhân có dữ liệu được xử lý trong hệ thống EvoTicket.
 
-Trong bối cảnh đồ án/demo project, chính sách này là phiên bản mô tả nguyên tắc xử lý dữ liệu cho hệ thống EvoTicket và cần được cập nhật theo mô hình pháp nhân, nhà cung cấp hạ tầng, đối tác thanh toán và quy trình vận hành thực tế trước khi thương mại hóa chính thức.
+EvoTicket tôn trọng quyền riêng tư của người dùng và xử lý dữ liệu cá nhân theo nguyên tắc minh bạch, có mục đích, trong phạm vi cần thiết và phù hợp với quy định pháp luật áp dụng.
 
 ## 1. Phạm vi áp dụng
 
-Chính sách này áp dụng cho Buyer, Organizer, Checker, Admin và các cá nhân khác có dữ liệu được xử lý trong quá trình sử dụng EvoTicket. Chính sách này cũng áp dụng cho dữ liệu phát sinh từ các giao dịch, vé điện tử, QR, check-in, resale, chatbot, log hệ thống và các tích hợp kỹ thuật liên quan.
+Chính sách này áp dụng cho dữ liệu phát sinh từ các hoạt động sau:
 
-Chính sách này không điều chỉnh trực tiếp hoạt động xử lý dữ liệu của website, ví điện tử, ngân hàng, cổng thanh toán, blockchain network, AI provider hoặc dịch vụ bên thứ ba khác khi các bên đó xử lý dữ liệu theo chính sách riêng của họ.
+- Tạo và quản lý tài khoản.
+- Tìm kiếm sự kiện, đặt vé, thanh toán và nhận vé.
+- Quản lý vé, sử dụng Dynamic QR và check-in.
+- Đăng bán, mua lại hoặc chuyển nhượng vé trong hệ thống.
+- Đăng ký và xác minh ban tổ chức.
+- Sử dụng AI chatbot, Trung tâm trợ giúp hoặc kênh hỗ trợ khách hàng.
+- Giao tiếp với EvoTicket qua email, thông báo, biểu mẫu hoặc kênh liên hệ chính thức.
 
-## 2. Dữ liệu có thể được thu thập
+## 2. Nhóm dữ liệu có thể được thu thập
 
-Tùy tính năng được sử dụng, EvoTicket có thể thu thập hoặc xử lý các nhóm dữ liệu sau:
+Tùy tính năng được sử dụng, EvoTicket có thể xử lý các nhóm dữ liệu sau.
 
-- **Dữ liệu tài khoản:** họ tên, email, số điện thoại, mật khẩu đã được bảo vệ theo cơ chế kỹ thuật phù hợp, ảnh đại diện, trạng thái tài khoản, vai trò và lịch sử đăng nhập.
-- **Dữ liệu người mua:** thông tin đặt vé, thông tin liên hệ, lựa chọn sự kiện, loại vé, ghế, suất diễn, lịch sử mua vé, yêu cầu hỗ trợ và khiếu nại.
-- **Dữ liệu ban tổ chức:** thông tin đăng ký Organizer, hồ sơ xác minh, thông tin liên hệ, thông tin sự kiện, cấu hình vé, cấu hình resale, dữ liệu đối soát và lịch sử vận hành sự kiện.
-- **Dữ liệu checker/admin:** thông tin phân quyền, thiết bị hoặc phiên làm việc được cấp quyền, lịch sử thao tác, log kiểm vé và log quản trị.
-- **Dữ liệu giao dịch, order và payment:** mã order, trạng thái order, thời điểm tạo/hết hạn, giá trị thanh toán, phương thức thanh toán, mã giao dịch, trạng thái webhook, dữ liệu đối soát và chứng từ liên quan.
-- **Dữ liệu vé, TicketAsset, QR và check-in:** mã vé, trạng thái vé, quyền sử dụng, qrVersion, dữ liệu Dynamic QR, lịch sử phát hành vé, lịch sử check-in, thời điểm quét, checker/device liên quan và log xử lý.
-- **Dữ liệu resale/chuyển nhượng:** listing resale, giá niêm yết, trạng thái giữ vé, trạng thái chuyển quyền, người bán, người mua, lịch sử giao dịch và dữ liệu xử lý tranh chấp nếu có.
-- **Dữ liệu blockchain/Web3:** wallet address, tokenId, transaction hash, trạng thái mint/transfer, metadata kỹ thuật và dữ liệu provenance nếu tính năng blockchain/NFT được áp dụng.
-- **Dữ liệu AI chatbot:** câu hỏi, nội dung hội thoại, ngữ cảnh hỗ trợ, phản hồi của chatbot, đánh giá phản hồi và log kỹ thuật nếu hệ thống có lưu để hỗ trợ người dùng, cải thiện chất lượng hoặc xử lý tranh chấp.
-- **Dữ liệu kỹ thuật:** địa chỉ IP, user agent, loại thiết bị, trình duyệt, thời gian truy cập, cookie, local storage, log lỗi, log bảo mật và dữ liệu phân tích vận hành.
+### 2.1. Dữ liệu tài khoản
+
+- Họ tên.
+- Email.
+- Số điện thoại.
+- Mật khẩu đã được bảo vệ bằng cơ chế kỹ thuật phù hợp.
+- Vai trò tài khoản.
+- Trạng thái tài khoản.
+- Lịch sử đăng nhập và hoạt động bảo mật.
+
+### 2.2. Dữ liệu người mua vé
+
+- Thông tin đặt vé.
+- Sự kiện, suất diễn, loại vé hoặc vị trí ghế đã chọn.
+- Lịch sử mua vé.
+- Trạng thái order, trạng thái vé và trạng thái check-in.
+- Yêu cầu hỗ trợ, khiếu nại hoặc phản hồi liên quan đến giao dịch.
+
+### 2.3. Dữ liệu ban tổ chức
+
+- Tên tổ chức, tên thương mại hoặc tên người đại diện.
+- Email, số điện thoại và địa chỉ liên hệ.
+- Hồ sơ xác minh, giấy tờ pháp lý hoặc tài liệu chứng minh quyền tổ chức sự kiện.
+- Thông tin thuế, thông tin ngân hàng hoặc dữ liệu phục vụ đối soát.
+- Thông tin sự kiện, giá vé, cấu hình vé, điều kiện resale và dữ liệu vận hành.
+
+### 2.4. Dữ liệu thanh toán và giao dịch
+
+- Mã order.
+- Giá vé, phí, tổng tiền, trạng thái thanh toán.
+- Phương thức thanh toán.
+- Mã giao dịch, nội dung chuyển khoản, mã tham chiếu hoặc dữ liệu đối soát.
+- Trạng thái callback, webhook hoặc thông báo từ đối tác thanh toán.
+
+EvoTicket không yêu cầu người dùng cung cấp mật khẩu ngân hàng, mã OTP ngân hàng hoặc thông tin bí mật không cần thiết cho việc xử lý thanh toán.
+
+### 2.5. Dữ liệu vé, Dynamic QR và check-in
+
+- Mã vé hoặc mã định danh vé.
+- Trạng thái vé.
+- Thông tin sự kiện, suất diễn và quyền truy cập.
+- Phiên bản QR, token xác thực, thời gian hết hạn token.
+- Lịch sử quét vé, thời điểm check-in, kết quả kiểm tra và thông tin checker hoặc thiết bị được phân quyền.
+
+### 2.6. Dữ liệu resale và chuyển nhượng
+
+- Thông tin listing resale.
+- Người bán, người mua, giá listing, giá thanh toán và trạng thái giao dịch.
+- Trạng thái khóa vé hoặc QR trong quá trình listing/reservation.
+- Lịch sử chuyển quyền sở hữu và dữ liệu phục vụ tranh chấp.
+
+### 2.7. Dữ liệu blockchain và NFT
+
+Nếu tính năng blockchain/NFT được áp dụng, EvoTicket có thể xử lý:
+
+- Địa chỉ ví lưu ký hoặc ví cá nhân do người dùng cung cấp.
+- TokenId.
+- Transaction hash.
+- Trạng thái mint, transfer hoặc withdraw.
+- Lịch sử provenance kỹ thuật liên quan đến vé.
+
+EvoTicket ưu tiên không ghi trực tiếp dữ liệu nhận dạng cá nhân lên blockchain công khai. Dữ liệu blockchain có thể có tính công khai và khó xóa hơn dữ liệu lưu trữ trong cơ sở dữ liệu truyền thống.
+
+### 2.8. Dữ liệu AI chatbot và hỗ trợ
+
+- Câu hỏi, nội dung hội thoại và phản hồi của chatbot.
+- Ngữ cảnh phiên hỗ trợ.
+- Tài liệu hoặc tệp người dùng tải lên nếu tính năng cho phép.
+- Đánh giá phản hồi, log lỗi hoặc dữ liệu phục vụ cải thiện chất lượng hỗ trợ.
+
+Người dùng không nên nhập mật khẩu, OTP, thông tin thẻ, giấy tờ định danh hoặc dữ liệu nhạy cảm không cần thiết vào chatbot.
+
+### 2.9. Dữ liệu kỹ thuật
+
+- Địa chỉ IP.
+- User agent, loại thiết bị, trình duyệt và hệ điều hành.
+- Cookie, local storage hoặc định danh phiên.
+- Log truy cập, log lỗi, log bảo mật và dữ liệu giám sát hiệu năng.
 
 ## 3. Mục đích xử lý dữ liệu
 
-EvoTicket xử lý dữ liệu nhằm các mục đích sau:
+EvoTicket xử lý dữ liệu nhằm:
 
-- Tạo, xác thực và quản lý tài khoản người dùng.
-- Cung cấp chức năng xem sự kiện, đặt vé, giữ vé, tạo order và thanh toán.
-- Phát hành, quản lý, xác minh và hỗ trợ sử dụng vé điện tử.
-- Vận hành Dynamic QR, check-in, phân quyền checker/device và ghi nhận log kiểm vé.
-- Hỗ trợ resale, chuyển nhượng vé, kiểm soát giá và giảm rủi ro gian lận.
-- Tích hợp blockchain/NFT nhằm hỗ trợ định danh, provenance và kiểm soát chuyển nhượng khi tính năng này được áp dụng.
-- Cung cấp hỗ trợ khách hàng, AI chatbot, xử lý khiếu nại và giải quyết tranh chấp.
-- Đối soát thanh toán, phòng chống gian lận, bảo mật hệ thống và kiểm tra bất thường.
-- Cải thiện chất lượng sản phẩm, khắc phục lỗi, phân tích hiệu năng và phát triển tính năng.
-- Tuân thủ nghĩa vụ theo quy định pháp luật áp dụng hoặc yêu cầu hợp lệ từ cơ quan có thẩm quyền.
+- Tạo, xác thực và bảo vệ tài khoản.
+- Vận hành giao dịch đặt vé, thanh toán và phát hành vé.
+- Quản lý vòng đời vé, quyền sở hữu và trạng thái sử dụng.
+- Cung cấp Dynamic QR và hỗ trợ check-in.
+- Vận hành resale, chuyển quyền sở hữu và xử lý tranh chấp liên quan.
+- Xác minh ban tổ chức và quản lý sự kiện.
+- Gửi thông báo hệ thống, email, biên nhận hoặc cập nhật trạng thái giao dịch.
+- Hỗ trợ khách hàng và phản hồi yêu cầu khiếu nại.
+- Phát hiện, phòng ngừa và xử lý gian lận, lạm dụng hoặc tấn công hệ thống.
+- Tuân thủ yêu cầu pháp luật, yêu cầu của cơ quan có thẩm quyền hoặc nghĩa vụ lưu trữ chứng từ.
 
-## 4. Cơ sở và phạm vi sử dụng dữ liệu
+## 4. Căn cứ xử lý dữ liệu
 
-EvoTicket chỉ xử lý dữ liệu trong phạm vi cần thiết cho việc cung cấp nền tảng, thực hiện giao dịch, bảo vệ quyền lợi hợp pháp của người dùng và các bên liên quan, bảo mật hệ thống, xử lý tranh chấp và tuân thủ quy định pháp luật áp dụng.
+Tùy trường hợp, EvoTicket xử lý dữ liệu dựa trên một hoặc nhiều căn cứ sau:
 
-Tùy từng flow, việc xử lý dữ liệu có thể dựa trên sự đồng ý của người dùng, nhu cầu thực hiện giao dịch, nghĩa vụ vận hành nền tảng, yêu cầu bảo mật, yêu cầu pháp lý hoặc lợi ích hợp pháp trong phạm vi được pháp luật cho phép.
+- Sự đồng ý của chủ thể dữ liệu.
+- Việc thực hiện giao dịch, hợp đồng hoặc yêu cầu của người dùng.
+- Tuân thủ nghĩa vụ pháp lý của EvoTicket hoặc các bên liên quan.
+- Bảo vệ quyền và lợi ích hợp pháp của EvoTicket, người dùng, ban tổ chức hoặc bên thứ ba trong phạm vi pháp luật cho phép.
+- Phòng chống gian lận, bảo mật hệ thống và giải quyết tranh chấp.
+
+EvoTicket không mặc nhiên xem sự im lặng của người dùng là đồng ý trong các trường hợp pháp luật yêu cầu phải có sự đồng ý rõ ràng.
 
 ## 5. Chia sẻ dữ liệu
 
-EvoTicket có thể chia sẻ dữ liệu trong phạm vi cần thiết với các nhóm bên nhận sau:
+EvoTicket có thể chia sẻ dữ liệu cần thiết với:
 
-- **Organizer:** để xác nhận quyền tham dự, quản lý danh sách vé, vận hành sự kiện, hỗ trợ check-in, xử lý hoàn tiền hoặc giải quyết khiếu nại.
-- **Cổng thanh toán, ngân hàng hoặc đối tác thanh toán:** để tạo giao dịch, xác nhận thanh toán, xử lý webhook, đối soát, hoàn tiền hoặc kiểm tra giao dịch bất thường.
-- **Nhà cung cấp hạ tầng kỹ thuật:** để lưu trữ dữ liệu, vận hành ứng dụng, bảo mật, gửi thông báo, giám sát lỗi và duy trì hệ thống.
-- **Blockchain/Web3 worker/provider:** để mint, transfer, truy xuất transaction hash, cập nhật provenance hoặc xử lý trạng thái kỹ thuật liên quan đến NFT nếu có.
-- **AI provider hoặc hệ thống AI liên quan:** để tạo phản hồi chatbot, xử lý ngữ cảnh hỗ trợ hoặc cải thiện chất lượng trong phạm vi được cấu hình.
-- **Cơ quan có thẩm quyền:** khi có yêu cầu hợp lệ hoặc khi EvoTicket cần tuân thủ quy định pháp luật áp dụng.
+- Ban tổ chức, trong phạm vi cần thiết để vận hành sự kiện, check-in, chăm sóc người tham dự và xử lý tranh chấp.
+- Đối tác thanh toán, ngân hàng hoặc nhà cung cấp dịch vụ thanh toán để xử lý, xác nhận và đối soát giao dịch.
+- Nhà cung cấp hạ tầng máy chủ, lưu trữ, email, thông báo, bảo mật, giám sát hệ thống hoặc hỗ trợ vận hành.
+- Nhà cung cấp hạ tầng blockchain, web3 hoặc ví kỹ thuật khi sự kiện sử dụng NFT/blockchain.
+- Nhà cung cấp AI hoặc hạ tầng xử lý ngôn ngữ khi người dùng sử dụng AI chatbot.
+- Cơ quan có thẩm quyền theo yêu cầu hợp lệ của pháp luật.
 
-EvoTicket không bán dữ liệu cá nhân của người dùng theo nghĩa chuyển giao dữ liệu để bên thứ ba tự do khai thác thương mại ngoài phạm vi nền tảng, trừ khi có thông báo và cơ sở xử lý phù hợp.
+EvoTicket không bán dữ liệu cá nhân của người dùng.
 
-## 6. Lưu trữ và bảo vệ dữ liệu
+## 6. Cookie và lưu trữ cục bộ
 
-EvoTicket áp dụng các biện pháp kỹ thuật và tổ chức hợp lý để bảo vệ dữ liệu, bao gồm phân quyền truy cập, kiểm soát phiên đăng nhập, log hệ thống, giới hạn quyền quản trị, cơ chế bảo vệ mật khẩu và các biện pháp bảo mật phù hợp với trạng thái phát triển của hệ thống.
+EvoTicket có thể sử dụng cookie, local storage hoặc công nghệ tương tự để:
 
-Không có hệ thống nào có thể bảo đảm an toàn tuyệt đối. Người dùng cần tự bảo vệ tài khoản, thiết bị, email, mật khẩu, mã OTP, ví và các thông tin xác thực khác. Khi phát hiện rủi ro bảo mật, người dùng nên thông báo cho EvoTicket qua kênh hỗ trợ được công bố.
+- Duy trì phiên đăng nhập.
+- Ghi nhớ lựa chọn ngôn ngữ hoặc giao diện.
+- Bảo vệ an toàn tài khoản.
+- Đo lường hiệu năng và phát hiện lỗi.
+- Cải thiện trải nghiệm sử dụng.
 
-## 7. Dữ liệu blockchain và tính bất biến
+Người dùng có thể kiểm soát cookie trong trình duyệt, nhưng việc tắt một số cookie có thể làm giảm khả năng sử dụng các chức năng của nền tảng.
 
-Một số dữ liệu blockchain như wallet address, tokenId, transaction hash hoặc lịch sử giao dịch on-chain có thể có tính công khai, phân tán và khó hoặc không thể xóa theo cách tương tự dữ liệu trong database truyền thống.
+## 7. Lưu trữ và bảo mật dữ liệu
 
-EvoTicket không cam kết có thể xóa, thu hồi hoặc chỉnh sửa mọi dữ liệu đã được ghi lên blockchain nếu blockchain có tính bất biến. Khi cần xử lý yêu cầu liên quan đến dữ liệu on-chain, EvoTicket sẽ xem xét các biện pháp hợp lý trong phạm vi kỹ thuật và quy định pháp luật áp dụng, chẳng hạn hạn chế hiển thị trong hệ thống hoặc cập nhật dữ liệu off-chain liên quan.
+EvoTicket áp dụng các biện pháp kỹ thuật và tổ chức phù hợp để bảo vệ dữ liệu, bao gồm phân quyền truy cập, mã hóa hoặc băm dữ liệu khi phù hợp, ghi log, giám sát bất thường và rà soát bảo mật.
 
-## 8. Quyền của người dùng đối với dữ liệu
+Dữ liệu được lưu trữ trong thời gian cần thiết để phục vụ mục đích xử lý, giải quyết giao dịch, hỗ trợ người dùng, đáp ứng nghĩa vụ pháp lý, bảo vệ quyền lợi hợp pháp và giải quyết tranh chấp.
 
-Trong phạm vi pháp luật áp dụng, người dùng có thể có các quyền liên quan đến dữ liệu cá nhân như yêu cầu truy cập, chỉnh sửa, cập nhật, rút lại đồng ý, hạn chế xử lý, phản đối xử lý, yêu cầu xóa dữ liệu hoặc yêu cầu cung cấp thông tin về hoạt động xử lý dữ liệu.
+## 8. Dữ liệu trên blockchain
 
-Một số yêu cầu có thể bị giới hạn nếu dữ liệu cần được giữ lại để hoàn tất giao dịch, bảo vệ quyền lợi của các bên, xử lý khiếu nại, tuân thủ nghĩa vụ pháp lý, bảo mật hệ thống hoặc do đặc tính công khai/bất biến của blockchain. EvoTicket sẽ tiếp nhận và phản hồi yêu cầu qua kênh hỗ trợ phù hợp.
+Một số dữ liệu kỹ thuật như địa chỉ ví, tokenId hoặc transaction hash có thể được ghi nhận trên blockchain. Do đặc tính của blockchain, dữ liệu đã ghi nhận có thể công khai, phân tán và khó xóa bỏ hoàn toàn.
 
-## 9. Dữ liệu trẻ em và người chưa thành niên
+EvoTicket áp dụng nguyên tắc tối thiểu hóa dữ liệu, hạn chế đưa dữ liệu nhận dạng trực tiếp lên blockchain và ưu tiên lưu dữ liệu cá nhân ở lớp hệ thống có thể quản lý quyền truy cập.
 
-EvoTicket không chủ đích thu thập dữ liệu của trẻ em hoặc người chưa thành niên ngoài phạm vi cần thiết cho việc mua vé, tham dự sự kiện hoặc sử dụng nền tảng theo điều kiện của sự kiện. Người chưa thành niên nên sử dụng EvoTicket với sự đồng ý hoặc giám sát của cha mẹ, người giám hộ hoặc người đại diện hợp pháp khi pháp luật yêu cầu.
+## 9. Quyền của người dùng
 
-Organizer có trách nhiệm công bố rõ các điều kiện về độ tuổi, giấy tờ hoặc người đi kèm nếu sự kiện có giới hạn hoặc yêu cầu đặc biệt.
+Theo quy định pháp luật áp dụng, người dùng có thể có các quyền sau:
 
-## 10. Cookie và local storage
+- Được biết về hoạt động xử lý dữ liệu cá nhân.
+- Đồng ý hoặc rút lại sự đồng ý trong phạm vi pháp luật cho phép.
+- Truy cập, chỉnh sửa hoặc yêu cầu cập nhật dữ liệu.
+- Yêu cầu xóa, hạn chế xử lý hoặc cung cấp dữ liệu.
+- Phản đối một số hoạt động xử lý dữ liệu.
+- Khiếu nại, tố cáo hoặc yêu cầu bồi thường theo quy định pháp luật.
 
-EvoTicket có thể sử dụng cookie, local storage hoặc công nghệ tương tự để duy trì phiên đăng nhập, ghi nhớ lựa chọn ngôn ngữ/giao diện, hỗ trợ bảo mật, lưu trạng thái tạm thời, phân tích hiệu năng và cải thiện trải nghiệm người dùng.
+Một số yêu cầu có thể bị giới hạn nếu dữ liệu cần được lưu giữ để hoàn tất giao dịch, bảo vệ quyền lợi hợp pháp, xử lý tranh chấp, phòng chống gian lận hoặc tuân thủ nghĩa vụ pháp lý.
 
-Người dùng có thể điều chỉnh cài đặt trình duyệt để chặn hoặc xóa cookie/local storage. Tuy nhiên, một số chức năng như đăng nhập, checkout, bảo mật phiên hoặc tùy chỉnh giao diện có thể không hoạt động đầy đủ nếu các công nghệ này bị vô hiệu hóa.
+## 10. Dữ liệu của trẻ em và người chưa thành niên
 
-## 11. Thời hạn lưu trữ
+EvoTicket không chủ động hướng tới việc thu thập dữ liệu của trẻ em nếu không có cơ sở phù hợp. Đối với sự kiện dành cho trẻ em hoặc người chưa thành niên, người giám hộ cần đọc kỹ điều kiện tham dự, quy định sự kiện và chính sách dữ liệu trước khi đặt vé.
 
-EvoTicket lưu trữ dữ liệu trong thời gian cần thiết để cung cấp dịch vụ, hoàn tất giao dịch, quản lý vé, đối soát thanh toán, hỗ trợ người dùng, xử lý tranh chấp, phòng chống gian lận, bảo mật hệ thống và tuân thủ quy định pháp luật áp dụng.
+## 11. Sự cố dữ liệu
 
-Thời hạn lưu trữ cụ thể có thể khác nhau tùy loại dữ liệu. Ví dụ, dữ liệu phiên đăng nhập có thể được lưu ngắn hơn dữ liệu order, payment, TicketAsset, check-in hoặc khiếu nại. Dữ liệu blockchain có thể tồn tại theo cơ chế của mạng blockchain liên quan.
+Khi phát hiện sự cố dữ liệu có thể ảnh hưởng đến quyền và lợi ích hợp pháp của người dùng, EvoTicket sẽ thực hiện các biện pháp cần thiết để kiểm tra, cô lập, khắc phục, ghi nhận và thông báo theo quy định pháp luật áp dụng.
 
-## 12. Sự cố dữ liệu và thông báo
+## 12. Chính sách liên quan
 
-Khi phát hiện sự cố dữ liệu có thể ảnh hưởng đến quyền và lợi ích hợp pháp của người dùng, EvoTicket sẽ đánh giá mức độ ảnh hưởng, áp dụng biện pháp khắc phục phù hợp và thông báo cho người dùng hoặc cơ quan có thẩm quyền nếu cần theo quy định pháp luật áp dụng.
+- [Điều khoản sử dụng](/vi/legal/terms-of-use)
+- [Chính sách thanh toán](/vi/legal/payment-policy)
+- [Chính sách vé](/vi/legal/ticket-policy)
+- [Chính sách bán lại vé](/vi/legal/resale-policy)
+- [Chính sách AI chatbot](/vi/legal/ai-chatbot-policy)
+- [Chính sách NFT, blockchain và tài sản số](/vi/legal/blockchain-nft-policy)
+- [Cơ chế giải quyết tranh chấp](/vi/legal/dispute-resolution)
 
-Thông báo có thể được thực hiện qua email, thông báo trong tài khoản, thông báo trên nền tảng hoặc kênh liên hệ phù hợp khác, tùy tính chất sự cố và dữ liệu liên quan.
+## Căn cứ pháp lý tham chiếu
 
-## 13. Thay đổi chính sách
+Các chính sách của EvoTicket được xây dựng trên cơ sở tham chiếu các nhóm văn bản pháp luật và nguyên tắc vận hành sau đây. Trường hợp văn bản được sửa đổi, bổ sung hoặc thay thế, quy định mới có hiệu lực sẽ được ưu tiên áp dụng:
 
-EvoTicket có thể cập nhật Chính sách này để phản ánh thay đổi về sản phẩm, quy trình vận hành, nhà cung cấp hạ tầng, yêu cầu bảo mật hoặc quy định pháp luật áp dụng. Phiên bản cập nhật sẽ được công bố trên nền tảng và có hiệu lực theo ngày được nêu trong tài liệu.
+- [Luật Bảo vệ quyền lợi người tiêu dùng số 19/2023/QH15](https://vanban.chinhphu.vn/?docid=208363&pageid=27160), đặc biệt các nguyên tắc về cung cấp thông tin, điều kiện giao dịch chung, giao dịch từ xa, chứng từ giao dịch, khiếu nại và giải quyết tranh chấp.
+- Nghị định số 55/2024/NĐ-CP quy định chi tiết một số điều của Luật Bảo vệ quyền lợi người tiêu dùng.
+- [Nghị định số 52/2013/NĐ-CP về thương mại điện tử](https://thuvienphapluat.vn/van-ban/Thuong-mai/Nghi-dinh-52-2013-ND-CP-thuong-mai-dien-tu-187901.aspx) và Nghị định số 85/2021/NĐ-CP sửa đổi, bổ sung một số điều của Nghị định số 52/2013/NĐ-CP.
+- [Luật Giao dịch điện tử số 20/2023/QH15](https://tulieuvankien.dangcongsan.vn/he-thong-van-ban/van-ban-quy-pham-phap-luat/luat-giao-dich-dien-tu-so-202023qh15-hieu-luc-thi-hanh-tu-ngay-0172024-9710), bao gồm nguyên tắc về thông điệp dữ liệu, giao dịch điện tử, chứng từ điện tử và hợp đồng điện tử.
+- [Nghị định số 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân](https://vanban.chinhphu.vn/?docid=207759&pageid=27160), [Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15](https://vanban.chinhphu.vn/?classid=1&docid=214590&pageid=27160&typegroupid=3) và văn bản hướng dẫn tương ứng khi có hiệu lực áp dụng.
+- [Nghị định số 52/2024/NĐ-CP về thanh toán không dùng tiền mặt](https://vanban.chinhphu.vn/?docid=210262&pageid=27160) đối với các nội dung liên quan đến thanh toán điện tử và phối hợp với đối tác thanh toán.
 
-Đối với thay đổi quan trọng về cách xử lý dữ liệu, EvoTicket có thể thông báo hoặc yêu cầu người dùng xác nhận lại trong các flow phù hợp.
+## Hiệu lực, cập nhật và liên hệ
 
-## 14. Liên hệ hỗ trợ
+Chính sách này có hiệu lực kể từ ngày được công bố trên nền tảng. EvoTicket có thể cập nhật chính sách để phù hợp với thay đổi của sản phẩm, quy định pháp luật hoặc yêu cầu vận hành. Phiên bản cập nhật sẽ được công bố trên nền tảng và có hiệu lực theo ngày ghi nhận tại phần thông tin tài liệu.
 
-Người dùng có thể gửi câu hỏi, yêu cầu hoặc khiếu nại liên quan đến dữ liệu cá nhân qua kênh hỗ trợ được EvoTicket công bố trên website, trong tài khoản hoặc tại Help Center nếu có. Khi gửi yêu cầu, người dùng nên cung cấp thông tin đủ để EvoTicket xác minh tài khoản và xử lý đúng dữ liệu liên quan.
+Người dùng có thể gửi yêu cầu hỗ trợ, khiếu nại hoặc câu hỏi liên quan đến chính sách thông qua Trung tâm trợ giúp, email hỗ trợ hoặc các kênh liên hệ chính thức được EvoTicket công bố.

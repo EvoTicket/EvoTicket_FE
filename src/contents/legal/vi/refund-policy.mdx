@@ -27,127 +27,187 @@ relatedPolicies:
 
 # Chính sách hoàn tiền, hủy, hoãn và thay đổi sự kiện
 
-Chính sách này quy định nguyên tắc tiếp nhận và phối hợp xử lý các yêu cầu liên quan đến hoàn tiền, lỗi thanh toán, lỗi phát hành vé, sự kiện bị hủy, hoãn, thay đổi quan trọng, vé đã check-in và vé đã bán lại trên EvoTicket.
+Chính sách này quy định nguyên tắc xử lý yêu cầu hoàn tiền, lỗi thanh toán, lỗi phát hành vé, sự kiện bị hủy, sự kiện bị hoãn, thay đổi thời gian/địa điểm/nội dung quan trọng, vé đã check-in và vé đã resale.
 
-Trong bối cảnh hệ thống/demo project, chính sách này không được hiểu là tuyên bố rằng EvoTicket đã có cơ chế hoàn tiền tự động hoàn chỉnh. EvoTicket tiếp nhận và phối hợp xử lý yêu cầu dựa trên trạng thái giao dịch, trạng thái vé, xác nhận của Organizer, cổng thanh toán và quy định pháp luật áp dụng.
+EvoTicket tiếp nhận và phối hợp xử lý yêu cầu theo dữ liệu giao dịch, trạng thái vé, chính sách sự kiện, xác nhận của ban tổ chức, dữ liệu thanh toán và quy định pháp luật áp dụng.
 
-## 1. Phạm vi áp dụng
+## 1. Nguyên tắc chung
 
-Chính sách này áp dụng cho giao dịch mua vé sơ cấp trên EvoTicket, giao dịch resale trong hệ thống nếu được hỗ trợ, các yêu cầu liên quan đến thanh toán, phát hành vé, TicketAsset, Dynamic QR, check-in, NFT/provenance và các tình huống sự kiện bị hủy, hoãn hoặc thay đổi quan trọng.
+Vé sự kiện là quyền tham dự gắn với thời gian, địa điểm, suất diễn, điều kiện sử dụng và chính sách của từng sự kiện. Sau khi giao dịch đã được xác nhận và vé đã được phát hành, người mua không mặc nhiên có quyền tự hủy vé hoặc yêu cầu hoàn tiền chỉ vì thay đổi ý định, trừ khi:
 
-Chính sách này được áp dụng cùng Điều khoản sử dụng, Chính sách thanh toán, Chính sách vé, Chính sách bán lại vé và điều kiện riêng của từng sự kiện.
+- Sự kiện hoặc ban tổ chức công bố chính sách cho phép hoàn/đổi.
+- EvoTicket hoặc ban tổ chức xác định có lỗi cần khắc phục bằng hoàn tiền.
+- Sự kiện bị hủy, hoãn hoặc thay đổi đáng kể theo chính sách này.
+- Pháp luật áp dụng quy định người tiêu dùng có quyền yêu cầu xử lý tương ứng.
 
-## 2. Nguyên tắc chung
+## 2. Người mua đổi ý sau khi thanh toán
 
-Việc hoàn tiền phụ thuộc vào chính sách sự kiện, trạng thái order, trạng thái thanh toán, trạng thái vé, lịch sử check-in, trạng thái resale, xác nhận từ Organizer, dữ liệu từ cổng thanh toán và quy định pháp luật áp dụng.
+Nếu người mua đổi ý sau khi thanh toán thành công, giao dịch thường không được hoàn tiền tự động. Người mua có thể:
 
-EvoTicket có thể sử dụng các nguồn dữ liệu như order logs, payment webhooks, payment transaction records, TicketAsset history, QR/check-in logs, resale listing history, blockchain transaction history nếu có và trao đổi hỗ trợ để xác minh yêu cầu.
+- Sử dụng vé theo điều kiện sự kiện.
+- Đăng bán lại vé trong hệ thống nếu sự kiện cho phép resale và vé đáp ứng điều kiện.
+- Gửi yêu cầu hỗ trợ để EvoTicket kiểm tra nếu có lý do đặc biệt.
 
-EvoTicket ưu tiên biện pháp khắc phục phù hợp với bản chất sự cố, bao gồm xác minh giao dịch, phát hành lại vé, cập nhật trạng thái, hỗ trợ check-in thủ công, phối hợp hoàn tiền hoặc chuyển yêu cầu cho Organizer/cổng thanh toán xử lý theo phạm vi trách nhiệm.
+Trường hợp thông tin bắt buộc trước giao dịch không được cung cấp đầy đủ hoặc có sai lệch đáng kể, yêu cầu sẽ được xem xét theo quy định về bảo vệ quyền lợi người tiêu dùng và chính sách áp dụng.
 
-## 3. Người mua đổi ý sau khi thanh toán
+## 3. Thanh toán lỗi
 
-Trừ khi sự kiện hoặc pháp luật áp dụng có quy định khác, vé đã được thanh toán và phát hành hợp lệ thường không được hoàn tiền chỉ vì người mua đổi ý, chọn nhầm, không còn nhu cầu tham dự hoặc không đọc kỹ thông tin sự kiện.
+Thanh toán lỗi có thể gồm:
 
-Người mua cần kiểm tra kỹ tên sự kiện, thời gian, địa điểm, loại vé, ghế, số lượng, giá, phí, điều kiện tham dự và chính sách hoàn tiền trước khi thanh toán. Nếu sự kiện cho phép resale, người mua có thể sử dụng chức năng bán lại trong hệ thống khi vé đủ điều kiện.
+- Giao dịch bị từ chối.
+- Người dùng bị trừ tiền nhưng order chưa cập nhật.
+- Người dùng thanh toán quá hạn giữ vé.
+- Người dùng thanh toán sai số tiền hoặc sai nội dung.
+- Hệ thống thanh toán gửi trạng thái chậm hoặc không đồng bộ.
 
-## 4. Thanh toán lỗi
+EvoTicket sẽ đối soát với dữ liệu từ order, đối tác thanh toán, log hệ thống và chứng từ do người dùng cung cấp. Nếu xác định tiền đã được ghi nhận hợp lệ nhưng giao dịch không thể hoàn tất, EvoTicket sẽ xử lý cấp vé hoặc hoàn tiền theo trường hợp cụ thể.
 
-Nếu giao dịch thanh toán không hoàn tất, bị hủy, hết hạn hoặc không được cổng thanh toán xác nhận thành công, order có thể không được xác nhận và vé có thể không được phát hành.
+## 4. Bị trừ tiền nhưng chưa nhận vé
 
-Nếu người dùng cho rằng giao dịch bị xử lý sai, cần cung cấp mã order, thời điểm thanh toán, phương thức thanh toán, ảnh chụp giao dịch hoặc chứng từ liên quan để EvoTicket phối hợp kiểm tra với cổng thanh toán.
+Người dùng cần gửi yêu cầu hỗ trợ kèm:
 
-## 5. Bị trừ tiền nhưng chưa nhận vé
+- Mã order.
+- Email hoặc số điện thoại tài khoản.
+- Thời gian thanh toán.
+- Số tiền đã thanh toán.
+- Mã giao dịch hoặc biên lai.
+- Ảnh chụp màn hình thông báo trừ tiền nếu có.
 
-Nếu tài khoản hoặc phương thức thanh toán của người dùng đã bị trừ tiền nhưng EvoTicket chưa ghi nhận thanh toán thành công hoặc chưa phát hành vé, EvoTicket sẽ tiếp nhận yêu cầu và phối hợp đối soát với cổng thanh toán.
+Sau khi đối soát, EvoTicket có thể:
 
-Tùy kết quả xác minh, EvoTicket có thể cập nhật trạng thái order và phát hành vé nếu giao dịch hợp lệ, hoặc phối hợp xử lý hoàn tiền nếu giao dịch không thể hoàn tất. Thời gian xử lý phụ thuộc vào dữ liệu đối soát, cổng thanh toán, ngân hàng hoặc bên xử lý giao dịch liên quan.
+- Cấp vé nếu giao dịch đủ điều kiện xác nhận.
+- Hoàn tiền nếu không thể cấp vé.
+- Yêu cầu người dùng hoặc đối tác thanh toán cung cấp thêm chứng từ.
+- Chuyển vụ việc sang quy trình tranh chấp nếu dữ liệu chưa đủ rõ.
 
-## 6. Thanh toán thành công nhưng phát hành vé lỗi
+## 5. Thanh toán thành công nhưng phát hành vé lỗi
 
-Nếu thanh toán đã được xác nhận thành công nhưng hệ thống phát hành vé, TicketAsset hoặc dữ liệu vé gặp lỗi, EvoTicket sẽ ưu tiên xác minh order và khắc phục để người mua nhận được vé hợp lệ.
+Nếu thanh toán đã được xác nhận hợp lệ nhưng vé chưa được phát hành do lỗi hệ thống, EvoTicket ưu tiên khắc phục theo thứ tự:
 
-Nếu không thể phát hành hoặc khôi phục vé phù hợp với giao dịch đã thanh toán, EvoTicket sẽ phối hợp với Organizer và cổng thanh toán để xử lý hoàn tiền hoặc biện pháp tương đương theo từng trường hợp.
+1. Cập nhật trạng thái order.
+2. Phát hành vé tương ứng nếu inventory còn hợp lệ.
+3. Cung cấp vé thay thế tương đương nếu được người dùng và ban tổ chức chấp thuận.
+4. Hoàn tiền nếu không thể cấp quyền tham dự hợp lệ.
 
-## 7. NFT mint hoặc provenance lỗi/chậm
+## 6. NFT mint hoặc provenance bị chậm/lỗi
 
-NFT mint, provenance hoặc cập nhật blockchain có thể là quy trình kỹ thuật bất đồng bộ sau khi vé điện tử hoặc TicketAsset đã được phát hành hợp lệ trong hệ thống EvoTicket.
+Nếu vé điện tử đã được EvoTicket phát hành hợp lệ trong hệ thống, việc mint NFT, cập nhật tokenId, transaction hash hoặc provenance bị chậm/lỗi không mặc nhiên làm mất hiệu lực vé.
 
-NFT mint chậm hoặc lỗi không mặc nhiên làm mất hiệu lực vé nếu quyền sử dụng vé đã được xác lập hợp lệ trong hệ thống. EvoTicket sẽ ưu tiên retry, đồng bộ lại, cập nhật trạng thái hoặc áp dụng biện pháp kỹ thuật tương đương. Chỉ khi lỗi kỹ thuật làm người dùng mất khả năng sử dụng vé hoặc mất quyền lợi quan trọng theo thiết kế nền tảng, EvoTicket mới xem xét biện pháp khắc phục bổ sung theo mức độ ảnh hưởng.
+EvoTicket có thể xử lý bằng:
 
-## 8. Sự kiện bị hủy
+- Retry mint hoặc transfer.
+- Cập nhật lại trạng thái blockchain.
+- Ghi nhận sự cố kỹ thuật và thông báo cho người dùng.
+- Áp dụng biện pháp khắc phục khác nếu lỗi blockchain làm ảnh hưởng đến quyền sử dụng, resale hoặc chuyển quyền của người dùng.
 
-Khi sự kiện bị hủy, EvoTicket sẽ phối hợp với Organizer để công bố thông tin xử lý cho người mua, bao gồm phạm vi vé bị ảnh hưởng, điều kiện hoàn tiền, dữ liệu cần xác minh và phương thức hỗ trợ.
+## 7. Sự kiện bị hủy
 
-Organizer thường là bên chịu trách nhiệm chính về việc tổ chức sự kiện và nghĩa vụ kinh tế liên quan đến giá trị vé khi sự kiện bị hủy, trừ khi có thỏa thuận hoặc quy định khác. EvoTicket đóng vai trò đầu mối tiếp nhận, phối hợp xác minh, đối soát và hỗ trợ xử lý trong phạm vi nền tảng.
+Nếu sự kiện bị hủy và không có phương án thay thế được công bố hoặc được người mua chấp nhận, người mua có thể được hoàn lại tiền vé theo chính sách của sự kiện, quyết định của ban tổ chức và quy định pháp luật áp dụng.
 
-## 9. Sự kiện bị hoãn
+EvoTicket sẽ tiếp nhận yêu cầu, phối hợp với ban tổ chức và đối tác thanh toán để xác định:
 
-Khi sự kiện bị hoãn, vé có thể tiếp tục có hiệu lực cho lịch mới nếu Organizer và EvoTicket công bố như vậy. Nếu lịch mới ảnh hưởng đáng kể đến khả năng tham dự của người mua, EvoTicket sẽ phối hợp Organizer xem xét phương án hỗ trợ hoặc hoàn tiền theo chính sách được công bố cho sự kiện đó và quy định pháp luật áp dụng.
+- Danh sách giao dịch đủ điều kiện.
+- Số tiền được hoàn.
+- Các khoản phí có được hoàn hay không.
+- Phương thức và thời gian xử lý.
+- Chứng từ hoặc thông báo cần cung cấp.
 
-Người mua cần theo dõi thông báo chính thức từ EvoTicket hoặc Organizer để biết thời gian, địa điểm, thời hạn gửi yêu cầu và điều kiện xử lý.
+## 8. Sự kiện bị hoãn
 
-## 10. Thay đổi thời gian, địa điểm hoặc nội dung quan trọng
+Nếu sự kiện bị hoãn, ban tổ chức hoặc EvoTicket sẽ thông báo lịch mới khi có thông tin xác nhận. Tùy từng trường hợp, vé có thể:
 
-Nếu sự kiện thay đổi thời gian, địa điểm, lineup, nội dung chính hoặc điều kiện tham dự theo cách ảnh hưởng đáng kể đến quyền lợi người mua, EvoTicket sẽ phối hợp Organizer công bố phương án xử lý phù hợp.
+- Tiếp tục có hiệu lực cho lịch mới.
+- Được đổi sang suất diễn khác.
+- Được hoàn tiền nếu lịch mới làm thay đổi đáng kể khả năng tham dự của người mua và chính sách sự kiện cho phép.
 
-Tùy mức độ thay đổi, phương án xử lý có thể bao gồm giữ nguyên hiệu lực vé, đổi vé, hỗ trợ tham dự lịch mới, tiếp nhận yêu cầu hoàn tiền hoặc biện pháp khác do Organizer/EvoTicket công bố.
+## 9. Thay đổi thời gian, địa điểm hoặc nội dung quan trọng
 
-## 11. Vé đã check-in hoặc đã sử dụng
+Thay đổi được xem xét là quan trọng khi ảnh hưởng đáng kể đến khả năng tham dự hoặc bản chất sự kiện, ví dụ:
 
-Vé đã check-in hợp lệ thường được xem là đã sử dụng và không thuộc diện hoàn tiền. Ngoại lệ có thể được xem xét nếu có lỗi được xác minh từ hệ thống, check-in sai do lỗi vận hành, gian lận được chứng minh hoặc quyết định riêng của Organizer/EvoTicket theo từng trường hợp.
+- Đổi ngày hoặc khung giờ chính.
+- Đổi địa điểm sang khu vực khác đáng kể.
+- Thay đổi nội dung chính, line-up chính hoặc hạng mục quan trọng đã công bố.
+- Thay đổi điều kiện tham dự làm người mua không thể sử dụng vé.
 
-Nếu người dùng cho rằng vé bị check-in trái phép, cần thông báo sớm và cung cấp thông tin tài khoản, mã vé, thời điểm phát sinh, ảnh chụp hoặc chứng cứ liên quan để EvoTicket kiểm tra log QR/check-in và dữ liệu hệ thống.
+Trong các trường hợp này, EvoTicket phối hợp với ban tổ chức để công bố phương án xử lý, có thể bao gồm giữ vé, đổi vé, hoàn tiền hoặc biện pháp khác.
 
-## 12. Vé đang listing resale hoặc đã resale thành công
+## 10. Vé đã check-in hoặc đã sử dụng
 
-Nếu vé đang được niêm yết resale, đang bị khóa QR, đang giữ cho giao dịch resale hoặc đang trong quá trình chuyển quyền, yêu cầu hoàn tiền có thể bị tạm dừng để xác minh trạng thái sở hữu và giao dịch.
+Vé đã check-in hợp lệ thường được xem là đã sử dụng và không thuộc diện hoàn tiền. Ngoại lệ có thể được xem xét nếu:
 
-Nếu resale đã hoàn tất trong hệ thống, quyền lợi tham dự hoặc xử lý hoàn tiền thường được xem xét theo người nắm giữ hợp lệ hiện tại trên hệ thống tại thời điểm áp dụng chính sách, trừ khi Chính sách bán lại vé, điều kiện sự kiện hoặc quyết định xử lý cụ thể có quy định khác.
+- Check-in sai do lỗi hệ thống.
+- Checker xử lý sai.
+- Vé bị sử dụng trái phép do lỗi thuộc phạm vi kiểm soát của EvoTicket hoặc ban tổ chức.
+- Có quyết định hỗ trợ riêng từ EvoTicket hoặc ban tổ chức.
 
-Giao dịch mua bán/chuyển nhượng vé ngoài hệ thống EvoTicket không được nền tảng bảo đảm và có thể không được hỗ trợ hoàn tiền hoặc giải quyết tranh chấp.
+## 11. Vé đang listing resale hoặc đã resale
 
-## 13. Phí nền tảng, phí thanh toán và phí dịch vụ
+Đối với vé đang listing resale:
 
-Một giao dịch có thể bao gồm giá vé, phí nền tảng, phí thanh toán, phí dịch vụ hoặc phí khác nếu được công bố trong flow mua vé hoặc chính sách liên quan.
+- QR hoặc quyền sử dụng có thể đang bị khóa.
+- Người bán có thể cần hủy listing trước khi gửi một số loại yêu cầu.
+- Nếu sự kiện bị hủy/hoãn trong thời gian listing, trạng thái listing có thể bị tạm dừng để xử lý.
 
-Khi phát sinh hoàn tiền, việc hoàn lại các khoản phí phụ thuộc vào chính sách sự kiện, điều kiện của cổng thanh toán, thỏa thuận giữa các bên, lỗi được xác minh và quy định pháp luật áp dụng. Một số khoản phí đã phát sinh cho bên thứ ba có thể không được hoàn lại nếu đã được công bố và được pháp luật cho phép.
+Đối với vé đã resale thành công, quyền lợi tham dự hoặc hoàn tiền thường được xác định dựa trên người sở hữu hợp lệ hiện tại trong hệ thống tại thời điểm chính sách xử lý được áp dụng, trừ khi có quy định khác trong chính sách sự kiện hoặc quyết định xử lý tranh chấp.
 
-## 14. Thời gian xử lý hoàn tiền
+## 12. Phí nền tảng, phí thanh toán và phí dịch vụ
 
-EvoTicket không nêu thời hạn cứng cho mọi trường hợp nếu chưa có căn cứ vận hành được công bố. Thời gian xử lý phụ thuộc vào mức độ phức tạp của yêu cầu, dữ liệu cần đối soát, phản hồi của Organizer, ngân hàng, cổng thanh toán và các bên liên quan.
+Việc hoàn lại phí phụ thuộc vào loại phí, chính sách được công bố tại thời điểm giao dịch, điều kiện của đối tác thanh toán và nguyên nhân hoàn tiền.
 
-EvoTicket sẽ nỗ lực tiếp nhận, xác minh và cập nhật trạng thái yêu cầu trong thời hạn vận hành hợp lý. Khi cần thêm thông tin, người dùng có trách nhiệm phối hợp cung cấp dữ liệu liên quan để tránh kéo dài quá trình xử lý.
+Bảng tham chiếu chung:
 
-## 15. Cách gửi yêu cầu hỗ trợ hoặc khiếu nại
+| Trường hợp | Giá vé | Phí nền tảng/phí dịch vụ | Phí thanh toán |
+| --- | --- | --- | --- |
+| Sự kiện bị hủy | Có thể được hoàn theo chính sách sự kiện | Tùy chính sách công bố | Tùy đối tác thanh toán |
+| Thanh toán lỗi nhưng chưa cấp vé | Có thể được hoàn nếu đã ghi nhận tiền | Tùy nguyên nhân lỗi | Tùy đối tác thanh toán |
+| Người mua đổi ý | Thường không tự động hoàn | Thường không tự động hoàn | Thường không tự động hoàn |
+| Lỗi hệ thống làm không thể sử dụng vé | Xem xét hoàn hoặc khắc phục | Xem xét theo lỗi thực tế | Tùy đối tác thanh toán |
 
-Người dùng có thể gửi yêu cầu qua kênh hỗ trợ được EvoTicket công bố. Yêu cầu nên bao gồm:
+## 13. Thời gian xử lý
+
+Thời gian xử lý phụ thuộc vào:
+
+- Độ phức tạp của yêu cầu.
+- Trạng thái đối soát với đối tác thanh toán.
+- Phản hồi từ ban tổ chức.
+- Trạng thái vé, check-in hoặc resale.
+- Yêu cầu chứng từ từ các bên liên quan.
+
+EvoTicket sẽ thông báo việc tiếp nhận và cập nhật tiến độ qua kênh hỗ trợ chính thức.
+
+## 14. Cách gửi yêu cầu hoàn tiền hoặc hỗ trợ
+
+Người dùng cần gửi yêu cầu qua Trung tâm trợ giúp hoặc kênh liên hệ chính thức và cung cấp:
 
 - Mã order hoặc mã vé.
-- Email, số điện thoại hoặc tài khoản đã dùng để mua vé.
-- Tên sự kiện, suất diễn, loại vé hoặc ghế liên quan.
-- Mô tả sự cố và yêu cầu cụ thể.
-- Chứng từ thanh toán, ảnh chụp lỗi, thông báo ngân hàng hoặc tài liệu liên quan nếu có.
-- Thời điểm phát sinh sự cố và các bước đã thực hiện.
+- Tài khoản liên quan.
+- Tên sự kiện và suất diễn.
+- Lý do yêu cầu.
+- Chứng từ thanh toán.
+- Ảnh chụp lỗi hoặc thông báo liên quan.
+- Thông tin bổ sung nếu EvoTicket yêu cầu.
 
-EvoTicket có thể yêu cầu bổ sung thông tin để xác minh danh tính, giao dịch hoặc quyền sử dụng vé trước khi xử lý yêu cầu.
+## 15. Chính sách liên quan
 
-## 16. Trách nhiệm của Organizer, EvoTicket và cổng thanh toán
+- [Điều kiện giao dịch chung](/vi/legal/general-transaction-conditions)
+- [Chính sách thanh toán](/vi/legal/payment-policy)
+- [Chính sách vé](/vi/legal/ticket-policy)
+- [Chính sách bán lại vé](/vi/legal/resale-policy)
+- [Cơ chế giải quyết tranh chấp](/vi/legal/dispute-resolution)
 
-Organizer chịu trách nhiệm chính về thông tin sự kiện, điều kiện tham dự, việc tổ chức sự kiện, thay đổi/hủy/hoãn sự kiện và nghĩa vụ kinh tế liên quan đến giá trị vé theo chính sách đã công bố.
+## Căn cứ pháp lý tham chiếu
 
-EvoTicket là nền tảng tiếp nhận, xác minh và phối hợp xử lý yêu cầu trong phạm vi dữ liệu và chức năng hệ thống. EvoTicket có thể hỗ trợ phát hành vé, cập nhật trạng thái, khóa/mở QR, đối soát dữ liệu, liên hệ Organizer hoặc chuyển thông tin cho cổng thanh toán.
+Các chính sách của EvoTicket được xây dựng trên cơ sở tham chiếu các nhóm văn bản pháp luật và nguyên tắc vận hành sau đây. Trường hợp văn bản được sửa đổi, bổ sung hoặc thay thế, quy định mới có hiệu lực sẽ được ưu tiên áp dụng:
 
-Cổng thanh toán, ngân hàng hoặc bên xử lý giao dịch chịu trách nhiệm đối với phần hạ tầng thanh toán, xác nhận giao dịch, đối soát, hoàn tiền qua kênh thanh toán và các lỗi phát sinh trong phạm vi dịch vụ của họ.
+- [Luật Bảo vệ quyền lợi người tiêu dùng số 19/2023/QH15](https://vanban.chinhphu.vn/?docid=208363&pageid=27160), đặc biệt các nguyên tắc về cung cấp thông tin, điều kiện giao dịch chung, giao dịch từ xa, chứng từ giao dịch, khiếu nại và giải quyết tranh chấp.
+- Nghị định số 55/2024/NĐ-CP quy định chi tiết một số điều của Luật Bảo vệ quyền lợi người tiêu dùng.
+- [Nghị định số 52/2013/NĐ-CP về thương mại điện tử](https://thuvienphapluat.vn/van-ban/Thuong-mai/Nghi-dinh-52-2013-ND-CP-thuong-mai-dien-tu-187901.aspx) và Nghị định số 85/2021/NĐ-CP sửa đổi, bổ sung một số điều của Nghị định số 52/2013/NĐ-CP.
+- [Luật Giao dịch điện tử số 20/2023/QH15](https://tulieuvankien.dangcongsan.vn/he-thong-van-ban/van-ban-quy-pham-phap-luat/luat-giao-dich-dien-tu-so-202023qh15-hieu-luc-thi-hanh-tu-ngay-0172024-9710), bao gồm nguyên tắc về thông điệp dữ liệu, giao dịch điện tử, chứng từ điện tử và hợp đồng điện tử.
+- [Nghị định số 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân](https://vanban.chinhphu.vn/?docid=207759&pageid=27160), [Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15](https://vanban.chinhphu.vn/?classid=1&docid=214590&pageid=27160&typegroupid=3) và văn bản hướng dẫn tương ứng khi có hiệu lực áp dụng.
+- [Nghị định số 52/2024/NĐ-CP về thanh toán không dùng tiền mặt](https://vanban.chinhphu.vn/?docid=210262&pageid=27160) đối với các nội dung liên quan đến thanh toán điện tử và phối hợp với đối tác thanh toán.
 
-## 17. Tranh chấp và đối soát
+## Hiệu lực, cập nhật và liên hệ
 
-Khi có tranh chấp, EvoTicket có thể tạm khóa vé, QR, listing resale, khoản chi trả hoặc chức năng liên quan để bảo toàn dữ liệu và giảm rủi ro thiệt hại. Việc tạm khóa không đồng nghĩa với kết luận cuối cùng về trách nhiệm của bất kỳ bên nào.
+Chính sách này có hiệu lực kể từ ngày được công bố trên nền tảng. EvoTicket có thể cập nhật chính sách để phù hợp với thay đổi của sản phẩm, quy định pháp luật hoặc yêu cầu vận hành. Phiên bản cập nhật sẽ được công bố trên nền tảng và có hiệu lực theo ngày ghi nhận tại phần thông tin tài liệu.
 
-EvoTicket sẽ xem xét dữ liệu giao dịch, trạng thái thanh toán, lịch sử vé, log check-in, lịch sử resale, trao đổi hỗ trợ và các chứng cứ liên quan. Các bên có trách nhiệm phối hợp trung thực trong quá trình đối soát. Nếu không thể giải quyết bằng hỗ trợ nội bộ hoặc thương lượng, tranh chấp có thể được xử lý theo phương thức phù hợp với quy định pháp luật áp dụng.
-
-## 18. Ghi chú quan trọng
-
-Chính sách này được viết thận trọng để phản ánh trạng thái sản phẩm hiện tại: EvoTicket tiếp nhận và phối hợp xử lý yêu cầu hoàn tiền, nhưng không mặc nhiên cam kết hoàn tiền tự động, hoàn tiền trong một thời hạn cố định hoặc hoàn tiền cho mọi trường hợp.
-
-NFT, blockchain, Dynamic QR, log hệ thống và dữ liệu kỹ thuật là công cụ hỗ trợ xác minh và xử lý, không phải bảo chứng tuyệt đối rằng mọi giao dịch hoặc tranh chấp sẽ không có rủi ro.
+Người dùng có thể gửi yêu cầu hỗ trợ, khiếu nại hoặc câu hỏi liên quan đến chính sách thông qua Trung tâm trợ giúp, email hỗ trợ hoặc các kênh liên hệ chính thức được EvoTicket công bố.
