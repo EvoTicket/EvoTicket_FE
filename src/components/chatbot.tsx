@@ -349,7 +349,7 @@ export function ChatBot() {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="fixed bottom-24 right-6 z-50 w-[calc(100vw-48px)] sm:w-[450px] h-[600px] max-h-[calc(100vh-120px)] bg-bg-page border border-border-default rounded-ds-lg shadow-2xl flex flex-col relative overflow-hidden">
+                <div className="fixed bottom-24 right-6 z-50 w-[calc(100vw-48px)] sm:w-[450px] h-[600px] max-h-[calc(100vh-120px)] bg-bg-page border border-border-default rounded-ds-lg shadow-2xl flex flex-col overflow-hidden">
                     {/* Sidebar Drawer */}
                     {isSidebarOpen && (
                         <div 
