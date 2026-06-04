@@ -245,14 +245,14 @@ export function ChatBot() {
             <div className="fixed bottom-6 right-6 z-50 group">
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="bg-button-primary-bg-defaul hover:bg-button-primary-bg-defaul-hovertext-button-primary-text-default rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110"
+                    className="bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110"
                     aria-label={t("btn_aria")}
                 >
                     {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
                 </button>
 
                 <div className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                    <div className="bg-gray-800text-button-primary-text-default text-sm px-3 py-1 rounded whitespace-nowrap">
+                    <div className="bg-gray-800 text-white text-sm px-3 py-1 rounded whitespace-nowrap">
                         {t("btn_tooltip")}
                     </div>
                 </div>
@@ -262,7 +262,7 @@ export function ChatBot() {
             {isOpen && (
                 <div className="fixed bottom-24 right-6 z-50 w-[calc(100vw-48px)] sm:w-[450px] h-[600px] max-h-[calc(100vh-120px)] bg-bg-page border border-border-default rounded-ds-lg shadow-2xl flex flex-col">
                     {/* Header */}
-                    <div className="bg-button-primary-bg-defaultext-button-primary-text-default p-4 rounded-t-lg flex items-center justify-between">
+                    <div className="bg-button-primary-bg-default text-button-primary-text-default p-4 rounded-t-lg flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <MessageCircle size={20} />
                             <h3 className="font-semibold">{t("header_title")}</h3>
@@ -293,13 +293,13 @@ export function ChatBot() {
                                 >
                                     <div
                                         className={`max-w-[75%] rounded-ds-lg p-3 ${msg.senderType === "USER"
-                                            ? "bg-button-primary-bg-defaultext-button-primary-text-default"
+                                            ? "bg-button-primary-bg-default text-button-primary-text-default"
                                             : "bg-secondary text-text-primary"
                                             }`}
                                     >
                                         <div className={`text-sm prose prose-sm max-w-none ${msg.senderType === "USER"
                                             ? "prose-invert"
-                                            : ""
+                                            : "dark:prose-invert text-text-primary"
                                             }`}>
                                             <ReactMarkdown
                                                 remarkPlugins={[remarkGfm]}
@@ -318,7 +318,7 @@ export function ChatBot() {
                                                             <code
                                                                 className={`px-1.5 py-0.5 rounded text-xs font-mono ${msg.senderType === "USER"
                                                                     ? "bg-white/20"
-                                                                    : "bg-gray-200 text-gray-800"
+                                                                    : "bg-gray-200 text-gray-800 dark:bg-bg-surface dark:text-text-primary"
                                                                     }`}
                                                                 {...props}
                                                             >
@@ -328,7 +328,7 @@ export function ChatBot() {
                                                             <code
                                                                 className={`block px-3 py-2 rounded text-xs font-mono overflow-x-auto my-2 ${msg.senderType === "USER"
                                                                     ? "bg-white/20"
-                                                                    : "bg-gray-200 text-gray-800"
+                                                                    : "bg-gray-200 text-gray-800 dark:bg-bg-surface dark:text-text-primary"
                                                                     }`}
                                                                 {...props}
                                                             >
@@ -354,12 +354,12 @@ export function ChatBot() {
                                                     blockquote: ({ children }) => (
                                                         <blockquote className={`border-l-4 pl-3 my-2 ${msg.senderType === "USER"
                                                             ? "border-white/50"
-                                                            : "border-gray-400"
+                                                            : "border-gray-400 dark:border-border-default"
                                                             }`}>
                                                             {children}
                                                         </blockquote>
                                                     ),
-                                                    hr: () => <hr className={`my-2 ${msg.senderType === "USER" ? "border-white/30" : "border-gray-300"}`} />,
+                                                    hr: () => <hr className={`my-2 ${msg.senderType === "USER" ? "border-white/30" : "border-gray-300 dark:border-border-default"}`} />,
                                                 }}
                                             >
                                                 {msg.message}
@@ -470,7 +470,7 @@ export function ChatBot() {
                             <button
                                 onClick={handleSendMessage}
                                 disabled={!inputMessage.trim() && selectedFiles.length === 0}
-                                className="bg-button-primary-bg-defaul hover:bg-button-primary-bg-defaul-hovertext-button-primary-text-default px-4 py-2 rounded-ds-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default px-4 py-2 rounded-ds-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
                                 <Send size={20} />
                             </button>

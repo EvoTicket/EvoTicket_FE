@@ -219,7 +219,7 @@ export function Footer() {
       </div>
 
       {/* === BOTTOM BAR: COPYRIGHT === */}
-      <div className="bg-button-primary-bg-defaultext-button-primary-text-default/90 py-6 text-[11px] leading-relaxed">
+      <div className="bg-button-primary-bg-default text-button-primary-text-default/90 py-6 text-[11px] leading-relaxed">
         <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-4">
 
           <div>
