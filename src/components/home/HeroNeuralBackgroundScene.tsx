@@ -4,164 +4,218 @@ import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
+type HeroNeuralBackgroundSceneProps = {
+  isDark: boolean;
+};
+
 const vertexShader = `
-uniform float uTime;
-uniform vec2 uPointer;
+precision highp float;
 
 varying vec2 vUv;
-varying float vDepth;
 
 void main() {
   vUv = uv;
-
-  vec3 transformed = position;
-  vec2 centeredUv = uv - 0.5;
-
-  float pointerDistance = distance(uv, uPointer);
-  float pointerWave = smoothstep(0.55, 0.0, pointerDistance);
-
-  transformed.z += sin(centeredUv.x * 9.0 + uTime * 0.55) * 0.055;
-  transformed.z += cos(centeredUv.y * 8.0 - uTime * 0.45) * 0.05;
-  transformed.z += pointerWave * 0.14;
-
-  vDepth = transformed.z;
-
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(transformed, 1.0);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `;
 
 const fragmentShader = `
 precision highp float;
 
+varying vec2 vUv;
+
 uniform float uTime;
+uniform float uRatio;
+uniform float uTheme;
+uniform float uDensity;
+uniform float uCutoff;
+uniform float uWaveOpacity;
+uniform float uGlowOpacity;
+uniform float uPointerStrength;
 uniform vec2 uPointer;
 
-varying vec2 vUv;
-varying float vDepth;
-
-float hash(vec2 p) {
-  p = fract(p * vec2(123.34, 456.21));
-  p += dot(p, p + 45.32);
-  return fract(p.x * p.y);
+vec2 rotate(vec2 uv, float angle) {
+  float s = sin(angle);
+  float c = cos(angle);
+  return mat2(c, s, -s, c) * uv;
 }
 
-float noise(vec2 p) {
-  vec2 i = floor(p);
-  vec2 f = fract(p);
+float neuroShape(vec2 uv, float t, float pointerPower) {
+  vec2 sineAcc = vec2(0.0);
+  vec2 result = vec2(0.0);
 
-  float a = hash(i);
-  float b = hash(i + vec2(1.0, 0.0));
-  float c = hash(i + vec2(0.0, 1.0));
-  float d = hash(i + vec2(1.0, 1.0));
+  float scale = uDensity;
 
-  vec2 u = f * f * (3.0 - 2.0 * f);
+  for (int j = 0; j < 10; j++) {
+    uv = rotate(uv, 1.0);
+    sineAcc = rotate(sineAcc, 1.0);
 
-  return mix(a, b, u.x)
-    + (c - a) * u.y * (1.0 - u.x)
-    + (d - b) * u.x * u.y;
-}
+    vec2 layer = uv * scale + vec2(float(j)) + sineAcc - vec2(t);
 
-float fbm(vec2 p) {
-  float value = 0.0;
-  float amplitude = 0.5;
+    sineAcc += sin(layer) + 2.05 * pointerPower;
+    result += (0.5 + 0.5 * cos(layer)) / scale;
 
-  for (int i = 0; i < 5; i++) {
-    value += amplitude * noise(p);
-    p *= 2.05;
-    amplitude *= 0.5;
+    scale *= 1.18;
   }
 
-  return value;
-}
-
-float neuralLine(vec2 uv, float scale, float width, float speed) {
-  vec2 p = uv * scale;
-
-  float flow =
-    sin(p.x + fbm(p * 0.35 + uTime * speed) * 4.0) *
-    cos(p.y - fbm(p.yx * 0.32 - uTime * speed) * 4.0);
-
-  float core = 1.0 - smoothstep(0.0, width, abs(flow));
-  float glow = 1.0 - smoothstep(width, width * 6.0, abs(flow));
-
-  return core * 1.35 + glow * 0.28;
+  return result.x + result.y;
 }
 
 void main() {
   vec2 uv = vUv;
-  vec2 center = uv - 0.5;
-  float radius = length(center);
-  float angle = atan(center.y, center.x);
 
-  float pointer = smoothstep(0.42, 0.0, distance(uv, uPointer));
+  vec2 aspectCenter = uv - 0.5;
+  aspectCenter.x *= uRatio;
 
-  vec2 driftA = vec2(
-    sin(uTime * 0.08) * 0.045,
-    cos(uTime * 0.07) * 0.035
-  );
+  float radius = length(aspectCenter);
 
-  vec2 driftB = vec2(
-    cos(uTime * 0.06) * 0.035,
-    sin(uTime * 0.09) * 0.045
-  );
+  vec2 shaderUv = uv * 0.5;
+  shaderUv.x *= uRatio;
 
-  float vortex = sin(angle * 3.5 + radius * 18.0 - uTime * 0.62) * 0.5 + 0.5;
+  vec2 pointerVector = uv - uPointer;
+  pointerVector.x *= uRatio;
 
-  float largeLines = neuralLine(uv + driftA, 7.0, 0.045, 0.16);
-  float sharpLines = neuralLine(uv + driftB, 14.0, 0.018, 0.12);
-  float microLines = neuralLine(uv + vec2(0.0, uTime * 0.012), 24.0, 0.01, 0.08);
+  float pointerDistance = clamp(length(pointerVector), 0.0, 1.0);
+  float pointerPower = 0.5 * pow(1.0 - pointerDistance, 2.0) * uPointerStrength;
 
-  float nebula = fbm(uv * 3.0 + vec2(uTime * 0.015, -uTime * 0.012));
-  float energy = largeLines * 0.55 + sharpLines * 0.75 + microLines * 0.24;
-  energy += vortex * 0.2 + pointer * 0.55 + vDepth * 0.45;
+  float t = uTime * 0.18;
 
-  vec3 bgTop = vec3(0.030, 0.040, 0.070);
-  vec3 bgMid = vec3(0.055, 0.050, 0.120);
-  vec3 bgDeep = vec3(0.012, 0.014, 0.026);
+  float field = neuroShape(shaderUv, t, pointerPower);
 
-  vec3 violet = vec3(0.430, 0.330, 0.950);
-  vec3 electric = vec3(0.630, 0.580, 1.000);
-  vec3 ice = vec3(0.690, 0.820, 1.000);
-  vec3 gold = vec3(1.000, 0.720, 0.260);
+  field = 1.08 * pow(field, 3.0);
+  field += 0.12 * pow(field, 8.0);
+  field = max(0.0, field - uCutoff);
+
+  float edgeFade = 1.0 - smoothstep(0.42, 0.94, radius);
+  field *= edgeFade;
+
+  /*
+    Làm vùng chữ bên trái sạch hơn một chút.
+    Nếu muốn sóng rõ hơn sau text, đổi 0.78 -> 0.88.
+  */
+  vec2 textZone = (uv - vec2(0.24, 0.52)) * vec2(1.0, 1.25);
+  float textClear = 1.0 - smoothstep(0.18, 0.50, length(textZone));
+  field *= mix(1.0, 0.78, textClear);
+
+  float core = clamp(field, 0.0, 1.0);
+  float glow = pow(core, 2.25);
+
+  /*
+    Background light: không trắng tuyệt đối để sóng tím có tương phản.
+  */
+  vec3 lightBgTop = vec3(0.988, 0.988, 1.000);   // #FCFCFF
+  vec3 lightBgMid = vec3(0.955, 0.948, 0.982);   // tím rất nhạt
+  vec3 lightBgDeep = vec3(0.972, 0.968, 0.992);
+
+  /*
+    Background dark: navy tím, không đen tuyền.
+  */
+  vec3 darkBgTop = vec3(0.055, 0.071, 0.145);
+  vec3 darkBgMid = vec3(0.105, 0.075, 0.175);
+  vec3 darkBgDeep = vec3(0.030, 0.035, 0.075);
 
   float vertical = smoothstep(0.0, 1.0, uv.y);
-  vec3 color = mix(bgDeep, bgTop, vertical);
-  color = mix(color, bgMid, nebula * 0.45);
 
-  color += violet * largeLines * 0.34;
-  color += electric * sharpLines * 0.48;
-  color += ice * microLines * 0.18;
-  color += gold * pow(max(energy - 0.72, 0.0), 2.0) * 1.8;
+  float rightSpot = 1.0 - smoothstep(
+    0.06,
+    0.72,
+    length((uv - vec2(0.72, 0.46)) * vec2(1.0, 0.78))
+  );
 
-  color += violet * pointer * 0.24;
-  color += electric * pointer * sharpLines * 0.55;
+  float leftSpot = 1.0 - smoothstep(
+    0.04,
+    0.90,
+    length((uv - vec2(0.24, 0.48)) * vec2(1.18, 0.92))
+  );
 
-  float vignette = smoothstep(0.98, 0.20, radius);
-  color *= mix(0.55, 1.08, vignette);
+  vec3 lightBg = mix(lightBgMid, lightBgTop, vertical);
+  lightBg = mix(lightBg, lightBgDeep, rightSpot * 0.36);
+  lightBg = mix(lightBg, vec3(0.965, 0.958, 0.992), leftSpot * 0.14);
 
-  float contrast = 1.12;
-  color = (color - 0.5) * contrast + 0.5;
+  vec3 darkBg = mix(darkBgDeep, darkBgTop, vertical);
+  darkBg = mix(darkBg, darkBgMid, rightSpot * 0.52);
+  darkBg = mix(darkBg, vec3(0.075, 0.055, 0.130), leftSpot * 0.18);
 
-  gl_FragColor = vec4(color, 1.0);
+  /*
+    Light mode: sóng tím rõ.
+    Dark mode: sóng trắng sáng / lavender white.
+  */
+  vec3 lightLineA = vec3(0.290, 0.220, 0.520);   // tím đậm hơn để nổi trên nền sáng
+  vec3 lightLineB = vec3(0.373, 0.290, 0.616);   // #5F4A9D
+  vec3 lightGlow = vec3(0.549, 0.518, 0.800);    // #8C84CC
+
+  vec3 darkLineA = vec3(0.760, 0.740, 0.900);
+  vec3 darkLineB = vec3(0.920, 0.910, 1.000);
+  vec3 darkGlow = vec3(1.000, 0.985, 0.940);
+
+  float chroma = 0.5 + 0.5 * sin(uTime * 0.34 + core * 5.0);
+
+  vec3 lightWave = mix(lightLineA, lightLineB, chroma);
+  lightWave = mix(lightWave, lightGlow, glow * 0.30);
+
+  vec3 darkWave = mix(darkLineA, darkLineB, chroma);
+  darkWave = mix(darkWave, darkGlow, glow * 0.50);
+
+  /*
+    Điểm quan trọng:
+    Light mode dùng mix để kéo nền sáng về tím.
+    Dark mode dùng cộng sáng để tạo glow.
+  */
+  float lightLineMask = clamp(core * uWaveOpacity * 1.35, 0.0, 0.82);
+  float lightGlowMask = clamp(glow * uGlowOpacity * 0.55, 0.0, 0.45);
+
+  vec3 lightColor = lightBg;
+  lightColor = mix(lightColor, lightWave, lightLineMask);
+  lightColor += lightGlow * lightGlowMask;
+
+  float darkLineMask = clamp(core * uWaveOpacity * 0.55, 0.0, 0.45);
+  float darkGlowMask = clamp(glow * uGlowOpacity * 1.25, 0.0, 0.80);
+
+  vec3 darkColor = darkBg;
+  darkColor = mix(darkColor, darkWave, darkLineMask);
+  darkColor += darkGlow * darkGlowMask;
+
+  float pointerGlow = smoothstep(0.42, 0.0, pointerDistance);
+
+  lightColor = mix(
+    lightColor,
+    lightGlow,
+    pointerGlow * core * uPointerStrength * 0.28
+  );
+
+  darkColor += darkGlow * pointerGlow * glow * uPointerStrength * 0.34;
+
+  vec3 finalColor = mix(lightColor, darkColor, uTheme);
+  finalColor = clamp(finalColor, 0.0, 1.0);
+
+  gl_FragColor = vec4(finalColor, 1.0);
 }
 `;
 
-function NeuralField() {
+function NeuralField({ isDark }: HeroNeuralBackgroundSceneProps) {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
-  const pointerRef = useRef(new THREE.Vector2(0.45, 0.52));
-  const { viewport } = useThree();
+  const pointerTargetRef = useRef(new THREE.Vector2(0.64, 0.52));
+
+  const { viewport, size } = useThree();
 
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uPointer: { value: new THREE.Vector2(0.45, 0.52) },
+      uRatio: { value: 1 },
+      uTheme: { value: isDark ? 1 : 0 },
+      uDensity: { value: 5.1 },
+      uCutoff: { value: 0.46 },
+      uWaveOpacity: { value: 0.62 },
+      uGlowOpacity: { value: 0.32 },
+      uPointerStrength: { value: 0.44 },
+      uPointer: { value: new THREE.Vector2(0.64, 0.52) },
     }),
     []
   );
 
   useEffect(() => {
     const handlePointerMove = (event: PointerEvent) => {
-      pointerRef.current.set(
+      pointerTargetRef.current.set(
         event.clientX / window.innerWidth,
         1 - event.clientY / window.innerHeight
       );
@@ -179,13 +233,33 @@ function NeuralField() {
   useFrame(({ clock }) => {
     if (!materialRef.current) return;
 
-    materialRef.current.uniforms.uTime.value = clock.getElapsedTime();
-    materialRef.current.uniforms.uPointer.value.lerp(pointerRef.current, 0.075);
+    const u = materialRef.current.uniforms;
+
+    u.uTime.value = clock.getElapsedTime();
+    u.uRatio.value = size.width / Math.max(size.height, 1);
+    u.uPointer.value.lerp(pointerTargetRef.current, 0.075);
+
+    u.uTheme.value = isDark ? 1 : 0;
+
+    /*
+      Light:
+      - cutoff thấp hơn để sóng không biến mất.
+      - opacity cao hơn vì phải nổi trên nền sáng.
+
+      Dark:
+      - cutoff cao hơn để bớt rườm rà.
+      - glow cao hơn để sóng trắng sáng hơn.
+    */
+    u.uDensity.value = isDark ? 8.15 : 8.05;
+    u.uCutoff.value = isDark ? 0.04 : 0.06;
+    u.uWaveOpacity.value = isDark ? 0.46 : 0.68;
+    u.uGlowOpacity.value = isDark ? 0.46 : 8.64;
+    u.uPointerStrength.value = isDark ? 1.9 : 2.0;
   });
 
   return (
     <mesh scale={[viewport.width, viewport.height, 1]}>
-      <planeGeometry args={[1, 1, 160, 160]} />
+      <planeGeometry args={[1, 1, 1, 1]} />
       <shaderMaterial
         ref={materialRef}
         uniforms={uniforms}
@@ -201,20 +275,24 @@ function NeuralField() {
   );
 }
 
-export default function HeroNeuralBackgroundScene() {
+export default function HeroNeuralBackgroundScene({
+  isDark,
+}: HeroNeuralBackgroundSceneProps) {
   return (
     <Canvas
       className="!absolute !inset-0 !h-full !w-full"
       camera={{ position: [0, 0, 1.6], fov: 52, near: 0.1, far: 10 }}
-      dpr={[1.5, 2]}
+      dpr={[1, 1.6]}
       gl={{
         alpha: false,
-        antialias: true,
+        antialias: false,
         powerPreference: "high-performance",
-        outputColorSpace: THREE.SRGBColorSpace,
+      }}
+      onCreated={({ gl }) => {
+        gl.outputColorSpace = THREE.SRGBColorSpace;
       }}
     >
-      <NeuralField />
+      <NeuralField isDark={isDark} />
     </Canvas>
   );
 }
