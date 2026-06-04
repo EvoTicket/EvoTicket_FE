@@ -1,0 +1,159 @@
+---
+title: "Điều kiện giao dịch chung"
+slug: "general-transaction-conditions"
+description: "Quy định về điều kiện giao kết, xác nhận giao dịch, trách nhiệm của các bên, bằng chứng giao dịch và quy trình xử lý trong các giao dịch trên EvoTicket."
+version: "1.0.0"
+effectiveDate: "2026-06-04"
+lastUpdated: "2026-06-04"
+legalCategory: "transaction"
+documentType: "legal-policy"
+locale: "vi"
+status: "published"
+requiredForFlow:
+  - primary-checkout
+  - resale-checkout
+  - payment
+relatedPolicies:
+  - terms-of-use
+  - ticket-policy
+  - payment-policy
+  - refund-policy
+  - resale-policy
+  - dispute-resolution
+---
+
+# Điều kiện giao dịch chung
+
+Điều kiện giao dịch chung này quy định cách giao dịch được hình thành, xác nhận, xử lý và lưu vết trên EvoTicket. Tài liệu áp dụng cho các giao dịch mua vé sơ cấp, giao dịch resale, thanh toán, cấp vé, xác nhận quyền sử dụng vé và các bước kỹ thuật liên quan.
+
+## 1. Phạm vi áp dụng
+
+Điều kiện này áp dụng cho:
+
+- Người mua vé trên EvoTicket.
+- Người bán và người mua trong giao dịch resale.
+- Ban tổ chức sử dụng EvoTicket để phân phối hoặc quản lý vé.
+- Các giao dịch thanh toán, cấp vé, chuyển quyền sở hữu và xử lý tranh chấp phát sinh trên nền tảng.
+
+## 2. Thông tin trước giao dịch
+
+Trước khi người dùng thanh toán, EvoTicket hiển thị hoặc cung cấp quyền truy cập đến các thông tin trọng yếu như:
+
+- Tên sự kiện, ban tổ chức, thời gian, địa điểm và suất diễn.
+- Loại vé, khu vực ghế, số lượng vé và điều kiện sử dụng.
+- Giá vé, phí, tổng tiền và phương thức thanh toán.
+- Chính sách hoàn tiền, hủy, hoãn, thay đổi sự kiện.
+- Chính sách vé, check-in, resale và chuyển nhượng nếu áp dụng.
+- Các điều khoản liên quan đến blockchain/NFT nếu sự kiện sử dụng tính năng này.
+
+Người dùng có trách nhiệm kiểm tra thông tin trước khi xác nhận thanh toán.
+
+## 3. Quy trình giao dịch mua vé sơ cấp
+
+Một giao dịch mua vé sơ cấp thường gồm:
+
+1. Người dùng chọn sự kiện, suất diễn, loại vé hoặc vị trí ghế.
+2. Hệ thống kiểm tra khả dụng và giữ vé hoặc ghế trong thời gian giới hạn.
+3. Người dùng xác nhận thông tin order và các chính sách áp dụng.
+4. Người dùng thực hiện thanh toán.
+5. EvoTicket nhận xác nhận thanh toán hợp lệ từ hệ thống thanh toán.
+6. EvoTicket ghi nhận order hoàn tất và phát hành vé điện tử cho tài khoản người dùng.
+7. Nếu sự kiện áp dụng NFT/blockchain, việc mint hoặc ghi nhận provenance có thể được xử lý bất đồng bộ.
+
+## 4. Quy trình giao dịch resale
+
+Một giao dịch resale thường gồm:
+
+1. Chủ sở hữu vé hợp lệ đăng bán vé nếu sự kiện cho phép resale.
+2. EvoTicket kiểm tra điều kiện listing và có thể khóa vé/QR trong thời gian listing.
+3. Người mua resale chọn vé và tạo giao dịch.
+4. Người mua resale thanh toán theo phương thức được hỗ trợ.
+5. EvoTicket xác nhận thanh toán hợp lệ.
+6. EvoTicket chuyển quyền sở hữu vé trong hệ thống.
+7. Nếu vé có NFT, transfer blockchain có thể được xử lý bất đồng bộ.
+
+## 5. Thời điểm giao dịch được xác nhận
+
+Giao dịch không được xem là hoàn tất chỉ vì người dùng đã bấm nút thanh toán, quét mã QR thanh toán hoặc chuyển sang trang thanh toán. Giao dịch chỉ được xác nhận khi EvoTicket ghi nhận trạng thái thanh toán hợp lệ và hoàn tất bước xử lý tương ứng trong hệ thống.
+
+Nếu có độ trễ giữa ngân hàng/cổng thanh toán và EvoTicket, trạng thái hiển thị có thể tạm thời chưa đồng bộ. Người dùng nên tránh thanh toán lặp lại cho cùng một order trước khi kiểm tra trạng thái hoặc liên hệ hỗ trợ.
+
+## 6. Giữ vé, hết hạn và giải phóng vé
+
+Trong thời gian giữ vé, hệ thống có thể tạm khóa số lượng vé hoặc vị trí ghế để người dùng hoàn tất thanh toán. Nếu quá thời hạn mà EvoTicket chưa nhận được xác nhận thanh toán hợp lệ, order có thể hết hiệu lực và vé hoặc ghế được giải phóng.
+
+Nếu người dùng bị trừ tiền sau khi order hết hạn, EvoTicket sẽ đối soát với đối tác thanh toán và xử lý theo [Chính sách thanh toán](/vi/legal/payment-policy) và [Chính sách hoàn tiền](/vi/legal/refund-policy).
+
+## 7. Vé điện tử và NFT/blockchain
+
+Sau khi thanh toán được xác nhận, EvoTicket ghi nhận quyền sử dụng vé cho tài khoản người dùng. Nếu sự kiện sử dụng NFT/blockchain, các bước mint, transfer hoặc cập nhật transaction hash có thể được thực hiện sau đó.
+
+Lỗi hoặc chậm trễ trong quá trình mint NFT không mặc nhiên làm mất hiệu lực của vé nếu quyền tham dự đã được EvoTicket xác lập hợp lệ trong hệ thống. Trường hợp lỗi kỹ thuật ảnh hưởng đến quyền sử dụng vé, EvoTicket sẽ xử lý theo chính sách liên quan.
+
+## 8. Chứng từ, lịch sử giao dịch và bằng chứng điện tử
+
+EvoTicket có thể lưu và cung cấp các dữ liệu sau để hỗ trợ truy xuất, đối soát và xử lý tranh chấp:
+
+- Mã order.
+- Mã vé hoặc mã định danh vé.
+- Biên nhận, thông tin thanh toán hoặc trạng thái giao dịch.
+- Lịch sử trạng thái order, vé và resale.
+- Log check-in, log QR và log hệ thống liên quan.
+- Transaction hash hoặc dữ liệu blockchain nếu có.
+- Nội dung trao đổi hỗ trợ và khiếu nại.
+
+Các dữ liệu điện tử này có thể được sử dụng như căn cứ kỹ thuật để xác minh giao dịch, xử lý hỗ trợ và giải quyết tranh chấp theo quy định pháp luật áp dụng.
+
+## 9. Sai lệch, lỗi kỹ thuật và khắc phục
+
+Nếu phát sinh sai lệch giữa trạng thái thanh toán, trạng thái order, trạng thái vé hoặc trạng thái blockchain, EvoTicket sẽ kiểm tra dữ liệu từ hệ thống nội bộ, đối tác thanh toán, ban tổ chức và các log kỹ thuật liên quan.
+
+Các biện pháp khắc phục có thể gồm:
+
+- Cập nhật lại trạng thái giao dịch.
+- Cấp vé bổ sung nếu người dùng đã thanh toán hợp lệ nhưng chưa nhận vé.
+- Hoàn tiền nếu giao dịch không thể hoàn tất.
+- Hủy hoặc đảo trạng thái giao dịch nếu có lỗi nghiêm trọng hoặc gian lận.
+- Chuyển yêu cầu sang quy trình khiếu nại/tranh chấp.
+
+## 10. Trách nhiệm của người dùng
+
+Người dùng có trách nhiệm:
+
+- Kiểm tra thông tin trước khi thanh toán.
+- Đọc và đồng ý với các chính sách được dẫn tại bước giao dịch.
+- Cung cấp thông tin chính xác để thanh toán và nhận vé.
+- Không lợi dụng lỗi hệ thống để tạo giao dịch bất hợp lệ.
+- Cung cấp chứng từ khi yêu cầu hỗ trợ, hoàn tiền hoặc khiếu nại.
+
+## 11. Trách nhiệm của EvoTicket và ban tổ chức
+
+EvoTicket có trách nhiệm vận hành nền tảng, ghi nhận giao dịch, phối hợp đối soát thanh toán, phát hành vé theo flow hệ thống và tiếp nhận yêu cầu hỗ trợ.
+
+Ban tổ chức chịu trách nhiệm về thông tin sự kiện, quyền tổ chức, điều kiện tham dự, nội dung chương trình, thay đổi sự kiện và các nghĩa vụ với người tham dự trong phạm vi tổ chức sự kiện.
+
+## 12. Chính sách liên quan
+
+- [Điều khoản sử dụng](/vi/legal/terms-of-use)
+- [Chính sách vé](/vi/legal/ticket-policy)
+- [Chính sách thanh toán](/vi/legal/payment-policy)
+- [Chính sách hoàn tiền](/vi/legal/refund-policy)
+- [Chính sách bán lại vé](/vi/legal/resale-policy)
+- [Cơ chế giải quyết tranh chấp](/vi/legal/dispute-resolution)
+
+## Căn cứ pháp lý tham chiếu
+
+Các chính sách của EvoTicket được xây dựng trên cơ sở tham chiếu các nhóm văn bản pháp luật và nguyên tắc vận hành sau đây. Trường hợp văn bản được sửa đổi, bổ sung hoặc thay thế, quy định mới có hiệu lực sẽ được ưu tiên áp dụng:
+
+- [Luật Bảo vệ quyền lợi người tiêu dùng số 19/2023/QH15](https://vanban.chinhphu.vn/?docid=208363&pageid=27160), đặc biệt các nguyên tắc về cung cấp thông tin, điều kiện giao dịch chung, giao dịch từ xa, chứng từ giao dịch, khiếu nại và giải quyết tranh chấp.
+- Nghị định số 55/2024/NĐ-CP quy định chi tiết một số điều của Luật Bảo vệ quyền lợi người tiêu dùng.
+- [Nghị định số 52/2013/NĐ-CP về thương mại điện tử](https://thuvienphapluat.vn/van-ban/Thuong-mai/Nghi-dinh-52-2013-ND-CP-thuong-mai-dien-tu-187901.aspx) và Nghị định số 85/2021/NĐ-CP sửa đổi, bổ sung một số điều của Nghị định số 52/2013/NĐ-CP.
+- [Luật Giao dịch điện tử số 20/2023/QH15](https://tulieuvankien.dangcongsan.vn/he-thong-van-ban/van-ban-quy-pham-phap-luat/luat-giao-dich-dien-tu-so-202023qh15-hieu-luc-thi-hanh-tu-ngay-0172024-9710), bao gồm nguyên tắc về thông điệp dữ liệu, giao dịch điện tử, chứng từ điện tử và hợp đồng điện tử.
+- [Nghị định số 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân](https://vanban.chinhphu.vn/?docid=207759&pageid=27160), [Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15](https://vanban.chinhphu.vn/?classid=1&docid=214590&pageid=27160&typegroupid=3) và văn bản hướng dẫn tương ứng khi có hiệu lực áp dụng.
+- [Nghị định số 52/2024/NĐ-CP về thanh toán không dùng tiền mặt](https://vanban.chinhphu.vn/?docid=210262&pageid=27160) đối với các nội dung liên quan đến thanh toán điện tử và phối hợp với đối tác thanh toán.
+
+## Hiệu lực, cập nhật và liên hệ
+
+Chính sách này có hiệu lực kể từ ngày được công bố trên nền tảng. EvoTicket có thể cập nhật chính sách để phù hợp với thay đổi của sản phẩm, quy định pháp luật hoặc yêu cầu vận hành. Phiên bản cập nhật sẽ được công bố trên nền tảng và có hiệu lực theo ngày ghi nhận tại phần thông tin tài liệu.
+
+Người dùng có thể gửi yêu cầu hỗ trợ, khiếu nại hoặc câu hỏi liên quan đến chính sách thông qua Trung tâm trợ giúp, email hỗ trợ hoặc các kênh liên hệ chính thức được EvoTicket công bố.

@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ChevronRight, ShieldCheck, CheckCircle2, User, Phone, Mail, Tag, CreditCard, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { isValidEmail, isValidPhone, isValidFullName } from "@/src/lib/validations";
+import { getLegalHref } from "@/src/lib/docs/registry";
 import { toast } from "react-toastify";
 import api from "@/src/lib/axios";
 import { TimeOutModal } from "@/src/components/modals/TimeOutModal";
@@ -508,7 +509,13 @@ export default function ResaleCheckoutPage() {
                                     />
                                 </div>
                                 <span className={`text-[13px] ${agreedToTerms ? 'text-text-primary' : 'text-text-secondary'} group-hover:text-text-primary transition-colors leading-tight`}>
-                                    {t('confirm_terms')}
+                                    Tôi xác nhận đã đọc và đồng ý với{" "}
+                                    <Link href={getLegalHref(locale as string, "terms-of-use")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Điều khoản sử dụng</Link>,{" "}
+                                    <Link href={getLegalHref(locale as string, "general-transaction-conditions")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Điều kiện giao dịch chung</Link>,{" "}
+                                    <Link href={getLegalHref(locale as string, "resale-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Chính sách bán lại vé</Link>,{" "}
+                                    <Link href={getLegalHref(locale as string, "payment-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Chính sách thanh toán</Link>,{" "}
+                                    <Link href={getLegalHref(locale as string, "refund-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Chính sách hoàn tiền</Link> và{" "}
+                                    <Link href={getLegalHref(locale as string, "privacy-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Chính sách bảo mật</Link>.
                                 </span>
                             </label>
                         </div>

@@ -1,0 +1,154 @@
+---
+title: "Chính sách thanh toán"
+slug: "payment-policy"
+description: "Quy định về phương thức thanh toán, xác nhận giao dịch, lỗi thanh toán, đối soát và trách nhiệm liên quan đến các cổng thanh toán được tích hợp trên EvoTicket."
+version: "1.0.0"
+effectiveDate: "2026-06-04"
+lastUpdated: "2026-06-04"
+legalCategory: "payment"
+documentType: "legal-policy"
+locale: "vi"
+status: "published"
+requiredForFlow:
+  - primary-checkout
+  - resale-checkout
+  - payment
+relatedPolicies:
+  - terms-of-use
+  - general-transaction-conditions
+  - ticket-policy
+  - refund-policy
+  - dispute-resolution
+---
+
+# Chính sách thanh toán
+
+Chính sách thanh toán quy định cách EvoTicket tiếp nhận, xử lý, xác nhận và đối soát các giao dịch thanh toán phát sinh trên nền tảng. Chính sách này áp dụng cho giao dịch mua vé sơ cấp, giao dịch resale và các khoản phí liên quan nếu được hiển thị tại bước thanh toán.
+
+## 1. Phạm vi áp dụng
+
+Chính sách này áp dụng cho:
+
+- Người mua vé.
+- Người mua trong giao dịch resale.
+- Ban tổ chức có giao dịch đối soát doanh thu qua EvoTicket.
+- Các giao dịch thanh toán, lỗi thanh toán, hoàn tiền, đối soát và chứng từ điện tử liên quan.
+
+## 2. Phương thức thanh toán
+
+EvoTicket hỗ trợ các phương thức thanh toán được hiển thị tại bước thanh toán. Tùy thời điểm và sự kiện, phương thức thanh toán có thể bao gồm chuyển khoản, QR thanh toán, cổng thanh toán, ví điện tử hoặc phương thức khác do EvoTicket tích hợp.
+
+Người dùng cần kiểm tra kỹ:
+
+- Số tiền cần thanh toán.
+- Nội dung chuyển khoản hoặc mã thanh toán.
+- Thời hạn thanh toán.
+- Tên đơn vị thụ hưởng hoặc đối tác thanh toán.
+- Trạng thái order sau khi thanh toán.
+
+## 3. Vai trò của đối tác thanh toán
+
+Một số giao dịch được xử lý thông qua ngân hàng, cổng thanh toán hoặc nhà cung cấp dịch vụ thanh toán. EvoTicket không yêu cầu người dùng cung cấp mật khẩu ngân hàng, OTP ngân hàng, mã PIN ví điện tử hoặc dữ liệu bảo mật không cần thiết cho EvoTicket.
+
+Trạng thái thanh toán trên EvoTicket phụ thuộc vào việc hệ thống nhận được xác nhận hợp lệ từ đối tác thanh toán hoặc dữ liệu đối soát tương ứng.
+
+## 4. Thời điểm thanh toán được xác nhận
+
+Thanh toán được xem là xác nhận trên EvoTicket khi:
+
+1. Người dùng thực hiện giao dịch thanh toán đúng order hoặc mã thanh toán.
+2. Đối tác thanh toán hoặc hệ thống đối soát gửi trạng thái hợp lệ về EvoTicket.
+3. EvoTicket ghi nhận giao dịch thành công và cập nhật trạng thái order.
+4. Vé hoặc quyền sở hữu tương ứng được phát hành, cập nhật hoặc chuyển giao theo flow hệ thống.
+
+Việc ứng dụng ngân hàng hiển thị đã trừ tiền không luôn đồng nghĩa EvoTicket đã nhận được xác nhận thanh toán ngay lập tức. Có thể có độ trễ đối soát tùy vào hệ thống thanh toán, ngân hàng hoặc hạ tầng mạng.
+
+## 5. Lỗi thanh toán thường gặp
+
+Các lỗi có thể phát sinh gồm:
+
+- Thanh toán quá thời hạn giữ vé.
+- Thanh toán sai số tiền hoặc sai nội dung.
+- Thanh toán thành công ở ngân hàng nhưng EvoTicket chưa nhận callback.
+- Người dùng thanh toán nhiều lần cho cùng một order.
+- Giao dịch bị hủy, bị từ chối hoặc bị nghi ngờ gian lận.
+- Lỗi mạng, lỗi trình duyệt, lỗi cổng thanh toán hoặc lỗi đồng bộ trạng thái.
+
+## 6. Trừ tiền nhưng chưa nhận vé
+
+Nếu người dùng bị trừ tiền nhưng chưa nhận vé, hãy thực hiện:
+
+1. Kiểm tra trạng thái order trong tài khoản EvoTicket.
+2. Chờ một khoảng thời gian hợp lý để hệ thống đối soát tự động cập nhật.
+3. Không tạo nhiều giao dịch thanh toán mới cho cùng một order nếu chưa xác minh trạng thái.
+4. Lưu lại chứng từ thanh toán, mã giao dịch, thời gian thanh toán và ảnh chụp màn hình.
+5. Gửi yêu cầu hỗ trợ qua kênh chính thức của EvoTicket.
+
+EvoTicket sẽ đối chiếu dữ liệu từ order, payment callback, log hệ thống và chứng từ người dùng cung cấp để xác định hướng xử lý.
+
+## 7. Thanh toán lặp hoặc thanh toán thừa
+
+Nếu người dùng thanh toán nhiều lần hoặc thanh toán thừa, EvoTicket sẽ kiểm tra dữ liệu giao dịch và xử lý theo một trong các hướng:
+
+- Ghi nhận một giao dịch hợp lệ và hoàn phần thừa nếu đủ căn cứ.
+- Hủy giao dịch trùng nếu chưa phát sinh quyền lợi vé.
+- Chuyển yêu cầu sang quy trình hoàn tiền hoặc tranh chấp nếu cần đối soát bổ sung.
+
+## 8. Phí và tổng tiền
+
+Tổng số tiền phải trả được hiển thị trước khi người dùng xác nhận thanh toán. Tổng tiền có thể bao gồm:
+
+- Giá vé.
+- Phí nền tảng hoặc phí dịch vụ nếu có.
+- Phí thanh toán nếu có.
+- Phí resale hoặc phí chuyển quyền nếu giao dịch thuộc marketplace resale.
+- Thuế, phí hoặc khoản thu khác nếu được công bố.
+
+EvoTicket không thu các khoản phí không được hiển thị hoặc không được công bố trong flow giao dịch, trừ trường hợp phát sinh theo quy định pháp luật hoặc điều kiện của đối tác thanh toán đã được thông báo cho người dùng.
+
+## 9. Hoàn tiền liên quan đến thanh toán
+
+Các trường hợp hoàn tiền liên quan đến thanh toán được xử lý theo [Chính sách hoàn tiền](/vi/legal/refund-policy), bao gồm:
+
+- Thanh toán thành công nhưng không thể cấp vé.
+- Thanh toán trùng.
+- Thanh toán sai order nhưng có đủ căn cứ xác minh.
+- Sự kiện bị hủy, hoãn hoặc thay đổi đáng kể.
+- Lỗi kỹ thuật thuộc phạm vi kiểm soát của EvoTicket hoặc đối tác liên quan.
+
+Thời gian tiền về tài khoản người dùng có thể phụ thuộc vào ngân hàng, cổng thanh toán, phương thức thanh toán và quy trình đối soát.
+
+## 10. Bảo mật thanh toán
+
+Người dùng cần:
+
+- Chỉ thanh toán qua đường dẫn, QR hoặc thông tin được hiển thị trong flow EvoTicket.
+- Không thanh toán cho tài khoản cá nhân hoặc kênh không được EvoTicket công bố.
+- Không cung cấp OTP, mật khẩu ngân hàng hoặc mã xác thực cho người khác.
+- Kiểm tra kỹ tên người thụ hưởng, nội dung giao dịch và số tiền.
+- Thông báo ngay nếu nghi ngờ bị lừa đảo hoặc chuyển tiền sai.
+
+## 11. Chính sách liên quan
+
+- [Điều kiện giao dịch chung](/vi/legal/general-transaction-conditions)
+- [Chính sách vé](/vi/legal/ticket-policy)
+- [Chính sách hoàn tiền](/vi/legal/refund-policy)
+- [Chính sách bán lại vé](/vi/legal/resale-policy)
+- [Cơ chế giải quyết tranh chấp](/vi/legal/dispute-resolution)
+
+## Căn cứ pháp lý tham chiếu
+
+Các chính sách của EvoTicket được xây dựng trên cơ sở tham chiếu các nhóm văn bản pháp luật và nguyên tắc vận hành sau đây. Trường hợp văn bản được sửa đổi, bổ sung hoặc thay thế, quy định mới có hiệu lực sẽ được ưu tiên áp dụng:
+
+- [Luật Bảo vệ quyền lợi người tiêu dùng số 19/2023/QH15](https://vanban.chinhphu.vn/?docid=208363&pageid=27160), đặc biệt các nguyên tắc về cung cấp thông tin, điều kiện giao dịch chung, giao dịch từ xa, chứng từ giao dịch, khiếu nại và giải quyết tranh chấp.
+- Nghị định số 55/2024/NĐ-CP quy định chi tiết một số điều của Luật Bảo vệ quyền lợi người tiêu dùng.
+- [Nghị định số 52/2013/NĐ-CP về thương mại điện tử](https://thuvienphapluat.vn/van-ban/Thuong-mai/Nghi-dinh-52-2013-ND-CP-thuong-mai-dien-tu-187901.aspx) và Nghị định số 85/2021/NĐ-CP sửa đổi, bổ sung một số điều của Nghị định số 52/2013/NĐ-CP.
+- [Luật Giao dịch điện tử số 20/2023/QH15](https://tulieuvankien.dangcongsan.vn/he-thong-van-ban/van-ban-quy-pham-phap-luat/luat-giao-dich-dien-tu-so-202023qh15-hieu-luc-thi-hanh-tu-ngay-0172024-9710), bao gồm nguyên tắc về thông điệp dữ liệu, giao dịch điện tử, chứng từ điện tử và hợp đồng điện tử.
+- [Nghị định số 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân](https://vanban.chinhphu.vn/?docid=207759&pageid=27160), [Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15](https://vanban.chinhphu.vn/?classid=1&docid=214590&pageid=27160&typegroupid=3) và văn bản hướng dẫn tương ứng khi có hiệu lực áp dụng.
+- [Nghị định số 52/2024/NĐ-CP về thanh toán không dùng tiền mặt](https://vanban.chinhphu.vn/?docid=210262&pageid=27160) đối với các nội dung liên quan đến thanh toán điện tử và phối hợp với đối tác thanh toán.
+
+## Hiệu lực, cập nhật và liên hệ
+
+Chính sách này có hiệu lực kể từ ngày được công bố trên nền tảng. EvoTicket có thể cập nhật chính sách để phù hợp với thay đổi của sản phẩm, quy định pháp luật hoặc yêu cầu vận hành. Phiên bản cập nhật sẽ được công bố trên nền tảng và có hiệu lực theo ngày ghi nhận tại phần thông tin tài liệu.
+
+Người dùng có thể gửi yêu cầu hỗ trợ, khiếu nại hoặc câu hỏi liên quan đến chính sách thông qua Trung tâm trợ giúp, email hỗ trợ hoặc các kênh liên hệ chính thức được EvoTicket công bố.

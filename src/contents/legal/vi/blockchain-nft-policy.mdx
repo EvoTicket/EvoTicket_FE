@@ -1,0 +1,150 @@
+---
+title: "Chính sách NFT, blockchain và tài sản số"
+slug: "blockchain-nft-policy"
+description: "Quy định về vai trò của NFT, blockchain, custodial wallet, provenance, tokenId, transaction hash, chuyển quyền sở hữu và giới hạn trách nhiệm liên quan đến tài sản số trên EvoTicket."
+version: "1.0.0"
+effectiveDate: "2026-06-04"
+lastUpdated: "2026-06-04"
+legalCategory: "blockchain"
+documentType: "legal-policy"
+locale: "vi"
+status: "published"
+requiredForFlow:
+  - primary-checkout
+  - resale-checkout
+  - my-ticket
+  - resale-listing
+relatedPolicies:
+  - terms-of-use
+  - privacy-policy
+  - ticket-policy
+  - resale-policy
+  - refund-policy
+---
+
+# Chính sách NFT, blockchain và tài sản số
+
+Chính sách này quy định cách EvoTicket sử dụng blockchain, NFT, ví kỹ thuật, tokenId, transaction hash và dữ liệu provenance trong quá trình quản lý vé điện tử.
+
+Blockchain và NFT trên EvoTicket được sử dụng như lớp kỹ thuật hỗ trợ định danh, truy vết và kiểm soát chuyển quyền sở hữu vé. Chính sách này không mô tả NFT vé như sản phẩm đầu tư, chứng khoán, công cụ tài chính hoặc cam kết sinh lời.
+
+## 1. Phạm vi áp dụng
+
+Chính sách này áp dụng cho:
+
+- Vé có sử dụng NFT hoặc blockchain.
+- Người mua vé, người sở hữu vé và người mua resale.
+- Giao dịch mint, transfer, withdraw hoặc cập nhật provenance.
+- Dữ liệu tokenId, transaction hash, địa chỉ ví và trạng thái blockchain.
+
+## 2. Vai trò của blockchain/NFT trong EvoTicket
+
+Blockchain/NFT có thể được sử dụng để:
+
+- Định danh vé ở lớp kỹ thuật.
+- Ghi nhận lịch sử phát hành hoặc chuyển quyền sở hữu.
+- Tăng khả năng truy vết provenance.
+- Hỗ trợ kiểm soát resale và chuyển nhượng trong hệ thống.
+- Cung cấp bằng chứng kỹ thuật bổ sung khi xử lý tranh chấp.
+
+Quyền tham dự sự kiện vẫn được xác định theo trạng thái vé, order, quyền sở hữu và điều kiện sự kiện trong hệ thống EvoTicket.
+
+## 3. NFT vé không phải sản phẩm đầu tư
+
+Người dùng hiểu và đồng ý rằng:
+
+- NFT vé không được thiết kế để đầu tư hoặc đầu cơ.
+- EvoTicket không cam kết NFT vé tăng giá, có thanh khoản hoặc có thể bán lại ngoài nền tảng.
+- NFT vé không phải chứng khoán, sản phẩm tài chính hoặc công cụ huy động vốn.
+- Giá trị chính của NFT vé nằm ở việc hỗ trợ định danh, truy vết và quyền lợi sự kiện nếu được công bố.
+
+## 4. Ví lưu ký và ví cá nhân
+
+EvoTicket có thể sử dụng cơ chế ví lưu ký hoặc hạ tầng kỹ thuật tương đương để người dùng không cần tự quản lý private key khi mua vé. Trong trường hợp người dùng được phép rút hoặc chuyển NFT sang ví cá nhân, người dùng chịu trách nhiệm:
+
+- Cung cấp đúng địa chỉ ví.
+- Bảo mật private key, seed phrase hoặc thiết bị ví.
+- Hiểu rủi ro mất quyền kiểm soát nếu nhập sai địa chỉ hoặc mất khóa ví.
+- Tuân thủ điều kiện rút/chuyển do EvoTicket và sự kiện công bố.
+
+EvoTicket có thể từ chối hoặc tạm dừng withdraw nếu phát hiện rủi ro gian lận, tranh chấp, vé chưa đủ điều kiện hoặc yêu cầu pháp lý liên quan.
+
+## 5. Mint NFT
+
+Mint NFT là quá trình ghi nhận vé hoặc thông tin định danh kỹ thuật lên blockchain. Việc mint có thể diễn ra sau khi giao dịch thanh toán được xác nhận và vé đã được ghi nhận trong hệ thống.
+
+Do tính chất của blockchain và hạ tầng kỹ thuật, mint có thể:
+
+- Chậm hơn so với thời điểm cấp vé trong tài khoản.
+- Thất bại tạm thời và cần retry.
+- Cần thời gian xác nhận giao dịch.
+- Phát sinh trạng thái chờ, thành công hoặc thất bại.
+
+Nếu quyền tham dự đã được EvoTicket xác lập hợp lệ, mint chậm hoặc lỗi không mặc nhiên làm vé mất hiệu lực.
+
+## 6. Transfer NFT trong resale
+
+Khi giao dịch resale hoàn tất, EvoTicket có thể cập nhật quyền sở hữu vé trong hệ thống trước hoặc song song với việc transfer NFT. Transfer blockchain có thể được xử lý bất đồng bộ.
+
+Nếu transfer blockchain bị lỗi, EvoTicket sẽ kiểm tra trạng thái giao dịch và áp dụng biện pháp phù hợp như retry, cập nhật trạng thái, tạm khóa vé, xử lý thủ công hoặc chuyển vụ việc sang quy trình tranh chấp.
+
+## 7. Transaction hash và provenance
+
+Transaction hash, tokenId và lịch sử provenance là dữ liệu kỹ thuật giúp truy vết các thao tác liên quan đến vé. Các dữ liệu này có thể được hiển thị trong tài khoản người dùng, chi tiết vé hoặc lịch sử giao dịch.
+
+Dữ liệu blockchain có thể hỗ trợ chứng minh lịch sử kỹ thuật của vé, nhưng không tự động thay thế toàn bộ chứng từ giao dịch, hóa đơn, biên nhận, log hệ thống hoặc quyết định xử lý tranh chấp.
+
+## 8. Dữ liệu on-chain và quyền riêng tư
+
+EvoTicket ưu tiên không ghi dữ liệu nhận dạng cá nhân trực tiếp lên blockchain công khai. Tuy nhiên, một số dữ liệu kỹ thuật như địa chỉ ví, tokenId hoặc transaction hash có thể công khai trên blockchain.
+
+Người dùng hiểu rằng dữ liệu đã được ghi lên blockchain có thể khó xóa, khó sửa hoặc tiếp tục được lưu trữ bởi nhiều node, explorer hoặc bên thứ ba ngoài phạm vi kiểm soát trực tiếp của EvoTicket.
+
+## 9. Sự cố blockchain
+
+Sự cố blockchain có thể bao gồm:
+
+- Giao dịch bị chậm xác nhận.
+- Giao dịch thất bại.
+- Phí mạng biến động.
+- Lỗi RPC, node hoặc hạ tầng web3.
+- Sự cố explorer hoặc dữ liệu hiển thị không đồng bộ.
+- Lỗi giữa trạng thái hệ thống và trạng thái blockchain.
+
+EvoTicket sẽ xử lý theo hướng bảo vệ quyền sử dụng vé hợp lệ của người dùng trong phạm vi có thể và theo chính sách áp dụng.
+
+## 10. Hạn chế trách nhiệm
+
+Trong phạm vi pháp luật cho phép, EvoTicket không chịu trách nhiệm đối với:
+
+- Việc người dùng gửi NFT đến sai địa chỉ ví.
+- Mất private key, seed phrase hoặc quyền truy cập ví cá nhân.
+- Giao dịch blockchain ngoài nền tảng EvoTicket.
+- Kỳ vọng đầu tư, đầu cơ hoặc sinh lời từ NFT vé.
+- Lỗi hoặc gián đoạn từ mạng blockchain, ví bên thứ ba, explorer hoặc hạ tầng web3 ngoài phạm vi kiểm soát hợp lý của EvoTicket.
+
+## 11. Chính sách liên quan
+
+- [Điều khoản sử dụng](/vi/legal/terms-of-use)
+- [Chính sách bảo mật](/vi/legal/privacy-policy)
+- [Chính sách vé](/vi/legal/ticket-policy)
+- [Chính sách bán lại vé](/vi/legal/resale-policy)
+- [Chính sách hoàn tiền](/vi/legal/refund-policy)
+- [Cơ chế giải quyết tranh chấp](/vi/legal/dispute-resolution)
+
+## Căn cứ pháp lý tham chiếu
+
+Các chính sách của EvoTicket được xây dựng trên cơ sở tham chiếu các nhóm văn bản pháp luật và nguyên tắc vận hành sau đây. Trường hợp văn bản được sửa đổi, bổ sung hoặc thay thế, quy định mới có hiệu lực sẽ được ưu tiên áp dụng:
+
+- [Luật Bảo vệ quyền lợi người tiêu dùng số 19/2023/QH15](https://vanban.chinhphu.vn/?docid=208363&pageid=27160), đặc biệt các nguyên tắc về cung cấp thông tin, điều kiện giao dịch chung, giao dịch từ xa, chứng từ giao dịch, khiếu nại và giải quyết tranh chấp.
+- Nghị định số 55/2024/NĐ-CP quy định chi tiết một số điều của Luật Bảo vệ quyền lợi người tiêu dùng.
+- [Nghị định số 52/2013/NĐ-CP về thương mại điện tử](https://thuvienphapluat.vn/van-ban/Thuong-mai/Nghi-dinh-52-2013-ND-CP-thuong-mai-dien-tu-187901.aspx) và Nghị định số 85/2021/NĐ-CP sửa đổi, bổ sung một số điều của Nghị định số 52/2013/NĐ-CP.
+- [Luật Giao dịch điện tử số 20/2023/QH15](https://tulieuvankien.dangcongsan.vn/he-thong-van-ban/van-ban-quy-pham-phap-luat/luat-giao-dich-dien-tu-so-202023qh15-hieu-luc-thi-hanh-tu-ngay-0172024-9710), bao gồm nguyên tắc về thông điệp dữ liệu, giao dịch điện tử, chứng từ điện tử và hợp đồng điện tử.
+- [Nghị định số 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân](https://vanban.chinhphu.vn/?docid=207759&pageid=27160), [Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15](https://vanban.chinhphu.vn/?classid=1&docid=214590&pageid=27160&typegroupid=3) và văn bản hướng dẫn tương ứng khi có hiệu lực áp dụng.
+- [Nghị định số 52/2024/NĐ-CP về thanh toán không dùng tiền mặt](https://vanban.chinhphu.vn/?docid=210262&pageid=27160) đối với các nội dung liên quan đến thanh toán điện tử và phối hợp với đối tác thanh toán.
+
+## Hiệu lực, cập nhật và liên hệ
+
+Chính sách này có hiệu lực kể từ ngày được công bố trên nền tảng. EvoTicket có thể cập nhật chính sách để phù hợp với thay đổi của sản phẩm, quy định pháp luật hoặc yêu cầu vận hành. Phiên bản cập nhật sẽ được công bố trên nền tảng và có hiệu lực theo ngày ghi nhận tại phần thông tin tài liệu.
+
+Người dùng có thể gửi yêu cầu hỗ trợ, khiếu nại hoặc câu hỏi liên quan đến chính sách thông qua Trung tâm trợ giúp, email hỗ trợ hoặc các kênh liên hệ chính thức được EvoTicket công bố.

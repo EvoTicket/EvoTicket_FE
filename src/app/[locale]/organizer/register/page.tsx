@@ -11,6 +11,8 @@ import { useAppSelector, useAppDispatch } from "@/src/store/hooks";
 import { updateToken } from "@/src/store/slices/authSlice";
 import { persistor } from "@/src/store";
 import { isValidEmail, isValidPhone, isValidTaxCode, isValidWebsite } from "@/src/lib/validations";
+import { getLegalHref } from "@/src/lib/docs/registry";
+import Link from "next/link";
 
 interface OrganizerFormData {
     organizationName: string;
@@ -122,6 +124,7 @@ export default function RegisterOrganizerPage() {
     const [bankOwnerName, setBankOwnerName] = useState("");
     const [isLoadingBanks, setIsLoadingBanks] = useState(false);
     const [isCheckingOwner, setIsCheckingOwner] = useState(false);
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
 
     const fetchProvinces = useCallback(async () => {
         setIsLoadingProvinces(true);
@@ -318,6 +321,7 @@ export default function RegisterOrganizerPage() {
         if (!bankOwnerName.trim()) newErrors.bankOwnerName = "Tên chủ tài khoản ngân hàng chưa được xác thực";
 
         if (!licenseFile) newErrors.licenseFile = "Vui lòng tải lên Giấy phép kinh doanh";
+        if (!agreedToTerms) newErrors.agreedToTerms = "Vui lòng xác nhận đồng ý với các điều khoản";
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -1065,6 +1069,33 @@ export default function RegisterOrganizerPage() {
                                     )}
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Terms and Conditions */}
+                        <div className="mb-6">
+                            <label className="flex items-start gap-3 cursor-pointer group">
+                                <div className="mt-0.5 shrink-0">
+                                    <input
+                                        type="checkbox"
+                                        checked={agreedToTerms}
+                                        onChange={(e) => {
+                                            setAgreedToTerms(e.target.checked);
+                                            setErrors((prev) => ({ ...prev, agreedToTerms: "" }));
+                                        }}
+                                        className="w-4 h-4 rounded border-border-default text-primary focus:ring-primary cursor-pointer accent-primary"
+                                    />
+                                </div>
+                                <div>
+                                    <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors leading-relaxed">
+                                        Tôi xác nhận thông tin cung cấp là chính xác và đồng ý với{" "}
+                                        <Link href={getLegalHref(locale, "organizer-terms")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-primary hover:underline font-semibold">Điều khoản dành cho ban tổ chức</Link>,{" "}
+                                        <Link href={getLegalHref(locale, "terms-of-use")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-primary hover:underline font-semibold">Điều khoản sử dụng</Link> và{" "}
+                                        <Link href={getLegalHref(locale, "privacy-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-primary hover:underline font-semibold">Chính sách bảo mật</Link>{" "}
+                                        của EvoTicket.
+                                    </span>
+                                    {errors.agreedToTerms && <p className="text-[11px] text-red-500 mt-1 select-none animate-fadeIn">{errors.agreedToTerms}</p>}
+                                </div>
+                            </label>
                         </div>
 
                         {/* Submit Button */}
