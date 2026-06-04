@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import axios from "axios";
 import api from "@/src/lib/axios";
 import { toast } from "react-toastify";
@@ -83,6 +84,7 @@ export default function RegisterOrganizerPage() {
     const locale = typeof params.locale === "string" ? params.locale : "vi";
     const dispatch = useAppDispatch();
     const { token } = useAppSelector((state) => state.auth);
+    const t = useTranslations("Organizer.Register");
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
@@ -135,7 +137,7 @@ export default function RegisterOrganizerPage() {
             }
         } catch (error) {
             console.error("Failed to fetch provinces", error);
-            toast.error("Không thể tải danh sách tỉnh/thành phố");
+            toast.error(t("toast_load_provinces_failed"));
         } finally {
             setIsLoadingProvinces(false);
         }
@@ -152,7 +154,7 @@ export default function RegisterOrganizerPage() {
             }
         } catch (error) {
             console.error("Failed to fetch wards", error);
-            toast.error("Không thể tải danh sách phường/xã");
+            toast.error(t("toast_load_wards_failed"));
         } finally {
             setIsLoadingWards(false);
         }
@@ -169,7 +171,7 @@ export default function RegisterOrganizerPage() {
             }
         } catch (error) {
             console.error("Failed to fetch banks", error);
-            toast.error("Không thể tải danh sách ngân hàng");
+            toast.error(t("toast_load_banks_failed"));
         } finally {
             setIsLoadingBanks(false);
         }
@@ -208,15 +210,15 @@ export default function RegisterOrganizerPage() {
                     );
                     if (response.data?.data) {
                         setBankOwnerName(response.data.data);
-                        toast.success("Xác thực tài khoản ngân hàng thành công!");
+                        toast.success(t("toast_bank_owner_verified"));
                     } else if (typeof response.data === "string") {
                         setBankOwnerName(response.data);
-                        toast.success("Xác thực tài khoản ngân hàng thành công!");
+                        toast.success(t("toast_bank_owner_verified"));
                     }
                 } catch (error: any) {
                     if (axios.isCancel(error)) return;
                     console.error("Failed to lookup owner name", error);
-                    const errorMsg = error.response?.data?.message || "Không thể xác thực tài khoản ngân hàng";
+                    const errorMsg = error.response?.data?.message || t("toast_bank_owner_verification_failed");
                     toast.error(errorMsg);
                     setBankOwnerName("");
                 } finally {
@@ -287,45 +289,45 @@ export default function RegisterOrganizerPage() {
 
         const newErrors: Record<string, string> = {};
 
-        if (!logoFile) newErrors.logoFile = "Vui lòng tải lên Logo tổ chức";
-        if (!formData.organizationType) newErrors.organizationType = "Vui lòng chọn Loại hình tổ chức";
-        if (!formData.businessType) newErrors.businessType = "Vui lòng chọn Loại hình kinh doanh";
-        if (!formData.organizationName.trim()) newErrors.organizationName = "Vui lòng nhập Tên tổ chức";
-        if (!formData.legalName.trim()) newErrors.legalName = "Vui lòng nhập Tên pháp lý";
+        if (!logoFile) newErrors.logoFile = t("error_logo_required");
+        if (!formData.organizationType) newErrors.organizationType = t("error_org_type_required");
+        if (!formData.businessType) newErrors.businessType = t("error_business_type_required");
+        if (!formData.organizationName.trim()) newErrors.organizationName = t("error_org_name_required");
+        if (!formData.legalName.trim()) newErrors.legalName = t("error_legal_name_required");
 
-        if (!formData.taxCode.trim()) newErrors.taxCode = "Vui lòng nhập Mã số thuế";
-        else if (!isValidTaxCode(formData.taxCode)) newErrors.taxCode = "Mã số thuế không hợp lệ (10 số, hoặc 10 số - 3 số)";
+        if (!formData.taxCode.trim()) newErrors.taxCode = t("error_tax_code_required");
+        else if (!isValidTaxCode(formData.taxCode)) newErrors.taxCode = t("error_tax_code_invalid");
 
-        if (!formData.businessPhone.trim()) newErrors.businessPhone = "Vui lòng nhập Số điện thoại";
-        else if (!isValidPhone(formData.businessPhone)) newErrors.businessPhone = "Số điện thoại phải bắt đầu bằng số 0 và có 10 chữ số";
+        if (!formData.businessPhone.trim()) newErrors.businessPhone = t("error_phone_required");
+        else if (!isValidPhone(formData.businessPhone)) newErrors.businessPhone = t("error_phone_invalid");
 
-        if (!formData.businessEmail.trim()) newErrors.businessEmail = "Vui lòng nhập Email doanh nghiệp";
-        else if (!isValidEmail(formData.businessEmail)) newErrors.businessEmail = "Email doanh nghiệp không hợp lệ";
+        if (!formData.businessEmail.trim()) newErrors.businessEmail = t("error_email_required");
+        else if (!isValidEmail(formData.businessEmail)) newErrors.businessEmail = t("error_email_invalid");
 
-        if (!formData.website.trim()) newErrors.website = "Vui lòng nhập Website";
-        else if (!isValidWebsite(formData.website)) newErrors.website = "Website phải hợp lệ và bắt đầu bằng http:// hoặc https://";
-        if (!formData.businessAddress.trim()) newErrors.businessAddress = "Vui lòng nhập Địa chỉ kinh doanh";
-        if (!formData.billingAddress.trim()) newErrors.billingAddress = "Vui lòng nhập Địa chỉ xuất hoá đơn";
+        if (!formData.website.trim()) newErrors.website = t("error_website_required");
+        else if (!isValidWebsite(formData.website)) newErrors.website = t("error_website_invalid");
+        if (!formData.businessAddress.trim()) newErrors.businessAddress = t("error_business_address_required");
+        if (!formData.billingAddress.trim()) newErrors.billingAddress = t("error_billing_address_required");
 
-        if (formData.provinceCode === 0) newErrors.provinceCode = "Vui lòng chọn Tỉnh/Thành phố";
-        if (formData.wardCode === 0) newErrors.wardCode = "Vui lòng chọn Phường/Xã";
+        if (formData.provinceCode === 0) newErrors.provinceCode = t("error_province_required");
+        if (formData.wardCode === 0) newErrors.wardCode = t("error_ward_required");
 
-        if (!formData.description.trim()) newErrors.description = "Vui lòng nhập Mô tả tổ chức";
-        if (!coverFile) newErrors.coverFile = "Vui lòng tải lên Ảnh bìa tổ chức";
-        if (!formData.shortDescription?.trim()) newErrors.shortDescription = "Vui lòng nhập Mô tả ngắn";
-        if (!formData.publicBio?.trim()) newErrors.publicBio = "Vui lòng nhập Tiểu sử công khai";
+        if (!formData.description.trim()) newErrors.description = t("error_description_required");
+        if (!coverFile) newErrors.coverFile = t("error_cover_required");
+        if (!formData.shortDescription?.trim()) newErrors.shortDescription = t("error_short_desc_required");
+        if (!formData.publicBio?.trim()) newErrors.publicBio = t("error_public_bio_required");
 
-        if (!bankProfileName.trim()) newErrors.bankProfileName = "Vui lòng nhập tên gợi nhớ tài khoản";
-        if (!selectedBank) newErrors.selectedBank = "Vui lòng chọn ngân hàng";
-        if (!bankAccountNumber.trim()) newErrors.bankAccountNumber = "Vui lòng nhập số tài khoản ngân hàng";
-        if (!bankOwnerName.trim()) newErrors.bankOwnerName = "Tên chủ tài khoản ngân hàng chưa được xác thực";
+        if (!bankProfileName.trim()) newErrors.bankProfileName = t("error_bank_profile_name_required");
+        if (!selectedBank) newErrors.selectedBank = t("error_bank_name_required");
+        if (!bankAccountNumber.trim()) newErrors.bankAccountNumber = t("error_bank_account_number_required");
+        if (!bankOwnerName.trim()) newErrors.bankOwnerName = t("error_bank_owner_name_required");
 
-        if (!licenseFile) newErrors.licenseFile = "Vui lòng tải lên Giấy phép kinh doanh";
-        if (!agreedToTerms) newErrors.agreedToTerms = "Vui lòng xác nhận đồng ý với các điều khoản";
+        if (!licenseFile) newErrors.licenseFile = t("error_license_required");
+        if (!agreedToTerms) newErrors.agreedToTerms = t("error_agree_terms");
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
-            toast.error("Vui lòng kiểm tra lại các trường thông tin bị lỗi");
+            toast.error(t("toast_validation_failed"));
             setTimeout(() => {
                 const firstErrorElement = document.querySelector(".text-red-500");
                 if (firstErrorElement) {
@@ -396,32 +398,32 @@ export default function RegisterOrganizerPage() {
 
                 if (!newToken) {
                     console.error("Missing newToken in organization creation response:", response.data);
-                    toast.error("Đăng ký thành công nhưng không nhận được token mới.");
+                    toast.error(t("toast_register_success_missing_token"));
                     return;
                 }
 
                 dispatch(updateToken({ token: newToken }));
                 await persistor.flush();
 
-                toast.success("Đăng ký organizer thành công!");
+                toast.success(t("toast_register_success"));
                 router.replace(`/${locale}/organizer/center`);
             }
         } catch (error: unknown) {
             console.error("Failed to register organizer", error);
 
             if (!axios.isAxiosError<ApiErrorResponse>(error)) {
-                toast.error("Đăng ký thất bại. Vui lòng thử lại.");
+                toast.error(t("toast_register_failed"));
                 return;
             }
 
             if (error.response?.status === 400) {
-                toast.error("Thông tin không hợp lệ. Vui lòng kiểm tra lại.");
+                toast.error(t("toast_invalid_info"));
             } else if (error.response?.status === 401 || error.response?.status === 403) {
-                toast.error("Phiên đăng nhập không hợp lệ hoặc bạn không có quyền thực hiện thao tác này.");
+                toast.error(t("toast_unauthorized"));
             } else if (error.response?.status === 409) {
-                toast.error("Tổ chức đã tồn tại.");
+                toast.error(t("toast_conflict"));
             } else {
-                toast.error(error.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.");
+                toast.error(error.response?.data?.message || t("toast_register_failed"));
             }
         } finally {
             setIsLoading(false);
@@ -435,10 +437,10 @@ export default function RegisterOrganizerPage() {
                     {/* Header */}
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-text-primary mb-2">
-                            Đăng ký trở thành Organizer
+                            {t("title")}
                         </h1>
                         <p className="text-text-muted">
-                            Điền thông tin tổ chức của bạn để bắt đầu tạo sự kiện
+                            {t("subtitle")}
                         </p>
                     </div>
 
@@ -447,7 +449,7 @@ export default function RegisterOrganizerPage() {
                         {/* Logo Upload */}
                         <div className="bg-bg-subtle p-6 rounded-ds-lg border border-border-default mb-6">
                             <label className="block text-sm font-medium text-text-primary mb-3">
-                                Logo tổ chức *
+                                {t("logo_label")}
                             </label>
                             <div className="flex items-center gap-6">
                                 <div className="relative w-20 h-20 rounded-full border-2 border-dashed border-border-default overflow-hidden flex items-center justify-center bg-bg-surface shrink-0">
@@ -479,9 +481,9 @@ export default function RegisterOrganizerPage() {
                                         className="inline-flex items-center px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary text-sm font-medium hover:bg-bg-subtle cursor-pointer transition-colors"
                                     >
                                         <Upload className="mr-2 h-4 w-4" />
-                                        Chọn ảnh logo
+                                        {t("logo_select_btn")}
                                     </label>
-                                    <p className="text-xs text-text-muted mt-2">Hỗ trợ JPG, PNG. Tối đa 5MB.</p>
+                                    <p className="text-xs text-text-muted mt-2">{t("logo_note")}</p>
                                     {errors.logoFile && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.logoFile}</p>}
                                 </div>
                             </div>
@@ -492,7 +494,7 @@ export default function RegisterOrganizerPage() {
                             <div>
                                 <label className="block text-sm font-medium text-text-primary mb-2">
                                     <Building2 className="inline mr-2 h-4 w-4" />
-                                    Tên tổ chức *
+                                    {t("org_name_label")}
                                 </label>
                                 <input
                                     type="text"
@@ -501,7 +503,7 @@ export default function RegisterOrganizerPage() {
                                     onChange={handleChange}
                                     required
                                     className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                                    placeholder="VD: Công ty ABC"
+                                    placeholder={t("org_name_placeholder")}
                                 />
                                 {errors.organizationName && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.organizationName}</p>}
                             </div>
@@ -509,7 +511,7 @@ export default function RegisterOrganizerPage() {
                             <div>
                                 <label className="block text-sm font-medium text-text-primary mb-2">
                                     <FileText className="inline mr-2 h-4 w-4" />
-                                    Tên pháp lý *
+                                    {t("legal_name_label")}
                                 </label>
                                 <input
                                     type="text"
@@ -518,7 +520,7 @@ export default function RegisterOrganizerPage() {
                                     onChange={handleChange}
                                     required
                                     className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                                    placeholder="VD: Công ty TNHH ABC"
+                                    placeholder={t("legal_name_placeholder")}
                                 />
                                 {errors.legalName && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.legalName}</p>}
                             </div>
@@ -528,7 +530,7 @@ export default function RegisterOrganizerPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-medium text-text-primary mb-2">
-                                    Loại hình tổ chức *
+                                    {t("org_type_label")}
                                 </label>
                                 <select
                                     name="organizationType"
@@ -537,17 +539,17 @@ export default function RegisterOrganizerPage() {
                                     required
                                     className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary h-[42px]"
                                 >
-                                    <option value="Doanh nghiệp tổ chức sự kiện">Doanh nghiệp tổ chức sự kiện</option>
-                                    <option value="Nhà hát/Đoàn nghệ thuật">Nhà hát/Đoàn nghệ thuật</option>
-                                    <option value="Cá nhân tự do">Cá nhân tự do</option>
-                                    <option value="Khác">Khác</option>
+                                    <option value="Doanh nghiệp tổ chức sự kiện">{t("org_type_option_enterprise")}</option>
+                                    <option value="Nhà hát/Đoàn nghệ thuật">{t("org_type_option_theater")}</option>
+                                    <option value="Cá nhân tự do">{t("org_type_option_freelancer")}</option>
+                                    <option value="Khác">{t("org_type_option_other")}</option>
                                 </select>
                                 {errors.organizationType && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.organizationType}</p>}
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-text-primary mb-2">
-                                    Loại hình kinh doanh *
+                                    {t("business_type_label")}
                                 </label>
                                 <select
                                     name="businessType"
@@ -556,10 +558,10 @@ export default function RegisterOrganizerPage() {
                                     required
                                     className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary h-[42px]"
                                 >
-                                    <option value="Công ty TNHH">Công ty TNHH</option>
-                                    <option value="Công ty Cổ phần">Công ty Cổ phần</option>
-                                    <option value="Hộ kinh doanh">Hộ kinh doanh</option>
-                                    <option value="Cá nhân">Cá nhân</option>
+                                    <option value="Công ty TNHH">{t("business_type_option_ltd")}</option>
+                                    <option value="Công ty Cổ phần">{t("business_type_option_joint_stock")}</option>
+                                    <option value="Hộ kinh doanh">{t("business_type_option_household")}</option>
+                                    <option value="Cá nhân">{t("business_type_option_individual")}</option>
                                 </select>
                                 {errors.businessType && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.businessType}</p>}
                             </div>
@@ -569,7 +571,7 @@ export default function RegisterOrganizerPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-medium text-text-primary mb-2">
-                                    Mã số thuế *
+                                    {t("tax_code_label")}
                                 </label>
                                 <input
                                     type="text"
@@ -579,7 +581,7 @@ export default function RegisterOrganizerPage() {
                                     required
                                     pattern="[0-9]{10}"
                                     className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                                    placeholder="VD: 0123456789"
+                                    placeholder={t("tax_code_placeholder")}
                                 />
                                 {errors.taxCode && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.taxCode}</p>}
                             </div>
@@ -587,7 +589,7 @@ export default function RegisterOrganizerPage() {
                             <div>
                                 <label className="block text-sm font-medium text-text-primary mb-2">
                                     <Phone className="inline mr-2 h-4 w-4" />
-                                    Số điện thoại *
+                                    {t("phone_label")}
                                 </label>
                                 <input
                                     type="tel"
@@ -597,7 +599,7 @@ export default function RegisterOrganizerPage() {
                                     required
                                     pattern="[0-9]{10}"
                                     className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                                    placeholder="VD: 0901234567"
+                                    placeholder={t("phone_placeholder")}
                                 />
                                 {errors.businessPhone && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.businessPhone}</p>}
                             </div>
@@ -608,7 +610,7 @@ export default function RegisterOrganizerPage() {
                             <div>
                                 <label className="block text-sm font-medium text-text-primary mb-2">
                                     <Mail className="inline mr-2 h-4 w-4" />
-                                    Email doanh nghiệp *
+                                    {t("email_label")}
                                 </label>
                                 <input
                                     type="email"
@@ -617,7 +619,7 @@ export default function RegisterOrganizerPage() {
                                     onChange={handleChange}
                                     required
                                     className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                                    placeholder="VD: contact@abc.com"
+                                    placeholder={t("email_placeholder")}
                                 />
                                 {errors.businessEmail && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.businessEmail}</p>}
                             </div>
@@ -625,7 +627,7 @@ export default function RegisterOrganizerPage() {
                             <div>
                                 <label className="block text-sm font-medium text-text-primary mb-2">
                                     <Globe className="inline mr-2 h-4 w-4" />
-                                    Website *
+                                    {t("website_label")}
                                 </label>
                                 <input
                                     type="url"
@@ -634,7 +636,7 @@ export default function RegisterOrganizerPage() {
                                     onChange={handleChange}
                                     required
                                     className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                                    placeholder="VD: https://abc.com"
+                                    placeholder={t("website_placeholder")}
                                 />
                                 {errors.website && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.website}</p>}
                             </div>
@@ -644,7 +646,7 @@ export default function RegisterOrganizerPage() {
                         <div>
                             <label className="block text-sm font-medium text-text-primary mb-2">
                                 <MapPin className="inline mr-2 h-4 w-4" />
-                                Địa chỉ kinh doanh *
+                                {t("business_address_label")}
                             </label>
                             <input
                                 type="text"
@@ -653,7 +655,7 @@ export default function RegisterOrganizerPage() {
                                 onChange={handleChange}
                                 required
                                 className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="VD: 123 Đường ABC"
+                                placeholder={t("business_address_placeholder")}
                             />
                             {errors.businessAddress && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.businessAddress}</p>}
                         </div>
@@ -663,14 +665,14 @@ export default function RegisterOrganizerPage() {
                             <div className="flex justify-between items-center mb-2">
                                 <label className="block text-sm font-medium text-text-primary">
                                     <MapPin className="inline mr-2 h-4 w-4" />
-                                    Địa chỉ xuất hoá đơn *
+                                    {t("billing_address_label")}
                                 </label>
                                 <button
                                     type="button"
                                     onClick={() => setFormData(prev => ({ ...prev, billingAddress: prev.businessAddress }))}
                                     className="text-xs text-primary hover:text-primary-hover font-semibold"
                                 >
-                                    Sao chép địa chỉ kinh doanh
+                                    {t("copy_business_address")}
                                 </button>
                             </div>
                             <input
@@ -680,7 +682,7 @@ export default function RegisterOrganizerPage() {
                                 onChange={handleChange}
                                 required
                                 className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="Địa chỉ để xuất hoá đơn tài chính"
+                                placeholder={t("billing_address_placeholder")}
                             />
                             {errors.billingAddress && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.billingAddress}</p>}
                         </div>
@@ -690,7 +692,7 @@ export default function RegisterOrganizerPage() {
                             <div>
                                 <label className="block text-sm font-medium text-text-primary mb-2">
                                     <MapPin className="inline mr-2 h-4 w-4" />
-                                    Tỉnh/Thành phố *
+                                    {t("province_label")}
                                 </label>
                                 <Listbox
                                     value={formData.provinceCode}
@@ -705,8 +707,8 @@ export default function RegisterOrganizerPage() {
                                                 {formData.provinceCode > 0
                                                     ? provinces.find((p) => p.code === formData.provinceCode)?.name
                                                     : isLoadingProvinces
-                                                        ? "Đang tải..."
-                                                        : "-- Chọn tỉnh/thành phố --"}
+                                                        ? t("province_loading")
+                                                        : t("province_placeholder")}
                                             </span>
                                             <ChevronDown size={16} className="text-text-secondary shrink-0 ml-2" />
                                         </ListboxButton>
@@ -719,7 +721,7 @@ export default function RegisterOrganizerPage() {
                                                 value={0}
                                                 className="group flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-bg-subtle transition-colors text-sm text-text-muted"
                                             >
-                                                <span className="group-data-[selected]:font-semibold">-- Chọn tỉnh/thành phố --</span>
+                                                <span className="group-data-[selected]:font-semibold">{t("province_placeholder")}</span>
                                                 <Check className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-action-brand-text-default shrink-0 ml-2" />
                                             </ListboxOption>
                                             {provinces.map((province) => (
@@ -741,7 +743,7 @@ export default function RegisterOrganizerPage() {
                             <div>
                                 <label className="block text-sm font-medium text-text-primary mb-2">
                                     <MapPin className="inline mr-2 h-4 w-4" />
-                                    Phường/Xã *
+                                    {t("ward_label")}
                                 </label>
                                 <Listbox
                                     value={formData.wardCode}
@@ -756,12 +758,12 @@ export default function RegisterOrganizerPage() {
                                                 {formData.wardCode > 0
                                                     ? wards.find((w) => w.code === formData.wardCode)?.name
                                                     : isLoadingWards
-                                                        ? "Đang tải..."
+                                                        ? t("ward_loading")
                                                         : !formData.provinceCode
-                                                            ? "-- Chọn tỉnh/thành phố trước --"
+                                                            ? t("ward_placeholder_select_province")
                                                             : wards.length === 0
-                                                                ? "-- Không có dữ liệu --"
-                                                                : "-- Chọn phường/xã --"}
+                                                                ? t("ward_placeholder_no_data")
+                                                                : t("ward_placeholder")}
                                             </span>
                                             <ChevronDown size={16} className="text-text-secondary shrink-0 ml-2" />
                                         </ListboxButton>
@@ -774,7 +776,7 @@ export default function RegisterOrganizerPage() {
                                                 value={0}
                                                 className="group flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-bg-subtle transition-colors text-sm text-text-muted"
                                             >
-                                                <span className="group-data-[selected]:font-semibold">-- Chọn phường/xã --</span>
+                                                <span className="group-data-[selected]:font-semibold">{t("ward_placeholder")}</span>
                                                 <Check className="h-4 w-4 opacity-0 group-data-[selected]:opacity-100 text-action-brand-text-default shrink-0 ml-2" />
                                             </ListboxOption>
                                             {wards.map((ward) => (
@@ -797,7 +799,7 @@ export default function RegisterOrganizerPage() {
                         {/* Description */}
                         <div>
                             <label className="block text-sm font-medium text-text-primary mb-2">
-                                Mô tả tổ chức *
+                                {t("description_label")}
                             </label>
                             <textarea
                                 name="description"
@@ -806,7 +808,7 @@ export default function RegisterOrganizerPage() {
                                 required
                                 rows={4}
                                 className="w-full px-4 py-2 border border-border-default rounded-ds-lg 	bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                                placeholder="Mô tả ngắn về tổ chức của bạn..."
+                                placeholder={t("description_placeholder")}
                             />
                             {errors.description && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.description}</p>}
                         </div>
@@ -815,7 +817,7 @@ export default function RegisterOrganizerPage() {
                         <div className="bg-bg-subtle p-6 rounded-ds-lg border border-border-default">
                             <label className="block text-sm font-medium text-text-primary mb-3">
                                 <Upload className="inline mr-2 h-4 w-4" />
-                                Ảnh bìa tổ chức (Cover Image) *
+                                {t("cover_label")}
                             </label>
                             {/* Preview banner */}
                             <div className="relative w-full h-36 rounded-ds-lg border-2 border-dashed border-border-default overflow-hidden flex items-center justify-center bg-bg-surface mb-3">
@@ -824,7 +826,7 @@ export default function RegisterOrganizerPage() {
                                 ) : (
                                     <div className="flex flex-col items-center gap-1 text-text-muted">
                                         <Upload className="h-8 w-8" />
-                                        <span className="text-xs">Chưa có ảnh bìa</span>
+                                        <span className="text-xs">{t("cover_no_image")}</span>
                                     </div>
                                 )}
                             </div>
@@ -849,9 +851,9 @@ export default function RegisterOrganizerPage() {
                                 className="inline-flex items-center px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary text-sm font-medium hover:bg-bg-subtle cursor-pointer transition-colors"
                             >
                                 <Upload className="mr-2 h-4 w-4" />
-                                Chọn ảnh bìa
+                                {t("cover_select_btn")}
                             </label>
-                            <p className="text-xs text-text-muted mt-2">Hỗ trợ JPG, PNG. Tỷ lệ 16:9 khuyến nghị. Tối đa 5MB.</p>
+                            <p className="text-xs text-text-muted mt-2">{t("cover_note")}</p>
                             {errors.coverFile && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.coverFile}</p>}
                         </div>
 
@@ -859,7 +861,7 @@ export default function RegisterOrganizerPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-medium text-text-primary mb-2">
-                                    Mô tả ngắn (Hiển thị trang chủ) *
+                                    {t("short_desc_label")}
                                 </label>
                                 <textarea
                                     name="shortDescription"
@@ -868,14 +870,14 @@ export default function RegisterOrganizerPage() {
                                     required
                                     rows={3}
                                     className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                                    placeholder="Tóm tắt về tổ chức"
+                                    placeholder={t("short_desc_placeholder")}
                                 />
                                 {errors.shortDescription && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.shortDescription}</p>}
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-text-primary mb-2">
-                                    Tiểu sử công khai (Public Bio) *
+                                    {t("public_bio_label")}
                                 </label>
                                 <textarea
                                     name="publicBio"
@@ -884,7 +886,7 @@ export default function RegisterOrganizerPage() {
                                     required
                                     rows={3}
                                     className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                                    placeholder="Giới thiệu chi tiết cho công chúng"
+                                    placeholder={t("public_bio_placeholder")}
                                 />
                                 {errors.publicBio && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.publicBio}</p>}
                             </div>
@@ -894,10 +896,10 @@ export default function RegisterOrganizerPage() {
                         <div className="border-t border-border-default pt-8 mt-8">
                             <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
                                 <Landmark className="h-5 w-5 text-primary" />
-                                Thông tin tài khoản ngân hàng nhận tiền
+                                {t("bank_section_title")}
                             </h3>
                             <p className="text-sm text-text-muted mb-6">
-                                Cung cấp thông tin tài khoản ngân hàng để nhận thanh toán doanh thu từ vé bán được.
+                                {t("bank_section_desc")}
                             </p>
 
                             <div className="space-y-6 bg-bg-subtle p-6 rounded-ds-lg border border-border-default mb-6">
@@ -905,7 +907,7 @@ export default function RegisterOrganizerPage() {
                                     {/* Tên gợi nhớ */}
                                     <div>
                                         <label className="block text-sm font-medium text-text-primary mb-2">
-                                            Tên gợi nhớ tài khoản *
+                                            {t("bank_profile_name_label")}
                                         </label>
                                         <input
                                             type="text"
@@ -914,7 +916,7 @@ export default function RegisterOrganizerPage() {
                                                 setBankProfileName(e.target.value);
                                                 setErrors((prev) => ({ ...prev, bankProfileName: "" }));
                                             }}
-                                            placeholder="VD: Tài khoản chính"
+                                            placeholder={t("bank_profile_name_placeholder")}
                                             required
                                             className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                                         />
@@ -924,7 +926,7 @@ export default function RegisterOrganizerPage() {
                                     {/* Ngân hàng */}
                                     <div>
                                         <label className="block text-sm font-medium text-text-primary mb-2">
-                                            Ngân hàng *
+                                            {t("bank_name_label")}
                                         </label>
                                         <Listbox
                                             value={selectedBank}
@@ -947,9 +949,9 @@ export default function RegisterOrganizerPage() {
                                                                 <span>{selectedBank.shortName || selectedBank.name}</span>
                                                             </>
                                                         ) : isLoadingBanks ? (
-                                                            "Đang tải..."
+                                                            t("bank_loading")
                                                         ) : (
-                                                            "-- Chọn ngân hàng --"
+                                                            t("bank_placeholder")
                                                         )}
                                                     </span>
                                                     <ChevronDown size={16} className="text-text-secondary shrink-0 ml-2" />
@@ -985,7 +987,7 @@ export default function RegisterOrganizerPage() {
                                     {/* Số tài khoản */}
                                     <div>
                                         <label className="block text-sm font-medium text-text-primary mb-2">
-                                            Số tài khoản *
+                                            {t("bank_account_number_label")}
                                         </label>
                                         <input
                                             type="text"
@@ -994,7 +996,7 @@ export default function RegisterOrganizerPage() {
                                                 setBankAccountNumber(e.target.value.replace(/\D/g, ""));
                                                 setErrors((prev) => ({ ...prev, bankAccountNumber: "" }));
                                             }}
-                                            placeholder="Nhập số tài khoản"
+                                            placeholder={t("bank_account_number_placeholder")}
                                             required
                                             className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                                         />
@@ -1004,14 +1006,14 @@ export default function RegisterOrganizerPage() {
                                     {/* Tên chủ tài khoản */}
                                     <div>
                                         <label className="block text-sm font-medium text-text-primary mb-2">
-                                            Tên chủ tài khoản *
+                                            {t("bank_owner_name_label")}
                                         </label>
                                         <div className="relative">
                                             <input
                                                 type="text"
                                                 value={bankOwnerName}
                                                 readOnly
-                                                placeholder={isCheckingOwner ? "Đang xác thực..." : "Tự động hiển thị tên chủ tài khoản"}
+                                                placeholder={isCheckingOwner ? t("bank_owner_name_checking") : t("bank_owner_name_placeholder")}
                                                 required
                                                 className="w-full px-4 py-2 border border-border-default rounded-ds-lg bg-bg-subtle text-text-primary focus:outline-none font-semibold uppercase disabled:opacity-75 h-[42px]"
                                             />
@@ -1036,7 +1038,7 @@ export default function RegisterOrganizerPage() {
                         <div className="mb-6">
                             <label className="block text-sm font-medium text-text-primary mb-2">
                                 <FileText className="inline mr-2 h-4 w-4" />
-                                Giấy phép kinh doanh *
+                                {t("license_label")}
                             </label>
                             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-border-default border-dashed rounded-ds-lg bg-bg-subtle hover:bg-bg-surface transition-colors">
                                 <div className="space-y-1 text-center">
@@ -1046,7 +1048,7 @@ export default function RegisterOrganizerPage() {
                                             htmlFor="licenseFile"
                                             className="relative cursor-pointer bg-transparent rounded-md font-semibold text-primary hover:text-primary-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary"
                                         >
-                                            <span>Tải tệp lên</span>
+                                            <span>{t("license_upload_btn")}</span>
                                             <input
                                                 id="licenseFile"
                                                 name="licenseFile"
@@ -1060,11 +1062,11 @@ export default function RegisterOrganizerPage() {
                                             />
                                         </label>
                                     </div>
-                                    <p className="text-xs text-text-muted">PDF hoặc hình ảnh (PNG, JPG) lên đến 10MB</p>
+                                    <p className="text-xs text-text-muted">{t("license_note")}</p>
                                     {errors.licenseFile && <p className="text-[11px] text-red-500 mt-1 pl-1 select-none animate-fadeIn">{errors.licenseFile}</p>}
                                     {licenseFile && (
                                         <p className="text-sm font-medium text-action-success-text-default mt-2 flex items-center justify-center gap-1">
-                                            <Check className="h-4 w-4" /> Đã chọn: {licenseFile.name}
+                                            <Check className="h-4 w-4" /> {t("license_selected", { name: licenseFile.name })}
                                         </p>
                                     )}
                                 </div>
@@ -1087,11 +1089,17 @@ export default function RegisterOrganizerPage() {
                                 </div>
                                 <div>
                                     <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors leading-relaxed">
-                                        Tôi xác nhận thông tin cung cấp là chính xác và đồng ý với{" "}
-                                        <Link href={getLegalHref(locale, "organizer-terms")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-primary hover:underline font-semibold">Điều khoản dành cho ban tổ chức</Link>,{" "}
-                                        <Link href={getLegalHref(locale, "terms-of-use")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-primary hover:underline font-semibold">Điều khoản sử dụng</Link> và{" "}
-                                        <Link href={getLegalHref(locale, "privacy-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-primary hover:underline font-semibold">Chính sách bảo mật</Link>{" "}
-                                        của EvoTicket.
+                                        {t.rich("confirm_terms_detailed", {
+                                            organizerTerms: (chunks: React.ReactNode) => (
+                                                <Link href={getLegalHref(locale, "organizer-terms")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-primary hover:underline font-semibold">{chunks}</Link>
+                                            ),
+                                            termsOfUse: (chunks: React.ReactNode) => (
+                                                <Link href={getLegalHref(locale, "terms-of-use")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-primary hover:underline font-semibold">{chunks}</Link>
+                                            ),
+                                            privacyPolicy: (chunks: React.ReactNode) => (
+                                                <Link href={getLegalHref(locale, "privacy-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-primary hover:underline font-semibold">{chunks}</Link>
+                                            )
+                                        })}
                                     </span>
                                     {errors.agreedToTerms && <p className="text-[11px] text-red-500 mt-1 select-none animate-fadeIn">{errors.agreedToTerms}</p>}
                                 </div>
@@ -1105,7 +1113,7 @@ export default function RegisterOrganizerPage() {
                                 onClick={() => router.back()}
                                 className="flex-1 px-6 py-3 bg-secondary hover:bg-secondary/80 border border-border-default text-text-primary rounded-ds-lg font-semibold transition-all"
                             >
-                                Hủy
+                                {t("btn_cancel")}
                             </button>
                             <button
                                 type="submit"
@@ -1113,7 +1121,7 @@ export default function RegisterOrganizerPage() {
                                 className="flex-1 px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-ds-lg font-semibold transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isLoading && <Loader2 className="h-5 w-5 animate-spin" />}
-                                {isLoading ? "Đang xử lý..." : "Đăng ký"}
+                                {isLoading ? t("processing") : t("btn_register")}
                             </button>
                         </div>
                     </form>

@@ -39,7 +39,7 @@ import { adminResaleApi, AdminResaleDashboardResponse, ResaleListingDto, Dispute
 export default function AdminResalePage() {
   const t = useTranslations("Admin");
   const [activeTab, setActiveTab] = useState("monitoring");
-  const [statusFilter, setStatusFilter] = useState("Tất cả");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [searchVal, setSearchVal] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -67,7 +67,7 @@ export default function AdminResalePage() {
       try {
         const res = await adminResaleApi.getResaleDashboard({
           tab: activeTab,
-          statusFilter,
+          statusFilter: statusFilter === "All" ? "Tất cả" : statusFilter,
           search: search || undefined,
           page,
           size: pageSize,
@@ -95,7 +95,7 @@ export default function AdminResalePage() {
       } catch (err: any) {
         if (isMounted) {
           console.error("Error fetching resale dashboard:", err);
-          setError("Không thể tải thông tin resale dashboard.");
+          setError(t("error_load_resale"));
         }
       } finally {
         if (isMounted) {
@@ -116,7 +116,7 @@ export default function AdminResalePage() {
     setActiveTab(tab);
     setSearchVal("");
     setSearch("");
-    setStatusFilter("Tất cả");
+    setStatusFilter("All");
     setPage(1);
   };
 
@@ -239,7 +239,7 @@ function MonitoringTab({ t, data, loading }: any) {
     return (
       <div className="text-center py-20 text-xs font-bold text-txt-muted flex items-center justify-center gap-2">
         <Clock size={16} className="animate-spin text-primary" />
-        <span>Đang tải số liệu monitoring...</span>
+        <span>{t("monitoring_loading")}</span>
       </div>
     );
   }
@@ -331,12 +331,12 @@ function ListingsReviewTab({
             type="text"
             value={searchVal}
             onChange={(e) => setSearchVal(e.target.value)}
-            placeholder="Tìm theo Listing ID, event hoặc seller"
+            placeholder={t("search_listings_placeholder")}
             className="w-full pl-12 pr-4 py-2.5 bg-main border border-border rounded-ds-2xl text-sm focus:bg-surface focus:border-primary outline-none transition-all"
           />
         </div>
         <div className="flex bg-main border border-border rounded-ds-xl p-1">
-          {["Tất cả", "Active", "Locked", "Over cap", "Under review", "Removed"].map((f) => (
+          {["All", "Active", "Locked", "Over cap", "Under review", "Removed"].map((f) => (
             <button
               key={f}
               onClick={() => {
@@ -345,7 +345,7 @@ function ListingsReviewTab({
               }}
               className={`px-4 py-1.5 text-[10px] font-black rounded-ds-lg transition-all ${statusFilter === f ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-txt-muted hover:text-txt-secondary'}`}
             >
-              {f.toUpperCase()}
+              {(f === "All" ? t("filter_all") : f).toUpperCase()}
             </button>
           ))}
         </div>
@@ -356,20 +356,20 @@ function ListingsReviewTab({
         <div className="xl:col-span-8 bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm h-fit">
           <div className="p-6 border-b border-border flex items-center gap-2">
             <Layers size={18} className="text-txt-muted" />
-            <h3 className="text-sm font-black text-txt-primary">Listings cần rà soát</h3>
+            <h3 className="text-sm font-black text-txt-primary">{t("listings_to_review")}</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-main/50 text-[10px] font-bold text-txt-muted uppercase tracking-widest border-b border-border">
-                  <th className="px-6 py-4">Listing</th>
-                  <th className="px-6 py-4">Event</th>
-                  <th className="px-6 py-4">Seller</th>
-                  <th className="px-6 py-4">Tier</th>
-                  <th className="px-6 py-4 text-right">Giá</th>
-                  <th className="px-6 py-4">Cap</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Flag</th>
+                  <th className="px-6 py-4">{t("table_listing")}</th>
+                  <th className="px-6 py-4">{t("table_event")}</th>
+                  <th className="px-6 py-4">{t("table_seller")}</th>
+                  <th className="px-6 py-4">{t("table_tier")}</th>
+                  <th className="px-6 py-4 text-right">{t("table_price")}</th>
+                  <th className="px-6 py-4">{t("table_cap")}</th>
+                  <th className="px-6 py-4">{t("table_status")}</th>
+                  <th className="px-6 py-4">{t("table_flag")}</th>
                   <th className="px-6 py-4 text-right"></th>
                 </tr>
               </thead>
@@ -379,14 +379,14 @@ function ListingsReviewTab({
                     <td colSpan={9} className="text-center py-20 text-xs font-bold text-txt-muted">
                       <div className="flex items-center justify-center gap-2">
                         <Clock size={16} className="animate-spin text-primary" />
-                        <span>Đang tải danh sách listings...</span>
+                        <span>{t("loading_listings")}</span>
                       </div>
                     </td>
                   </tr>
                 ) : listingsList.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="text-center py-12 text-txt-muted text-xs font-bold italic">
-                      Không tìm thấy listing nào cần rà soát.
+                      {t("no_listings_found")}
                     </td>
                   </tr>
                 ) : (
@@ -409,7 +409,7 @@ function ListingsReviewTab({
                       </td>
                       <td className="px-6 py-4 text-[10px] font-medium text-rose-500 italic whitespace-nowrap">{l.flag}</td>
                       <td className="px-6 py-4 text-right">
-                        <button className="text-[10px] font-black text-primary hover:underline">Review</button>
+                        <button className="text-[10px] font-black text-primary hover:underline">{t("action_view")}</button>
                       </td>
                     </tr>
                   ))
@@ -422,7 +422,7 @@ function ListingsReviewTab({
           {totalElements > 0 && (
             <div className="px-6 py-4 bg-main/30 border-t border-border flex items-center justify-between">
               <p className="text-[10px] font-medium text-txt-muted uppercase tracking-widest">
-                Hiển thị {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, totalElements)} trên tổng {totalElements}
+                {t("pagination_showing", { start: (page - 1) * pageSize + 1, end: Math.min(page * pageSize, totalElements), total: totalElements })}
               </p>
               <div className="flex items-center gap-1.5">
                 <button
@@ -460,16 +460,16 @@ function ListingsReviewTab({
             <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-6 animate-in slide-in-from-right-4">
               <div className="flex items-center gap-2">
                 <DatabaseIcon size={18} className="text-txt-muted" />
-                <h3 className="text-sm font-black text-txt-primary">Chi tiết {selectedListing.id}</h3>
+                <h3 className="text-sm font-black text-txt-primary">{t("detail_title", { id: selectedListing.id })}</h3>
               </div>
 
               <div className="space-y-4">
-                <DetailItemSidebar icon={<Calendar size={14} />} label="Event" value={selectedListing.event} />
-                <DetailItemSidebar icon={<Layers size={14} />} label="Hạng vé" value={selectedListing.tier} />
-                <DetailItemSidebar icon={<User size={14} />} label="Người bán" value={selectedListing.seller} />
-                <DetailItemSidebar icon={<Activity size={14} />} label="Chủ sở hữu trước" value={selectedListing.previousOwner || "N/A"} />
-                <DetailItemSidebar icon={<DollarSign size={14} />} label="Giá niêm yết" value={selectedListing.price} />
-                <DetailItemSidebar icon={<DollarSign size={14} />} label="Giá trần" value={String(selectedListing.listingLimit)} />
+                <DetailItemSidebar icon={<Calendar size={14} />} label={t("table_event")} value={selectedListing.event} />
+                <DetailItemSidebar icon={<Layers size={14} />} label={t("table_tier")} value={selectedListing.tier} />
+                <DetailItemSidebar icon={<User size={14} />} label={t("table_seller")} value={selectedListing.seller} />
+                <DetailItemSidebar icon={<Activity size={14} />} label={t("previous_owner")} value={selectedListing.previousOwner || "N/A"} />
+                <DetailItemSidebar icon={<DollarSign size={14} />} label={t("listing_price")} value={selectedListing.price} />
+                <DetailItemSidebar icon={<DollarSign size={14} />} label={t("price_cap")} value={String(selectedListing.listingLimit)} />
               </div>
 
               <div className="flex gap-2">
@@ -493,7 +493,7 @@ function ListingsReviewTab({
 
               <div className="pt-6 border-t border-border">
                 <h4 className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-4 flex items-center gap-2">
-                  <Clock size={14} /> Lịch sử listing
+                  <Clock size={14} /> {t("listing_history")}
                 </h4>
                 <div className="space-y-4">
                   {selectedListing.hisListings?.map((h: any, idx: number) => (
@@ -504,18 +504,18 @@ function ListingsReviewTab({
 
               <div className="pt-6 border-t border-border space-y-4">
                 <h4 className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2 flex items-center gap-2">
-                  <MoreHorizontal size={14} /> Hành động admin
+                  <MoreHorizontal size={14} /> {t("admin_actions")}
                 </h4>
                 <textarea
-                  placeholder="Ghi chú nội bộ về listing này..."
+                  placeholder={t("note_placeholder")}
                   defaultValue={selectedListing.note}
                   className="w-full p-4 bg-main border border-border rounded-ds-2xl text-xs outline-none focus:border-primary transition-all min-h-[100px] resize-none"
                 ></textarea>
                 <div className="grid grid-cols-2 gap-2">
-                  <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all">Thêm ghi chú</button>
-                  <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all">Mark under review</button>
-                  <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all text-amber-600">Escalate</button>
-                  <button className="py-2.5 bg-rose-600 text-white rounded-ds-xl text-[10px] font-black shadow-lg shadow-rose-600/20 hover:bg-rose-700 transition-all">Remove listing</button>
+                  <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all">{t("btn_add_note")}</button>
+                  <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all">{t("btn_mark_under_review")}</button>
+                  <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all text-amber-600">{t("btn_escalate")}</button>
+                  <button className="py-2.5 bg-rose-600 text-white rounded-ds-xl text-[10px] font-black shadow-lg shadow-rose-600/20 hover:bg-rose-700 transition-all">{t("btn_remove_listing")}</button>
                 </div>
               </div>
             </div>
@@ -524,7 +524,7 @@ function ListingsReviewTab({
               <div className="w-16 h-16 rounded-ds-2xl bg-main flex items-center justify-center text-txt-muted/20 mb-4">
                 <Activity size={32} />
               </div>
-              <h4 className="text-sm font-bold text-txt-muted">Chọn một listing để xem chi tiết</h4>
+              <h4 className="text-sm font-bold text-txt-muted">{t("select_listing_prompt")}</h4>
             </div>
           )}
         </div>
@@ -538,7 +538,7 @@ function DisputesTab({ t, data, loading, selectedCase, setSelectedCase }: any) {
     return (
       <div className="text-center py-20 text-xs font-bold text-txt-muted flex items-center justify-center gap-2">
         <Clock size={16} className="animate-spin text-primary" />
-        <span>Đang tải danh sách disputes...</span>
+        <span>{t("loading_disputes")}</span>
       </div>
     );
   }
@@ -551,7 +551,7 @@ function DisputesTab({ t, data, loading, selectedCase, setSelectedCase }: any) {
       <div className="xl:col-span-8 bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm h-fit">
         <div className="p-6 border-b border-border flex items-center gap-2">
           <Scale size={18} className="text-txt-muted" />
-          <h3 className="text-sm font-black text-txt-primary">Hàng đợi disputes resale</h3>
+          <h3 className="text-sm font-black text-txt-primary">{t("disputes_queue")}</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -559,12 +559,12 @@ function DisputesTab({ t, data, loading, selectedCase, setSelectedCase }: any) {
               <tr className="bg-main/50 text-[10px] font-bold text-txt-muted uppercase tracking-widest border-b border-border">
                 <th className="px-6 py-4">Case</th>
                 <th className="px-6 py-4">Ticket</th>
-                <th className="px-6 py-4">Event</th>
-                <th className="px-6 py-4">Liên quan</th>
-                <th className="px-6 py-4">Loại</th>
-                <th className="px-6 py-4">Priority</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Cập nhật</th>
+                <th className="px-6 py-4">{t("table_event")}</th>
+                <th className="px-6 py-4">{t("disputes_parties")}</th>
+                <th className="px-6 py-4">{t("disputes_type")}</th>
+                <th className="px-6 py-4">{t("disputes_priority")}</th>
+                <th className="px-6 py-4">{t("table_status")}</th>
+                <th className="px-6 py-4">{t("disputes_last_update")}</th>
                 <th className="px-6 py-4 text-right"></th>
               </tr>
             </thead>
@@ -591,14 +591,14 @@ function DisputesTab({ t, data, loading, selectedCase, setSelectedCase }: any) {
                   </td>
                   <td className="px-6 py-4 text-xs font-medium text-txt-muted">{d.lastUpdate}</td>
                   <td className="px-6 py-4 text-right">
-                    <button className="text-[10px] font-black text-primary hover:underline">Mở</button>
+                    <button className="text-[10px] font-black text-primary hover:underline">{t("open_dispute_detail")}</button>
                   </td>
                 </tr>
               ))}
               {disputesList.length === 0 && (
                 <tr>
                   <td colSpan={9} className="text-center py-12 text-txt-muted text-xs font-bold italic">
-                    Không có case dispute nào.
+                    {t("no_cases_found")}
                   </td>
                 </tr>
               )}
@@ -614,7 +614,7 @@ function DisputesTab({ t, data, loading, selectedCase, setSelectedCase }: any) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <MessageSquare size={18} className="text-indigo-500" />
-                <h3 className="text-sm font-black text-txt-primary">Case {selectedCase.id}</h3>
+                <h3 className="text-sm font-black text-txt-primary">{t("detail_title", { id: selectedCase.id })}</h3>
               </div>
               <div className="flex gap-1.5">
                 <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase border ${
@@ -632,14 +632,14 @@ function DisputesTab({ t, data, loading, selectedCase, setSelectedCase }: any) {
               </div>
 
               <div className="space-y-4">
-                <DetailItemSidebar icon={<Layers size={14} />} label="Vé liên quan" value={selectedCase.ticket} />
-                <DetailItemSidebar icon={<Calendar size={14} />} label="Sự kiện" value={selectedCase.event} />
-                <DetailItemSidebar icon={<User size={14} />} label="Bên liên quan" value={selectedCase.parties} />
-                <DetailItemSidebar icon={<Clock size={14} />} label="Cập nhật" value={selectedCase.lastUpdate} />
+                <DetailItemSidebar icon={<Layers size={14} />} label={t("disputes_related_ticket")} value={selectedCase.ticket} />
+                <DetailItemSidebar icon={<Calendar size={14} />} label={t("table_event")} value={selectedCase.event} />
+                <DetailItemSidebar icon={<User size={14} />} label={t("disputes_parties")} value={selectedCase.parties} />
+                <DetailItemSidebar icon={<Clock size={14} />} label={t("disputes_last_update")} value={selectedCase.lastUpdate} />
               </div>
 
               <div className="pt-6 border-t border-border">
-                <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">Mô tả</p>
+                <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">{t("case_description")}</p>
                 <div className="p-4 bg-main rounded-ds-2xl text-xs text-txt-secondary leading-relaxed font-medium">
                   {selectedCase.description}
                 </div>
@@ -647,17 +647,17 @@ function DisputesTab({ t, data, loading, selectedCase, setSelectedCase }: any) {
 
               <div className="pt-2">
                 <textarea
-                  placeholder="Ghi chú nội bộ về case..."
+                  placeholder={t("note_placeholder")}
                   defaultValue={selectedCase.note}
                   className="w-full p-4 bg-main border border-border rounded-ds-2xl text-xs outline-none focus:border-primary transition-all min-h-[100px] resize-none"
                 ></textarea>
               </div>
 
               <div className="grid grid-cols-2 gap-2 pt-2">
-                <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all">Thêm ghi chú</button>
-                <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all text-amber-600">Escalate</button>
-                <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all text-rose-600">Remove listing</button>
-                <button className="py-2.5 bg-indigo-600 text-white rounded-ds-xl text-[10px] font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all">Resolve case</button>
+                <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all">{t("btn_add_note")}</button>
+                <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all text-amber-600">{t("btn_escalate")}</button>
+                <button className="py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-black hover:bg-main transition-all text-rose-600">{t("btn_remove_listing")}</button>
+                <button className="py-2.5 bg-indigo-600 text-white rounded-ds-xl text-[10px] font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all">{t("btn_resolve_case")}</button>
               </div>
             </div>
           </div>
@@ -666,7 +666,7 @@ function DisputesTab({ t, data, loading, selectedCase, setSelectedCase }: any) {
             <div className="w-16 h-16 rounded-ds-2xl bg-main flex items-center justify-center text-txt-muted/20 mb-4">
               <Scale size={32} />
             </div>
-            <h4 className="text-sm font-bold text-txt-muted">Chọn một case dispute để xem chi tiết</h4>
+            <h4 className="text-sm font-bold text-txt-muted">{t("select_case_prompt")}</h4>
           </div>
         )}
       </div>

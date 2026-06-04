@@ -198,7 +198,7 @@ function SyncMonitorTab({ t }: any) {
     <div className="bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm">
       <div className="p-6 border-b border-border flex items-center gap-2">
         <AlertCircle size={18} className="text-txt-muted" />
-        <h3 className="text-sm font-black text-txt-primary">Bất thường đồng bộ</h3>
+        <h3 className="text-sm font-black text-txt-primary">{t("sync_anomalies")}</h3>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
@@ -264,12 +264,12 @@ function ContractRelayerTab({ t }: any) {
                 <span className="text-xs font-bold text-emerald-600">Polygon Mainnet</span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-txt-muted uppercase">Trạng thái</span>
+                <span className="text-[10px] font-bold text-txt-muted uppercase">{t("filter_status")}</span>
                 <span className="text-xs font-black text-amber-600">Active · Warning</span>
               </div>
             </div>
             <button className="w-full py-3 bg-primary text-white rounded-ds-xl text-xs font-black shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all">
-              Yêu cầu top-up gas
+              {t("btn_request_gas_topup")}
             </button>
           </div>
 
@@ -285,7 +285,7 @@ function ContractRelayerTab({ t }: any) {
               <div className="h-1.5 w-full bg-main rounded-full overflow-hidden">
                 <div className="h-full bg-rose-500" style={{ width: '42%' }}></div>
               </div>
-              <p className="text-[9px] text-txt-muted font-medium italic">Ngưỡng cảnh báo: 1.0 MATIC</p>
+              <p className="text-[9px] text-txt-muted font-medium italic">{t("gas_warning_threshold", { threshold: "1.0" })}</p>
             </div>
           </div>
 
@@ -305,7 +305,7 @@ function ContractRelayerTab({ t }: any) {
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-txt-muted uppercase">Last block</span>
-                <span className="text-xs font-medium text-txt-muted">3 giây trước</span>
+                <span className="text-xs font-medium text-txt-muted">{t("seconds_ago", { count: 3 })}</span>
               </div>
             </div>
           </div>
@@ -336,7 +336,7 @@ function ContractRelayerTab({ t }: any) {
         <div className="bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm">
           <div className="p-6 border-b border-border flex items-center gap-2">
             <ArrowRightLeft size={18} className="text-txt-muted" />
-            <h3 className="text-sm font-black text-txt-primary">Giao dịch gần đây</h3>
+            <h3 className="text-sm font-black text-txt-primary">{t("recent_transactions")}</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -345,7 +345,7 @@ function ContractRelayerTab({ t }: any) {
                   <th className="px-6 py-4">Tx hash</th>
                   <th className="px-6 py-4">Action</th>
                   <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Thời điểm</th>
+                  <th className="px-6 py-4 text-right">{t("log_time")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -381,7 +381,7 @@ function TokenLookupTab({ t }: any) {
         <Search className="text-txt-muted ml-2" size={20} />
         <input
           type="text"
-          placeholder="Tra cứu theo Token ID, ví, hoặc Event ID"
+          placeholder={t("search_token_placeholder")}
           className="flex-1 bg-transparent border-none outline-none text-sm font-medium text-txt-primary placeholder:text-txt-muted"
         />
         <div className="px-3 py-1 bg-main rounded-ds-lg text-[10px] font-bold text-txt-muted border border-border">3 token</div>
@@ -392,7 +392,7 @@ function TokenLookupTab({ t }: any) {
         <div className="xl:col-span-8 bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm h-fit">
           <div className="p-6 border-b border-border flex items-center gap-2">
             <Activity size={18} className="text-txt-muted" />
-            <h3 className="text-sm font-black text-txt-primary">Kết quả token</h3>
+            <h3 className="text-sm font-black text-txt-primary">{t("token_results")}</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -403,7 +403,7 @@ function TokenLookupTab({ t }: any) {
                   <th className="px-6 py-4">Event</th>
                   <th className="px-6 py-4">Mint</th>
                   <th className="px-6 py-4">Sync</th>
-                  <th className="px-6 py-4 text-right">Hoạt động</th>
+                  <th className="px-6 py-4 text-right">{t("col_activity")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -438,7 +438,7 @@ function TokenLookupTab({ t }: any) {
         <div className="xl:col-span-4 bg-surface border border-border rounded-ds-3xl p-6 shadow-sm h-fit space-y-6">
           <div className="flex items-center gap-2">
             <Database size={18} className="text-indigo-500" />
-            <h3 className="text-sm font-black text-txt-primary">Chi tiết TKN-5821</h3>
+            <h3 className="text-sm font-black text-txt-primary">{t("token_detail_title", { id: "TKN-5821" })}</h3>
           </div>
 
           <div className="space-y-6">
@@ -447,12 +447,12 @@ function TokenLookupTab({ t }: any) {
             <DetailItemSidebar icon={<Calendar size={14} />} label="Event" value="Anh Trai Say Hi Concert 2026" />
             <DetailItemSidebar icon={<Database size={14} />} label="Metadata" value="ipfs://Qm...s9d" />
             <DetailItemSidebar icon={<ArrowRightLeft size={14} />} label="Mint Tx" value="0x9af2...3c1d" />
-            <DetailItemSidebar icon={<Activity size={14} />} label="Hoạt động cuối" value="Resale 25/04" />
+            <DetailItemSidebar icon={<Activity size={14} />} label={t("last_activity")} value="Resale 25/04" />
 
             <div className="bg-main/50 border border-border rounded-ds-2xl p-4">
-              <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">Tóm tắt sync</p>
+              <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">{t("sync_summary")}</p>
               <p className="text-xs text-txt-secondary font-medium leading-relaxed">
-                Owner trên chuỗi khác với off-chain, cần reconcile.
+                {t("sync_summary_warning")}
               </p>
             </div>
           </div>

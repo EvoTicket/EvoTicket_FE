@@ -79,7 +79,7 @@ export default function AdminAuditPage() {
       } catch (err: any) {
         if (isMounted) {
           console.error("Error fetching audit logs:", err);
-          setError("Không thể tải danh sách nhật ký hệ thống.");
+          setError(t("audit_error_load"));
         }
       } finally {
         if (isMounted) {
@@ -204,7 +204,7 @@ export default function AdminAuditPage() {
                       <td colSpan={6} className="text-center py-20 text-xs font-bold text-txt-muted">
                         <div className="flex items-center justify-center gap-2">
                           <Clock size={16} className="animate-spin text-primary" />
-                          <span>Đang tải dữ liệu...</span>
+                          <span>{t("loading_data")}</span>
                         </div>
                       </td>
                     </tr>
@@ -263,7 +263,11 @@ export default function AdminAuditPage() {
             {totalElements > 0 && (
               <div className="px-6 py-4 bg-main/30 border-t border-border flex items-center justify-between">
                 <p className="text-[10px] font-medium text-txt-muted uppercase tracking-widest">
-                  Hiển thị {totalElements > 0 ? (page - 1) * pageSize + 1 : 0}-{Math.min(page * pageSize, totalElements)} trên tổng {totalElements}
+                  {t("pagination_showing", {
+                    start: totalElements > 0 ? (page - 1) * pageSize + 1 : 0,
+                    end: Math.min(page * pageSize, totalElements),
+                    total: totalElements
+                  })}
                 </p>
                 <div className="flex items-center gap-1.5">
                   <button

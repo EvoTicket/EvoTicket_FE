@@ -212,7 +212,7 @@ export default function AccountDetailPage() {
         setError(null);
       } catch (err: any) {
         console.error("Failed to fetch account details:", err);
-        setError("Không thể tải thông tin chi tiết tài khoản.");
+        setError(t("accounts_detail_not_found"));
       } finally {
         setIsLoading(false);
       }
@@ -235,9 +235,9 @@ export default function AccountDetailPage() {
   if (error || !account) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <p className="text-rose-500 font-bold">{error || "Không tìm thấy dữ liệu tài khoản."}</p>
+        <p className="text-rose-500 font-bold">{error || t("accounts_detail_not_found")}</p>
         <button onClick={handleBack} className="px-4 py-2 border border-border rounded-ds-xl text-xs font-bold hover:bg-main">
-          Quay lại
+          {t("accounts_detail_back")}
         </button>
       </div>
     );
@@ -303,7 +303,7 @@ export default function AccountDetailPage() {
                   {statusInfo.label}
                 </span>
                 <span className="text-[10px] font-medium text-txt-muted">
-                  ID: {account.id} · Đăng ký {account.registeredDate}
+                  ID: {account.id} · {t("accounts_detail_registered")} {account.registeredDate}
                 </span>
               </div>
             </div>
@@ -311,39 +311,39 @@ export default function AccountDetailPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <ActionButton icon={<Save size={16} />} label="Lưu ghi chú" />
-          <ActionButton icon={<MessageSquare size={16} />} label="Yêu cầu bổ sung" />
-          <ActionButton icon={<ShieldAlert size={16} />} label="Hạn chế" color="rose" />
-          <ActionButton icon={<XCircle size={16} />} label="Từ chối" color="rose" variant="solid" />
-          <ActionButton icon={<Check size={16} />} label="Phê duyệt" color="indigo" variant="solid" />
+          <ActionButton icon={<Save size={16} />} label={t("accounts_detail_save_note")} />
+          <ActionButton icon={<MessageSquare size={16} />} label={t("accounts_detail_request_info")} />
+          <ActionButton icon={<ShieldAlert size={16} />} label={t("accounts_detail_restrict")} color="rose" />
+          <ActionButton icon={<XCircle size={16} />} label={t("accounts_detail_reject")} color="rose" variant="solid" />
+          <ActionButton icon={<Check size={16} />} label={t("accounts_detail_approve")} color="indigo" variant="solid" />
         </div>
       </div>
 
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <QuickStatCard 
-          label="Trạng thái xác minh" 
+          label={t("accounts_detail_verification_status")} 
           value={account.stats.verificationStatus} 
-          subValue={`${account.stats.documentsSubmitted}/${account.stats.totalDocuments} tài liệu đã nộp`}
+          subValue={t("accounts_detail_docs_submitted_sub", { submitted: account.stats.documentsSubmitted, total: account.stats.totalDocuments })}
           icon={<ShieldAlert size={20} />}
           color="amber"
         />
         <QuickStatCard 
-          label="Sự kiện đã tạo" 
+          label={t("accounts_detail_events_created")} 
           value={account.stats.eventsCreated.toString()} 
-          subValue={`${account.stats.pendingEvents} đang chờ duyệt`}
+          subValue={t("accounts_detail_pending_events_sub", { count: account.stats.pendingEvents })}
           icon={<Calendar size={20} />}
           color="indigo"
         />
         <QuickStatCard 
-          label="Hoạt động gần nhất" 
+          label={t("accounts_detail_last_active")} 
           value={account.stats.lastActive} 
-          subValue="Tạo event draft"
+          subValue={t("accounts_detail_event_draft_sub")}
           icon={<Clock size={20} />}
           color="sky"
         />
         <QuickStatCard 
-          label="Mức độ rủi ro" 
+          label={t("accounts_detail_risk_level")} 
           value={account.stats.riskLevel} 
           subValue={account.stats.riskReason}
           icon={<AlertTriangle size={20} />}
@@ -357,9 +357,9 @@ export default function AccountDetailPage() {
           {/* Tabs Navigation */}
           <div className="bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm">
             <div className="flex border-b border-border px-6">
-              <TabButton active={activeTab === "profile"} onClick={() => setActiveTab("profile")} label="Hồ sơ" icon={<User size={16} />} />
-              <TabButton active={activeTab === "activity"} onClick={() => setActiveTab("activity")} label="Hoạt động" icon={<ActivityIcon size={16} />} />
-              <TabButton active={activeTab === "history"} onClick={() => setActiveTab("history")} label="Lịch sử xử lý" icon={<History size={16} />} />
+              <TabButton active={activeTab === "profile"} onClick={() => setActiveTab("profile")} label={t("accounts_detail_profile")} icon={<User size={16} />} />
+              <TabButton active={activeTab === "activity"} onClick={() => setActiveTab("activity")} label={t("accounts_detail_activity")} icon={<ActivityIcon size={16} />} />
+              <TabButton active={activeTab === "history"} onClick={() => setActiveTab("history")} label={t("accounts_detail_history")} icon={<History size={16} />} />
             </div>
 
             <div className="p-8">
@@ -367,18 +367,18 @@ export default function AccountDetailPage() {
                 <div className="space-y-8">
                   {/* Basic Info */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
-                    <InfoField label="Tên tổ chức" value={account.name} />
-                    <InfoField label="Loại tổ chức" value={account.profile.orgType} />
-                    <InfoField label="Người đại diện" value={account.profile.representative} />
+                    <InfoField label={t("accounts_detail_org_name")} value={account.name} />
+                    <InfoField label={t("accounts_detail_org_type")} value={account.profile.orgType} />
+                    <InfoField label={t("accounts_detail_representative")} value={account.profile.representative} />
                     <InfoField label="Email" value={account.profile.email} isLink icon={<Mail size={14} />} />
-                    <InfoField label="Số điện thoại" value={account.profile.phone} icon={<Phone size={14} />} />
-                    <InfoField label="Mã số thuế" value={account.profile.taxId} />
+                    <InfoField label={t("accounts_detail_phone")} value={account.profile.phone} icon={<Phone size={14} />} />
+                    <InfoField label={t("accounts_detail_tax_id")} value={account.profile.taxId} />
                   </div>
 
                   {/* Documents Section */}
                   <div>
                     <h4 className="text-sm font-bold text-txt-primary mb-4 flex items-center gap-2">
-                      Hồ sơ tài liệu đã nộp
+                      {t("accounts_detail_submitted_docs")}
                     </h4>
                     {account.documents && account.documents.length > 0 ? (
                       <div className="bg-main/30 rounded-ds-2xl border border-border overflow-hidden">
@@ -413,13 +413,13 @@ export default function AccountDetailPage() {
                         </table>
                       </div>
                     ) : (
-                      <p className="text-xs text-txt-muted">Không có tài liệu nào được tải lên.</p>
+                      <p className="text-xs text-txt-muted">{t("accounts_detail_no_docs")}</p>
                     )}
                   </div>
 
                   {/* Payout Account */}
                   <div>
-                    <h4 className="text-sm font-bold text-txt-primary mb-4">Tài khoản thanh toán</h4>
+                    <h4 className="text-sm font-bold text-txt-primary mb-4">{t("accounts_detail_payout_account")}</h4>
                     {account.payoutAccount ? (
                       <div className="p-4 bg-surface border border-border rounded-ds-2xl flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -440,7 +440,7 @@ export default function AccountDetailPage() {
                         </span>
                       </div>
                     ) : (
-                      <p className="text-xs text-txt-muted">Chưa cấu hình tài khoản thanh toán</p>
+                      <p className="text-xs text-txt-muted">{t("accounts_detail_no_payout")}</p>
                     )}
                   </div>
 
@@ -450,9 +450,9 @@ export default function AccountDetailPage() {
                       <div className="flex gap-3">
                         <AlertTriangle size={18} className="text-amber-600 shrink-0" />
                         <div>
-                          <p className="text-xs font-bold text-amber-700">Ghi chú xác minh nội bộ</p>
+                          <p className="text-xs font-bold text-amber-700">{t("accounts_detail_internal_note")}</p>
                           <p className="text-[11px] text-amber-600/80 mt-1 leading-relaxed">
-                            {account.adminContext?.internalNote || "Tổ chức chưa có ghi chú xác minh nào từ quản trị viên."}
+                            {account.adminContext?.internalNote || t("accounts_detail_no_internal_note")}
                           </p>
                         </div>
                       </div>
@@ -478,10 +478,10 @@ export default function AccountDetailPage() {
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-main/50 border-b border-border">
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Thời điểm</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Người thực hiện</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Hành động</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Ghi chú</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("accounts_detail_col_time")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("accounts_detail_col_actor")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("accounts_detail_col_action")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("accounts_detail_col_note")}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -506,8 +506,8 @@ export default function AccountDetailPage() {
           <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-sm font-bold text-txt-primary">Bối cảnh nền tảng liên quan</h3>
-                <p className="text-[10px] text-txt-muted uppercase font-medium mt-0.5 tracking-tight">Tổng hợp dữ liệu vận hành của tổ chức này</p>
+                <h3 className="text-sm font-bold text-txt-primary">{t("accounts_detail_operational_context")}</h3>
+                <p className="text-[10px] text-txt-muted uppercase font-medium mt-0.5 tracking-tight">{t("accounts_detail_operational_context_desc")}</p>
               </div>
               <span className="px-2 py-0.5 rounded-ds-md bg-amber-500/10 text-amber-600 text-[10px] font-bold border border-amber-500/10 uppercase">
                 Pending Review
@@ -515,14 +515,14 @@ export default function AccountDetailPage() {
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <MiniStat label="Sự kiện gần đây" value={account.operationalContext.summary.recentEventsCount.toString()} color="indigo" />
-              <MiniStat label="Sự kiện bị flag" value={account.operationalContext.summary.flaggedEventsCount.toString()} color="rose" />
-              <MiniStat label="Payout đang chờ" value={account.operationalContext.summary.pendingPayoutCount.toString()} color="amber" />
-              <MiniStat label="Ghi chú hỗ trợ mở" value={account.operationalContext.summary.openSupportNotesCount.toString()} color="sky" />
+              <MiniStat label={t("accounts_detail_recent_events")} value={account.operationalContext.summary.recentEventsCount.toString()} color="indigo" />
+              <MiniStat label={t("accounts_detail_flagged_events")} value={account.operationalContext.summary.flaggedEventsCount.toString()} color="rose" />
+              <MiniStat label={t("accounts_detail_pending_payout")} value={account.operationalContext.summary.pendingPayoutCount.toString()} color="amber" />
+              <MiniStat label={t("accounts_detail_open_support_notes")} value={account.operationalContext.summary.openSupportNotesCount.toString()} color="sky" />
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-xs font-bold text-txt-primary">Sự kiện gần đây</h4>
+              <h4 className="text-xs font-bold text-txt-primary">{t("accounts_detail_recent_events")}</h4>
               <div className="space-y-2">
                 {account.operationalContext.recentEvents.map((evt) => (
                   <EventRow 
@@ -538,7 +538,7 @@ export default function AccountDetailPage() {
             </div>
 
             <div className="mt-8 pt-8 border-t border-border space-y-4">
-              <h4 className="text-xs font-bold text-txt-primary">Ghi chú hỗ trợ / kiểm duyệt</h4>
+              <h4 className="text-xs font-bold text-txt-primary">{t("accounts_detail_support_notes")}</h4>
               <div className="space-y-4">
                 {account.operationalContext.adminLogs.map((log, idx) => (
                   <LogEntry 
@@ -557,34 +557,34 @@ export default function AccountDetailPage() {
         <div className="space-y-6">
           <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm sticky top-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-sm font-black text-txt-primary uppercase tracking-tight">Bảng điều khiển admin</h3>
+              <h3 className="text-sm font-black text-txt-primary uppercase tracking-tight">{t("accounts_detail_admin_panel")}</h3>
               <ShieldAlert size={18} className="text-txt-muted" />
             </div>
 
             <div className="space-y-6">
               <div>
-                <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">Trạng thái nền tảng</p>
+                <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">{t("platform_status") || "Platform Status"}</p>
                 <div className="p-2 bg-amber-500/5 border border-amber-500/20 rounded-ds-xl text-center">
                   <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Pending Approval</span>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <p className="text-[10px] font-bold text-txt-muted uppercase">Tóm tắt xác minh</p>
+                <p className="text-[10px] font-bold text-txt-muted uppercase">{t("accounts_detail_verification_summary")}</p>
                 {account.documents.map((doc, idx) => (
                   <ChecklistItem key={idx} label={doc.name} status={doc.status} />
                 ))}
               </div>
 
               <div>
-                <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">Ghi chú nội bộ</p>
+                <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">{t("accounts_detail_internal_note_title")}</p>
                 <textarea 
-                  placeholder="Nhập ghi chú cho quản trị viên khác..."
+                  placeholder={t("accounts_detail_note_placeholder")}
                   className="w-full h-32 p-4 bg-main border border-border rounded-ds-2xl text-xs text-txt-primary placeholder:text-txt-muted focus:border-primary outline-none transition-all resize-none"
                   defaultValue={account.adminContext.internalNote}
                 />
                 <button className="w-full mt-3 py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-bold text-txt-primary hover:bg-main transition-all">
-                  Lưu ghi chú
+                  {t("accounts_detail_save_note")}
                 </button>
               </div>
 
@@ -593,7 +593,7 @@ export default function AccountDetailPage() {
                   <div className="p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-ds-2xl">
                     <div className="flex items-center gap-2 mb-1">
                       <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                      <p className="text-[10px] font-bold text-indigo-600">Hành động admin gần nhất</p>
+                      <p className="text-[10px] font-bold text-indigo-600">{t("accounts_detail_last_admin_action")}</p>
                     </div>
                     <p className="text-[10px] text-indigo-600/70">
                       {account.adminContext.lastAction.timestamp} · {account.adminContext.lastAction.adminUser} {account.adminContext.lastAction.description}
@@ -602,10 +602,10 @@ export default function AccountDetailPage() {
                 )}
 
                 <div className="space-y-2">
-                  <AdminActionButton color="indigo" label="Phê duyệt tổ chức" icon={<Check size={14} />} />
-                  <AdminActionButton color="default" label="Yêu cầu bổ sung hồ sơ" icon={<MessageSquare size={14} />} />
-                  <AdminActionButton color="default" label="Hạn chế tài khoản" icon={<Slash size={14} />} />
-                  <AdminActionButton color="rose" label="Từ chối hồ sơ" icon={<XCircle size={14} />} />
+                  <AdminActionButton color="indigo" label={t("accounts_detail_approve_org")} icon={<Check size={14} />} />
+                  <AdminActionButton color="default" label={t("accounts_detail_request_info_docs")} icon={<MessageSquare size={14} />} />
+                  <AdminActionButton color="default" label={t("accounts_detail_restrict_account")} icon={<Slash size={14} />} />
+                  <AdminActionButton color="rose" label={t("accounts_detail_reject_docs")} icon={<XCircle size={14} />} />
                 </div>
               </div>
             </div>
@@ -712,6 +712,7 @@ function MiniStat({ label, value, color }: any) {
 }
 
 function EventRow({ name, id, date, status, isFlagged }: any) {
+  const t = useTranslations("Admin");
   return (
     <div className="flex items-center justify-between p-3 bg-main/20 rounded-ds-2xl hover:bg-main/40 transition-colors">
       <div className="flex items-center gap-3">
@@ -731,11 +732,13 @@ function EventRow({ name, id, date, status, isFlagged }: any) {
         </div>
       </div>
       <span className={`px-2 py-0.5 rounded-ds-md text-[8px] font-black border uppercase ${
-        status === "Đã duyệt" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/10" :
-        status === "Đang chờ duyệt" ? "bg-amber-500/10 text-amber-600 border-amber-500/10" :
+        status === "Đã duyệt" || status === "APPROVED" || status === "VERIFIED" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/10" :
+        status === "Đang chờ duyệt" || status === "PENDING" ? "bg-amber-500/10 text-amber-600 border-amber-500/10" :
         "bg-surface text-txt-muted border-border"
       }`}>
-        {status}
+        {status === "Đã duyệt" || status === "APPROVED" || status === "VERIFIED" ? t("status_verified") :
+         status === "Đang chờ duyệt" || status === "PENDING" ? t("status_pending") :
+         status}
       </span>
     </div>
   );

@@ -85,7 +85,7 @@ export default function AdminAIKBPage() {
       }
     } catch (err: any) {
       console.error("KB fetch error:", err);
-      setError("Không thể tải danh sách KB. Vui lòng thử lại.");
+      setError(t("kb_load_error"));
     } finally {
       setLoading(false);
     }
@@ -97,15 +97,15 @@ export default function AdminAIKBPage() {
 
   // ── Delete ───────────────────────────────────────────────────────────────
   const handleDelete = async (source: string, title: string) => {
-    if (!window.confirm(`Xóa KB item "${title}"?\nThao tác này sẽ xóa toàn bộ chunks trong VectorStore và không thể hoàn tác.`)) return;
+    if (!window.confirm(t("kb_delete_confirm", { title }))) return;
     setDeletingSource(source);
     try {
       await adminKbApi.deleteItem(source);
-      toast.success(`Đã xóa "${title}" khỏi Knowledge Base`);
+      toast.success(t("kb_delete_success", { title }));
       if (selectedSource === source) setSelectedSource(null);
       await fetchItems();
     } catch {
-      toast.error("Xóa KB item thất bại");
+      toast.error(t("kb_delete_error"));
     } finally {
       setDeletingSource(null);
     }
@@ -120,7 +120,7 @@ export default function AdminAIKBPage() {
       toast.success(`"${item.title}" → ${newStatus}`);
       await fetchItems();
     } catch {
-      toast.error("Cập nhật trạng thái thất bại");
+      toast.error(t("kb_status_update_error"));
     } finally {
       setTogglingSource(null);
     }
@@ -131,7 +131,7 @@ export default function AdminAIKBPage() {
     setShowUpload(false);
     await fetchItems();
     setSelectedSource(newItem.source);
-    toast.success(`✓ Đã nạp "${newItem.title}" — ${newItem.chunkCount} chunks`);
+    toast.success(t("kb_ingest_success", { title: newItem.title, chunkCount: newItem.chunkCount }));
   };
 
   return (
@@ -148,7 +148,7 @@ export default function AdminAIKBPage() {
             onClick={fetchItems}
             disabled={loading}
             className="w-10 h-10 flex items-center justify-center rounded-ds-xl border border-border bg-surface hover:bg-main text-txt-muted hover:text-txt-primary transition-all shadow-sm"
-            title="Làm mới"
+            title={t("btn_refresh")}
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
           </button>
@@ -204,7 +204,7 @@ export default function AdminAIKBPage() {
           </p>
           <p className="text-[10px] text-primary/60 font-medium mt-2 flex items-center gap-1.5">
             <ShieldAlert size={11} />
-            Upload cùng <code className="font-mono font-black">source</code> sẽ xóa chunks cũ và nạp lại — không bao giờ có conflict.
+            {t.rich("kb_convention_warning", { codeNode: (chunks: any) => <code className="font-mono font-black">{chunks}</code> })}
           </p>
         </div>
       </div>
@@ -260,7 +260,7 @@ export default function AdminAIKBPage() {
                   <td colSpan={7} className="py-20 text-center">
                     <div className="flex flex-col items-center gap-3 text-txt-muted">
                       <Loader2 size={24} className="animate-spin text-primary" />
-                      <span className="text-xs font-bold">Đang tải Knowledge Base...</span>
+                      <span className="text-xs font-bold">{t("kb_loading")}</span>
                     </div>
                   </td>
                 </tr>
@@ -270,7 +270,7 @@ export default function AdminAIKBPage() {
                     <div className="flex flex-col items-center gap-3">
                       <AlertTriangle size={24} />
                       <span>{error}</span>
-                      <button onClick={fetchItems} className="text-primary underline font-bold text-xs">Thử lại</button>
+                      <button onClick={fetchItems} className="text-primary underline font-bold text-xs">{t("btn_retry")}</button>
                     </div>
                   </td>
                 </tr>
@@ -280,7 +280,7 @@ export default function AdminAIKBPage() {
                     <div className="flex flex-col items-center gap-4 text-txt-muted">
                       <Database size={40} className="opacity-20" />
                       <p className="text-xs font-bold">
-                        {items.length === 0 ? "Chưa có KB item nào. Nhấn \"+ Thêm KB\" để bắt đầu." : "Không tìm thấy kết quả phù hợp."}
+                        {items.length === 0 ? t("kb_empty_state_intro") : t("kb_empty_state_no_match")}
                       </p>
                     </div>
                   </td>
@@ -321,7 +321,7 @@ export default function AdminAIKBPage() {
                           onClick={() => handleToggleStatus(item)}
                           disabled={togglingSource === item.source}
                           className="text-[9px] font-black text-txt-muted hover:text-primary uppercase tracking-widest border border-border rounded-ds-lg px-2.5 py-1 hover:border-primary/40 hover:bg-primary/5 transition-all disabled:opacity-40"
-                          title={item.status === "Published" ? "Chuyển sang Draft" : "Publish"}
+                          title={item.status === "Published" ? t("kb_action_draft") : t("kb_action_publish")}
                         >
                           {togglingSource === item.source ? (
                             <Loader2 size={10} className="animate-spin" />
@@ -331,7 +331,7 @@ export default function AdminAIKBPage() {
                           onClick={() => handleDelete(item.source, item.title)}
                           disabled={deletingSource === item.source}
                           className="w-7 h-7 flex items-center justify-center rounded-ds-lg text-txt-muted/30 hover:text-rose-500 hover:bg-rose-500/10 transition-all disabled:opacity-40"
-                          title="Xóa KB item"
+                          title={t("kb_delete_item")}
                         >
                           {deletingSource === item.source ? (
                             <Loader2 size={12} className="animate-spin text-rose-500" />
@@ -381,11 +381,11 @@ export default function AdminAIKBPage() {
               {/* Details */}
               <div className="space-y-4">
                 <DetailRow icon={<Hash size={14} />} label="Source slug" value={selectedItem.source} mono />
-                <DetailRow icon={<FileText size={14} />} label="File nguồn" value={selectedItem.filename || "Manual entry"} />
+                <DetailRow icon={<FileText size={14} />} label={t("kb_source_file")} value={selectedItem.filename || t("kb_manual_entry")} />
                 <DetailRow
                   icon={<Database size={14} />}
                   label="Vector chunks"
-                  value={`${selectedItem.chunkCount ?? 0} chunks trong VectorStore`}
+                  value={t("kb_chunks_in_vectorstore", { count: selectedItem.chunkCount ?? 0 })}
                 />
                 <DetailRow icon={<User size={14} />} label={t("col_editor")} value={selectedItem.updatedBy || "—"} />
                 <DetailRow
@@ -399,8 +399,11 @@ export default function AdminAIKBPage() {
               <div className="mt-6 p-4 bg-primary/5 border border-primary/10 rounded-ds-2xl flex gap-3">
                 <Info size={14} className="text-primary flex-shrink-0 mt-0.5" />
                 <p className="text-[10px] text-primary/80 font-medium leading-relaxed">
-                  Để cập nhật nội dung, upload file mới với source <span className="font-mono font-black">"{selectedItem.source}"</span>.
-                  Hệ thống sẽ tự động xóa {selectedItem.chunkCount} chunks cũ và nạp lại — không bao giờ có conflict.
+                  {t.rich("kb_update_info_desc", {
+                    source: selectedItem.source,
+                    count: selectedItem.chunkCount ?? 0,
+                    mono: (chunks: any) => <span className="font-mono font-black">{chunks}</span>
+                  })}
                 </p>
               </div>
 
@@ -423,7 +426,7 @@ export default function AdminAIKBPage() {
                   ) : (
                     <Trash2 size={14} />
                   )}
-                  Xóa
+                  {t("kb_action_delete")}
                 </button>
               </div>
             </div>
@@ -433,7 +436,7 @@ export default function AdminAIKBPage() {
                 <Database size={32} />
               </div>
               <p className="text-xs font-bold text-txt-muted">{t("aikb_sub.select_to_view")}</p>
-              <p className="text-[10px] text-txt-muted/60 mt-1">Chọn một KB item để xem chi tiết</p>
+              <p className="text-[10px] text-txt-muted/60 mt-1">{t("kb_select_detail_desc")}</p>
             </div>
           )}
         </div>
@@ -468,6 +471,7 @@ function IngestModal({
   onSuccess: (item: KbItemDto) => void;
   prefillSource?: string;
 }) {
+  const t = useTranslations("Admin");
   const [file, setFile] = useState<File | null>(null);
   const [source, setSource] = useState(prefillSource ?? "");
   const [title, setTitle] = useState("");
@@ -498,7 +502,7 @@ function IngestModal({
       const result = await adminKbApi.ingestFile(file!, source.trim(), title.trim(), category, status);
       onSuccess(result);
     } catch (err: any) {
-      const msg = err?.response?.data?.message || "Ingest thất bại. Vui lòng thử lại.";
+      const msg = err?.response?.data?.message || t("kb_ingest_failed");
       toast.error(msg);
     } finally {
       setSubmitting(false);
@@ -521,12 +525,12 @@ function IngestModal({
         <div className="flex items-center justify-between p-6 border-b border-border">
           <div>
             <h2 className="text-base font-black text-txt-primary">
-              {isReingest ? "Re-ingest KB Item" : "Thêm KB Item"}
+              {isReingest ? t("kb_reingest_item") : t("kb_add_item")}
             </h2>
             <p className="text-[11px] text-txt-muted mt-0.5">
               {isReingest
-                ? "Nội dung cũ sẽ bị xóa và thay thế hoàn toàn"
-                : "Upload file để nạp kiến thức mới cho AI"}
+                ? t("kb_add_item_reingest_desc")
+                : t("kb_add_item_new_desc")}
             </p>
           </div>
           <button
@@ -544,10 +548,13 @@ function IngestModal({
               <AlertTriangle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-[11px] font-black text-amber-700 dark:text-amber-500 mb-1">
-                  Source <span className="font-mono">"{source}"</span> đã tồn tại
+                  {t.rich("kb_source_exists_warning", {
+                    source: source,
+                    mono: (chunks: any) => <span className="font-mono">{chunks}</span>
+                  })}
                 </p>
                 <p className="text-[10px] text-amber-600/80 leading-relaxed">
-                  Upload sẽ xóa toàn bộ chunks cũ và nạp lại từ file mới. AI sẽ chỉ thấy phiên bản mới nhất — không có conflict.
+                  {t("kb_source_exists_detail")}
                 </p>
               </div>
             </div>
@@ -585,7 +592,7 @@ function IngestModal({
                   onClick={(e) => { e.stopPropagation(); setFile(null); }}
                   className="text-[10px] font-bold text-rose-500 hover:underline mt-1"
                 >
-                  Xóa file
+                  {t("kb_delete_file")}
                 </button>
               </div>
             ) : (
@@ -593,8 +600,8 @@ function IngestModal({
                 <div className="w-10 h-10 rounded-ds-xl bg-main border border-border flex items-center justify-center">
                   <Upload size={18} />
                 </div>
-                <p className="text-xs font-bold">Kéo thả hoặc click để chọn file</p>
-                <p className="text-[10px]">PDF, DOCX, TXT, MD, CSV — tối đa 20MB</p>
+                <p className="text-xs font-bold">{t("kb_drag_drop_file")}</p>
+                <p className="text-[10px]">{t("kb_file_specs")}</p>
               </div>
             )}
           </div>
@@ -614,20 +621,20 @@ function IngestModal({
               }`}
             />
             <p className="text-[10px] text-txt-muted mt-1">
-              Slug cố định, dùng để định danh. Cùng slug = replace thay vì duplicate.
+              {t("kb_slug_description")}
             </p>
           </div>
 
           {/* Title */}
           <div>
             <label className="text-[10px] font-black text-txt-muted uppercase tracking-widest block mb-1.5">
-              Tên hiển thị <span className="text-rose-500">*</span>
+              {t("kb_display_name")} <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="vd: Chính sách phí giao dịch"
+              placeholder={t("kb_display_name_placeholder")}
               className="w-full px-4 py-2.5 rounded-ds-xl border border-border focus:border-primary text-xs outline-none transition-all bg-main text-txt-primary placeholder:text-txt-muted"
             />
           </div>
@@ -651,8 +658,8 @@ function IngestModal({
                 onChange={(e) => setStatus(e.target.value as "Published" | "Draft")}
                 className="w-full px-4 py-2.5 rounded-ds-xl border border-border focus:border-primary text-xs outline-none bg-main text-txt-primary"
               >
-                <option value="Published">Published — AI sẽ dùng ngay</option>
-                <option value="Draft">Draft — lưu nhưng chưa dùng</option>
+                <option value="Published">{t("kb_status_published_desc")}</option>
+                <option value="Draft">{t("kb_status_draft_desc")}</option>
               </select>
             </div>
           </div>
@@ -665,7 +672,7 @@ function IngestModal({
             disabled={submitting}
             className="px-5 py-2.5 rounded-ds-xl border border-border text-txt-muted hover:bg-main text-xs font-bold transition-all"
           >
-            Hủy
+            {t("kb_cancel")}
           </button>
           <button
             onClick={handleSubmit}
@@ -679,12 +686,12 @@ function IngestModal({
             {submitting ? (
               <>
                 <Loader2 size={14} className="animate-spin" />
-                Đang nạp...
+                {t("kb_ingest_loading")}
               </>
             ) : (
               <>
                 <Upload size={14} />
-                {isReingest ? "Xóa cũ & Re-ingest" : "Ingest vào KB"}
+                {isReingest ? t("kb_reingest_action") : t("kb_ingest_action")}
               </>
             )}
           </button>

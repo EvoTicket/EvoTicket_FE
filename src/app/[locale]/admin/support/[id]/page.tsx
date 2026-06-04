@@ -48,10 +48,10 @@ export default function SupportDetailPage() {
    }, [id]);
 
    const typeLabel = useMemo(() => {
-      if (data.type === "transaction") return "Chi tiết giao dịch";
-      if (data.type === "ticket") return "Chi tiết vé";
-      return "Chi tiết case";
-   }, [data.type]);
+      if (data.type === "transaction") return t("support_detail_transaction");
+      if (data.type === "ticket") return t("support_detail_ticket");
+      return t("support_detail_case");
+   }, [data.type, t]);
 
    const displayStatus = useMemo(() => {
       if (data.type === "ticket") return (data as any).access;
@@ -71,13 +71,13 @@ export default function SupportDetailPage() {
             </div>
 
             <div className="flex items-center gap-2">
-               <ActionButton icon={<FileText size={14} />} label="Ghi chú nội bộ" />
-               <ActionButton icon={<Flag size={14} />} label="Gắn cờ" />
-               <ActionButton icon={<Share2 size={14} />} label="Chuyển xử lý" />
-               <ActionButton icon={<Copy size={14} />} label="Sao chép ID" />
+               <ActionButton icon={<FileText size={14} />} label={t("accounts_detail_internal_note")} />
+               <ActionButton icon={<Flag size={14} />} label={t("action_flag")} />
+               <ActionButton icon={<Share2 size={14} />} label={t("action_assign_transfer")} />
+               <ActionButton icon={<Copy size={14} />} label={t("action_copy_id")} />
                <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-ds-xl text-xs font-bold transition-all shadow-lg shadow-indigo-600/20">
                   <ExternalLink size={14} />
-                  <span>Xem account liên quan</span>
+                  <span>{t("action_view_related_account")}</span>
                </button>
             </div>
          </div>
@@ -86,7 +86,7 @@ export default function SupportDetailPage() {
          <div className="space-y-2">
             <div className="flex items-center gap-3">
                <h1 className="text-2xl font-black text-txt-primary tracking-tight">
-                  {data.type === "transaction" ? "Giao dịch" : data.type === "ticket" ? "Vé" : "Case"} #{id || data.id}
+                  {data.type === "transaction" ? t("type_transaction") : data.type === "ticket" ? t("type_ticket") : t("type_case")} #{id || data.id}
                </h1>
                <div className="flex items-center gap-2">
                   <span className={`px-2.5 py-0.5 border rounded-ds-lg text-[10px] font-black uppercase tracking-tighter ${displayStatus === "Success" || displayStatus === "Active"
@@ -103,7 +103,7 @@ export default function SupportDetailPage() {
                </div>
             </div>
             <p className="text-sm text-txt-secondary font-medium">
-               {data.type === "transaction" ? `Giao dịch bởi ${(data as any).buyer.name}` : data.type === "ticket" ? `Chủ sở hữu: ${(data as any).owner}` : (data as any).subject}
+               {data.type === "transaction" ? t("support_transaction_by", { name: (data as any).buyer.name }) : data.type === "ticket" ? t("support_owner_label", { owner: (data as any).owner }) : (data as any).subject}
             </p>
          </div>
 
@@ -128,9 +128,9 @@ export default function SupportDetailPage() {
                <div className="bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm">
                   {/* Tabs Header */}
                   <div className="flex items-center border-b border-border px-6">
-                     <DetailTab active={activeTab === "overview"} onClick={() => setActiveTab("overview")} label="Tổng quan" />
-                     <DetailTab active={activeTab === "timeline"} onClick={() => setActiveTab("timeline")} label="Timeline" />
-                     <DetailTab active={activeTab === "related"} onClick={() => setActiveTab("related")} label="Liên kết liên quan" />
+                     <DetailTab active={activeTab === "overview"} onClick={() => setActiveTab("overview")} label={t("tab_overview")} />
+                     <DetailTab active={activeTab === "timeline"} onClick={() => setActiveTab("timeline")} label={t("tab_timeline")} />
+                     <DetailTab active={activeTab === "related"} onClick={() => setActiveTab("related")} label={t("tab_related_links")} />
                   </div>
 
                   {/* Tab Content */}
@@ -139,32 +139,32 @@ export default function SupportDetailPage() {
                         <div className="space-y-8 animate-in fade-in duration-300">
                            {data.type === "case" && (
                               <section>
-                                 <h3 className="text-xs font-black text-txt-primary uppercase tracking-widest mb-4">Thông tin case hỗ trợ</h3>
+                                 <h3 className="text-xs font-black text-txt-primary uppercase tracking-widest mb-4">{t("support_case_info")}</h3>
                                  <div className="space-y-4">
-                                    <InfoRow label="Mã case" value={data.id} />
-                                    <InfoRow label="Chủ đề" value={(data as any).subject} />
-                                    <InfoRow label="Người dùng liên quan" value={data.user.email} />
-                                    <InfoRow label="Sự kiện liên quan" value={data.event} />
-                                    <InfoRow label="Mô tả" value={(data as any).description} />
-                                    <InfoRow label="Trạng thái xử lý" value="Đang đối chiếu với đội tài chính" />
-                                    <InfoRow label="Vé / Giao dịch liên quan" value={data.relatedLinks.transaction} />
+                                    <InfoRow label={t("col_case_id")} value={data.id} />
+                                    <InfoRow label={t("col_subject")} value={(data as any).subject} />
+                                    <InfoRow label={t("support_related_user")} value={data.user.email} />
+                                    <InfoRow label={t("support_related_event")} value={data.event} />
+                                    <InfoRow label={t("support_description")} value={(data as any).description} />
+                                    <InfoRow label={t("support_processing_status")} value={t("support_status_reconciling_finance")} />
+                                    <InfoRow label={t("support_related_ticket_tx")} value={data.relatedLinks.transaction} />
                                  </div>
                               </section>
                            )}
 
                            {data.type === "transaction" && (
                               <section>
-                                 <h3 className="text-xs font-black text-txt-primary uppercase tracking-widest mb-4">Thông tin giao dịch</h3>
+                                 <h3 className="text-xs font-black text-txt-primary uppercase tracking-widest mb-4">{t("support_tx_info")}</h3>
                                  <div className="space-y-4">
-                                    <InfoRow label="Mã đơn hàng" value={data.id} />
-                                    <InfoRow label="Người mua" value={(data as any).buyer.name} />
+                                    <InfoRow label={t("col_order_id")} value={data.id} />
+                                    <InfoRow label={t("support_buyer_name")} value={(data as any).buyer.name} />
                                     <InfoRow label="Email" value={(data as any).buyer.email} />
-                                    <InfoRow label="Ví điện tử" value={(data as any).buyer.wallet} />
-                                    <InfoRow label="Sự kiện" value={data.event} />
-                                    <InfoRow label="Phương thức thanh toán" value={(data as any).paymentMethod} />
-                                    <InfoRow label="Tổng tiền" value={(data as any).amount} />
+                                    <InfoRow label={t("support_wallet")} value={(data as any).buyer.wallet} />
+                                    <InfoRow label={t("support_related_event")} value={data.event} />
+                                    <InfoRow label={t("support_payment_method")} value={(data as any).paymentMethod} />
+                                    <InfoRow label={t("col_total_amount")} value={(data as any).amount} />
                                     <div className="pt-4 border-t border-border/50">
-                                       <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">Chi tiết sản phẩm</p>
+                                       <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">{t("support_product_details")}</p>
                                        {(data as any).items.map((item: any, i: number) => (
                                           <div key={i} className="flex justify-between items-center bg-main/30 p-3 rounded-ds-xl">
                                              <span className="text-[11px] font-bold text-txt-primary">{item.name} x {item.qty}</span>
@@ -178,16 +178,16 @@ export default function SupportDetailPage() {
 
                            {data.type === "ticket" && (
                               <section>
-                                 <h3 className="text-xs font-black text-txt-primary uppercase tracking-widest mb-4">Thông tin vé điện tử</h3>
+                                 <h3 className="text-xs font-black text-txt-primary uppercase tracking-widest mb-4">{t("support_ticket_info")}</h3>
                                  <div className="space-y-4">
-                                    <InfoRow label="Mã vé" value={data.id} />
-                                    <InfoRow label="Mã NFT" value={(data as any).nftId} />
-                                    <InfoRow label="Chủ sở hữu" value={(data as any).owner} />
-                                    <InfoRow label="Loại sở hữu" value={(data as any).ownerType} />
-                                    <InfoRow label="Sự kiện" value={data.event} />
-                                    <InfoRow label="Hạng vé" value={(data as any).tier} />
-                                    <InfoRow label="Giá vé" value={(data as any).price} />
-                                    <InfoRow label="Blockchain Ref" value={(data as any).blockchainRef} />
+                                    <InfoRow label={t("col_ticket_id")} value={data.id} />
+                                    <InfoRow label={t("support_nft_id")} value={(data as any).nftId} />
+                                    <InfoRow label={t("support_owner")} value={(data as any).owner} />
+                                    <InfoRow label={t("support_owner_type")} value={(data as any).ownerType} />
+                                    <InfoRow label={t("support_related_event")} value={data.event} />
+                                    <InfoRow label={t("col_ticket_tier")} value={(data as any).tier} />
+                                    <InfoRow label={t("support_ticket_price")} value={(data as any).price} />
+                                    <InfoRow label={t("support_blockchain_ref")} value={(data as any).blockchainRef} />
                                  </div>
                               </section>
                            )}
@@ -198,8 +198,8 @@ export default function SupportDetailPage() {
                                     <AlertCircle size={18} />
                                  </div>
                                  <div>
-                                    <p className="text-xs font-bold text-amber-700">Cần đối chiếu thanh toán</p>
-                                    <p className="text-[11px] text-amber-600/80 mt-1">Đội tài chính đang xác minh giao dịch trùng với cổng VNPay.</p>
+                                    <p className="text-xs font-bold text-amber-700">{t("support_need_payment_reconciliation")}</p>
+                                    <p className="text-[11px] text-amber-600/80 mt-1">{t("support_vnpay_reconciliation_desc")}</p>
                                  </div>
                               </div>
                            )}
@@ -208,7 +208,7 @@ export default function SupportDetailPage() {
 
                      {activeTab === "timeline" && (
                         <div className="space-y-6 animate-in fade-in duration-300">
-                           <h3 className="text-xs font-black text-txt-primary uppercase tracking-widest mb-4">Lịch sử bản ghi</h3>
+                           <h3 className="text-xs font-black text-txt-primary uppercase tracking-widest mb-4">{t("support_record_history")}</h3>
                            <div className="relative pl-8 space-y-8 before:absolute before:left-3.5 before:top-2 before:bottom-2 before:w-px before:bg-border">
                               {data.timeline.map((item, idx) => (
                                  <div key={idx} className="relative">
@@ -233,14 +233,14 @@ export default function SupportDetailPage() {
 
                      {activeTab === "related" && (
                         <div className="space-y-6 animate-in fade-in duration-300">
-                           <h3 className="text-xs font-black text-txt-primary uppercase tracking-widest mb-4">Liên kết liên quan</h3>
+                           <h3 className="text-xs font-black text-txt-primary uppercase tracking-widest mb-4">{t("tab_related_links")}</h3>
                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <RelatedCard icon={<User size={16} />} label="Tài khoản liên quan" value={data.relatedLinks.account} />
-                              <RelatedCard icon={<Calendar size={16} />} label="Sự kiện liên quan" value={data.relatedLinks.event} />
-                              <RelatedCard icon={<CreditCard size={16} />} label="Thanh toán / Vé" value={data.relatedLinks.transaction} />
-                              <RelatedCard icon={<Building2 size={16} />} label="Đơn vị tổ chức" value={data.relatedLinks.organizer} />
-                              <RelatedCard icon={<ShieldCheck size={16} />} label="Cảnh báo gắn cờ" value={data.relatedLinks.flag} />
-                              <RelatedCard icon={<Link2 size={16} />} label="Tham chiếu chuỗi khối" value={data.relatedLinks.blockchain} />
+                              <RelatedCard icon={<User size={16} />} label={t("support_related_account")} value={data.relatedLinks.account} />
+                              <RelatedCard icon={<Calendar size={16} />} label={t("support_related_event")} value={data.relatedLinks.event} />
+                              <RelatedCard icon={<CreditCard size={16} />} label={t("support_payment_ticket")} value={data.relatedLinks.transaction} />
+                              <RelatedCard icon={<Building2 size={16} />} label={t("support_organizer_unit")} value={data.relatedLinks.organizer} />
+                              <RelatedCard icon={<ShieldCheck size={16} />} label={t("support_flag_alerts")} value={data.relatedLinks.flag} />
+                              <RelatedCard icon={<Link2 size={16} />} label={t("support_blockchain_ref_label")} value={data.relatedLinks.blockchain} />
                            </div>
                         </div>
                      )}
@@ -252,18 +252,18 @@ export default function SupportDetailPage() {
             <div className="xl:col-span-4 space-y-6">
                {/* Related Links Widget */}
                <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-4 transition-colors duration-300">
-                  <h3 className="text-[10px] font-black text-txt-muted uppercase tracking-widest">Liên kết liên quan</h3>
+                  <h3 className="text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("tab_related_links")}</h3>
                   <div className="space-y-3">
-                     <SidebarLink icon={<User size={14} />} label="Tài khoản" value={(data as any).user.email} />
-                     <SidebarLink icon={<Calendar size={14} />} label="Sự kiện" value={data.event} />
-                     <SidebarLink icon={<CreditCard size={14} />} label="Thanh toán" value={data.relatedLinks.transaction} />
-                     <SidebarLink icon={<Building2 size={14} />} label="Đơn vị tổ chức" value={data.relatedLinks.organizer} />
+                     <SidebarLink icon={<User size={14} />} label={t("support_sidebar_account")} value={(data as any).user.email} />
+                     <SidebarLink icon={<Calendar size={14} />} label={t("support_sidebar_event")} value={data.event} />
+                     <SidebarLink icon={<CreditCard size={14} />} label={t("support_sidebar_payment")} value={data.relatedLinks.transaction} />
+                     <SidebarLink icon={<Building2 size={14} />} label={t("support_sidebar_organizer")} value={data.relatedLinks.organizer} />
                   </div>
                </div>
 
                {/* Recent Notes Widget */}
                <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-4 transition-colors duration-300">
-                  <h3 className="text-[10px] font-black text-txt-muted uppercase tracking-widest">Ghi chú hỗ trợ gần đây</h3>
+                  <h3 className="text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("support_sidebar_recent_notes")}</h3>
                   <div className="space-y-4">
                      {data.notes.map((note, idx) => (
                         <div key={idx} className="p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-ds-2xl space-y-2">
@@ -279,14 +279,14 @@ export default function SupportDetailPage() {
 
                {/* Support Actions Widget */}
                <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm space-y-4 transition-colors duration-300">
-                  <h3 className="text-[10px] font-black text-txt-muted uppercase tracking-widest">Hành động hỗ trợ</h3>
+                  <h3 className="text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("support_sidebar_actions")}</h3>
                   <div className="space-y-2">
-                     <SidebarAction label="Thêm ghi chú nội bộ" />
-                     <SidebarAction label="Eskalate case" />
-                     <SidebarAction label="Chờ cho đội tài chính" />
-                     <SidebarAction label="Chờ cho đội blockchain" />
+                     <SidebarAction label={t("support_action_add_note")} />
+                     <SidebarAction label={t("support_action_escalate")} />
+                     <SidebarAction label={t("support_action_pending_finance")} />
+                     <SidebarAction label={t("support_action_pending_blockchain")} />
                      <button className="w-full flex items-center justify-center py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-ds-xl text-[11px] font-bold transition-all shadow-md shadow-indigo-600/10">
-                        Mở account liên quan
+                        <span>{t("action_view_related_account")}</span>
                      </button>
                   </div>
                </div>
@@ -343,6 +343,7 @@ function RelatedCard({ icon, label, value }: any) {
 }
 
 function SidebarLink({ icon, label, value }: any) {
+   const t = useTranslations("Admin");
    return (
       <div className="flex items-center gap-3 p-2 hover:bg-main rounded-ds-xl transition-all cursor-pointer group">
          <div className="w-8 h-8 bg-surface border border-border rounded-ds-lg flex items-center justify-center text-txt-muted group-hover:text-primary transition-colors">
@@ -353,7 +354,7 @@ function SidebarLink({ icon, label, value }: any) {
             <p className="text-[10px] font-black text-txt-primary truncate">{value}</p>
          </div>
          <button className="text-[9px] font-black text-primary px-2 py-1 bg-primary/5 rounded-ds-md opacity-0 group-hover:opacity-100 transition-all">
-            Xem
+            {t("action_view")}
          </button>
       </div>
    );

@@ -41,7 +41,7 @@ export function AdminHeader() {
             }
         }
         dispatch(logoutAction());
-        toast.info("Đăng xuất thành công");
+        toast.info(t("header.logout_success"));
         router.push(`/${locale}/user/homepage`);
     };
 
@@ -158,7 +158,7 @@ export function AdminHeader() {
                         <DropdownMenuSeparator className="bg-border" />
                         <DropdownMenuItem onClick={handleLogout} className="text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 cursor-pointer focus:bg-rose-500/10 focus:text-rose-600">
                             <LogOut className="mr-2 h-4 w-4" />
-                            <span>Đăng xuất</span>
+                            <span>{t("header.logout")}</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
