@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Bell, Ticket, Plus, ChevronDown, Moon, Sun, User, LogOut, LogInIcon, Subscript, UserPlus, Users, Globe } from "lucide-react";
+import { Search, Bell, Ticket, Plus, ChevronDown, Moon, Sun, User, LogOut, LogInIcon, Subscript, UserPlus, Users, Globe, Heart } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter, usePathname, useSearchParams } from "next/navigation";
@@ -260,6 +260,10 @@ export function Header() {
                 <DropdownMenuItem onClick={() => router.push(`/${locale}/user/profile`)}>
                   <User className="mr-2 h-4 w-4" />
                   <span>{t("profile")}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push(`/${locale}/user/favorites`)}>
+                  <Heart className="mr-2 h-4 w-4 text-rose-500" />
+                  <span>{t("favorite_events")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push(`/${locale}/user/tickets`)} className="flex lg:hidden">
                   <Ticket className="mr-2 h-4 w-4" />

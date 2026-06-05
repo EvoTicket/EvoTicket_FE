@@ -80,10 +80,28 @@ export interface Showtime {
 export interface Review {
     id: number;
     userId: number;
+    userFullName?: string | null;
+    userAvatarUrl?: string | null;
     rating: number;
     comment: string;
     images: string[] | null;
     createdAt: string;
+    updatedAt?: string | null;
+}
+
+export interface UserFavorite {
+    id: number;
+    userId: number;
+    eventId: number;
+    eventName: string;
+    eventDescription: string;
+    eventStartDate: string;
+    eventEndDate: string;
+    likedAt: string;
+    eventBannerImage?: string | null;
+    eventVenue?: string | null;
+    eventAddress?: string | null;
+    minPrice?: number | null;
 }
 
 export interface EventDetail {

@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import {
     MapPin, Calendar, Clock, User, Star, Image as ImageIcon,
-    Check, MapIcon, CircleHelp, AlertCircle, ChevronDown, ChevronUp, ArrowLeft
+    Check, MapIcon, CircleHelp, AlertCircle, ChevronDown, ChevronUp, ArrowLeft, Heart, Trash2
 } from "lucide-react";
 import { Footer } from "@/src/components/footer";
 import { Header } from "@/src/components/header";
@@ -46,6 +46,125 @@ export default function EventDetailPage() {
     const [suggestedEvents, setSuggestedEvents] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const isAuthenticated = useAppSelector(selectIsAuthenticated);
+    const { user } = useAppSelector((state) => state.auth);
+
+    // Favorites & Reviews States
+    const [isFavorite, setIsFavorite] = useState(false);
+    const [newRating, setNewRating] = useState(0);
+    const [newComment, setNewComment] = useState("");
+    const [newImages, setNewImages] = useState<File[]>([]);
+    const [submittingReview, setSubmittingReview] = useState(false);
+
+    // Check favorite status on mount/auth change
+    useEffect(() => {
+        if (id && isAuthenticated) {
+            const checkFav = async () => {
+                try {
+                    const res = await api.get(`/inventory-service/api/favorites/check`, {
+                        params: { eventId: id }
+                    });
+                    if (res.data && res.data.status === 200) {
+                        setIsFavorite(res.data.data);
+                    }
+                } catch (e) {
+                    console.error("Failed to check favorite status", e);
+                }
+            };
+            void checkFav();
+        } else {
+            setIsFavorite(false);
+        }
+    }, [id, isAuthenticated]);
+
+    // Favorite Toggle
+    const toggleFavorite = async () => {
+        if (!isAuthenticated) {
+            router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+            return;
+        }
+        try {
+            if (isFavorite) {
+                await api.delete('/inventory-service/api/favorites', { params: { eventId: id } });
+                setIsFavorite(false);
+                toast.success(te('remove_favorite_success'));
+            } else {
+                await api.post('/inventory-service/api/favorites', null, { params: { eventId: id } });
+                setIsFavorite(true);
+                toast.success(te('add_favorite_success'));
+            }
+        } catch (error) {
+            console.error("Failed to toggle favorite", error);
+            toast.error("Đã xảy ra lỗi khi cập nhật yêu thích.");
+        }
+    };
+
+    // Review Submit
+    const handleReviewSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!isAuthenticated) {
+            router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+            return;
+        }
+        if (newRating === 0) {
+            toast.error(te('rating_required'));
+            return;
+        }
+        if (!newComment.trim() && newImages.length === 0) {
+            toast.error(te('comment_required'));
+            return;
+        }
+
+        setSubmittingReview(true);
+        try {
+            const formData = new FormData();
+            formData.append("eventId", id as string);
+            if (newComment.trim()) {
+                formData.append("comment", newComment.trim());
+            }
+            formData.append("rating", newRating.toString());
+            newImages.forEach((img) => {
+                formData.append("files", img);
+            });
+
+            const response = await api.post("/inventory-service/api/reviews", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            if (response.data) {
+                toast.success(te('review_success'));
+                if (id) {
+                    fetchEventDetail(id as string);
+                }
+                setNewRating(0);
+                setNewComment("");
+                setNewImages([]);
+            }
+        } catch (error: any) {
+            console.error("Failed to submit review", error);
+            toast.error(error.response?.data?.message || "Đã xảy ra lỗi khi gửi đánh giá.");
+        } finally {
+            setSubmittingReview(false);
+        }
+    };
+
+    // Review Delete
+    const handleDeleteReview = async (reviewId: number) => {
+        if (!window.confirm(te('delete_confirm'))) {
+            return;
+        }
+        try {
+            await api.delete(`/inventory-service/api/reviews/${reviewId}`);
+            toast.success(te('review_deleted'));
+            if (id) {
+                fetchEventDetail(id as string);
+            }
+        } catch (error) {
+            console.error("Failed to delete review", error);
+            toast.error("Không thể xóa đánh giá.");
+        }
+    };
 
     // Expansion state for the 'introduction' block
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -306,10 +425,22 @@ export default function EventDetailPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                         {/* Poster Cột Trái */}
                         <div className="lg:col-span-6 w-full flex flex-col">
-                            <div className="flex items-center justify-end gap-3 mb-4 w-full">
-                                <span className="text-sm text-text-secondary font-medium">{te('event_category_label')}</span>
-                                <div className="inline-block bg-badge-neutral-bg text-badge-neutral-text rounded-full border-2 border-badge-neutral-border px-4 py-1.5 text-sm font-semibold shadow-sm">
-                                    {CATEGORIES.find(c => c.id === event.category) ? tEvents(CATEGORIES.find(c => c.id === event.category)!.translationKey as any) : event.category}
+                            <div className="flex items-center justify-between mb-4 w-full">
+                                <button
+                                    onClick={toggleFavorite}
+                                    className="flex items-center justify-center w-10 h-10 rounded-full border border-border-default hover:bg-bg-subtle transition-all cursor-pointer bg-card-bg-default shadow-sm text-text-secondary hover:text-rose-500"
+                                    title={isFavorite ? "Bỏ yêu thích" : "Yêu thích"}
+                                >
+                                    <Heart
+                                        size={20}
+                                        className={`${isFavorite ? 'fill-rose-500 text-rose-500' : 'text-text-secondary'} transition-colors duration-300`}
+                                    />
+                                </button>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-sm text-text-secondary font-medium">{te('event_category_label')}</span>
+                                    <div className="inline-block bg-badge-neutral-bg text-badge-neutral-text rounded-full border-2 border-badge-neutral-border px-4 py-1.5 text-sm font-semibold shadow-sm">
+                                        {CATEGORIES.find(c => c.id === event.category) ? tEvents(CATEGORIES.find(c => c.id === event.category)!.translationKey as any) : event.category}
+                                    </div>
                                 </div>
                             </div>
                             <div className="relative aspect-[4/3] rounded-ds-2xl overflow-hidden shadow-xl bg-bg-surface border border-border-default">
@@ -582,6 +713,170 @@ export default function EventDetailPage() {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Khối Đánh giá */}
+                            <div className="bg-card-bg-default border border-border-default rounded-ds-xl p-6 shadow-sm">
+                                <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 border-b border-border-subtle">{te('reviews_title')}</h3>
+                                
+                                {/* Form viết đánh giá */}
+                                {isAuthenticated ? (
+                                    <form onSubmit={handleReviewSubmit} className="mb-8 bg-bg-page border border-border-subtle rounded-ds-lg p-4">
+                                        <h4 className="font-semibold text-sm text-text-primary mb-3">{te('write_review')}</h4>
+                                        
+                                        {/* Chọn rating */}
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <span className="text-xs text-text-secondary">{te('rating_label')}</span>
+                                            <div className="flex gap-1">
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <button
+                                                        key={star}
+                                                        type="button"
+                                                        onClick={() => setNewRating(star)}
+                                                        className="cursor-pointer text-feedback-warning-text hover:scale-110 transition-transform"
+                                                    >
+                                                        <Star
+                                                            size={20}
+                                                            className={star <= newRating ? "fill-current" : "text-text-muted"}
+                                                        />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Nhập bình luận */}
+                                        <div className="mb-3">
+                                            <textarea
+                                                className="w-full text-sm p-3 bg-bg-surface text-text-primary border border-border-default rounded-ds-md focus:outline-none focus:ring-1 focus:ring-button-primary-bg-default"
+                                                rows={3}
+                                                placeholder={te('comment_label')}
+                                                value={newComment}
+                                                onChange={(e) => setNewComment(e.target.value)}
+                                            />
+                                        </div>
+
+                                        {/* Upload file ảnh */}
+                                        <div className="mb-4">
+                                            <label className="block text-xs text-text-secondary mb-1.5">{te('images_label')}</label>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                multiple
+                                                onChange={(e) => {
+                                                    if (e.target.files) {
+                                                        const filesArray = Array.from(e.target.files);
+                                                        if (filesArray.length + newImages.length > 3) {
+                                                            toast.error("Tối đa 3 hình ảnh.");
+                                                            return;
+                                                        }
+                                                        setNewImages([...newImages, ...filesArray]);
+                                                    }
+                                                }}
+                                                className="text-xs text-text-secondary file:mr-3 file:py-1.5 file:px-3 file:rounded-ds-md file:border-0 file:text-xs file:font-semibold file:bg-button-neutral-bg-default file:text-button-neutral-text-default hover:file:bg-button-neutral-bg-hover cursor-pointer"
+                                            />
+                                            {/* Preview ảnh đã chọn */}
+                                            {newImages.length > 0 && (
+                                                <div className="flex gap-2 mt-3">
+                                                    {newImages.map((img, idx) => (
+                                                        <div key={idx} className="relative w-16 h-16 rounded overflow-hidden border border-border-default">
+                                                            <img
+                                                                src={URL.createObjectURL(img)}
+                                                                alt="upload-preview"
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setNewImages(newImages.filter((_, i) => i !== idx))}
+                                                                className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-0.5 text-[10px] w-4 h-4 flex items-center justify-center hover:bg-red-600 cursor-pointer"
+                                                            >
+                                                                ×
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            disabled={submittingReview}
+                                            className="px-4 py-2 bg-button-primary-bg-default text-button-primary-text-default text-xs font-semibold rounded-ds-md hover:bg-button-primary-bg-hover disabled:bg-bg-subtle disabled:text-text-muted transition-colors cursor-pointer"
+                                        >
+                                            {submittingReview ? "..." : te('submit_review_btn')}
+                                        </button>
+                                    </form>
+                                ) : (
+                                    <div className="mb-6 p-4 bg-bg-page border border-border-subtle rounded-ds-lg text-center text-sm text-text-secondary">
+                                        Vui lòng <Link href={`/${locale}/auth/login?callbackUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`} className="text-primary hover:underline font-semibold">Đăng nhập</Link> để viết đánh giá cho sự kiện này.
+                                    </div>
+                                )}
+
+                                {/* Danh sách reviews */}
+                                <div className="space-y-6">
+                                    {event.reviews && event.reviews.length > 0 ? (
+                                        event.reviews.map((review) => (
+                                            <div key={review.id} className="flex gap-3 pb-6 border-b border-border-subtle last:border-0 last:pb-0">
+                                                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-bg-page border border-border-default shrink-0">
+                                                    <Image
+                                                        src={review.userAvatarUrl || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
+                                                        alt={review.userFullName || "User"}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex justify-between items-start">
+                                                        <div>
+                                                            <h5 className="font-semibold text-sm text-text-primary">{review.userFullName || "Người dùng ẩn danh"}</h5>
+                                                            <div className="flex gap-0.5 mt-0.5">
+                                                                {[1, 2, 3, 4, 5].map((s) => (
+                                                                    <Star
+                                                                        key={s}
+                                                                        size={12}
+                                                                        className={s <= review.rating ? "fill-current text-feedback-warning-text" : "text-text-muted"}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[11px] text-text-muted">
+                                                                {new Date(review.createdAt).toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
+                                                                    year: 'numeric', month: '2-digit', day: '2-digit'
+                                                                })}
+                                                            </span>
+                                                            {user && user.id === review.userId && (
+                                                                <button
+                                                                    onClick={() => handleDeleteReview(review.id)}
+                                                                    className="text-feedback-error-text hover:bg-feedback-error-bg/10 p-1 rounded transition-colors cursor-pointer"
+                                                                    title={te('delete_review_confirm', { defaultMessage: 'Xóa nhận xét' })}
+                                                                >
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-sm text-text-secondary mt-2 leading-relaxed">{review.comment}</p>
+                                                    
+                                                    {/* Ảnh đính kèm trong review */}
+                                                    {review.images && review.images.length > 0 && (
+                                                        <div className="flex gap-2 mt-3 flex-wrap">
+                                                            {Array.from(review.images).map((imgUrl, i) => (
+                                                                <a href={imgUrl} target="_blank" rel="noopener noreferrer" key={i} className="relative w-20 h-20 rounded overflow-hidden border border-border-default hover:opacity-90 transition-opacity">
+                                                                    <img src={imgUrl} alt="review-attachment" className="w-full h-full object-cover" />
+                                                                </a>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-8 text-sm text-text-secondary italic">
+                                            {te('no_reviews')}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
 
                         </div>
 
