@@ -219,7 +219,7 @@ export default function AccountDetailPage() {
 
     if (actionType === "approve") {
       nextStatus = "Active";
-      successMsg = "Phê duyệt hồ sơ tổ chức thành công!";
+      successMsg = t("accounts_detail_toast_approve_success");
       if (account.type === "Organizer") {
         try {
           await api.post(`/iam-service/api/organizations/${account.id}/verify`, {
@@ -231,12 +231,12 @@ export default function AccountDetailPage() {
       }
     } else if (actionType === "reject") {
       nextStatus = "Suspended";
-      successMsg = "Từ chối hồ sơ tổ chức thành công!";
+      successMsg = t("accounts_detail_toast_reject_success");
       if (account.type === "Organizer") {
         try {
           await api.post(`/iam-service/api/organizations/${account.id}/verify`, {
             status: "REJECTED",
-            rejectionReason: "Hồ sơ không hợp lệ"
+            rejectionReason: t("accounts_detail_rejection_reason_invalid")
           });
         } catch (e) {
           console.warn("Backend API verify failed, falling back to mock update:", e);
@@ -244,10 +244,10 @@ export default function AccountDetailPage() {
       }
     } else if (actionType === "ban" || actionType === "restrict") {
       nextStatus = account.type === "Organizer" ? "Suspended" : "Restricted";
-      successMsg = account.type === "Organizer" ? "Đã khóa tài khoản tổ chức!" : "Đã hạn chế tài khoản người dùng!";
+      successMsg = account.type === "Organizer" ? t("accounts_detail_toast_lock_org_success") : t("accounts_detail_toast_restrict_buyer_success");
     } else if (actionType === "unrestrict" || actionType === "activate") {
       nextStatus = "Active";
-      successMsg = "Kích hoạt / Mở khóa tài khoản thành công!";
+      successMsg = t("accounts_detail_toast_reactivate_success");
     }
 
     setAccount({
@@ -374,11 +374,68 @@ export default function AccountDetailPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <ActionButton icon={<Save size={16} />} label="Lưu ghi chú" />
-          <ActionButton icon={<MessageSquare size={16} />} label="Yêu cầu bổ sung" />
-          <ActionButton icon={<ShieldAlert size={16} />} label="Hạn chế" color="rose" />
-          <ActionButton icon={<XCircle size={16} />} label="Từ chối" color="rose" variant="solid" />
-          <ActionButton icon={<Check size={16} />} label="Phê duyệt" color="indigo" variant="solid" />
+          <ActionButton icon={<Save size={16} />} label={t("accounts_detail_save_note")} />
+          
+          {account.type === "Organizer" ? (
+            <>
+              {account.status === "Pending Approval" && (
+                <>
+                  <ActionButton 
+                    icon={<XCircle size={16} />} 
+                    label={t("accounts_detail_reject_docs")} 
+                    color="rose" 
+                    variant="solid" 
+                    onClick={() => handleAction("reject")}
+                  />
+                  <ActionButton 
+                    icon={<Check size={16} />} 
+                    label={t("accounts_detail_approve_org")} 
+                    color="indigo" 
+                    variant="solid" 
+                    onClick={() => handleAction("approve")}
+                  />
+                </>
+              )}
+              {account.status === "Active" && (
+                <ActionButton 
+                  icon={<Slash size={16} />} 
+                  label={t("accounts_detail_lock_account")} 
+                  color="rose" 
+                  variant="solid" 
+                  onClick={() => handleAction("ban")}
+                />
+              )}
+              {(account.status === "Suspended" || account.status === "Restricted" || account.status === "Rejected") && (
+                <ActionButton 
+                  icon={<CheckCircle2 size={16} />} 
+                  label={t("accounts_detail_reactivate_account")} 
+                  color="indigo" 
+                  variant="solid" 
+                  onClick={() => handleAction("activate")}
+                />
+              )}
+            </>
+          ) : (
+            <>
+              {account.status === "Active" ? (
+                <ActionButton 
+                  icon={<Slash size={16} />} 
+                  label={t("accounts_detail_restrict_account")} 
+                  color="rose" 
+                  variant="solid" 
+                  onClick={() => handleAction("restrict")}
+                />
+              ) : (
+                <ActionButton 
+                  icon={<CheckCircle2 size={16} />} 
+                  label={t("accounts_detail_unrestrict_account")} 
+                  color="indigo" 
+                  variant="solid" 
+                  onClick={() => handleAction("unrestrict")}
+                />
+              )}
+            </>
+          )}
         </div>
       </div>
 
@@ -430,59 +487,74 @@ export default function AccountDetailPage() {
                 <div className="space-y-8">
                   {/* Basic Info */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
-                    <InfoField label="Tên tổ chức" value={account.name} />
-                    <InfoField label="Loại tổ chức" value={account.profile.orgType} />
-                    <InfoField label="Người đại diện" value={account.profile.representative} />
-                    <InfoField label="Email" value={account.profile.email} isLink icon={<Mail size={14} />} />
-                    <InfoField label="Số điện thoại" value={account.profile.phone} icon={<Phone size={14} />} />
-                    <InfoField label="Mã số thuế" value={account.profile.taxId} />
-                  </div>
-
-                  {/* Documents Section */}
-                  <div>
-                    <h4 className="text-sm font-bold text-txt-primary mb-4 flex items-center gap-2">
-                      Hồ sơ tài liệu đã nộp
-                    </h4>
-                    {account.documents && account.documents.length > 0 ? (
-                      <div className="bg-main/30 rounded-ds-2xl border border-border overflow-hidden">
-                        <table className="w-full text-left border-collapse">
-                          <tbody className="divide-y divide-border">
-                            {account.documents.map((doc, idx) => (
-                              <tr key={idx} className="hover:bg-main/50 transition-colors">
-                                <td className="px-6 py-4">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-ds-lg bg-surface border border-border flex items-center justify-center text-txt-muted">
-                                      <FileText size={16} />
-                                    </div>
-                                    <span className="text-xs font-bold text-txt-primary">{doc.name}</span>
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                  <StatusBadge status={doc.status} />
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                  <button
-                                    onClick={() => doc.url && window.open(doc.url, "_blank")}
-                                    disabled={!doc.url}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-lg border border-border bg-surface text-[10px] font-bold text-txt-primary hover:bg-main transition-all disabled:opacity-50"
-                                  >
-                                    <ExternalLink size={12} />
-                                    Xem
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                    {account.type === "Organizer" ? (
+                      <>
+                        <InfoField label={t("accounts_detail_org_name")} value={account.name} />
+                        <InfoField label={t("accounts_detail_org_type")} value={account.profile.orgType} />
+                        <InfoField label={t("accounts_detail_representative")} value={account.profile.representative} />
+                        <InfoField label="Email" value={account.profile.email} isLink icon={<Mail size={14} />} />
+                        <InfoField label={t("accounts_detail_phone")} value={account.profile.phone} icon={<Phone size={14} />} />
+                        <InfoField label={t("accounts_detail_tax_id")} value={account.profile.taxId} />
+                      </>
                     ) : (
-                      <p className="text-xs text-txt-muted">Không có tài liệu nào được tải lên.</p>
+                      <>
+                        <InfoField label={t("accounts_detail_buyer_name")} value={account.name} />
+                        <InfoField label={t("accounts_detail_account_type")} value={t("type_buyer")} />
+                        <InfoField label="Email" value={account.profile.email} isLink icon={<Mail size={14} />} />
+                        <InfoField label={t("accounts_detail_phone")} value={account.profile.phone} icon={<Phone size={14} />} />
+                      </>
                     )}
                   </div>
 
+                  {/* Documents Section */}
+                  {account.type === "Organizer" && (
+                    <div>
+                      <h4 className="text-sm font-bold text-txt-primary mb-4 flex items-center gap-2">
+                        {t("accounts_detail_submitted_docs")}
+                      </h4>
+                      {account.documents && account.documents.length > 0 ? (
+                        <div className="bg-main/30 rounded-ds-2xl border border-border overflow-hidden">
+                          <table className="w-full text-left border-collapse">
+                            <tbody className="divide-y divide-border">
+                              {account.documents.map((doc, idx) => (
+                                <tr key={idx} className="hover:bg-main/50 transition-colors">
+                                  <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-8 h-8 rounded-ds-lg bg-surface border border-border flex items-center justify-center text-txt-muted">
+                                        <FileText size={16} />
+                                      </div>
+                                      <span className="text-xs font-bold text-txt-primary">{doc.name}</span>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <StatusBadge status={doc.status} />
+                                  </td>
+                                  <td className="px-6 py-4 text-right">
+                                    <button
+                                      onClick={() => doc.url && window.open(doc.url, "_blank")}
+                                      disabled={!doc.url}
+                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-lg border border-border bg-surface text-[10px] font-bold text-txt-primary hover:bg-main transition-all disabled:opacity-50"
+                                    >
+                                      <ExternalLink size={12} />
+                                      {t("action_view")}
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-txt-muted">{t("accounts_detail_no_docs")}</p>
+                      )}
+                    </div>
+                  )}
+
                   {/* Payout Account */}
                   <div>
-                    <h4 className="text-sm font-bold text-txt-primary mb-4">Tài khoản thanh toán</h4>
+                    <h4 className="text-sm font-bold text-txt-primary mb-4">
+                      {account.type === "Organizer" ? t("accounts_detail_payout_account_org") : t("accounts_detail_payout_account_resale")}
+                    </h4>
                     {account.payoutAccount ? (
                       <div className="p-4 bg-surface border border-border rounded-ds-2xl flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -494,7 +566,7 @@ export default function AccountDetailPage() {
                               {account.payoutAccount.bank} - {account.payoutAccount.accountNumber}
                             </p>
                             <p className="text-[10px] text-txt-muted uppercase font-medium">
-                              Chủ tài khoản: {account.payoutAccount.accountName}
+                              {t("accounts_detail_bank_owner")}: {account.payoutAccount.accountName}
                             </p>
                           </div>
                         </div>
@@ -626,18 +698,20 @@ export default function AccountDetailPage() {
 
             <div className="space-y-6">
               <div>
-                <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">Trạng thái nền tảng</p>
-                <div className="p-2 bg-amber-500/5 border border-amber-500/20 rounded-ds-xl text-center">
-                  <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Pending Approval</span>
+                <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">{t("platform_status")}</p>
+                <div className={`p-2 rounded-ds-xl text-center ${statusInfo.classes}`}>
+                  <span className="text-[10px] font-black uppercase tracking-widest">{statusInfo.label}</span>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <p className="text-[10px] font-bold text-txt-muted uppercase">Tóm tắt xác minh</p>
-                {account.documents.map((doc, idx) => (
-                  <ChecklistItem key={idx} label={doc.name} status={doc.status} />
-                ))}
-              </div>
+              {account.type === "Organizer" && (
+                <div className="space-y-3">
+                  <p className="text-[10px] font-bold text-txt-muted uppercase">{t("accounts_detail_verification_summary")}</p>
+                  {account.documents.map((doc, idx) => (
+                    <ChecklistItem key={idx} label={doc.name} status={doc.status} />
+                  ))}
+                </div>
+              )}
 
               <div>
                 <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">{t("accounts_detail_internal_note_title")}</p>
@@ -665,10 +739,60 @@ export default function AccountDetailPage() {
                 )}
 
                 <div className="space-y-2">
-                  <AdminActionButton color="indigo" label="Phê duyệt tổ chức" icon={<Check size={14} />} />
-                  <AdminActionButton color="default" label="Yêu cầu bổ sung hồ sơ" icon={<MessageSquare size={14} />} />
-                  <AdminActionButton color="default" label="Hạn chế tài khoản" icon={<Slash size={14} />} />
-                  <AdminActionButton color="rose" label="Từ chối hồ sơ" icon={<XCircle size={14} />} />
+                  {account.type === "Organizer" ? (
+                    <>
+                      {account.status === "Pending Approval" && (
+                        <>
+                          <AdminActionButton 
+                            color="indigo" 
+                            label={t("accounts_detail_approve_org")} 
+                            icon={<Check size={14} />} 
+                            onClick={() => handleAction("approve")}
+                          />
+                          <AdminActionButton 
+                            color="rose" 
+                            label={t("accounts_detail_reject_docs")} 
+                            icon={<XCircle size={14} />} 
+                            onClick={() => handleAction("reject")}
+                          />
+                        </>
+                      )}
+                      {account.status === "Active" && (
+                        <AdminActionButton 
+                          color="rose" 
+                          label={t("accounts_detail_lock_account")} 
+                          icon={<Slash size={14} />} 
+                          onClick={() => handleAction("ban")}
+                        />
+                      )}
+                      {(account.status === "Suspended" || account.status === "Restricted" || account.status === "Rejected") && (
+                        <AdminActionButton 
+                          color="indigo" 
+                          label={t("accounts_detail_reactivate_account")} 
+                          icon={<CheckCircle2 size={14} />} 
+                          onClick={() => handleAction("activate")}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {account.status === "Active" ? (
+                        <AdminActionButton 
+                          color="rose" 
+                          label={t("accounts_detail_restrict_account")} 
+                          icon={<Slash size={14} />} 
+                          onClick={() => handleAction("restrict")}
+                        />
+                      ) : (
+                        <AdminActionButton 
+                          color="indigo" 
+                          label={t("accounts_detail_unrestrict_account")} 
+                          icon={<CheckCircle2 size={14} />} 
+                          onClick={() => handleAction("unrestrict")}
+                        />
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
