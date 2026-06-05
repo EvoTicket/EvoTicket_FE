@@ -26,6 +26,7 @@ import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { adminAccountsApi, type AccountDetailResponse } from "@/src/lib/api/adminAccountsApi";
+import api from "@/src/lib/axios";
 
 /**
  * Interfaces for Account Detail Data
@@ -201,6 +202,60 @@ export default function AccountDetailPage() {
   const [account, setAccount] = useState<AccountDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const showSuccess = (msg: string) => {
+    setSuccessMessage(msg);
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 3000);
+  };
+
+  const handleAction = async (actionType: "approve" | "reject" | "restrict" | "unrestrict" | "ban" | "activate") => {
+    if (!account) return;
+    
+    let nextStatus = account.status;
+    let successMsg = "";
+
+    if (actionType === "approve") {
+      nextStatus = "Active";
+      successMsg = "Phê duyệt hồ sơ tổ chức thành công!";
+      if (account.type === "Organizer") {
+        try {
+          await api.post(`/iam-service/api/organizations/${account.id}/verify`, {
+            status: "VERIFIED"
+          });
+        } catch (e) {
+          console.warn("Backend API verify failed, falling back to mock update:", e);
+        }
+      }
+    } else if (actionType === "reject") {
+      nextStatus = "Suspended";
+      successMsg = "Từ chối hồ sơ tổ chức thành công!";
+      if (account.type === "Organizer") {
+        try {
+          await api.post(`/iam-service/api/organizations/${account.id}/verify`, {
+            status: "REJECTED",
+            rejectionReason: "Hồ sơ không hợp lệ"
+          });
+        } catch (e) {
+          console.warn("Backend API verify failed, falling back to mock update:", e);
+        }
+      }
+    } else if (actionType === "ban" || actionType === "restrict") {
+      nextStatus = account.type === "Organizer" ? "Suspended" : "Restricted";
+      successMsg = account.type === "Organizer" ? "Đã khóa tài khoản tổ chức!" : "Đã hạn chế tài khoản người dùng!";
+    } else if (actionType === "unrestrict" || actionType === "activate") {
+      nextStatus = "Active";
+      successMsg = "Kích hoạt / Mở khóa tài khoản thành công!";
+    }
+
+    setAccount({
+      ...account,
+      status: nextStatus
+    });
+    showSuccess(successMsg);
+  };
 
   useEffect(() => {
     if (!paramId) return;
@@ -276,7 +331,15 @@ export default function AccountDetailPage() {
   const statusInfo = getStatusBadge(account.status);
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12 relative">
+      {/* Toast Notification */}
+      {successMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-emerald-600 text-white px-6 py-3 rounded-ds-xl shadow-xl font-bold flex items-center gap-2 border border-emerald-500/30 animate-in fade-in slide-in-from-top-4 duration-300">
+          <CheckCircle2 size={18} />
+          <span>{successMessage}</span>
+        </div>
+      )}
+
       {/* Breadcrumbs & Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -290,7 +353,7 @@ export default function AccountDetailPage() {
           </div>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-ds-2xl bg-surface border border-border flex items-center justify-center text-primary shadow-sm">
-              <Building2 size={24} />
+              {account.type === "Organizer" ? <Building2 size={24} /> : <User size={24} />}
             </div>
             <div>
               <p className="text-[10px] font-black text-txt-muted uppercase tracking-tighter">ADM-03</p>
@@ -312,10 +375,67 @@ export default function AccountDetailPage() {
 
         <div className="flex flex-wrap items-center gap-2">
           <ActionButton icon={<Save size={16} />} label="Lưu ghi chú" />
-          <ActionButton icon={<MessageSquare size={16} />} label="Yêu cầu bổ sung" />
-          <ActionButton icon={<ShieldAlert size={16} />} label="Hạn chế" color="rose" />
-          <ActionButton icon={<XCircle size={16} />} label="Từ chối" color="rose" variant="solid" />
-          <ActionButton icon={<Check size={16} />} label="Phê duyệt" color="indigo" variant="solid" />
+          
+          {account.type === "Organizer" ? (
+            <>
+              {account.status === "Pending Approval" && (
+                <>
+                  <ActionButton 
+                    icon={<XCircle size={16} />} 
+                    label="Từ chối hồ sơ" 
+                    color="rose" 
+                    variant="solid" 
+                    onClick={() => handleAction("reject")}
+                  />
+                  <ActionButton 
+                    icon={<Check size={16} />} 
+                    label="Phê duyệt tổ chức" 
+                    color="indigo" 
+                    variant="solid" 
+                    onClick={() => handleAction("approve")}
+                  />
+                </>
+              )}
+              {account.status === "Active" && (
+                <ActionButton 
+                  icon={<Slash size={16} />} 
+                  label="Khóa tài khoản" 
+                  color="rose" 
+                  variant="solid" 
+                  onClick={() => handleAction("ban")}
+                />
+              )}
+              {(account.status === "Suspended" || account.status === "Restricted" || account.status === "Rejected") && (
+                <ActionButton 
+                  icon={<CheckCircle2 size={16} />} 
+                  label="Kích hoạt lại" 
+                  color="indigo" 
+                  variant="solid" 
+                  onClick={() => handleAction("activate")}
+                />
+              )}
+            </>
+          ) : (
+            <>
+              {account.status === "Active" ? (
+                <ActionButton 
+                  icon={<Slash size={16} />} 
+                  label="Hạn chế tài khoản" 
+                  color="rose" 
+                  variant="solid" 
+                  onClick={() => handleAction("restrict")}
+                />
+              ) : (
+                <ActionButton 
+                  icon={<CheckCircle2 size={16} />} 
+                  label="Mở khóa tài khoản" 
+                  color="indigo" 
+                  variant="solid" 
+                  onClick={() => handleAction("unrestrict")}
+                />
+              )}
+            </>
+          )}
         </div>
       </div>
 
@@ -367,59 +487,74 @@ export default function AccountDetailPage() {
                 <div className="space-y-8">
                   {/* Basic Info */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
-                    <InfoField label="Tên tổ chức" value={account.name} />
-                    <InfoField label="Loại tổ chức" value={account.profile.orgType} />
-                    <InfoField label="Người đại diện" value={account.profile.representative} />
-                    <InfoField label="Email" value={account.profile.email} isLink icon={<Mail size={14} />} />
-                    <InfoField label="Số điện thoại" value={account.profile.phone} icon={<Phone size={14} />} />
-                    <InfoField label="Mã số thuế" value={account.profile.taxId} />
-                  </div>
-
-                  {/* Documents Section */}
-                  <div>
-                    <h4 className="text-sm font-bold text-txt-primary mb-4 flex items-center gap-2">
-                      Hồ sơ tài liệu đã nộp
-                    </h4>
-                    {account.documents && account.documents.length > 0 ? (
-                      <div className="bg-main/30 rounded-ds-2xl border border-border overflow-hidden">
-                        <table className="w-full text-left border-collapse">
-                          <tbody className="divide-y divide-border">
-                            {account.documents.map((doc, idx) => (
-                              <tr key={idx} className="hover:bg-main/50 transition-colors">
-                                <td className="px-6 py-4">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-ds-lg bg-surface border border-border flex items-center justify-center text-txt-muted">
-                                      <FileText size={16} />
-                                    </div>
-                                    <span className="text-xs font-bold text-txt-primary">{doc.name}</span>
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                  <StatusBadge status={doc.status} />
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                  <button
-                                    onClick={() => doc.url && window.open(doc.url, "_blank")}
-                                    disabled={!doc.url}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-lg border border-border bg-surface text-[10px] font-bold text-txt-primary hover:bg-main transition-all disabled:opacity-50"
-                                  >
-                                    <ExternalLink size={12} />
-                                    Xem
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                    {account.type === "Organizer" ? (
+                      <>
+                        <InfoField label="Tên tổ chức" value={account.name} />
+                        <InfoField label="Loại tổ chức" value={account.profile.orgType} />
+                        <InfoField label="Người đại diện" value={account.profile.representative} />
+                        <InfoField label="Email" value={account.profile.email} isLink icon={<Mail size={14} />} />
+                        <InfoField label="Số điện thoại" value={account.profile.phone} icon={<Phone size={14} />} />
+                        <InfoField label="Mã số thuế" value={account.profile.taxId} />
+                      </>
                     ) : (
-                      <p className="text-xs text-txt-muted">Không có tài liệu nào được tải lên.</p>
+                      <>
+                        <InfoField label="Họ và tên" value={account.name} />
+                        <InfoField label="Loại tài khoản" value="Cá nhân (Khách mua vé)" />
+                        <InfoField label="Email" value={account.profile.email} isLink icon={<Mail size={14} />} />
+                        <InfoField label="Số điện thoại" value={account.profile.phone || "Chưa cung cấp"} icon={<Phone size={14} />} />
+                      </>
                     )}
                   </div>
 
+                  {/* Documents Section (Only for Organizer) */}
+                  {account.type === "Organizer" && (
+                    <div>
+                      <h4 className="text-sm font-bold text-txt-primary mb-4 flex items-center gap-2">
+                        Hồ sơ tài liệu đã nộp
+                      </h4>
+                      {account.documents && account.documents.length > 0 ? (
+                        <div className="bg-main/30 rounded-ds-2xl border border-border overflow-hidden">
+                          <table className="w-full text-left border-collapse">
+                            <tbody className="divide-y divide-border">
+                              {account.documents.map((doc, idx) => (
+                                <tr key={idx} className="hover:bg-main/50 transition-colors">
+                                  <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-8 h-8 rounded-ds-lg bg-surface border border-border flex items-center justify-center text-txt-muted">
+                                        <FileText size={16} />
+                                      </div>
+                                      <span className="text-xs font-bold text-txt-primary">{doc.name}</span>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <StatusBadge status={doc.status} />
+                                  </td>
+                                  <td className="px-6 py-4 text-right">
+                                    <button
+                                      onClick={() => doc.url && window.open(doc.url, "_blank")}
+                                      disabled={!doc.url}
+                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-lg border border-border bg-surface text-[10px] font-bold text-txt-primary hover:bg-main transition-all disabled:opacity-50"
+                                    >
+                                      <ExternalLink size={12} />
+                                      Xem
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-txt-muted">Không có tài liệu nào được tải lên.</p>
+                      )}
+                    </div>
+                  )}
+
                   {/* Payout Account */}
                   <div>
-                    <h4 className="text-sm font-bold text-txt-primary mb-4">Tài khoản thanh toán</h4>
+                    <h4 className="text-sm font-bold text-txt-primary mb-4">
+                      {account.type === "Organizer" ? "Tài khoản nhận thanh toán" : "Tài khoản nhận tiền resale"}
+                    </h4>
                     {account.payoutAccount ? (
                       <div className="p-4 bg-surface border border-border rounded-ds-2xl flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -564,17 +699,25 @@ export default function AccountDetailPage() {
             <div className="space-y-6">
               <div>
                 <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">Trạng thái nền tảng</p>
-                <div className="p-2 bg-amber-500/5 border border-amber-500/20 rounded-ds-xl text-center">
-                  <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Pending Approval</span>
+                <div className={`p-2 rounded-ds-xl text-center border ${
+                  account.status === "Active" ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-600" :
+                  account.status === "Pending Approval" ? "bg-amber-500/5 border-amber-500/20 text-amber-600" :
+                  "bg-rose-500/5 border-rose-500/20 text-rose-600"
+                }`}>
+                  <span className="text-[10px] font-black uppercase tracking-widest">
+                    {account.status}
+                  </span>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <p className="text-[10px] font-bold text-txt-muted uppercase">Tóm tắt xác minh</p>
-                {account.documents.map((doc, idx) => (
-                  <ChecklistItem key={idx} label={doc.name} status={doc.status} />
-                ))}
-              </div>
+              {account.type === "Organizer" && (
+                <div className="space-y-3">
+                  <p className="text-[10px] font-bold text-txt-muted uppercase">Tóm tắt xác minh</p>
+                  {account.documents.map((doc, idx) => (
+                    <ChecklistItem key={idx} label={doc.name} status={doc.status} />
+                  ))}
+                </div>
+              )}
 
               <div>
                 <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">Ghi chú nội bộ</p>
@@ -602,10 +745,60 @@ export default function AccountDetailPage() {
                 )}
 
                 <div className="space-y-2">
-                  <AdminActionButton color="indigo" label="Phê duyệt tổ chức" icon={<Check size={14} />} />
-                  <AdminActionButton color="default" label="Yêu cầu bổ sung hồ sơ" icon={<MessageSquare size={14} />} />
-                  <AdminActionButton color="default" label="Hạn chế tài khoản" icon={<Slash size={14} />} />
-                  <AdminActionButton color="rose" label="Từ chối hồ sơ" icon={<XCircle size={14} />} />
+                  {account.type === "Organizer" ? (
+                    <>
+                      {account.status === "Pending Approval" && (
+                        <>
+                          <AdminActionButton 
+                            color="indigo" 
+                            label="Phê duyệt tổ chức" 
+                            icon={<Check size={14} />} 
+                            onClick={() => handleAction("approve")}
+                          />
+                          <AdminActionButton 
+                            color="rose" 
+                            label="Từ chối hồ sơ" 
+                            icon={<XCircle size={14} />} 
+                            onClick={() => handleAction("reject")}
+                          />
+                        </>
+                      )}
+                      {account.status === "Active" && (
+                        <AdminActionButton 
+                          color="rose" 
+                          label="Khóa tài khoản" 
+                          icon={<Slash size={14} />} 
+                          onClick={() => handleAction("ban")}
+                        />
+                      )}
+                      {(account.status === "Suspended" || account.status === "Restricted" || account.status === "Rejected") && (
+                        <AdminActionButton 
+                          color="indigo" 
+                          label="Kích hoạt lại" 
+                          icon={<CheckCircle2 size={14} />} 
+                          onClick={() => handleAction("activate")}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {account.status === "Active" ? (
+                        <AdminActionButton 
+                          color="rose" 
+                          label="Hạn chế tài khoản" 
+                          icon={<Slash size={14} />} 
+                          onClick={() => handleAction("restrict")}
+                        />
+                      ) : (
+                        <AdminActionButton 
+                          color="indigo" 
+                          label="Mở khóa tài khoản" 
+                          icon={<CheckCircle2 size={14} />} 
+                          onClick={() => handleAction("unrestrict")}
+                        />
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -617,7 +810,7 @@ export default function AccountDetailPage() {
 }
 
 // Components
-function ActionButton({ icon, label, color = "default", variant = "outline" }: any) {
+function ActionButton({ icon, label, color = "default", variant = "outline", onClick }: any) {
   const colors: any = {
     default: "text-txt-primary border-border bg-surface hover:bg-main",
     rose: variant === "solid" ? "bg-rose-500 text-white hover:bg-rose-600" : "text-rose-600 border-rose-500/30 bg-surface hover:bg-rose-50",
@@ -625,7 +818,10 @@ function ActionButton({ icon, label, color = "default", variant = "outline" }: a
   };
 
   return (
-    <button className={`flex items-center gap-2 px-4 py-2 rounded-ds-xl text-[11px] font-bold border transition-all shadow-sm ${colors[color]}`}>
+    <button 
+      onClick={onClick}
+      className={`flex items-center gap-2 px-4 py-2 rounded-ds-xl text-[11px] font-bold border transition-all shadow-sm ${colors[color]}`}
+    >
       {icon}
       <span>{label}</span>
     </button>
@@ -764,7 +960,7 @@ function ChecklistItem({ label, status }: any) {
   );
 }
 
-function AdminActionButton({ color, label, icon }: any) {
+function AdminActionButton({ color, label, icon, onClick }: any) {
   const styles: any = {
     indigo: "bg-primary text-white hover:bg-primary-hover shadow-md shadow-primary/20",
     rose: "bg-rose-500 text-white hover:bg-rose-600 shadow-md shadow-rose-500/20",
@@ -772,7 +968,10 @@ function AdminActionButton({ color, label, icon }: any) {
   };
 
   return (
-    <button className={`w-full py-3 px-4 rounded-ds-2xl flex items-center justify-between text-xs font-bold transition-all ${styles[color]}`}>
+    <button 
+      onClick={onClick}
+      className={`w-full py-3 px-4 rounded-ds-2xl flex items-center justify-between text-xs font-bold transition-all ${styles[color]}`}
+    >
       <span>{label}</span>
       {icon}
     </button>

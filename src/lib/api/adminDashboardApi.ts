@@ -12,6 +12,20 @@ export interface PlatformDashboardResponse {
   totalTicketsSold: number;
   newUsersCount: number;
   trend: DailyTrendDto[];
+  payoutPendingVolume: number;
+  payoutPendingOrgs: number;
+  payoutPendingBatch: string;
+  payoutSettledVolume: number;
+  payoutSettledBatches: number;
+  disputesCount: number;
+  disputesMessage: string;
+  organizationsPendingApproval: number;
+  organizationsPendingDetails: string;
+  eventsPendingApproval: number;
+  eventsPendingDetails: string;
+  restrictedAccounts: number;
+  restrictedAccountsDetails: string;
+  highRiskEventsCount: number;
 }
 
 export const adminDashboardApi = {

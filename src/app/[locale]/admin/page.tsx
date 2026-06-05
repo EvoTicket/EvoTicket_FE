@@ -76,10 +76,22 @@ export default function AdminDashboard() {
   // Utility to format values like 12.8B or 286M
   const formatCurrencyVal = (val: number) => {
     if (val >= 1000000000) {
-      return `₫${(val / 1000000000).toFixed(1)}B`;
+      const formatted = (val / 1000000000).toFixed(2);
+      const cleaned = formatted.endsWith(".00")
+        ? formatted.slice(0, -3)
+        : formatted.endsWith("0")
+        ? formatted.slice(0, -1)
+        : formatted;
+      return `₫${cleaned}B`;
     }
     if (val >= 1000000) {
-      return `₫${(val / 1000000).toFixed(1)}M`;
+      const formatted = (val / 1000000).toFixed(2);
+      const cleaned = formatted.endsWith(".00")
+        ? formatted.slice(0, -3)
+        : formatted.endsWith("0")
+        ? formatted.slice(0, -1)
+        : formatted;
+      return `₫${cleaned}M`;
     }
     return `₫${val.toLocaleString()}`;
   };
@@ -363,22 +375,25 @@ export default function AdminDashboard() {
             <SummaryItem
               icon={<TrendingUp size={16} className="text-amber-600" />}
               label={t("payout_pending")}
-              sub={t("dashboard.payout_pending_sub", { count: 14, batch: "PB-2604" })}
-              value="₫2.16B"
+              sub={t("dashboard.payout_pending_sub", {
+                count: dashboardData?.payoutPendingOrgs ?? 14,
+                batch: dashboardData?.payoutPendingBatch ?? "PB-2604"
+              })}
+              value={formatCurrencyVal(dashboardData?.payoutPendingVolume ?? 2160000000)}
               bg="bg-amber-500/5"
             />
             <SummaryItem
               icon={<ShieldCheck size={16} className="text-emerald-600" />}
               label={t("payout_settled")}
-              sub={t("dashboard.payout_settled_sub", { count: 86 })}
-              value="₫4.72B"
+              sub={t("dashboard.payout_settled_sub", { count: dashboardData?.payoutSettledBatches ?? 86 })}
+              value={formatCurrencyVal(dashboardData?.payoutSettledVolume ?? 4720000000)}
               bg="bg-emerald-500/5"
             />
             <SummaryItem
               icon={<AlertTriangle size={16} className="text-rose-600" />}
               label={t("disputes")}
               sub={t("dashboard.disputes_sub")}
-              value="7"
+              value={String(dashboardData?.disputesCount ?? 7)}
               bg="bg-rose-500/5"
             />
           </div>
@@ -400,21 +415,21 @@ export default function AdminDashboard() {
               icon={<Users size={16} className="text-indigo-600" />}
               label={t("org_pending")}
               sub={t("dashboard.kyc_new")}
-              value="8"
+              value={String(dashboardData?.organizationsPendingApproval ?? 8)}
               bg="bg-primary/5"
             />
             <SummaryItem
               icon={<Calendar size={16} className="text-amber-600" />}
               label={t("event_pending")}
-              sub={t("dashboard.event_risk_sub", { count: 3 })}
-              value="14"
+              sub={t("dashboard.event_risk_sub", { count: dashboardData?.highRiskEventsCount ?? 3 })}
+              value={String(dashboardData?.eventsPendingApproval ?? 14)}
               bg="bg-amber-500/5"
             />
             <SummaryItem
               icon={<Users size={16} className="text-rose-600" />}
               label={t("restricted_accounts")}
               sub={t("dashboard.monitoring_violation")}
-              value="11"
+              value={String(dashboardData?.restrictedAccounts ?? 11)}
               bg="bg-rose-500/5"
             />
           </div>
