@@ -542,7 +542,9 @@
     "no_favorite_events": "Bạn chưa có sự kiện yêu thích nào.",
     "browse_events_btn": "Khám phá sự kiện",
     "add_favorite_success": "Đã thêm vào sự kiện yêu thích!",
-    "remove_favorite_success": "Đã xóa khỏi sự kiện yêu thích!"
+    "remove_favorite_success": "Đã xóa khỏi sự kiện yêu thích!",
+    "add_to_favorites": "Thêm vào yêu thích",
+    "remove_from_favorites": "Bỏ yêu thích"
   },
   "Resale": {
     "page_title": "Chợ vé bán lại",

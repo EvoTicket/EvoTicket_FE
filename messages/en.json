@@ -542,7 +542,9 @@
     "no_favorite_events": "You don't have any favorite events yet.",
     "browse_events_btn": "Explore Events",
     "add_favorite_success": "Added to favorite events!",
-    "remove_favorite_success": "Removed from favorite events!"
+    "remove_favorite_success": "Removed from favorite events!",
+    "add_to_favorites": "Add to Favorites",
+    "remove_from_favorites": "Remove from Favorites"
   },
   "Resale": {
     "page_title": "Resale Marketplace",

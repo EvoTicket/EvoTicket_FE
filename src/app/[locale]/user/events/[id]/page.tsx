@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { Footer } from "@/src/components/footer";
 import { Header } from "@/src/components/header";
-import { EventDetail } from "@/src/types/event";
+import { EventDetail, Review } from "@/src/types/event";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
@@ -50,6 +50,7 @@ export default function EventDetailPage() {
 
     // Favorites & Reviews States
     const [isFavorite, setIsFavorite] = useState(false);
+    const [reviews, setReviews] = useState<Review[]>([]);
     const [newRating, setNewRating] = useState(0);
     const [newComment, setNewComment] = useState("");
     const [newImages, setNewImages] = useState<File[]>([]);
@@ -135,7 +136,7 @@ export default function EventDetailPage() {
             if (response.data) {
                 toast.success(te('review_success'));
                 if (id) {
-                    fetchEventDetail(id as string);
+                    void fetchReviews(id as string);
                 }
                 setNewRating(0);
                 setNewComment("");
@@ -158,7 +159,7 @@ export default function EventDetailPage() {
             await api.delete(`/inventory-service/api/reviews/${reviewId}`);
             toast.success(te('review_deleted'));
             if (id) {
-                fetchEventDetail(id as string);
+                void fetchReviews(id as string);
             }
         } catch (error) {
             console.error("Failed to delete review", error);
@@ -260,6 +261,7 @@ export default function EventDetailPage() {
                 const data = response.data.data;
                 data.hasSeatMap = data.seatMapImage !== null;
                 setEvent(data);
+                void fetchReviews(eventId);
                 fetchSuggestedEvents();
             }
         } catch (error) {
@@ -268,6 +270,17 @@ export default function EventDetailPage() {
             fetchSuggestedEvents();
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchReviews = async (eventId: string) => {
+        try {
+            const res = await api.get(`/inventory-service/api/reviews/event/${eventId}`);
+            if (res.data && res.data.status === 200) {
+                setReviews(res.data.data || []);
+            }
+        } catch (error) {
+            console.error("Failed to fetch reviews", error);
         }
     };
 
@@ -425,17 +438,7 @@ export default function EventDetailPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                         {/* Poster Cột Trái */}
                         <div className="lg:col-span-6 w-full flex flex-col">
-                            <div className="flex items-center justify-between mb-4 w-full">
-                                <button
-                                    onClick={toggleFavorite}
-                                    className="flex items-center justify-center w-10 h-10 rounded-full border border-border-default hover:bg-bg-subtle transition-all cursor-pointer bg-card-bg-default shadow-sm text-text-secondary hover:text-rose-500"
-                                    title={isFavorite ? "Bỏ yêu thích" : "Yêu thích"}
-                                >
-                                    <Heart
-                                        size={20}
-                                        className={`${isFavorite ? 'fill-rose-500 text-rose-500' : 'text-text-secondary'} transition-colors duration-300`}
-                                    />
-                                </button>
+                            <div className="flex items-center justify-end mb-4 w-full">
                                 <div className="flex items-center gap-3">
                                     <span className="text-sm text-text-secondary font-medium">{te('event_category_label')}</span>
                                     <div className="inline-block bg-badge-neutral-bg text-badge-neutral-text rounded-full border-2 border-badge-neutral-border px-4 py-1.5 text-sm font-semibold shadow-sm">
@@ -516,6 +519,16 @@ export default function EventDetailPage() {
                                     }}
                                 >
                                     {getBuyButtonText()}
+                                </button>
+                                <button
+                                    onClick={toggleFavorite}
+                                    className="w-full mt-3 py-3 px-10 rounded-button-radius font-bold text-base border border-border-default flex items-center justify-center gap-2 hover:bg-bg-subtle transition-all cursor-pointer shadow-sm text-text-primary bg-card-bg-default"
+                                >
+                                    <Heart
+                                        size={18}
+                                        className={isFavorite ? 'fill-rose-500 text-rose-500' : 'text-text-secondary'}
+                                    />
+                                    {isFavorite ? te('remove_from_favorites') : te('add_to_favorites')}
                                 </button>
                             </div>
                         </div>
@@ -812,8 +825,8 @@ export default function EventDetailPage() {
 
                                 {/* Danh sách reviews */}
                                 <div className="space-y-6">
-                                    {event.reviews && event.reviews.length > 0 ? (
-                                        event.reviews.map((review) => (
+                                    {reviews && reviews.length > 0 ? (
+                                        reviews.map((review) => (
                                             <div key={review.id} className="flex gap-3 pb-6 border-b border-border-subtle last:border-0 last:pb-0">
                                                 <div className="relative w-10 h-10 rounded-full overflow-hidden bg-bg-page border border-border-default shrink-0">
                                                     <Image
@@ -859,7 +872,7 @@ export default function EventDetailPage() {
                                                     {/* Ảnh đính kèm trong review */}
                                                     {review.images && review.images.length > 0 && (
                                                         <div className="flex gap-2 mt-3 flex-wrap">
-                                                            {Array.from(review.images).map((imgUrl, i) => (
+                                                            {review.images.map((imgUrl, i) => (
                                                                 <a href={imgUrl} target="_blank" rel="noopener noreferrer" key={i} className="relative w-20 h-20 rounded overflow-hidden border border-border-default hover:opacity-90 transition-opacity">
                                                                     <img src={imgUrl} alt="review-attachment" className="w-full h-full object-cover" />
                                                                 </a>
@@ -933,7 +946,7 @@ export default function EventDetailPage() {
                                     </div>
 
                                     <button
-                                        className={`w-full py-3.5 rounded-button-radius font-semibold mb-6 transition-colors shadow-sm ${isBuyDisabled ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
+                                        className={`w-full py-3.5 rounded-button-radius font-semibold mb-3 transition-colors shadow-sm ${isBuyDisabled ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
                                         disabled={isBuyDisabled}
                                         onClick={() => {
                                             if (isBuyDisabled) return;
@@ -945,6 +958,16 @@ export default function EventDetailPage() {
                                         }}
                                     >
                                         {getBuyButtonText()}
+                                    </button>
+                                    <button
+                                        onClick={toggleFavorite}
+                                        className="w-full mb-6 py-2.5 rounded-button-radius font-semibold border border-border-default flex items-center justify-center gap-2 hover:bg-bg-subtle transition-colors cursor-pointer shadow-sm text-text-primary bg-card-bg-default"
+                                    >
+                                        <Heart
+                                            size={16}
+                                            className={isFavorite ? 'fill-rose-500 text-rose-500' : 'text-text-secondary'}
+                                        />
+                                        {isFavorite ? te('remove_from_favorites') : te('add_to_favorites')}
                                     </button>
 
                                     <div className="space-y-2">
