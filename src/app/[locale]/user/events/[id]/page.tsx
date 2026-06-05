@@ -852,8 +852,9 @@ export default function EventDetailPage() {
                                                         </div>
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-[11px] text-text-muted">
-                                                                {new Date(review.createdAt).toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
-                                                                    year: 'numeric', month: '2-digit', day: '2-digit'
+                                                                {new Date(review.createdAt).toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US', {
+                                                                    year: 'numeric', month: '2-digit', day: '2-digit',
+                                                                    hour: '2-digit', minute: '2-digit'
                                                                 })}
                                                             </span>
                                                             {user && user.id === review.userId && (
