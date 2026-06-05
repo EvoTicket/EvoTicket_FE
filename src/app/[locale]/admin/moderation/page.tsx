@@ -21,17 +21,17 @@ import Link from "next/link";
 import { adminEventsApi, ListEventResponse } from "@/src/lib/api/adminEventsApi";
 
 const triageGuide = [
-  { id: "tg-1", title: "Asset compliance", description: "Kiểm tra banner, ảnh, video — đảm bảo không vi phạm bản quyền và đạt chuẩn kỹ thuật.", icon: "Image", color: "sky" },
-  { id: "tg-2", title: "Nội dung cấm", description: "Đối chiếu mô tả với danh sách nội dung cấm: bạo lực, chính trị nhạy cảm, lừa đảo tài chính.", icon: "ShieldAlert", color: "amber" },
-  { id: "tg-3", title: "Lịch sử tổ chức rủi ro", description: "Xem trước lịch sử tổ chức: từng bị từ chối, bị flag, hoặc tạm ngừng trong 90 ngày.", icon: "UserX", color: "rose" },
-  { id: "tg-4", title: "Thiếu xác minh tổ chức", description: "Tổ chức cần Verified KYC trước khi sự kiện được phép phát hành vé công khai.", icon: "Clock", color: "amber" },
-  { id: "tg-5", title: "Liên hệ ngoài hệ thống", description: "Cảnh giác với link Zalo / Telegram / số điện thoại cá nhân trong mô tả sự kiện.", icon: "Link2", color: "sky" }
+  { id: "tg-1", titleKey: "triage_asset_compliance_title", descKey: "triage_asset_compliance_desc", icon: "Image", color: "sky" },
+  { id: "tg-2", titleKey: "triage_prohibited_content_title", descKey: "triage_prohibited_content_desc", icon: "ShieldAlert", color: "amber" },
+  { id: "tg-3", titleKey: "triage_risk_history_title", descKey: "triage_risk_history_desc", icon: "UserX", color: "rose" },
+  { id: "tg-4", titleKey: "triage_missing_kyc_title", descKey: "triage_missing_kyc_desc", icon: "Clock", color: "amber" },
+  { id: "tg-5", titleKey: "triage_external_links_title", descKey: "triage_external_links_desc", icon: "Link2", color: "sky" }
 ];
 
 const slaData = {
-  high: { target: "< 2 giờ", current: "46 phút", color: "emerald", percentage: 85 },
-  medium: { target: "< 8 giờ", current: "3 giờ 22 phút", color: "emerald", percentage: 60 },
-  low: { target: "< 24 giờ", current: "14 giờ 08 phút", color: "amber", percentage: 40 }
+  high: { targetKey: "sla_high_target", currentKey: "sla_high_current", color: "emerald", percentage: 85 },
+  medium: { targetKey: "sla_medium_target", currentKey: "sla_medium_current", color: "emerald", percentage: 60 },
+  low: { targetKey: "sla_low_target", currentKey: "sla_low_current", color: "amber", percentage: 40 }
 };
 
 export default function AdminModerationPage() {
@@ -43,9 +43,9 @@ export default function AdminModerationPage() {
   // Filter state for API calls
   const [filters, setFilters] = useState({
     search: "",
-    status: "Tất cả",
-    category: "Tất cả",
-    timeRange: "30 ngày"
+    status: "All",
+    category: "All",
+    timeRange: "30 days"
   });
 
   const [events, setEvents] = useState<ListEventResponse[]>([]);
@@ -72,22 +72,21 @@ export default function AdminModerationPage() {
     try {
       // Map status
       let approvalStatuses: string[] = [];
-      if (filters.status === "Chờ duyệt") {
+      if (filters.status === "Pending") {
         approvalStatuses = ["PENDING_REVIEW"];
-      } else if (filters.status === "Từ chối") {
+      } else if (filters.status === "Rejected") {
         approvalStatuses = ["REJECTED"];
       }
 
       // Map category
       let categories: string[] | undefined = undefined;
-      if (filters.category !== "Tất cả") {
+      if (filters.category !== "All") {
         const catMap: Record<string, string> = {
-          "Hội thảo": "WORKSHOP",
-          "Lễ hội": "LIVESTAGE",
-          "Âm nhạc": "LIVESTAGE",
-          "Thể thao": "SPORTS",
           "Workshop": "WORKSHOP",
-          "Triển lãm": "EXHIBITION",
+          "Festival": "LIVESTAGE",
+          "Music": "LIVESTAGE",
+          "Sports": "SPORTS",
+          "Exhibition": "EXHIBITION",
         };
         const backendCat = catMap[filters.category];
         if (backendCat) {
@@ -122,28 +121,28 @@ export default function AdminModerationPage() {
   }, [currentPage, filters.search, filters.status, filters.category]);
 
   const handleQuickApprove = async (eventId: number) => {
-    if (!confirm("Bạn có chắc chắn muốn phê duyệt sự kiện này?")) return;
+    if (!confirm(t("moderation_quick_approve_confirm"))) return;
     try {
       await adminEventsApi.updateApprovalStatus(eventId, "PUBLISHED");
-      alert("Đã phê duyệt sự kiện thành công!");
+      alert(t("action_quick_approve_success"));
       fetchSummary();
       fetchEvents();
     } catch (error) {
       console.error("Error approving event:", error);
-      alert("Không thể phê duyệt sự kiện.");
+      alert(t("action_quick_approve_error"));
     }
   };
 
   const handleQuickReject = async (eventId: number) => {
-    if (!confirm("Bạn có chắc chắn muốn từ chối sự kiện này?")) return;
+    if (!confirm(t("moderation_quick_reject_confirm"))) return;
     try {
       await adminEventsApi.updateApprovalStatus(eventId, "REJECTED");
-      alert("Đã từ chối sự kiện thành công!");
+      alert(t("action_quick_reject_success"));
       fetchSummary();
       fetchEvents();
     } catch (error) {
       console.error("Error rejecting event:", error);
-      alert("Không thể từ chối sự kiện.");
+      alert(t("action_quick_reject_error"));
     }
   };
 
@@ -163,12 +162,12 @@ export default function AdminModerationPage() {
 
   const formatCategory = (cat?: string) => {
     const names: Record<string, string> = {
-      WORKSHOP: "Hội thảo",
-      LIVESTAGE: "Âm nhạc / Lễ hội",
-      SPORTS: "Thể thao",
-      EXHIBITION: "Triển lãm",
+      WORKSHOP: t("cat_workshop"),
+      LIVESTAGE: t("cat_livestage"),
+      SPORTS: t("cat_sports"),
+      EXHIBITION: t("cat_exhibition"),
     };
-    return names[cat || ""] || cat || "Chưa phân loại";
+    return names[cat || ""] || cat || t("cat_unclassified");
   };
 
   return (
@@ -177,20 +176,20 @@ export default function AdminModerationPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-1">ADM-04</p>
-          <h1 className="text-3xl font-black text-txt-primary tracking-tight">Kiểm duyệt sự kiện</h1>
-          <p className="text-sm text-txt-secondary mt-1">Quản lý hàng chờ duyệt và các sự kiện bị từ chối</p>
+          <h1 className="text-3xl font-black text-txt-primary tracking-tight">{t("moderation_title")}</h1>
+          <p className="text-sm text-txt-secondary mt-1">{t("moderation_subtitle")}</p>
         </div>
         <button className="flex items-center gap-2 bg-surface hover:bg-main text-txt-primary px-5 py-2.5 rounded-ds-xl text-xs font-bold border border-border shadow-sm transition-all whitespace-nowrap">
           <Download size={16} />
-          <span>Xuất hàng chờ</span>
+          <span>{t("btn_export_queue")}</span>
         </button>
       </div>
 
       {/* Stats Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatsCard icon={<Clock size={20} />} label="Đang chờ duyệt" value={summary.pendingCount.toString()} color="amber" />
-        <StatsCard icon={<XCircle size={20} />} label="Bị từ chối" value={summary.rejectedCount.toString()} color="rose" />
-        <StatsCard icon={<AlertTriangle size={20} />} label="Tổng sự kiện hàng chờ" value={(summary.pendingCount + summary.rejectedCount).toString()} color="indigo" />
+        <StatsCard icon={<Clock size={20} />} label={t("moderation_pending_review")} value={summary.pendingCount.toString()} color="amber" />
+        <StatsCard icon={<XCircle size={20} />} label={t("moderation_rejected")} value={summary.rejectedCount.toString()} color="rose" />
+        <StatsCard icon={<AlertTriangle size={20} />} label={t("moderation_total_queue")} value={(summary.pendingCount + summary.rejectedCount).toString()} color="indigo" />
       </div>
 
       {/* Main Content Area */}
@@ -199,15 +198,15 @@ export default function AdminModerationPage() {
         <div className="bg-surface border border-border rounded-ds-3xl shadow-sm overflow-hidden transition-colors duration-300">
           {/* Header Bar */}
           <div className="flex items-center justify-between border-b border-border px-6 py-4 bg-main/10">
-            <h2 className="text-sm font-black text-txt-primary uppercase tracking-tight">Danh sách sự kiện hàng chờ</h2>
+            <h2 className="text-sm font-black text-txt-primary uppercase tracking-tight">{t("moderation_list_title")}</h2>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                <span className="text-[10px] font-bold text-txt-muted uppercase">{summary.pendingCount} Chờ duyệt</span>
+                <span className="text-[10px] font-bold text-txt-muted uppercase">{summary.pendingCount} {t("moderation_pending_review")}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-rose-500"></div>
-                <span className="text-[10px] font-bold text-txt-muted uppercase">{summary.rejectedCount} Bị từ chối</span>
+                <span className="text-[10px] font-bold text-txt-muted uppercase">{summary.rejectedCount} {t("moderation_rejected")}</span>
               </div>
             </div>
           </div>
@@ -221,27 +220,43 @@ export default function AdminModerationPage() {
                   type="text"
                   value={filters.search}
                   onChange={(e) => handleFilterChange("search", e.target.value)}
-                  placeholder="Tìm theo tên sự kiện, tổ chức, mã EVT"
+                  placeholder={t("search_moderation_placeholder")}
                   className="w-full pl-11 pr-4 py-2.5 bg-main border border-border rounded-ds-2xl text-[13px] focus:bg-surface focus:border-primary outline-none transition-all text-txt-primary placeholder:text-txt-muted shadow-inner"
                 />
               </div>
 
               <FilterSelect
-                label="Trạng thái"
+                label={t("filter_status")}
                 value={filters.status}
-                options={["Tất cả", "Chờ duyệt", "Từ chối"]}
+                options={[
+                  { value: "All", label: t("filter_all") },
+                  { value: "Pending", label: t("status_pending") },
+                  { value: "Rejected", label: t("status_rejected") }
+                ]}
                 onChange={(val: string) => handleFilterChange("status", val)}
               />
               <FilterSelect
-                label="Danh mục"
+                label={t("filter_category")}
                 value={filters.category}
-                options={["Tất cả", "Hội thảo", "Lễ hội", "Âm nhạc", "Thể thao", "Workshop", "Triển lãm"]}
+                options={[
+                  { value: "All", label: t("filter_all") },
+                  { value: "Workshop", label: t("cat_workshop") },
+                  { value: "Festival", label: t("cat_livestage") },
+                  { value: "Music", label: t("cat_livestage") },
+                  { value: "Sports", label: t("cat_sports") },
+                  { value: "Exhibition", label: t("cat_exhibition") }
+                ]}
                 onChange={(val: string) => handleFilterChange("category", val)}
               />
               <FilterSelect
-                label="Gửi từ"
+                label={t("filter_sent_from")}
                 value={filters.timeRange}
-                options={["24 giờ", "7 ngày", "30 ngày", "Tất cả"]}
+                options={[
+                  { value: "24 hours", label: t("time_24h") },
+                  { value: "7 days", label: t("time_7d") },
+                  { value: "30 days", label: t("time_30d") },
+                  { value: "All", label: t("filter_all") }
+                ]}
                 onChange={(val: string) => handleFilterChange("timeRange", val)}
               />
             </div>
@@ -249,15 +264,15 @@ export default function AdminModerationPage() {
             <div className="flex items-center justify-between px-2">
               <button className="flex items-center gap-2 text-xs font-bold text-txt-muted hover:text-txt-primary transition-colors">
                 <Filter size={14} />
-                <span>Bộ lọc nâng cao</span>
+                <span>{t("filter_advanced")}</span>
               </button>
 
-              {(filters.search || filters.status !== "Tất cả" || filters.category !== "Tất cả" || filters.timeRange !== "30 ngày") && (
+              {(filters.search || filters.status !== "All" || filters.category !== "All" || filters.timeRange !== "30 days") && (
                 <button
-                  onClick={() => setFilters({ search: "", status: "Tất cả", category: "Tất cả", timeRange: "30 ngày" })}
+                  onClick={() => setFilters({ search: "", status: "All", category: "All", timeRange: "30 days" })}
                   className="text-[10px] font-black text-rose-500 uppercase tracking-widest hover:underline"
                 >
-                  Xóa bộ lọc
+                  {t("filter_clear")}
                 </button>
               )}
             </div>
@@ -268,25 +283,25 @@ export default function AdminModerationPage() {
             <table className="w-full text-left border-collapse min-w-[900px]">
               <thead>
                 <tr className="bg-main/30 border-y border-border">
-                  <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Sự kiện</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Tổ chức</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Gửi lúc</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Danh mục</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest text-center">Trạng thái review</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest text-right">Hành động</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_event")}</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_organizer")}</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_submitted_at")}</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_category")}</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest text-center">{t("review_status")}</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest text-right">{t("col_action")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {loading ? (
                   <tr>
                     <td colSpan={6} className="text-center py-8 text-txt-muted text-xs">
-                      Đang tải dữ liệu...
+                      {t("loading_data")}
                     </td>
                   </tr>
                 ) : events.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center py-8 text-txt-muted text-xs">
-                      Không tìm thấy sự kiện nào cần kiểm duyệt.
+                      {t("no_moderation_events")}
                     </td>
                   </tr>
                 ) : (
@@ -311,7 +326,7 @@ export default function AdminModerationPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="space-y-0.5">
-                            <p className="text-[11px] font-bold text-txt-secondary">{row.organizerName || "Chưa xác định"}</p>
+                            <p className="text-[11px] font-bold text-txt-secondary">{row.organizerName || t("status_unknown")}</p>
                             <p className="text-[9px] font-medium text-txt-muted uppercase tracking-tighter">ORG-{row.organizerId}</p>
                           </div>
                         </td>
@@ -331,7 +346,7 @@ export default function AdminModerationPage() {
                               href={`/${locale}/admin/moderation/${row.id}`}
                               className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500 text-indigo-600 hover:text-white rounded-ds-xl text-[10px] font-black transition-all border border-indigo-500/20 shadow-sm uppercase tracking-tighter"
                             >
-                              Xem chi tiết
+                              {t("action_detail")}
                             </Link>
                             {row.approvalStatus === "PENDING_REVIEW" && (
                               <>
@@ -339,13 +354,13 @@ export default function AdminModerationPage() {
                                   onClick={() => handleQuickApprove(row.id)}
                                   className="px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-600 text-emerald-600 hover:text-white border border-emerald-500/20 rounded-ds-xl text-[10px] font-black transition-all uppercase tracking-tighter"
                                 >
-                                  Duyệt nhanh
+                                  {t("action_quick_approve")}
                                 </button>
                                 <button
                                   onClick={() => handleQuickReject(row.id)}
                                   className="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-500/20 rounded-ds-xl text-[10px] font-black transition-all uppercase tracking-tighter"
                                 >
-                                  Từ chối nhanh
+                                  {t("action_quick_reject")}
                                 </button>
                               </>
                             )}
@@ -362,7 +377,11 @@ export default function AdminModerationPage() {
           {/* Pagination */}
           <div className="px-6 py-4 bg-main/30 border-t border-border flex items-center justify-between">
             <p className="text-[10px] font-medium text-txt-muted uppercase tracking-widest">
-              Hiển thị {totalElements > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-{Math.min(currentPage * itemsPerPage, totalElements)} trên tổng {totalElements}
+              {t("pagination_showing", {
+                start: totalElements > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0,
+                end: Math.min(currentPage * itemsPerPage, totalElements),
+                total: totalElements
+              })}
             </p>
             <div className="flex items-center gap-1.5">
               <button
@@ -399,11 +418,11 @@ export default function AdminModerationPage() {
         {/* Triage Guide */}
         <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-black text-txt-primary uppercase tracking-tight">Hướng dẫn triage</h3>
+            <h3 className="text-xs font-black text-txt-primary uppercase tracking-tight">{t("moderation_triage_guide")}</h3>
             <ShieldAlert size={14} className="text-txt-muted" />
           </div>
           <p className="text-[10px] text-txt-muted mb-6 leading-relaxed">
-            Dùng để rà soát nhanh trước khi mở chi tiết review (ADM-05).
+            {t("moderation_triage_desc")}
           </p>
 
           <div className="space-y-4">
@@ -422,9 +441,9 @@ export default function AdminModerationPage() {
                     <IconComponent name={guide.icon} size={16} />
                   </div>
                   <div>
-                    <h4 className="text-[11px] font-bold text-txt-primary mb-1">{guide.title}</h4>
+                    <h4 className="text-[11px] font-bold text-txt-primary mb-1">{t(guide.titleKey)}</h4>
                     <p className="text-[10px] text-txt-muted leading-relaxed line-clamp-2 group-hover:line-clamp-none transition-all">
-                      {guide.description}
+                      {t(guide.descKey)}
                     </p>
                   </div>
                 </div>
@@ -437,13 +456,13 @@ export default function AdminModerationPage() {
         <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm overflow-hidden relative h-fit ">
           <div className="flex items-center gap-2 mb-6">
             <Clock size={16} className="text-txt-muted" />
-            <h3 className="text-xs font-black text-txt-primary uppercase tracking-tight">SLA xử lý duyệt</h3>
+            <h3 className="text-xs font-black text-txt-primary uppercase tracking-tight">{t("moderation_sla_title")}</h3>
           </div>
 
           <div className="space-y-6">
-            <SLACard label="High" target={slaData.high.target} current={slaData.high.current} color={slaData.high.color} percentage={slaData.high.percentage} />
-            <SLACard label="Medium" target={slaData.medium.target} current={slaData.medium.current} color={slaData.medium.color} percentage={slaData.medium.percentage} />
-            <SLACard label="Low" target={slaData.low.target} current={slaData.low.current} color={slaData.low.color} percentage={slaData.low.percentage} />
+            <SLACard label="High" target={t(slaData.high.targetKey)} current={t(slaData.high.currentKey)} color={slaData.high.color} percentage={slaData.high.percentage} />
+            <SLACard label="Medium" target={t(slaData.medium.targetKey)} current={t(slaData.medium.currentKey)} color={slaData.medium.color} percentage={slaData.medium.percentage} />
+            <SLACard label="Low" target={t(slaData.low.targetKey)} current={t(slaData.low.currentKey)} color={slaData.low.color} percentage={slaData.low.percentage} />
           </div>
         </div>
       </div>
@@ -479,28 +498,37 @@ function FilterSelect({ label, value, options, onChange }: any) {
     <div className="relative group">
       <div className="flex items-center gap-2 px-4 py-2.5 bg-surface border border-border rounded-ds-2xl shadow-sm cursor-pointer hover:bg-main transition-colors text-[11px]">
         <span className="font-bold text-txt-muted">{label}:</span>
-        <span className="font-black text-txt-primary">{value}</span>
+        <span className="font-black text-txt-primary">
+          {typeof options[0] === 'object' ? options.find((o: any) => o.value === value)?.label : value}
+        </span>
         <ChevronDown size={14} className="text-txt-muted ml-1" />
       </div>
 
       {/* Mini Dropdown */}
       <div className="absolute top-full left-0 mt-2 w-48 bg-surface border border-border rounded-ds-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2">
-        {options?.map((opt: string) => (
-          <button
-            key={opt}
-            onClick={() => onChange?.(opt)}
-            className={`w-full text-left px-3 py-2 rounded-ds-lg text-[11px] font-bold transition-colors ${value === opt ? "bg-primary text-white" : "text-txt-secondary hover:bg-main"
-              }`}
-          >
-            {opt}
-          </button>
-        ))}
+        {options?.map((opt: any) => {
+          const isObject = typeof opt === 'object';
+          const optVal = isObject ? opt.value : opt;
+          const optLbl = isObject ? opt.label : opt;
+          const isActive = value === optVal;
+          return (
+            <button
+              key={optVal}
+              onClick={() => onChange?.(optVal)}
+              className={`w-full text-left px-3 py-2 rounded-ds-lg text-[11px] font-bold transition-colors ${isActive ? "bg-primary text-white" : "text-txt-secondary hover:bg-main"
+                }`}
+            >
+              {optLbl}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useTranslations("Admin");
   const styles: any = {
     "PENDING_REVIEW": "bg-amber-500/10 text-amber-600 border-amber-500/10",
     "REJECTED": "bg-rose-500/10 text-rose-600 border-rose-500/10",
@@ -509,10 +537,10 @@ function StatusBadge({ status }: { status: string }) {
   };
 
   const textMap: any = {
-    "PENDING_REVIEW": "Chờ duyệt",
-    "REJECTED": "Từ chối",
-    "PUBLISHED": "Đã duyệt",
-    "DRAFT": "Bản nháp",
+    "PENDING_REVIEW": t("status_pending"),
+    "REJECTED": t("status_rejected"),
+    "PUBLISHED": t("status_published"),
+    "DRAFT": t("status_draft"),
   };
 
   return (
@@ -537,6 +565,7 @@ function PaginationButton({ active, label, onClick }: any) {
 }
 
 function SLACard({ label, target, current, color, percentage }: any) {
+  const t = useTranslations("Admin");
   const colorStyles: any = {
     emerald: "text-emerald-600 bg-emerald-500/10 bg-emerald-500/20",
     amber: "text-amber-600 bg-amber-500/10 bg-amber-500/20",
@@ -555,7 +584,7 @@ function SLACard({ label, target, current, color, percentage }: any) {
       <div className="flex items-center justify-between">
         <div>
           <h4 className="text-[11px] font-black text-txt-primary uppercase tracking-tight">{label}</h4>
-          <p className="text-[9px] text-txt-muted uppercase font-bold tracking-tighter">Mục tiêu {target}</p>
+          <p className="text-[9px] text-txt-muted uppercase font-bold tracking-tighter">{t("moderation_sla_target", { target })}</p>
         </div>
         <p className={`text-xs font-black ${colorStyles[color].split(" ")[0]}`}>{current}</p>
       </div>

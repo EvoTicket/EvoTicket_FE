@@ -192,7 +192,7 @@ function OverviewTab({ t, data, isLoading, error }: any) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-txt-muted gap-2">
         <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
-        <span>Đang tải thông tin tổng quan...</span>
+        <span>{t("health_loading_overview")}</span>
       </div>
     );
   }
@@ -200,7 +200,7 @@ function OverviewTab({ t, data, isLoading, error }: any) {
   if (error) {
     return (
       <div className="p-6 text-center text-rose-500 font-medium bg-surface border border-border rounded-ds-3xl">
-        Lỗi: {error}
+        {t("health_error_prefix", { message: error })}
       </div>
     );
   }
@@ -264,7 +264,7 @@ function ServicesTab({ t, data, isLoading, error }: any) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-txt-muted gap-2">
         <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
-        <span>Đang tải thông tin dịch vụ...</span>
+        <span>{t("health_loading_services")}</span>
       </div>
     );
   }
@@ -272,7 +272,7 @@ function ServicesTab({ t, data, isLoading, error }: any) {
   if (error) {
     return (
       <div className="p-6 text-center text-rose-500 font-medium bg-surface border border-border rounded-ds-3xl">
-        Lỗi: {error}
+        {t("health_error_prefix", { message: error })}
       </div>
     );
   }
@@ -293,7 +293,7 @@ function ServicesTab({ t, data, isLoading, error }: any) {
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Latency</th>
                 <th className="px-6 py-4">Uptime (24h)</th>
-                <th className="px-6 py-4 text-right">Sự cố gần nhất</th>
+                <th className="px-6 py-4 text-right">{t("health_col_last_incident")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -375,7 +375,7 @@ function AlertsTab({ t, data, isLoading, error }: any) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-txt-muted gap-2">
         <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
-        <span>Đang tải thông tin sự cố...</span>
+        <span>{t("health_loading_incidents")}</span>
       </div>
     );
   }
@@ -383,7 +383,7 @@ function AlertsTab({ t, data, isLoading, error }: any) {
   if (error) {
     return (
       <div className="p-6 text-center text-rose-500 font-medium bg-surface border border-border rounded-ds-3xl">
-        Lỗi: {error}
+        {t("health_error_prefix", { message: error })}
       </div>
     );
   }
@@ -394,17 +394,17 @@ function AlertsTab({ t, data, isLoading, error }: any) {
       <div className="lg:col-span-2 bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm h-fit">
         <div className="p-6 border-b border-border flex items-center gap-2">
           <AlertTriangle size={18} className="text-txt-muted" />
-          <h3 className="text-lg font-bold text-txt-primary">Sự cố đang mở</h3>
+          <h3 className="text-lg font-bold text-txt-primary">{t("health_open_incidents_title")}</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-main/50 text-[10px] font-bold text-txt-muted uppercase tracking-widest border-b border-border">
                 <th className="px-6 py-4">Severity</th>
-                <th className="px-6 py-4">Sự cố</th>
-                <th className="px-6 py-4">Nguồn</th>
-                <th className="px-6 py-4">Bắt đầu</th>
-                <th className="px-6 py-4">Trạng thái</th>
+                <th className="px-6 py-4">{t("health_col_incident")}</th>
+                <th className="px-6 py-4">{t("health_col_source")}</th>
+                <th className="px-6 py-4">{t("health_col_start")}</th>
+                <th className="px-6 py-4">{t("health_col_status")}</th>
                 <th className="px-6 py-4 text-right"></th>
               </tr>
             </thead>
@@ -455,7 +455,7 @@ function AlertsTab({ t, data, isLoading, error }: any) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Info size={18} className="text-indigo-500" />
-              <h3 className="text-lg font-bold text-txt-primary">Chi tiết sự cố</h3>
+              <h3 className="text-lg font-bold text-txt-primary">{t("health_incident_details")}</h3>
             </div>
             <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded-ds-lg text-[10px] font-black uppercase tracking-tighter">
               {selectedIncident.status}
@@ -473,34 +473,34 @@ function AlertsTab({ t, data, isLoading, error }: any) {
             </div>
 
             <div className="space-y-3">
-              <DetailItem label="Nguồn" value={selectedIncident.source} />
-              <DetailItem label="Bắt đầu" value={selectedIncident.start} />
-              <DetailItem label="Mã sự cố" value={selectedIncident.id} />
+              <DetailItem label={t("health_col_source")} value={selectedIncident.source} />
+              <DetailItem label={t("health_col_start")} value={selectedIncident.start} />
+              <DetailItem label={t("health_incident_id")} value={selectedIncident.id} />
             </div>
 
             <div className="pt-4 border-t border-border">
-              <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">Tác động hiện tại</p>
+              <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">{t("health_current_impact")}</p>
               <div className="p-3 bg-main rounded-ds-xl text-xs text-txt-secondary leading-relaxed">
                 {selectedIncident.severity === 'Critical'
-                  ? "Hệ thống Relayer Web3 không thể tự động trả phí giao dịch blockchain. Cần nạp hoặc xử lý khẩn cấp."
+                  ? t("health_impact_web3_relayer")
                   : selectedIncident.severity === 'High'
-                    ? "Một số request bị chậm trên 800ms, ảnh hưởng đến trải nghiệm mua vé."
-                    : "Hàng đợi đang có dấu hiệu ứ đọng nhẹ, hệ thống vẫn đang tự phục hồi."}
+                    ? t("health_impact_api_latency")
+                    : t("health_impact_queue_delayed")}
               </div>
             </div>
 
             <div className="pt-4">
-              <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">Bước xử lý đề xuất</p>
+              <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest mb-2">{t("health_recommended_steps")}</p>
               <div className="p-3 bg-amber-500/5 border border-amber-500/10 rounded-ds-xl text-xs text-amber-700 font-medium leading-relaxed">
                 {selectedIncident.severity === 'Critical'
-                  ? "Chuyển gas khẩn cấp vào ví relayer hoặc kiểm tra cấu hình kết nối mạng RPC."
-                  : "Tăng số instance service hoặc kiểm tra lại chỉ mục của cơ sở dữ liệu."}
+                  ? t("health_step_relayer_gas")
+                  : t("health_step_scale_instances")}
               </div>
             </div>
 
             <div className="flex gap-2 pt-4">
-              <button className="flex-1 py-2.5 bg-indigo-600 text-white rounded-ds-xl text-xs font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all">Nhận xử lý</button>
-              <button className="px-4 py-2.5 bg-surface border border-border text-txt-primary rounded-ds-xl text-xs font-black hover:bg-main transition-all">Snooze</button>
+              <button className="flex-1 py-2.5 bg-indigo-600 text-white rounded-ds-xl text-xs font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all">{t("health_btn_acknowledge")}</button>
+              <button className="px-4 py-2.5 bg-surface border border-border text-txt-primary rounded-ds-xl text-xs font-black hover:bg-main transition-all">{t("common.snooze")}</button>
             </div>
           </div>
         </div>

@@ -197,24 +197,24 @@ export default function AdminSupportPage() {
 
               {activeTab === "transactions" && (
                 <>
-                  <FilterSelect label="Payment status" value={t("common.all")} />
-                  <FilterSelect label="Mint status" value={t("common.all")} />
+                  <FilterSelect label={t("filter_payment_status")} value={t("common.all")} />
+                  <FilterSelect label={t("filter_mint_status")} value={t("common.all")} />
                 </>
               )}
 
               {activeTab === "tickets" && (
                 <>
-                  <FilterSelect label="Access status" value={t("common.all")} />
-                  <FilterSelect label="Sở hữu" value={t("common.all")} />
-                  <FilterSelect label="Check-in" value={t("common.all")} />
+                  <FilterSelect label={t("filter_access_status")} value={t("common.all")} />
+                  <FilterSelect label={t("filter_owner")} value={t("common.all")} />
+                  <FilterSelect label={t("filter_checkin")} value={t("common.all")} />
                 </>
               )}
 
               {activeTab === "cases" && (
                 <>
-                  <FilterSelect label="Trạng thái case" value={t("common.all")} />
-                  <FilterSelect label="Ưu tiên" value={t("common.all")} />
-                  <FilterSelect label="Admin xử lý" value={t("common.all")} />
+                  <FilterSelect label={t("filter_case_status")} value={t("common.all")} />
+                  <FilterSelect label={t("filter_priority")} value={t("common.all")} />
+                  <FilterSelect label={t("filter_admin_assignee")} value={t("common.all")} />
                 </>
               )}
 
@@ -242,25 +242,25 @@ export default function AdminSupportPage() {
                     )}
                     {activeTab === "tickets" && (
                       <>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Mã vé</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Chủ sở hữu hiện tại</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Sự kiện</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Hạng vé</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Access</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Check-in</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Hoạt động</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_ticket_id")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_current_owner")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("support_sub.col_event")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_ticket_tier")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_access")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_checkin")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_activity")}</th>
                       </>
                     )}
                     {activeTab === "cases" && (
                       <>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Mã case</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Chủ đề</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">User liên quan</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Sự kiện</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Ưu tiên</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Trạng thái</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Người xử lý</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Cập nhật</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_case_id")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_subject")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_related_user")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("support_sub.col_event")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("filter_priority")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_status")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_assignee")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("col_updated_at")}</th>
                       </>
                     )}
                     <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("support_sub.col_actions")}</th>
@@ -272,14 +272,14 @@ export default function AdminSupportPage() {
                       <td colSpan={10} className="px-6 py-12 text-center text-txt-muted">
                         <div className="flex flex-col items-center gap-2 justify-center">
                           <span className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
-                          <span>Đang tải dữ liệu...</span>
+                          <span>{t("loading_data")}</span>
                         </div>
                       </td>
                     </tr>
                   ) : error ? (
                     <tr>
                       <td colSpan={10} className="px-6 py-12 text-center text-rose-500 font-medium">
-                        Lỗi: {error}
+                        {t("error_title") || "Error"}: {error}
                       </td>
                     </tr>
                   ) : (
@@ -288,7 +288,7 @@ export default function AdminSupportPage() {
                         !data?.transactions?.content || data.transactions.content.length === 0 ? (
                           <tr>
                             <td colSpan={10} className="px-6 py-8 text-center text-txt-muted text-xs">
-                              Không tìm thấy giao dịch nào.
+                              {t("support_no_transactions")}
                             </td>
                           </tr>
                         ) : (
@@ -335,7 +335,7 @@ export default function AdminSupportPage() {
                         !data?.tickets?.content || data.tickets.content.length === 0 ? (
                           <tr>
                             <td colSpan={10} className="px-6 py-8 text-center text-txt-muted text-xs">
-                              Không tìm thấy vé nào.
+                              {t("support_no_tickets")}
                             </td>
                           </tr>
                         ) : (
@@ -382,7 +382,7 @@ export default function AdminSupportPage() {
                         !data?.cases?.content || data.cases.content.length === 0 ? (
                           <tr>
                             <td colSpan={10} className="px-6 py-8 text-center text-txt-muted text-xs">
-                              Không tìm thấy case hỗ trợ nào.
+                              {t("support_no_cases")}
                             </td>
                           </tr>
                         ) : (

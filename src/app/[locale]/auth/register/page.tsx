@@ -608,23 +608,26 @@ export default function RegisterPage() {
               )}
             </button>
             <p className="mt-4 text-[12px] text-txt-secondary text-center leading-relaxed px-2">
-              Bằng việc tạo tài khoản, tôi đồng ý với{" "}
-              <Link
-                href={getLegalHref(locale as string, "terms-of-use")}
-                target="_blank"
-                className="text-txt-primary hover:text-primary underline decoration-border underline-offset-4 transition-all font-semibold"
-              >
-                Điều khoản sử dụng
-              </Link>{" "}
-              và{" "}
-              <Link
-                href={getLegalHref(locale as string, "privacy-policy")}
-                target="_blank"
-                className="text-txt-primary hover:text-primary underline decoration-border underline-offset-4 transition-all font-semibold"
-              >
-                Chính sách bảo mật
-              </Link>{" "}
-              của EvoTicket.
+              {t.rich("register_terms_agree", {
+                termsOfUse: (chunks) => (
+                  <Link
+                    href={getLegalHref(locale as string, "terms-of-use")}
+                    target="_blank"
+                    className="text-txt-primary hover:text-primary underline decoration-border underline-offset-4 transition-all font-semibold"
+                  >
+                    {chunks}
+                  </Link>
+                ),
+                privacyPolicy: (chunks) => (
+                  <Link
+                    href={getLegalHref(locale as string, "privacy-policy")}
+                    target="_blank"
+                    className="text-txt-primary hover:text-primary underline decoration-border underline-offset-4 transition-all font-semibold"
+                  >
+                    {chunks}
+                  </Link>
+                )
+              })}
             </p>
           </div>
         </form>

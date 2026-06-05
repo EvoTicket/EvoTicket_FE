@@ -46,8 +46,7 @@ export default function AdminDashboard() {
       const data = await adminDashboardApi.getPlatformDashboard(days);
       setDashboardData(data);
     } catch (err) {
-      console.error("Failed to load platform dashboard data:", err);
-      setError("Không thể tải dữ liệu dashboard. Vui lòng thử lại.");
+      setError(t("dashboard_load_error"));
     } finally {
       setIsLoading(false);
     }
@@ -186,14 +185,14 @@ export default function AdminDashboard() {
           <AlertTriangle size={32} />
         </div>
         <div className="space-y-2">
-          <h3 className="text-xl font-bold text-txt-primary">Đã xảy ra lỗi</h3>
+          <h3 className="text-xl font-bold text-txt-primary">{t("error_title")}</h3>
           <p className="text-sm text-txt-secondary max-w-md">{error}</p>
         </div>
         <button
           onClick={loadDashboard}
           className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-ds-xl font-bold shadow-lg shadow-primary/20 transition-all"
         >
-          {t("btn_refresh") || "Thử lại"}
+          {t("btn_refresh")}
         </button>
       </div>
     );

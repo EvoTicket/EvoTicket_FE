@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MessageCircle, X, Send, Loader2, Menu, Plus, Trash2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Menu, Plus, Trash2, Edit2, Check } from "lucide-react";
 import api from "@/src/lib/axios";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import { store } from "@/src/store";
 
@@ -33,6 +33,7 @@ const PDF_PLACEHOLDER = "https://img.freepik.com/premium-vector/modern-flat-desi
 export function ChatBot() {
     const pathname = usePathname();
     const t = useTranslations("Chatbot");
+    const locale = useLocale();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputMessage, setInputMessage] = useState("");
@@ -42,6 +43,8 @@ export function ChatBot() {
     const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isLoadingConversations, setIsLoadingConversations] = useState(false);
+    const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
+    const [editingTitle, setEditingTitle] = useState("");
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const targetTextRef = useRef("");
     const currentTextRef = useRef("");
@@ -111,14 +114,14 @@ export function ChatBot() {
             }
         } catch (error) {
             console.error("Failed to create conversation", error);
-            toast.error("Failed to create new conversation");
+            toast.error(t("toast_create_failed"));
         }
         return null;
     };
 
     const handleDeleteConversation = async (e: React.MouseEvent, id: string) => {
         e.stopPropagation(); // prevent selecting the conversation
-        if (!confirm("Bạn có chắc chắn muốn xóa cuộc trò chuyện này?")) return;
+        if (!confirm(t("confirm_delete"))) return;
         
         try {
             const response = await api.delete(`/inventory-service/api/chatbot/conversations/${id}`);
@@ -137,11 +140,31 @@ export function ChatBot() {
                         await handleCreateConversation();
                     }
                 }
-                toast.success("Đã xóa cuộc trò chuyện");
+                toast.success(t("toast_delete_success"));
             }
         } catch (error) {
             console.error("Failed to delete conversation", error);
-            toast.error("Không thể xóa cuộc trò chuyện");
+            toast.error(t("toast_delete_failed"));
+        }
+    };
+
+    const handleUpdateConversationTitle = async (e: React.FormEvent | React.KeyboardEvent, id: string) => {
+        e.stopPropagation();
+        if (!editingTitle.trim()) return;
+        try {
+            const response = await api.put(
+                `/inventory-service/api/chatbot/conversations/${id}/title?title=${encodeURIComponent(editingTitle.trim())}`
+            );
+            if (response.data && response.data.status === 200) {
+                setConversations(prev =>
+                    prev.map(c => (c.id === id ? { ...c, title: editingTitle.trim() } : c))
+                );
+                setEditingConversationId(null);
+                toast.success(t("toast_update_title_success") || "Cập nhật tiêu đề thành công");
+            }
+        } catch (error) {
+            console.error("Failed to update conversation title", error);
+            toast.error(t("toast_update_title_failed") || "Cập nhật tiêu đề thất bại");
         }
     };
 
@@ -362,7 +385,7 @@ export function ChatBot() {
                         <div className="p-4 border-b border-border-default flex items-center justify-between bg-bg-page">
                             <h4 className="font-bold text-text-primary text-sm flex items-center gap-2">
                                 <MessageCircle size={16} />
-                                {t("conversations_title") || "Hội thoại gần đây"}
+                                {t("conversations_title")}
                             </h4>
                             <button 
                                 onClick={() => setIsSidebarOpen(false)}
@@ -382,7 +405,7 @@ export function ChatBot() {
                                 className="w-full flex items-center justify-center gap-2 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default text-xs font-bold py-2 px-3 rounded-ds-lg transition-colors cursor-pointer"
                             >
                                 <Plus size={14} />
-                                {t("new_chat_btn") || "Cuộc trò chuyện mới"}
+                                {t("new_chat_btn")}
                             </button>
                         </div>
 
@@ -394,7 +417,7 @@ export function ChatBot() {
                                 </div>
                             ) : conversations.length === 0 ? (
                                 <div className="text-center text-xs text-text-muted py-8">
-                                    {t("no_conversations") || "Chưa có cuộc trò chuyện nào"}
+                                    {t("no_conversations")}
                                 </div>
                             ) : (
                                 conversations.map((conv) => (
@@ -407,14 +430,65 @@ export function ChatBot() {
                                                 : "hover:bg-secondary text-text-secondary hover:text-text-primary border border-transparent"
                                         }`}
                                     >
-                                        <span className="truncate flex-1 pr-2">{conv.title}</span>
-                                        <button
-                                            onClick={(e) => handleDeleteConversation(e, conv.id)}
-                                            className="opacity-0 group-hover:opacity-100 text-text-muted hover:text-error p-1 rounded hover:bg-bg-page transition-all shrink-0 cursor-pointer"
-                                            title={t("delete_chat") || "Xóa cuộc trò chuyện"}
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
+                                        {editingConversationId === conv.id ? (
+                                            <div className="flex items-center gap-1 flex-1" onClick={(e) => e.stopPropagation()}>
+                                                <input
+                                                    type="text"
+                                                    value={editingTitle}
+                                                    onChange={(e) => setEditingTitle(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "Enter") {
+                                                            handleUpdateConversationTitle(e, conv.id);
+                                                        } else if (e.key === "Escape") {
+                                                            setEditingConversationId(null);
+                                                        }
+                                                    }}
+                                                    autoFocus
+                                                    className="w-full bg-bg-page border border-border-default rounded px-1.5 py-0.5 text-xs text-text-primary outline-none focus:border-primary"
+                                                />
+                                                <button
+                                                    onClick={(e) => handleUpdateConversationTitle(e, conv.id)}
+                                                    className="text-emerald-500 hover:text-emerald-600 p-1 rounded hover:bg-bg-page transition-all shrink-0 cursor-pointer"
+                                                    title={t("save_title") || "Lưu"}
+                                                >
+                                                    <Check size={14} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setEditingConversationId(null);
+                                                    }}
+                                                    className="text-text-muted hover:text-error p-1 rounded hover:bg-bg-page transition-all shrink-0 cursor-pointer"
+                                                    title={t("cancel_edit") || "Hủy"}
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <span className="truncate flex-1 pr-2">{conv.title}</span>
+                                                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 shrink-0">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setEditingConversationId(conv.id);
+                                                            setEditingTitle(conv.title);
+                                                        }}
+                                                        className="text-text-muted hover:text-primary p-1 rounded hover:bg-bg-page transition-all cursor-pointer"
+                                                        title={t("edit_title") || "Sửa tiêu đề"}
+                                                    >
+                                                        <Edit2 size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => handleDeleteConversation(e, conv.id)}
+                                                        className="text-text-muted hover:text-error p-1 rounded hover:bg-bg-page transition-all cursor-pointer"
+                                                        title={t("delete_chat")}
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 ))
                             )}
@@ -427,7 +501,7 @@ export function ChatBot() {
                             <button
                                 onClick={() => setIsSidebarOpen(true)}
                                 className="hover:bg-white/20 rounded p-1 transition-colors -ml-1 cursor-pointer"
-                                title={t("history_tooltip") || "Lịch sử cuộc trò chuyện"}
+                                title={t("history_tooltip")}
                             >
                                 <Menu size={20} />
                             </button>
@@ -439,7 +513,7 @@ export function ChatBot() {
                             <button
                                 onClick={handleCreateConversation}
                                 className="hover:bg-white/20 rounded p-1 transition-colors cursor-pointer"
-                                title={t("new_chat_btn") || "Cuộc trò chuyện mới"}
+                                title={t("new_chat_btn")}
                             >
                                 <Plus size={20} />
                             </button>
@@ -573,7 +647,7 @@ export function ChatBot() {
                                             </div>
                                         )}
                                         <p className="text-xs opacity-70 mt-1">
-                                            {new Date(msg.createdAt).toLocaleTimeString("vi-VN", {
+                                            {new Date(msg.createdAt).toLocaleTimeString(locale === "vi" ? "vi-VN" : "en-US", {
                                                 hour: "2-digit",
                                                 minute: "2-digit",
                                             })}

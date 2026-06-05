@@ -1,16 +1,16 @@
 "use client";
 
-import { 
-  ArrowLeft, 
-  Building2, 
-  Calendar, 
-  CheckCircle2, 
-  Clock, 
-  FileText, 
-  Mail, 
-  Phone, 
-  ShieldAlert, 
-  User, 
+import {
+  ArrowLeft,
+  Building2,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  FileText,
+  Mail,
+  Phone,
+  ShieldAlert,
+  User,
   ExternalLink,
   Save,
   MessageSquare,
@@ -213,7 +213,7 @@ export default function AccountDetailPage() {
 
   const handleAction = async (actionType: "approve" | "reject" | "restrict" | "unrestrict" | "ban" | "activate") => {
     if (!account) return;
-    
+
     let nextStatus = account.status;
     let successMsg = "";
 
@@ -267,7 +267,7 @@ export default function AccountDetailPage() {
         setError(null);
       } catch (err: any) {
         console.error("Failed to fetch account details:", err);
-        setError("Không thể tải thông tin chi tiết tài khoản.");
+        setError(t("accounts_detail_not_found"));
       } finally {
         setIsLoading(false);
       }
@@ -290,9 +290,9 @@ export default function AccountDetailPage() {
   if (error || !account) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <p className="text-rose-500 font-bold">{error || "Không tìm thấy dữ liệu tài khoản."}</p>
+        <p className="text-rose-500 font-bold">{error || t("accounts_detail_not_found")}</p>
         <button onClick={handleBack} className="px-4 py-2 border border-border rounded-ds-xl text-xs font-bold hover:bg-main">
-          Quay lại
+          {t("accounts_detail_back")}
         </button>
       </div>
     );
@@ -366,7 +366,7 @@ export default function AccountDetailPage() {
                   {statusInfo.label}
                 </span>
                 <span className="text-[10px] font-medium text-txt-muted">
-                  ID: {account.id} · Đăng ký {account.registeredDate}
+                  ID: {account.id} · {t("accounts_detail_registered")} {account.registeredDate}
                 </span>
               </div>
             </div>
@@ -375,96 +375,39 @@ export default function AccountDetailPage() {
 
         <div className="flex flex-wrap items-center gap-2">
           <ActionButton icon={<Save size={16} />} label="Lưu ghi chú" />
-          
-          {account.type === "Organizer" ? (
-            <>
-              {account.status === "Pending Approval" && (
-                <>
-                  <ActionButton 
-                    icon={<XCircle size={16} />} 
-                    label="Từ chối hồ sơ" 
-                    color="rose" 
-                    variant="solid" 
-                    onClick={() => handleAction("reject")}
-                  />
-                  <ActionButton 
-                    icon={<Check size={16} />} 
-                    label="Phê duyệt tổ chức" 
-                    color="indigo" 
-                    variant="solid" 
-                    onClick={() => handleAction("approve")}
-                  />
-                </>
-              )}
-              {account.status === "Active" && (
-                <ActionButton 
-                  icon={<Slash size={16} />} 
-                  label="Khóa tài khoản" 
-                  color="rose" 
-                  variant="solid" 
-                  onClick={() => handleAction("ban")}
-                />
-              )}
-              {(account.status === "Suspended" || account.status === "Restricted" || account.status === "Rejected") && (
-                <ActionButton 
-                  icon={<CheckCircle2 size={16} />} 
-                  label="Kích hoạt lại" 
-                  color="indigo" 
-                  variant="solid" 
-                  onClick={() => handleAction("activate")}
-                />
-              )}
-            </>
-          ) : (
-            <>
-              {account.status === "Active" ? (
-                <ActionButton 
-                  icon={<Slash size={16} />} 
-                  label="Hạn chế tài khoản" 
-                  color="rose" 
-                  variant="solid" 
-                  onClick={() => handleAction("restrict")}
-                />
-              ) : (
-                <ActionButton 
-                  icon={<CheckCircle2 size={16} />} 
-                  label="Mở khóa tài khoản" 
-                  color="indigo" 
-                  variant="solid" 
-                  onClick={() => handleAction("unrestrict")}
-                />
-              )}
-            </>
-          )}
+          <ActionButton icon={<MessageSquare size={16} />} label="Yêu cầu bổ sung" />
+          <ActionButton icon={<ShieldAlert size={16} />} label="Hạn chế" color="rose" />
+          <ActionButton icon={<XCircle size={16} />} label="Từ chối" color="rose" variant="solid" />
+          <ActionButton icon={<Check size={16} />} label="Phê duyệt" color="indigo" variant="solid" />
         </div>
       </div>
 
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <QuickStatCard 
-          label="Trạng thái xác minh" 
-          value={account.stats.verificationStatus} 
-          subValue={`${account.stats.documentsSubmitted}/${account.stats.totalDocuments} tài liệu đã nộp`}
+        <QuickStatCard
+          label={t("accounts_detail_verification_status")}
+          value={account.stats.verificationStatus}
+          subValue={t("accounts_detail_docs_submitted_sub", { submitted: account.stats.documentsSubmitted, total: account.stats.totalDocuments })}
           icon={<ShieldAlert size={20} />}
           color="amber"
         />
-        <QuickStatCard 
-          label="Sự kiện đã tạo" 
-          value={account.stats.eventsCreated.toString()} 
-          subValue={`${account.stats.pendingEvents} đang chờ duyệt`}
+        <QuickStatCard
+          label={t("accounts_detail_events_created")}
+          value={account.stats.eventsCreated.toString()}
+          subValue={t("accounts_detail_pending_events_sub", { count: account.stats.pendingEvents })}
           icon={<Calendar size={20} />}
           color="indigo"
         />
-        <QuickStatCard 
-          label="Hoạt động gần nhất" 
-          value={account.stats.lastActive} 
-          subValue="Tạo event draft"
+        <QuickStatCard
+          label={t("accounts_detail_last_active")}
+          value={account.stats.lastActive}
+          subValue={t("accounts_detail_event_draft_sub")}
           icon={<Clock size={20} />}
           color="sky"
         />
-        <QuickStatCard 
-          label="Mức độ rủi ro" 
-          value={account.stats.riskLevel} 
+        <QuickStatCard
+          label={t("accounts_detail_risk_level")}
+          value={account.stats.riskLevel}
           subValue={account.stats.riskReason}
           icon={<AlertTriangle size={20} />}
           color="amber"
@@ -477,9 +420,9 @@ export default function AccountDetailPage() {
           {/* Tabs Navigation */}
           <div className="bg-surface border border-border rounded-ds-3xl overflow-hidden shadow-sm">
             <div className="flex border-b border-border px-6">
-              <TabButton active={activeTab === "profile"} onClick={() => setActiveTab("profile")} label="Hồ sơ" icon={<User size={16} />} />
-              <TabButton active={activeTab === "activity"} onClick={() => setActiveTab("activity")} label="Hoạt động" icon={<ActivityIcon size={16} />} />
-              <TabButton active={activeTab === "history"} onClick={() => setActiveTab("history")} label="Lịch sử xử lý" icon={<History size={16} />} />
+              <TabButton active={activeTab === "profile"} onClick={() => setActiveTab("profile")} label={t("accounts_detail_profile")} icon={<User size={16} />} />
+              <TabButton active={activeTab === "activity"} onClick={() => setActiveTab("activity")} label={t("accounts_detail_activity")} icon={<ActivityIcon size={16} />} />
+              <TabButton active={activeTab === "history"} onClick={() => setActiveTab("history")} label={t("accounts_detail_history")} icon={<History size={16} />} />
             </div>
 
             <div className="p-8">
@@ -487,74 +430,59 @@ export default function AccountDetailPage() {
                 <div className="space-y-8">
                   {/* Basic Info */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
-                    {account.type === "Organizer" ? (
-                      <>
-                        <InfoField label="Tên tổ chức" value={account.name} />
-                        <InfoField label="Loại tổ chức" value={account.profile.orgType} />
-                        <InfoField label="Người đại diện" value={account.profile.representative} />
-                        <InfoField label="Email" value={account.profile.email} isLink icon={<Mail size={14} />} />
-                        <InfoField label="Số điện thoại" value={account.profile.phone} icon={<Phone size={14} />} />
-                        <InfoField label="Mã số thuế" value={account.profile.taxId} />
-                      </>
+                    <InfoField label="Tên tổ chức" value={account.name} />
+                    <InfoField label="Loại tổ chức" value={account.profile.orgType} />
+                    <InfoField label="Người đại diện" value={account.profile.representative} />
+                    <InfoField label="Email" value={account.profile.email} isLink icon={<Mail size={14} />} />
+                    <InfoField label="Số điện thoại" value={account.profile.phone} icon={<Phone size={14} />} />
+                    <InfoField label="Mã số thuế" value={account.profile.taxId} />
+                  </div>
+
+                  {/* Documents Section */}
+                  <div>
+                    <h4 className="text-sm font-bold text-txt-primary mb-4 flex items-center gap-2">
+                      Hồ sơ tài liệu đã nộp
+                    </h4>
+                    {account.documents && account.documents.length > 0 ? (
+                      <div className="bg-main/30 rounded-ds-2xl border border-border overflow-hidden">
+                        <table className="w-full text-left border-collapse">
+                          <tbody className="divide-y divide-border">
+                            {account.documents.map((doc, idx) => (
+                              <tr key={idx} className="hover:bg-main/50 transition-colors">
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-ds-lg bg-surface border border-border flex items-center justify-center text-txt-muted">
+                                      <FileText size={16} />
+                                    </div>
+                                    <span className="text-xs font-bold text-txt-primary">{doc.name}</span>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <StatusBadge status={doc.status} />
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                  <button
+                                    onClick={() => doc.url && window.open(doc.url, "_blank")}
+                                    disabled={!doc.url}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-lg border border-border bg-surface text-[10px] font-bold text-txt-primary hover:bg-main transition-all disabled:opacity-50"
+                                  >
+                                    <ExternalLink size={12} />
+                                    Xem
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     ) : (
-                      <>
-                        <InfoField label="Họ và tên" value={account.name} />
-                        <InfoField label="Loại tài khoản" value="Cá nhân (Khách mua vé)" />
-                        <InfoField label="Email" value={account.profile.email} isLink icon={<Mail size={14} />} />
-                        <InfoField label="Số điện thoại" value={account.profile.phone || "Chưa cung cấp"} icon={<Phone size={14} />} />
-                      </>
+                      <p className="text-xs text-txt-muted">Không có tài liệu nào được tải lên.</p>
                     )}
                   </div>
 
-                  {/* Documents Section (Only for Organizer) */}
-                  {account.type === "Organizer" && (
-                    <div>
-                      <h4 className="text-sm font-bold text-txt-primary mb-4 flex items-center gap-2">
-                        Hồ sơ tài liệu đã nộp
-                      </h4>
-                      {account.documents && account.documents.length > 0 ? (
-                        <div className="bg-main/30 rounded-ds-2xl border border-border overflow-hidden">
-                          <table className="w-full text-left border-collapse">
-                            <tbody className="divide-y divide-border">
-                              {account.documents.map((doc, idx) => (
-                                <tr key={idx} className="hover:bg-main/50 transition-colors">
-                                  <td className="px-6 py-4">
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded-ds-lg bg-surface border border-border flex items-center justify-center text-txt-muted">
-                                        <FileText size={16} />
-                                      </div>
-                                      <span className="text-xs font-bold text-txt-primary">{doc.name}</span>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4">
-                                    <StatusBadge status={doc.status} />
-                                  </td>
-                                  <td className="px-6 py-4 text-right">
-                                    <button
-                                      onClick={() => doc.url && window.open(doc.url, "_blank")}
-                                      disabled={!doc.url}
-                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-lg border border-border bg-surface text-[10px] font-bold text-txt-primary hover:bg-main transition-all disabled:opacity-50"
-                                    >
-                                      <ExternalLink size={12} />
-                                      Xem
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      ) : (
-                        <p className="text-xs text-txt-muted">Không có tài liệu nào được tải lên.</p>
-                      )}
-                    </div>
-                  )}
-
                   {/* Payout Account */}
                   <div>
-                    <h4 className="text-sm font-bold text-txt-primary mb-4">
-                      {account.type === "Organizer" ? "Tài khoản nhận thanh toán" : "Tài khoản nhận tiền resale"}
-                    </h4>
+                    <h4 className="text-sm font-bold text-txt-primary mb-4">Tài khoản thanh toán</h4>
                     {account.payoutAccount ? (
                       <div className="p-4 bg-surface border border-border rounded-ds-2xl flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -575,7 +503,7 @@ export default function AccountDetailPage() {
                         </span>
                       </div>
                     ) : (
-                      <p className="text-xs text-txt-muted">Chưa cấu hình tài khoản thanh toán</p>
+                      <p className="text-xs text-txt-muted">{t("accounts_detail_no_payout")}</p>
                     )}
                   </div>
 
@@ -585,9 +513,9 @@ export default function AccountDetailPage() {
                       <div className="flex gap-3">
                         <AlertTriangle size={18} className="text-amber-600 shrink-0" />
                         <div>
-                          <p className="text-xs font-bold text-amber-700">Ghi chú xác minh nội bộ</p>
+                          <p className="text-xs font-bold text-amber-700">{t("accounts_detail_internal_note")}</p>
                           <p className="text-[11px] text-amber-600/80 mt-1 leading-relaxed">
-                            {account.adminContext?.internalNote || "Tổ chức chưa có ghi chú xác minh nào từ quản trị viên."}
+                            {account.adminContext?.internalNote || t("accounts_detail_no_internal_note")}
                           </p>
                         </div>
                       </div>
@@ -599,10 +527,10 @@ export default function AccountDetailPage() {
               {activeTab === "activity" && (
                 <div className="space-y-0 ml-4">
                   {account.operationalContext.activities.map((activity, idx) => (
-                    <ActivityTimelineItem 
-                      key={idx} 
-                      activity={activity} 
-                      isLast={idx === account.operationalContext.activities.length - 1} 
+                    <ActivityTimelineItem
+                      key={idx}
+                      activity={activity}
+                      isLast={idx === account.operationalContext.activities.length - 1}
                     />
                   ))}
                 </div>
@@ -613,10 +541,10 @@ export default function AccountDetailPage() {
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-main/50 border-b border-border">
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Thời điểm</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Người thực hiện</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Hành động</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">Ghi chú</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("accounts_detail_col_time")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("accounts_detail_col_actor")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("accounts_detail_col_action")}</th>
+                        <th className="px-6 py-4 text-[10px] font-black text-txt-muted uppercase tracking-widest">{t("accounts_detail_col_note")}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -641,26 +569,26 @@ export default function AccountDetailPage() {
           <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-sm font-bold text-txt-primary">Bối cảnh nền tảng liên quan</h3>
-                <p className="text-[10px] text-txt-muted uppercase font-medium mt-0.5 tracking-tight">Tổng hợp dữ liệu vận hành của tổ chức này</p>
+                <h3 className="text-sm font-bold text-txt-primary">{t("accounts_detail_operational_context")}</h3>
+                <p className="text-[10px] text-txt-muted uppercase font-medium mt-0.5 tracking-tight">{t("accounts_detail_operational_context_desc")}</p>
               </div>
               <span className="px-2 py-0.5 rounded-ds-md bg-amber-500/10 text-amber-600 text-[10px] font-bold border border-amber-500/10 uppercase">
                 Pending Review
               </span>
             </div>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <MiniStat label="Sự kiện gần đây" value={account.operationalContext.summary.recentEventsCount.toString()} color="indigo" />
-              <MiniStat label="Sự kiện bị flag" value={account.operationalContext.summary.flaggedEventsCount.toString()} color="rose" />
-              <MiniStat label="Payout đang chờ" value={account.operationalContext.summary.pendingPayoutCount.toString()} color="amber" />
-              <MiniStat label="Ghi chú hỗ trợ mở" value={account.operationalContext.summary.openSupportNotesCount.toString()} color="sky" />
+              <MiniStat label={t("accounts_detail_recent_events")} value={account.operationalContext.summary.recentEventsCount.toString()} color="indigo" />
+              <MiniStat label={t("accounts_detail_flagged_events")} value={account.operationalContext.summary.flaggedEventsCount.toString()} color="rose" />
+              <MiniStat label={t("accounts_detail_pending_payout")} value={account.operationalContext.summary.pendingPayoutCount.toString()} color="amber" />
+              <MiniStat label={t("accounts_detail_open_support_notes")} value={account.operationalContext.summary.openSupportNotesCount.toString()} color="sky" />
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-xs font-bold text-txt-primary">Sự kiện gần đây</h4>
+              <h4 className="text-xs font-bold text-txt-primary">{t("accounts_detail_recent_events")}</h4>
               <div className="space-y-2">
                 {account.operationalContext.recentEvents.map((evt) => (
-                  <EventRow 
+                  <EventRow
                     key={evt.id}
                     name={evt.name}
                     id={evt.id}
@@ -673,10 +601,10 @@ export default function AccountDetailPage() {
             </div>
 
             <div className="mt-8 pt-8 border-t border-border space-y-4">
-              <h4 className="text-xs font-bold text-txt-primary">Ghi chú hỗ trợ / kiểm duyệt</h4>
+              <h4 className="text-xs font-bold text-txt-primary">{t("accounts_detail_support_notes")}</h4>
               <div className="space-y-4">
                 {account.operationalContext.adminLogs.map((log, idx) => (
-                  <LogEntry 
+                  <LogEntry
                     key={idx}
                     user={log.user}
                     time={log.timestamp}
@@ -692,42 +620,34 @@ export default function AccountDetailPage() {
         <div className="space-y-6">
           <div className="bg-surface border border-border rounded-ds-3xl p-6 shadow-sm sticky top-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-sm font-black text-txt-primary uppercase tracking-tight">Bảng điều khiển admin</h3>
+              <h3 className="text-sm font-black text-txt-primary uppercase tracking-tight">{t("accounts_detail_admin_panel")}</h3>
               <ShieldAlert size={18} className="text-txt-muted" />
             </div>
 
             <div className="space-y-6">
               <div>
                 <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">Trạng thái nền tảng</p>
-                <div className={`p-2 rounded-ds-xl text-center border ${
-                  account.status === "Active" ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-600" :
-                  account.status === "Pending Approval" ? "bg-amber-500/5 border-amber-500/20 text-amber-600" :
-                  "bg-rose-500/5 border-rose-500/20 text-rose-600"
-                }`}>
-                  <span className="text-[10px] font-black uppercase tracking-widest">
-                    {account.status}
-                  </span>
+                <div className="p-2 bg-amber-500/5 border border-amber-500/20 rounded-ds-xl text-center">
+                  <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Pending Approval</span>
                 </div>
               </div>
 
-              {account.type === "Organizer" && (
-                <div className="space-y-3">
-                  <p className="text-[10px] font-bold text-txt-muted uppercase">Tóm tắt xác minh</p>
-                  {account.documents.map((doc, idx) => (
-                    <ChecklistItem key={idx} label={doc.name} status={doc.status} />
-                  ))}
-                </div>
-              )}
+              <div className="space-y-3">
+                <p className="text-[10px] font-bold text-txt-muted uppercase">Tóm tắt xác minh</p>
+                {account.documents.map((doc, idx) => (
+                  <ChecklistItem key={idx} label={doc.name} status={doc.status} />
+                ))}
+              </div>
 
               <div>
-                <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">Ghi chú nội bộ</p>
-                <textarea 
-                  placeholder="Nhập ghi chú cho quản trị viên khác..."
+                <p className="text-[10px] font-bold text-txt-muted uppercase mb-2">{t("accounts_detail_internal_note_title")}</p>
+                <textarea
+                  placeholder={t("accounts_detail_note_placeholder")}
                   className="w-full h-32 p-4 bg-main border border-border rounded-ds-2xl text-xs text-txt-primary placeholder:text-txt-muted focus:border-primary outline-none transition-all resize-none"
                   defaultValue={account.adminContext.internalNote}
                 />
                 <button className="w-full mt-3 py-2.5 bg-surface border border-border rounded-ds-xl text-[10px] font-bold text-txt-primary hover:bg-main transition-all">
-                  Lưu ghi chú
+                  {t("accounts_detail_save_note")}
                 </button>
               </div>
 
@@ -736,7 +656,7 @@ export default function AccountDetailPage() {
                   <div className="p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-ds-2xl">
                     <div className="flex items-center gap-2 mb-1">
                       <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                      <p className="text-[10px] font-bold text-indigo-600">Hành động admin gần nhất</p>
+                      <p className="text-[10px] font-bold text-indigo-600">{t("accounts_detail_last_admin_action")}</p>
                     </div>
                     <p className="text-[10px] text-indigo-600/70">
                       {account.adminContext.lastAction.timestamp} · {account.adminContext.lastAction.adminUser} {account.adminContext.lastAction.description}
@@ -745,60 +665,10 @@ export default function AccountDetailPage() {
                 )}
 
                 <div className="space-y-2">
-                  {account.type === "Organizer" ? (
-                    <>
-                      {account.status === "Pending Approval" && (
-                        <>
-                          <AdminActionButton 
-                            color="indigo" 
-                            label="Phê duyệt tổ chức" 
-                            icon={<Check size={14} />} 
-                            onClick={() => handleAction("approve")}
-                          />
-                          <AdminActionButton 
-                            color="rose" 
-                            label="Từ chối hồ sơ" 
-                            icon={<XCircle size={14} />} 
-                            onClick={() => handleAction("reject")}
-                          />
-                        </>
-                      )}
-                      {account.status === "Active" && (
-                        <AdminActionButton 
-                          color="rose" 
-                          label="Khóa tài khoản" 
-                          icon={<Slash size={14} />} 
-                          onClick={() => handleAction("ban")}
-                        />
-                      )}
-                      {(account.status === "Suspended" || account.status === "Restricted" || account.status === "Rejected") && (
-                        <AdminActionButton 
-                          color="indigo" 
-                          label="Kích hoạt lại" 
-                          icon={<CheckCircle2 size={14} />} 
-                          onClick={() => handleAction("activate")}
-                        />
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {account.status === "Active" ? (
-                        <AdminActionButton 
-                          color="rose" 
-                          label="Hạn chế tài khoản" 
-                          icon={<Slash size={14} />} 
-                          onClick={() => handleAction("restrict")}
-                        />
-                      ) : (
-                        <AdminActionButton 
-                          color="indigo" 
-                          label="Mở khóa tài khoản" 
-                          icon={<CheckCircle2 size={14} />} 
-                          onClick={() => handleAction("unrestrict")}
-                        />
-                      )}
-                    </>
-                  )}
+                  <AdminActionButton color="indigo" label="Phê duyệt tổ chức" icon={<Check size={14} />} />
+                  <AdminActionButton color="default" label="Yêu cầu bổ sung hồ sơ" icon={<MessageSquare size={14} />} />
+                  <AdminActionButton color="default" label="Hạn chế tài khoản" icon={<Slash size={14} />} />
+                  <AdminActionButton color="rose" label="Từ chối hồ sơ" icon={<XCircle size={14} />} />
                 </div>
               </div>
             </div>
@@ -818,7 +688,7 @@ function ActionButton({ icon, label, color = "default", variant = "outline", onC
   };
 
   return (
-    <button 
+    <button
       onClick={onClick}
       className={`flex items-center gap-2 px-4 py-2 rounded-ds-xl text-[11px] font-bold border transition-all shadow-sm ${colors[color]}`}
     >
@@ -908,6 +778,7 @@ function MiniStat({ label, value, color }: any) {
 }
 
 function EventRow({ name, id, date, status, isFlagged }: any) {
+  const t = useTranslations("Admin");
   return (
     <div className="flex items-center justify-between p-3 bg-main/20 rounded-ds-2xl hover:bg-main/40 transition-colors">
       <div className="flex items-center gap-3">
@@ -926,12 +797,13 @@ function EventRow({ name, id, date, status, isFlagged }: any) {
           <p className="text-[10px] text-txt-muted">{id} · {date}</p>
         </div>
       </div>
-      <span className={`px-2 py-0.5 rounded-ds-md text-[8px] font-black border uppercase ${
-        status === "Đã duyệt" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/10" :
-        status === "Đang chờ duyệt" ? "bg-amber-500/10 text-amber-600 border-amber-500/10" :
-        "bg-surface text-txt-muted border-border"
-      }`}>
-        {status}
+      <span className={`px-2 py-0.5 rounded-ds-md text-[8px] font-black border uppercase ${status === "Đã duyệt" || status === "APPROVED" || status === "VERIFIED" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/10" :
+          status === "Đang chờ duyệt" || status === "PENDING" ? "bg-amber-500/10 text-amber-600 border-amber-500/10" :
+            "bg-surface text-txt-muted border-border"
+        }`}>
+        {status === "Đã duyệt" || status === "APPROVED" || status === "VERIFIED" ? t("status_verified") :
+          status === "Đang chờ duyệt" || status === "PENDING" ? t("status_pending") :
+            status}
       </span>
     </div>
   );
@@ -968,7 +840,7 @@ function AdminActionButton({ color, label, icon, onClick }: any) {
   };
 
   return (
-    <button 
+    <button
       onClick={onClick}
       className={`w-full py-3 px-4 rounded-ds-2xl flex items-center justify-between text-xs font-bold transition-all ${styles[color]}`}
     >
@@ -996,11 +868,11 @@ function ActivityTimelineItem({ activity, isLast }: { activity: IActivity, isLas
   return (
     <div className="relative flex gap-6 pb-10">
       {!isLast && <div className="absolute left-5 top-10 bottom-0 w-0.5 bg-border -translate-x-1/2" />}
-      
+
       <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 z-10 border-4 border-surface ${colors[activity.icon]}`}>
         {icons[activity.icon]}
       </div>
-      
+
       <div className="space-y-1.5 pt-1">
         <p className="text-[10px] font-bold text-txt-muted">{activity.timestamp}</p>
         <p className="text-sm font-bold text-txt-primary">{activity.title}</p>

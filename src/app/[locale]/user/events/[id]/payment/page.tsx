@@ -655,16 +655,30 @@ export default function PaymentPage() {
                                         onChange={(e) => setAgreedToTerms(e.target.checked)}
                                         className="mt-0.5 w-4 h-4 accent-button-primary-bg-default shrink-0 cursor-pointer"
                                     />
-                                    <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors">
-                                        Tôi xác nhận đã đọc và đồng ý với{" "}
-                                        <Link href={getLegalHref(locale as string, "terms-of-use")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Điều khoản sử dụng</Link>,{" "}
-                                        <Link href={getLegalHref(locale as string, "general-transaction-conditions")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Điều kiện giao dịch chung</Link>,{" "}
-                                        <Link href={getLegalHref(locale as string, "ticket-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Chính sách vé</Link>,{" "}
-                                        <Link href={getLegalHref(locale as string, "payment-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Chính sách thanh toán</Link>,{" "}
-                                        <Link href={getLegalHref(locale as string, "refund-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Chính sách hoàn tiền</Link>,{" "}
-                                        <Link href={getLegalHref(locale as string, "privacy-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Chính sách bảo mật</Link> và{" "}
-                                        <Link href={getLegalHref(locale as string, "blockchain-nft-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline">Chính sách NFT/blockchain</Link>{" "}
-                                        của EvoTicket.
+                                    <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors leading-relaxed">
+                                        {tp.rich("confirm_terms_detailed", {
+                                            termsOfUse: (chunks) => (
+                                                <Link href={getLegalHref(locale as string, "terms-of-use")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline font-semibold">{chunks}</Link>
+                                            ),
+                                            generalConditions: (chunks) => (
+                                                <Link href={getLegalHref(locale as string, "general-transaction-conditions")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline font-semibold">{chunks}</Link>
+                                            ),
+                                            ticketPolicy: (chunks) => (
+                                                <Link href={getLegalHref(locale as string, "ticket-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline font-semibold">{chunks}</Link>
+                                            ),
+                                            paymentPolicy: (chunks) => (
+                                                <Link href={getLegalHref(locale as string, "payment-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline font-semibold">{chunks}</Link>
+                                            ),
+                                            refundPolicy: (chunks) => (
+                                                <Link href={getLegalHref(locale as string, "refund-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline font-semibold">{chunks}</Link>
+                                            ),
+                                            privacyPolicy: (chunks) => (
+                                                <Link href={getLegalHref(locale as string, "privacy-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline font-semibold">{chunks}</Link>
+                                            ),
+                                            blockchainPolicy: (chunks) => (
+                                                <Link href={getLegalHref(locale as string, "blockchain-nft-policy")} onClick={(e) => e.stopPropagation()} target="_blank" className="text-button-primary-bg-default hover:underline font-semibold">{chunks}</Link>
+                                            )
+                                        })}
                                     </span>
                                 </label>
                             </div>

@@ -83,8 +83,7 @@ export default function AdminAccountsPage() {
       });
       setAccountsPage(response);
     } catch (err) {
-      console.error("Failed to load accounts:", err);
-      setError("Không thể tải danh sách tài khoản. Vui lòng thử lại.");
+      setError(t("accounts_load_error"));
     } finally {
       setIsLoading(false);
     }
@@ -283,7 +282,7 @@ export default function AdminAccountsPage() {
                   <td colSpan={8} className="px-6 py-12 text-center text-txt-muted">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-sm font-medium">Đang tải dữ liệu...</span>
+                      <span className="text-sm font-medium">{t("accounts_loading")}</span>
                     </div>
                   </td>
                 </tr>
@@ -296,7 +295,7 @@ export default function AdminAccountsPage() {
               ) : !accountsPage || accountsPage.content.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-12 text-center text-txt-muted font-medium">
-                    Không tìm thấy tài khoản nào khớp với tiêu chí tìm kiếm.
+                    {t("accounts_empty")}
                   </td>
                 </tr>
               ) : (
@@ -376,7 +375,7 @@ export default function AdminAccountsPage() {
                         <td className="px-6 py-4">
                           <div>
                             <p className="text-sm font-bold">{row.fullName || "—"}</p>
-                            <p className="text-[10px] text-txt-muted">Đại diện</p>
+                            <p className="text-[10px] text-txt-muted">{t("accounts_representative")}</p>
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -428,7 +427,7 @@ export default function AdminAccountsPage() {
                         </td>
                         <td className="px-6 py-4">
                           <p className="text-xs font-medium text-txt-secondary max-w-[250px] leading-relaxed">
-                            Nghi vấn hành vi gian lận tài khoản
+                            {t("accounts_fraud_reason")}
                           </p>
                         </td>
                         <td className="px-6 py-4">
