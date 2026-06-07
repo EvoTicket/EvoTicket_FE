@@ -254,7 +254,7 @@ export default function EventDetailPage() {
         setLoading(true);
         try {
 
-            const response = await api.get(`/inventory-service/api/events/${eventId}`, { skipAuth: true});
+            const response = await api.get(`/inventory-service/api/events/${eventId}`, { skipAuth: true });
 
             if (response.data && response.data.data) {
                 // Mock seat map conditionally based on fake logic if API doesn't provide
@@ -275,7 +275,7 @@ export default function EventDetailPage() {
 
     const fetchReviews = async (eventId: string) => {
         try {
-            const res = await api.get(`/inventory-service/api/reviews/event/${eventId}`, { skipAuth: true});
+            const res = await api.get(`/inventory-service/api/reviews/event/${eventId}`, { skipAuth: true });
             if (res.data && res.data.status === 200) {
                 setReviews(res.data.data || []);
             }
@@ -506,30 +506,33 @@ export default function EventDetailPage() {
                                         {minPrice > 0 ? `${minPrice.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US')} VND` : te('free')}
                                     </span>
                                 </div>
-                                <button
-                                    className={`w-full py-4 px-10 rounded-button-radius font-bold text-lg transition-all shadow-lg ${isBuyDisabled ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default hover:shadow-xl hover:-translate-y-0.5'}`}
-                                    disabled={isBuyDisabled}
-                                    onClick={() => {
-                                        if (isBuyDisabled) return;
-                                        if (!isAuthenticated) {
-                                            router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`);
-                                            return;
-                                        }
-                                        router.push(`/${locale}/user/events/${id}/booking`);
-                                    }}
-                                >
-                                    {getBuyButtonText()}
-                                </button>
-                                <button
-                                    onClick={toggleFavorite}
-                                    className="w-full mt-3 py-3 px-10 rounded-button-radius font-bold text-base border border-border-default flex items-center justify-center gap-2 hover:bg-bg-subtle transition-all cursor-pointer shadow-sm text-text-primary bg-card-bg-default"
-                                >
-                                    <Heart
-                                        size={18}
-                                        className={isFavorite ? 'fill-rose-500 text-rose-500' : 'text-text-secondary'}
-                                    />
-                                    {isFavorite ? te('remove_from_favorites') : te('add_to_favorites')}
-                                </button>
+                                <div className="flex flex-col w-full md:flex-row gap-2">
+                                    <button
+                                        className={`w-full cursor-pointer py-4 px-10 rounded-button-radius font-bold text-lg transition-all shadow-lg ${isBuyDisabled ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default hover:shadow-xl hover:-translate-y-0.5'}`}
+                                        disabled={isBuyDisabled}
+                                        onClick={() => {
+                                            if (isBuyDisabled) return;
+                                            if (!isAuthenticated) {
+                                                router.push(`/${locale}/auth/login?callbackUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+                                                return;
+                                            }
+                                            router.push(`/${locale}/user/events/${id}/booking`);
+                                        }}
+                                    >
+                                        {getBuyButtonText()}
+                                    </button>
+                                    <button
+                                        onClick={toggleFavorite}
+                                        className="w-full py-4 px-10 rounded-button-radius font-bold text-base border border-border-default flex items-center justify-center gap-2 hover:bg-bg-subtle transition-all cursor-pointer shadow-sm text-text-primary bg-card-bg-default"
+                                    >
+                                        <Heart
+                                            size={18}
+                                            className={isFavorite ? 'fill-rose-500 text-rose-500' : 'text-text-secondary'}
+                                        />
+                                        {isFavorite ? te('remove_from_favorites') : te('add_to_favorites')}
+                                    </button>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -730,12 +733,12 @@ export default function EventDetailPage() {
                             {/* Khối Đánh giá */}
                             <div className="bg-card-bg-default border border-border-default rounded-ds-xl p-6 shadow-sm">
                                 <h3 className="text-lg font-bold text-text-primary mb-4 pb-2 border-b border-border-subtle">{te('reviews_title')}</h3>
-                                
+
                                 {/* Form viết đánh giá */}
                                 {isAuthenticated ? (
                                     <form onSubmit={handleReviewSubmit} className="mb-8 bg-bg-page border border-border-subtle rounded-ds-lg p-4">
                                         <h4 className="font-semibold text-sm text-text-primary mb-3">{te('write_review')}</h4>
-                                        
+
                                         {/* Chọn rating */}
                                         <div className="flex items-center gap-2 mb-3">
                                             <span className="text-xs text-text-secondary">{te('rating_label')}</span>
@@ -869,7 +872,7 @@ export default function EventDetailPage() {
                                                         </div>
                                                     </div>
                                                     <p className="text-sm text-text-secondary mt-2 leading-relaxed">{review.comment}</p>
-                                                    
+
                                                     {/* Ảnh đính kèm trong review */}
                                                     {review.images && review.images.length > 0 && (
                                                         <div className="flex gap-2 mt-3 flex-wrap">
@@ -926,7 +929,7 @@ export default function EventDetailPage() {
                                                 const latestSaleEnd = Math.max(...allTickets.map(t => new Date(t.saleEndDate).getTime()));
                                                 const startStr = new Date(earliestSaleStart).toISOString();
                                                 const endStr = new Date(latestSaleEnd).toISOString();
-                                                
+
                                                 const formatCompactDate = (dateString: string) => {
                                                     const d = new Date(dateString);
                                                     return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
@@ -947,7 +950,7 @@ export default function EventDetailPage() {
                                     </div>
 
                                     <button
-                                        className={`w-full py-3.5 rounded-button-radius font-semibold mb-3 transition-colors shadow-sm ${isBuyDisabled ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
+                                        className={`cursor-pointer w-full py-3.5 rounded-button-radius font-semibold mb-3 transition-colors shadow-sm ${isBuyDisabled ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
                                         disabled={isBuyDisabled}
                                         onClick={() => {
                                             if (isBuyDisabled) return;

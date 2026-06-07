@@ -751,7 +751,7 @@ export default function PaymentPage() {
                                 </div>
 
                                 <button
-                                    className={`w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm mb-3 ${isCreatingOrder ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
+                                    className={`w-full cursor-pointer py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm mb-3 ${isCreatingOrder ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
                                     disabled={isCreatingOrder}
                                     onClick={() => {
                                         if (!(agreedToTerms && checkedInfo && understoodTime)) {
@@ -773,7 +773,7 @@ export default function PaymentPage() {
                                 </button>
 
                                 <button
-                                    className="w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm bg-transparent hover:bg-bg-subtle text-text-secondary border border-border-strong"
+                                    className="w-full cursor-pointer py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm bg-transparent hover:bg-bg-subtle text-text-secondary border border-border-strong"
                                     onClick={() => router.push(`/${locale}/user/events/${event.eventId}/booking`)}
                                 >
                                     {tp('reselect_ticket')}

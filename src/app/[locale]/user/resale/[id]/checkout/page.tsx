@@ -603,7 +603,7 @@ export default function ResaleCheckoutPage() {
                         <div className="space-y-3">
                             <button
                                 onClick={handlePurchaseResaleTicket}
-                                className={`w-full py-3 rounded-lg text-[13px] font-bold transition-all duration-200 shadow-sm
+                                className={`w-full cursor-pointer py-3 rounded-lg text-[13px] font-bold transition-all duration-200 shadow-sm
                                 ${!isCreatingOrder
                                         ? 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default active:scale-[0.98]'
                                         : 'bg-button-secondary-bg-default text-text-muted cursor-not-allowed border border-border-default'

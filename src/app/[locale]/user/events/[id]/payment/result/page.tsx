@@ -341,13 +341,13 @@ function PaymentResultContent() {
 
                         <div className="w-full space-y-3">
                             <button
-                                className="w-full py-3 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default rounded-button-radius font-semibold transition-colors"
+                                className="w-full cursor-pointer py-3 bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/events/${event.eventId}/payment`)}
                             >
                                 {tr('continue_payment_btn')}
                             </button>
                             <button
-                                className="w-full py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-button-radius font-semibold transition-colors"
+                                className="w-full cursor-pointe py-3 bg-bg-surface border border-border-default hover:bg-bg-subtle text-text-primary rounded-button-radius font-semibold transition-colors"
                                 onClick={() => router.push(`/${locale}/user/events/${event.eventId}/booking`)}
                             >
                                 {tr('reselect_tickets')}

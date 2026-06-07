@@ -321,7 +321,7 @@ export const Step1SelectTicket: React.FC<Step1SelectTicketProps> = ({
                         </div>
 
                         <button
-                            className={`w-full py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm mb-3 text-body-base ${selectedTickets.length === 0 ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
+                            className={`w-full cursor-pointer py-3.5 rounded-button-radius font-semibold transition-colors shadow-sm mb-3 text-body-base ${selectedTickets.length === 0 ? 'bg-bg-subtle text-text-muted cursor-not-allowed border border-border-default' : 'bg-button-primary-bg-default hover:bg-button-primary-bg-hover text-button-primary-text-default'}`}
                             disabled={selectedTickets.length === 0}
                             onClick={onNext}
                         >
