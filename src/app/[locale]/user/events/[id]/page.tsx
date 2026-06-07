@@ -254,7 +254,7 @@ export default function EventDetailPage() {
         setLoading(true);
         try {
 
-            const response = await api.get(`/inventory-service/api/events/${eventId}`);
+            const response = await api.get(`/inventory-service/api/events/${eventId}`, { skipAuth: true});
 
             if (response.data && response.data.data) {
                 // Mock seat map conditionally based on fake logic if API doesn't provide
@@ -275,7 +275,7 @@ export default function EventDetailPage() {
 
     const fetchReviews = async (eventId: string) => {
         try {
-            const res = await api.get(`/inventory-service/api/reviews/event/${eventId}`);
+            const res = await api.get(`/inventory-service/api/reviews/event/${eventId}`, { skipAuth: true});
             if (res.data && res.data.status === 200) {
                 setReviews(res.data.data || []);
             }
