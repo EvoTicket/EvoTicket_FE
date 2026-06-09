@@ -69,7 +69,7 @@ export const adminEventsApi = {
     eventId: number,
     approvalStatus: "PUBLISHED" | "REJECTED"
   ): Promise<any> {
-    const response = await api.patch(
+    const response = await api.put(
       `/inventory-service/api/admin/events/${eventId}/approval`,
       { approvalStatus }
     );

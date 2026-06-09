@@ -38,7 +38,9 @@ interface TicketDetail {
     qrAvailable: boolean;
     canResell: boolean;
     resaleBlockedReason: string | null;
-    platformFeeRate: number;
+    platformFeeRate?: number | null;
+    organizerRoyaltyFeePercentage?: number | null;
+    maxResalePricePercentage?: number | null;
     priceCapRate?: number;
 }
 
@@ -258,6 +260,30 @@ export default function ResellTicketPage() {
         setDesiredPrice(new Intl.NumberFormat('vi-VN').format(numberValue));
     };
 
+    const normalizeFeeRate = (value: number | null | undefined, fallback: number) => {
+        if (value === null || value === undefined || Number.isNaN(Number(value))) {
+            return fallback;
+        }
+
+        const numericValue = Number(value);
+        return numericValue >= 1 ? numericValue / 100 : numericValue;
+    };
+
+    const normalizeCapRate = (value: number | null | undefined, fallback: number) => {
+        if (value === null || value === undefined || Number.isNaN(Number(value))) {
+            return fallback;
+        }
+
+        const numericValue = Number(value);
+        return numericValue > 10 ? numericValue / 100 : numericValue;
+    };
+
+    const formatRatePercent = (rate: number) => {
+        return new Intl.NumberFormat(locale === 'vi' ? 'vi-VN' : 'en-US', {
+            maximumFractionDigits: 2
+        }).format(rate * 100);
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-bg-page flex flex-col items-center justify-center">
@@ -289,11 +315,14 @@ export default function ResellTicketPage() {
     if (!ticket) return null;
 
     const currentPriceNum = parseInt(desiredPrice.replace(/\D/g, "")) || 0;
-    const capRate = ticket.priceCapRate ?? 1.1;
+    const capRate = normalizeCapRate(ticket.priceCapRate ?? ticket.maxResalePricePercentage, 1.1);
     const priceCap = Math.floor(ticket.originalPrice * capRate);
-    const feeRate = ticket.platformFeeRate ?? 0.02;
-    const calculatedFee = Math.floor(currentPriceNum * feeRate);
-    const netReceived = Math.max(0, currentPriceNum - calculatedFee);
+    const platformFeeRate = normalizeFeeRate(ticket.platformFeeRate, 0.02);
+    const organizerRoyaltyRate = normalizeFeeRate(ticket.organizerRoyaltyFeePercentage, 0);
+    const platformFee = Math.floor(currentPriceNum * platformFeeRate);
+    const organizerRoyaltyFee = Math.floor(currentPriceNum * organizerRoyaltyRate);
+    const totalFees = platformFee + organizerRoyaltyFee;
+    const netReceived = Math.max(0, currentPriceNum - totalFees);
 
     const suggestedPrices = [
         Math.floor(ticket.originalPrice * 0.9),
@@ -442,9 +471,19 @@ export default function ResellTicketPage() {
                                     <span className="text-text-secondary">{t("listing_price")}</span>
                                     <span className="font-medium text-text-primary">{formatVND(currentPriceNum)}</span>
                                 </div>
+                                {/* Phí sàn Evoticket */}
                                 <div className="flex justify-between items-center">
-                                    <span className="text-text-secondary">{t("platform_fee")}</span>
-                                    <span className="font-medium text-feedback-error-text">-{formatVND(calculatedFee)}</span>
+                                    <span className="text-text-secondary">{t("platform_fee", { rate: formatRatePercent(platformFeeRate) })}</span>
+                                    <span className="font-medium text-feedback-error-text">-{formatVND(platformFee)}</span>
+                                </div>
+                                {/* Phí hoa hồng dành cho Organizer */}
+                                <div className="flex justify-between items-center">
+                                    <span className="text-text-secondary">{t("organizer_royalty_fee", { rate: formatRatePercent(organizerRoyaltyRate) })}</span>
+                                    <span className="font-medium text-feedback-error-text">-{formatVND(organizerRoyaltyFee)}</span>
+                                </div>
+                                <div className="flex justify-between items-center pt-4 border-t border-border-default">
+                                    <span className="text-text-secondary">{t("total_fees")}</span>
+                                    <span className="font-semibold text-feedback-error-text">-{formatVND(totalFees)}</span>
                                 </div>
                             </div>
 
@@ -735,6 +774,14 @@ export default function ResellTicketPage() {
                                             <div className="flex justify-between">
                                                 <span className="text-text-secondary">{t("desired_price_label", { defaultMessage: "Giá bán:" })}</span>
                                                 <span className="font-bold text-text-primary">{formatVND(currentPriceNum)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-text-secondary">{t("platform_fee", { rate: formatRatePercent(platformFeeRate) })}</span>
+                                                <span className="font-medium text-feedback-error-text">-{formatVND(platformFee)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-text-secondary">{t("organizer_royalty_fee", { rate: formatRatePercent(organizerRoyaltyRate) })}</span>
+                                                <span className="font-medium text-feedback-error-text">-{formatVND(organizerRoyaltyFee)}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-text-secondary">{t("total_received_est", { defaultMessage: "Thực nhận ước tính:" })}</span>
