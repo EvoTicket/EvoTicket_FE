@@ -342,12 +342,12 @@ export function Header() {
                             !isNotifRead ? "bg-button-primary-bg-default/5 dark:bg-button-primary-bg-default/10" : ""
                           }`}
                         >
-                          <div className="w-10 h-10 rounded overflow-hidden shrink-0 border border-border-default relative bg-bg-surface">
+                          <div className="w-10 h-10 p-1 rounded overflow-hidden shrink-0 border border-border-default relative bg-bg-surface flex items-center justify-center">
                             <Image
-                              src={notif.imageUrl || "https://api.dicebear.com/7.x/identicon/svg?seed=evoticket"}
+                              src={notif.imageUrl || "/evoticket-logo/light/light-icon-only.svg"}
                               alt="Notification Icon"
                               fill
-                              className="object-cover"
+                              className={notif.imageUrl ? "object-cover" : "object-contain p-1"}
                             />
                           </div>
                           <div className="flex-1 min-w-0">
