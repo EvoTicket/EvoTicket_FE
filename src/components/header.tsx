@@ -52,6 +52,97 @@ export function Header() {
   // Get auth state from Redux
   const { user, token, refreshToken, isOrganization } = useAppSelector((state) => state.auth);
 
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
+  const fetchNotifications = useCallback(async () => {
+    if (!token) return;
+    try {
+      const response = await api.get("/notification-service/api/notifications?page=1&size=10");
+      if (response.data && response.data.content) {
+        setNotifications(response.data.content);
+      }
+    } catch (error) {
+      console.error("Failed to fetch notifications", error);
+    }
+  }, [token]);
+
+  const fetchUnreadCount = useCallback(async () => {
+    if (!token) return;
+    try {
+      const response = await api.get("/notification-service/api/notifications/unread-count");
+      if (response.data && response.data.unreadCount !== undefined) {
+        setUnreadCount(response.data.unreadCount);
+      }
+    } catch (error) {
+      console.error("Failed to fetch unread count", error);
+    }
+  }, [token]);
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      await api.put(`/notification-service/api/notifications/${id}/read`);
+      setNotifications(prev =>
+        prev.map(notif => notif.id === id ? { ...notif, isRead: true, read: true } : notif)
+      );
+      void fetchUnreadCount();
+    } catch (error) {
+      console.error("Failed to mark notification as read", error);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await api.put("/notification-service/api/notifications/read-all");
+      setNotifications(prev => prev.map(notif => ({ ...notif, isRead: true, read: true })));
+      setUnreadCount(0);
+      toast.success(t("all_marked_as_read", { defaultMessage: "Đã đánh dấu tất cả là đã đọc" }));
+    } catch (error) {
+      console.error("Failed to mark all as read", error);
+    }
+  };
+
+  const formatTime = (dateStr: string) => {
+    if (!dateStr) return "";
+    try {
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffMins < 1) return "Vừa xong";
+      if (diffMins < 60) return `${diffMins} phút trước`;
+      if (diffHours < 24) return `${diffHours} giờ trước`;
+      if (diffDays < 7) return `${diffDays} ngày trước`;
+
+      return date.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", {
+        day: "numeric",
+        month: "short",
+      });
+    } catch {
+      return "";
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      void fetchUnreadCount();
+      void fetchNotifications();
+
+      const interval = setInterval(() => {
+        void fetchUnreadCount();
+        void fetchNotifications();
+      }, 30000); // 30 seconds
+
+      return () => clearInterval(interval);
+    } else {
+      setNotifications([]);
+      setUnreadCount(0);
+    }
+  }, [token, fetchUnreadCount, fetchNotifications]);
+
   const fetchUserProfile = useCallback(async () => {
     try {
       // Token auto-injected by axios interceptor
@@ -195,15 +286,93 @@ export function Header() {
           }
 
           {/* Icon Notification */}
+          {user && (
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <button className="relative p-2.5 border border-border-default rounded-lg text-text-secondary hover:border-button-primary-bg-default transition-colors cursor-pointer outline-none">
+                  <Bell size={20} />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-feedback-error-bg text-button-primary-text-default text-[10px] font-bold h-5 min-w-5 px-1 flex items-center justify-center rounded-full border-2 border-navbar-topbar-bg animate-pulse">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-80 p-0" align="end" forceMount>
+                <div className="flex items-center justify-between p-3 border-b border-border-default bg-bg-surface/50">
+                  <span className="font-semibold text-sm text-text-primary">
+                    {t("notifications", { defaultMessage: "Thông báo" })}
+                  </span>
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={handleMarkAllAsRead}
+                      className="text-xs font-medium text-button-primary-bg-default hover:underline cursor-pointer bg-transparent border-none"
+                    >
+                      {t("mark_all_read", { defaultMessage: "Đánh dấu tất cả đã đọc" })}
+                    </button>
+                  )}
+                </div>
 
-          {/* {user &&
-            <button className="relative p-2.5 border border-border-default rounded-lg text-text-secondary hover:border-button-primary-bg-default transition-colors cursor-pointer">
-              <Bell size={20} />
-              <span className="absolute -top-1.5 -right-1.5 bg-feedback-error-bg text-button-primary-text-default text-[10px] font-bold h-5 min-w-5 px-1 flex items-center justify-center rounded-full border-2 border-navbar-topbar-bg">
-                99
-              </span>
-            </button>
-          } */}
+                <div className="max-h-96 overflow-y-auto divide-y divide-border-default">
+                  {notifications.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                      <Bell size={32} className="text-text-muted mb-2 opacity-50" />
+                      <p className="text-sm text-text-secondary font-medium">
+                        {t("no_notifications", { defaultMessage: "Không có thông báo nào" })}
+                      </p>
+                      <p className="text-xs text-text-muted mt-1">
+                        {t("no_notifications_desc", { defaultMessage: "Chúng tôi sẽ thông báo khi có cập nhật mới." })}
+                      </p>
+                    </div>
+                  ) : (
+                    notifications.map((notif) => {
+                      const isNotifRead = notif.isRead || notif.read;
+                      return (
+                        <div
+                          key={notif.id}
+                          onClick={() => {
+                            void handleMarkAsRead(notif.id);
+                            if (notif.type === "TICKET" || notif.type === "PAYMENT") {
+                              router.push(`/${locale}/user/tickets`);
+                            } else if (notif.type === "EVENT") {
+                              router.push(`/${locale}/user/events`);
+                            }
+                          }}
+                          className={`flex gap-3 p-3 hover:bg-bg-subtle cursor-pointer transition-colors ${
+                            !isNotifRead ? "bg-button-primary-bg-default/5 dark:bg-button-primary-bg-default/10" : ""
+                          }`}
+                        >
+                          <div className="w-10 h-10 rounded overflow-hidden shrink-0 border border-border-default relative bg-bg-surface">
+                            <Image
+                              src={notif.imageUrl || "https://api.dicebear.com/7.x/identicon/svg?seed=evoticket"}
+                              alt="Notification Icon"
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-xs font-semibold leading-tight text-text-primary ${!isNotifRead ? "font-bold" : ""}`}>
+                              {notif.title}
+                            </p>
+                            <p className="text-[11px] text-text-secondary leading-snug mt-1 break-words">
+                              {notif.message}
+                            </p>
+                            <p className="text-[10px] text-text-muted mt-1">
+                              {formatTime(notif.createdAt)}
+                            </p>
+                          </div>
+                          {!isNotifRead && (
+                            <div className="w-2 h-2 rounded-full bg-button-primary-bg-default mt-1.5 shrink-0" />
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
           {/* === THEME & LANGUAGE (OUTSIDE) === */}
           <div className={`${user ? "hidden lg:flex" : "flex"} items-center`}>
             <button
@@ -258,33 +427,33 @@ export function Header() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => router.push(`/${locale}/user/profile`)}>
-                  <User className="mr-2 h-4 w-4" />
+                  <User className="h-4 w-4" />
                   <span>{t("profile")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push(`/${locale}/user/favorites`)}>
-                  <Heart className="mr-2 h-4 w-4 text-rose-500" />
+                  <Heart className="h-4 w-4 text-rose-500" />
                   <span>{t("favorite_events")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push(`/${locale}/user/tickets`)} className="flex lg:hidden">
-                  <Ticket className="mr-2 h-4 w-4" />
+                  <Ticket className="h-4 w-4" />
                   <span>{t("my_tickets")}</span>
                 </DropdownMenuItem>
                 {/* <DropdownMenuSeparator className="lg:hidden" /> */}
                 <DropdownMenuItem onClick={switchLanguage} className="lg:hidden">
-                  <Globe className="mr-2 h-4 w-4" />
+                  <Globe className="h-4 w-4" />
                   <span>{locale === "vi" ? "English" : "Tiếng Việt"}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="lg:hidden">
                   {mounted ? (
-                    theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />
+                    theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />
                   ) : (
-                    <div className="mr-2 h-4 w-4" />
+                    <div className="h-4 w-4" />
                   )}
                   <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-feedback-error-text hover:text-feedback-error-text hover:bg-feedback-error-bg/10 cursor-pointer">
-                  <LogOut className="mr-2 h-4 w-4" />
+                  <LogOut className="h-4 w-4" />
                   <span>{t("logout")}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
