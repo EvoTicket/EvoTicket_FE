@@ -188,7 +188,7 @@ export default function MyTicketsPage() {
                 const data = response.data.data;
                 setEvents(data);
                 if (data.length > 0) {
-                    setExpandedEvents([data[0].id]);
+                    setExpandedEvents([data[0].id || data[0].orderId]);
                 }
             }
         } catch (error) {
@@ -413,9 +413,10 @@ export default function MyTicketsPage() {
                     </div>
                 ) : (
                     filteredEvents.map((event, index) => {
-                        const isExpanded = expandedEvents.includes(event.id);
+                        const eventKey = event.id || event.orderId || `event-${index}`;
+                        const isExpanded = expandedEvents.includes(eventKey);
                         return (
-                            <div key={event.id || event.orderId || `event-${index}`} className="bg-bg-surface border border-border-default rounded-lg overflow-hidden shadow-sm">
+                            <div key={eventKey} className="bg-bg-surface border border-border-default rounded-lg overflow-hidden shadow-sm">
                                 <div className="p-4 sm:p-6 flex flex-col md:flex-row gap-4 justify-between md:items-center">
                                     <div className="flex-1 max-w-sm">
                                         <h3 className="font-semibold text-[15px] text-text-primary mb-1">{event.eventName}</h3>
@@ -432,7 +433,7 @@ export default function MyTicketsPage() {
                                     </div>
                                     <div className="mt-2 md:mt-0 md:pl-4 shrink-0 self-start md:self-center">
                                         <button
-                                            onClick={() => toggleEvent(event.id)}
+                                            onClick={() => toggleEvent(eventKey)}
                                             className={`px-3 py-1.5 border rounded-full text-[11px] font-medium transition-colors flex items-center gap-1 min-w-[90px] justify-center ${isExpanded
                                                 ? 'bg-button-secondary-bg-default border-button-secondary-border-default text-button-secondary-text-default hover:bg-button-secondary-bg-hover'
                                                 : 'border-button-primary-bg-default/20 text-button-primary-bg-default hover:bg-button-primary-bg-default/10'
@@ -453,10 +454,11 @@ export default function MyTicketsPage() {
 
                                         <div className="space-y-3 relative z-10 w-full overflow-visible">
                                             {event.tickets.map((ticket: any, ticketIndex: number) => {
-                                                const isTicketExpanded = expandedTickets.includes(ticket.id);
+                                                const ticketKey = ticket.id || ticket.ticketAssetId || `ticket-${ticketIndex}`;
+                                                const isTicketExpanded = expandedTickets.includes(ticketKey);
 
                                                 return (
-                                                    <div key={ticket.id || ticket.ticketAssetId || `ticket-${ticketIndex}`} className="bg-bg-surface border border-border-default rounded-ds-md overflow-hidden relative">
+                                                    <div key={ticketKey} className="bg-bg-surface border border-border-default rounded-ds-md overflow-hidden relative">
                                                         <div className="p-4 sm:px-6 sm:py-4 flex flex-col md:flex-row gap-4 justify-between md:items-center">
                                                             <div className="w-full md:w-1/4 shrink-0">
                                                                 <h5 className="font-bold text-text-primary text-[13px] mb-1">{ticket.ticketName}</h5>
@@ -546,7 +548,7 @@ export default function MyTicketsPage() {
                                                                     </button>
                                                                 )}
                                                                 <button
-                                                                    onClick={() => toggleTicket(ticket.id)}
+                                                                    onClick={() => toggleTicket(ticketKey)}
                                                                     className="ml-2 w-6 h-6 flex items-center justify-center rounded-full hover:bg-secondary text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
                                                                 >
                                                                     {isTicketExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}

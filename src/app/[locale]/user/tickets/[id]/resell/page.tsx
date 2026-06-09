@@ -99,9 +99,7 @@ export default function ResellTicketPage() {
             } catch (error: any) {
                 console.error("Failed to fetch bank owner name:", error);
                 if (error.response && error.response.status === 404) {
-                    toast.error(locale === "vi" 
-                        ? "Không tìm thấy thông tin tài khoản ngân hàng này" 
-                        : "Bank account details not found");
+                    toast.error(t("bank_not_found"));
                 }
                 setBankAccountName("");
             } finally {
@@ -170,7 +168,7 @@ export default function ResellTicketPage() {
                 toast.success(t("resell_success"));
                 router.push(`/${locale}/user/tickets`);
             } else if (response.data.status === 400 || response.data.status === 403) {
-                toast.warning(response.data.message || (locale === "vi" ? "Vui lòng liên kết tài khoản ngân hàng để tiếp tục" : "Please link a bank account to continue"));
+                toast.warning(response.data.message || t("please_link_bank"));
                 setIsBankSetupOpen(true);
             } else {
                 toast.error(response.data.message || t("resell_failed"));
@@ -180,7 +178,7 @@ export default function ResellTicketPage() {
             const message = err.response?.data?.message || t("submit_error");
             
             if (status === 400 || status === 403 || message.includes("ngân hàng") || message.includes("bank")) {
-                toast.warning(message || (locale === "vi" ? "Vui lòng liên kết tài khoản ngân hàng để tiếp tục" : "Please link a bank account to continue"));
+                toast.warning(message || t("please_link_bank"));
                 setIsBankSetupOpen(true);
             } else {
                 toast.error(message);
@@ -198,15 +196,15 @@ export default function ResellTicketPage() {
 
     const handleBankSubmit = async () => {
         if (!bankCode) {
-            toast.error(locale === "vi" ? "Vui lòng chọn ngân hàng" : "Please select a bank");
+            toast.error(t("please_select_bank"));
             return;
         }
         if (!bankAccountNumber) {
-            toast.error(locale === "vi" ? "Vui lòng nhập số tài khoản" : "Please enter account number");
+            toast.error(t("please_enter_account_number"));
             return;
         }
         if (!bankAccountName) {
-            toast.error(locale === "vi" ? "Vui lòng nhập tên tài khoản" : "Please enter account owner name");
+            toast.error(t("please_enter_account_name"));
             return;
         }
 
@@ -219,15 +217,15 @@ export default function ResellTicketPage() {
             });
 
             if (response.status === 200 || response.status === 204 || response.data?.status === 200) {
-                toast.success(locale === "vi" ? "Liên kết tài khoản ngân hàng thành công!" : "Linked bank account successfully!");
+                toast.success(t("link_bank_success"));
                 setIsBankSetupOpen(false);
                 // Immediately call resale submission for a frictionless UX!
                 void executeResell();
             } else {
-                toast.error(response.data?.message || (locale === "vi" ? "Không thể liên kết ngân hàng" : "Failed to link bank"));
+                toast.error(response.data?.message || t("link_bank_failed"));
             }
         } catch (err: any) {
-            const message = err.response?.data?.message || (locale === "vi" ? "Có lỗi xảy ra" : "An error occurred");
+            const message = err.response?.data?.message || t("an_error_occurred");
             toast.error(message);
         } finally {
             setIsSavingBank(false);
@@ -556,12 +554,10 @@ export default function ResellTicketPage() {
                                 <CreditCard size={28} className="text-button-primary-bg-default" />
                             </div>
                             <h3 className="text-2xl font-black text-text-primary tracking-tight">
-                                {locale === "vi" ? "Cài Đặt Tài Khoản Nhận Tiền" : "Payout Account Setup"}
+                                {t("bank_setup_title")}
                             </h3>
                             <p className="text-sm text-text-secondary mt-2 max-w-sm mx-auto leading-relaxed">
-                                {locale === "vi"
-                                    ? "Bạn cần liên kết tài khoản ngân hàng để nhận tiền thanh toán khi vé được mua lại."
-                                    : "You must link a bank account to receive payout funds when your ticket is resold."}
+                                {t("bank_setup_desc")}
                             </p>
                         </div>
 
@@ -569,7 +565,7 @@ export default function ResellTicketPage() {
                             {/* Bank list using Listbox */}
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">
-                                    {locale === "vi" ? "NGÂN HÀNG" : "BANK NAME"}
+                                    {t("bank_label")}
                                 </label>
                                 <Listbox value={bankCode} onChange={setBankCode}>
                                     <div className="relative w-full">
@@ -579,7 +575,7 @@ export default function ResellTicketPage() {
                                                 <span className="truncate">
                                                     {(() => {
                                                         const bank = bankList.find((b) => b.code === bankCode);
-                                                        return bank ? `${bank.shortName || bank.name} (${bank.code})` : (locale === "vi" ? "-- Chọn ngân hàng --" : "-- Select Bank --");
+                                                    return bank ? `${bank.shortName || bank.name} (${bank.code})` : t("select_bank_placeholder");
                                                     })()}
                                                 </span>
                                             </div>
@@ -594,7 +590,7 @@ export default function ResellTicketPage() {
                                                 value=""
                                                 className="group flex items-center px-4 py-3 cursor-pointer hover:bg-bg-subtle transition-colors text-sm font-medium"
                                             >
-                                                <span>{locale === "vi" ? "-- Chọn ngân hàng --" : "-- Select Bank --"}</span>
+                                                <span>{t("select_bank_placeholder")}</span>
                                             </ListboxOption>
                                             {bankList.map((bank: any) => (
                                                 <ListboxOption
@@ -625,14 +621,14 @@ export default function ResellTicketPage() {
                             {/* Account number */}
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">
-                                    {locale === "vi" ? "SỐ TÀI KHOẢN" : "ACCOUNT NUMBER"}
+                                    {t("account_number_label")}
                                 </label>
                                 <div className="flex items-center gap-4 p-4 rounded-xl border bg-bg-surface border-border-strong focus-within:border-button-primary-bg-default transition-all shadow-sm">
                                     <CreditCard size={18} className="text-button-primary-bg-default" />
                                     <input
                                         type="text"
                                         className="bg-transparent border-none outline-none text-sm font-bold text-text-primary w-full"
-                                        placeholder={locale === "vi" ? "Nhập số tài khoản" : "Enter account number"}
+                                        placeholder={t("account_number_placeholder")}
                                         value={bankAccountNumber}
                                         onChange={(e) => setBankAccountNumber(e.target.value.replace(/\D/g, ""))}
                                     />
@@ -642,7 +638,7 @@ export default function ResellTicketPage() {
                             {/* Account Name */}
                              <div className="space-y-2">
                                  <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">
-                                     {locale === "vi" ? "TÊN CHỦ TÀI KHOẢN (KHÔNG DẤU)" : "ACCOUNT HOLDER NAME (NO ACCENTS)"}
+                                     {t("account_name_label")}
                                  </label>
                                  <div className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${isFetchingBankOwner ? 'bg-bg-subtle/40 border-border-default/50' : 'bg-bg-subtle/10 border-border-default/30'}`}>
                                      {isFetchingBankOwner ? (
@@ -657,14 +653,12 @@ export default function ResellTicketPage() {
                                          type="text"
                                          readOnly
                                          className="bg-transparent border-none outline-none text-sm font-bold text-text-primary w-full uppercase cursor-not-allowed select-none placeholder-text-muted"
-                                         placeholder={isFetchingBankOwner ? (locale === "vi" ? "ĐANG TRUY VẤN TÊN CHỦ TÀI KHOẢN..." : "QUERYING OWNER NAME...") : (locale === "vi" ? "TỰ ĐỘNG XÁC THỰC TÊN CHỦ TÀI KHOẢN" : "AUTOMATICALLY RETRIEVED")}
+                                         placeholder={isFetchingBankOwner ? t("querying_owner_name") : t("auto_retrieved")}
                                          value={bankAccountName}
                                      />
                                  </div>
                                  <p className="text-[10px] text-text-muted ml-1">
-                                     {locale === "vi" 
-                                         ? "* Tên chủ tài khoản được tự động xác thực dựa trên số tài khoản và ngân hàng đã chọn." 
-                                         : "* Account owner name is automatically validated based on the selected bank and account number."}
+                                     {t("account_name_note")}
                                  </p>
                              </div>
                         </div>
@@ -674,7 +668,7 @@ export default function ResellTicketPage() {
                                 onClick={() => setIsBankSetupOpen(false)}
                                 className="flex-1 py-3 bg-bg-subtle text-text-secondary border border-border-default rounded-xl text-sm font-bold transition-all cursor-pointer"
                             >
-                                {locale === "vi" ? "Hủy" : "Cancel"}
+                                {t("cancel")}
                             </button>
                             <button
                                 onClick={handleBankSubmit}
@@ -684,10 +678,10 @@ export default function ResellTicketPage() {
                                 {isSavingBank ? (
                                     <>
                                         <Loader2 size={16} className="animate-spin" />
-                                        {locale === "vi" ? "Đang lưu..." : "Saving..."}
+                                        {t("saving")}
                                     </>
                                 ) : (
-                                    locale === "vi" ? "Liên kết ngay" : "Link Account"
+                                    t("link_now")
                                 )}
                             </button>
                         </div>

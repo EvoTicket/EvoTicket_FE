@@ -81,7 +81,7 @@ export default function ResaleMarketplacePage() {
             if (searchQuery) params.keyword = searchQuery;
             if (selectedProvince) params.provinceCode = selectedProvince.code;
             if (selectedCategories.length > 0) {
-                params.category = selectedCategories[0].id; // API expects single string category
+                params.category = selectedCategories.map(c => c.id).join(',');
             }
             if (startDate) {
                 params.startTime = startDate.toISOString().split('T')[0];
@@ -250,7 +250,7 @@ export default function ResaleMarketplacePage() {
                                                 <input
                                                     type="checkbox"
                                                     checked={selectedCategories.some(c => c.id === cat.id)}
-                                                    onChange={() => setSelectedCategories(selectedCategories.some(c => c.id === cat.id) ? [] : [cat])}
+                                                    onChange={() => toggleArrayItem(selectedCategories, setSelectedCategories, cat, true)}
                                                     className="peer appearance-none w-5 h-5 border border-border-default rounded bg-bg-surface checked:bg-button-primary-bg-default checked:border-button-primary-bg-default transition-colors cursor-pointer"
                                                 />
                                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 peer-checked:opacity-100 pointer-events-none text-button-primary-text-default">
