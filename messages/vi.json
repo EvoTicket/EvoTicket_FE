@@ -116,7 +116,13 @@
     "login": "Đăng nhập",
     "register": "Đăng ký",
     "switch_to_organizer": "Vai trò Tổ chức",
-    "organizer_center": "Quản trị Tổ chức"
+    "organizer_center": "Quản trị Tổ chức",
+    "notifications": "Thông báo",
+    "view_all": "Xem tất cả",
+    "no_notifications": "không có thông báo nào",
+    "no_notifications_desc": "Bạn đã cập nhật xong tất cả! Hãy quay lại để kiểm tra các cập nhật về các sự kiện mà bạn quan tâm.",
+    "loading_notifications": "Đang tải thông báo...",
+    "mark_all_read": "đánh dấu tất cả đã đọc"
   },
   "Homepage": {
     "hero_title": "Trải nghiệm sự kiện đỉnh cao cùng",

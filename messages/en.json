@@ -116,7 +116,13 @@
     "login": "Login",
     "register": "Register",
     "switch_to_organizer": "Organizer Role",
-    "organizer_center": "Organizer Center"
+    "organizer_center": "Organizer Center",
+    "notifications": "Notifications",
+    "view_all": "View All",
+    "no_notifications": "No notifications yet",
+    "no_notifications_desc": "You're all caught up! Check back for updates on events you're interested in.",
+    "loading_notifications": "Loading notifications...",
+    "mark_all_read": "Mark all as read"
   },
   "Homepage": {
     "hero_title": "Experience the ultimate events with",
